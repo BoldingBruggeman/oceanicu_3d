@@ -6,7 +6,7 @@ Rivers can come from different sources - presently EMORID.
 
 The configuration falls in two steps:
 1) Set name and  position of rivers in the Domain object.
-2) Attach river data to the simulation object.
+2) Attach river data to the Simulation object.
 
 """
 
@@ -62,48 +62,63 @@ def create(domain: pygetm.domain.Domain, cfg):
             cfg.rivers.source
         )
 
-        # Limit the available rivers to those inside the model domain
-        min_lon = domain.lon.min()
-        max_lon = domain.lon.max()
-        min_lat = domain.lat.min()
-        max_lat = domain.lat.max()
-        if False:
-            print(
-                min_lon,
-                max_lon,
-                min_lat,
-                max_lat,
-            )
-
         time_coder = xr.coders.CFDatetimeCoder(use_cftime=True)
         ds = xr.open_dataset(
             cfg.rivers.folder / cfg.rivers.file,
             engine="netcdf4",
             decode_times=time_coder,
         )
+
+        # print(domain.contains(10, 55))
+        # print(domain.contains.get_boundary())
+        # quit()
+
+        # Limit the available rivers to those inside the model domain
+        # Temporary solution
+        min_lon = -180.0
+        max_lon = 180.0
+        min_lat = -90.0
+        max_lat = 90.0
+        if cfg.setup == "ns":
+            min_lon = -5.125
+            max_lon = 13.375
+            min_lat = 48.39167
+            max_lat = 60.79167
+        if cfg.setup == "ena4":
+            min_lon = -20
+            max_lon = 15.5
+            min_lat = 40
+            max_lat = 70
+        if cfg.setup == "ena8":
+            min_lon = -20
+            max_lon = 15.5
+            min_lat = 40
+            max_lat = 70
+
+        lon_da = ds[lon_name]
+        lat_da = ds[lat_name]
+        valid_lon = (lon_da >= min_lon) & (lon_da <= max_lon)
+        valid_lat = (lat_da >= min_lat) & (lat_da <= max_lat)
+        valid_combined = valid_lon & valid_lat
+
+        # Limit available rivers by threshold
+        if cfg.rivers.threshold > 0.0:
+            mean_q = ds[Qmean_name]
+            valid_mean = mean_q > cfg.rivers.threshold
+            valid_combined = valid_combined & valid_mean
+
         river_list = []
         # for n in ds["HydroID"]:
         # Loop over all rivers in the river source file
         for n in ds[index].values:
-            lon = float(ds[lon_name].values[n])
-            lat = float(ds[lat_name].values[n])
-            mean = ds[Qmean_name].values[n]
-            # print(f"{n}: {lon}, {lat}, {mean}")
             # filter out rivers
-            if (
-                # Only include rivers above a threhold value
-                mean > cfg.rivers.threshold
-                and lon > min_lon
-                and lon < max_lon
-                and lat > min_lat
-                and lat < max_lat
-            ):
+            if valid_combined[n]:
                 river_name = f"{ds[name].values[n]}"
                 river_list.append(
                     domain.rivers.add_by_location(
                         river_name,
-                        lon,
-                        lat,
+                        lon_da.values[n],
+                        lat_da.values[n],
                         coordinate_type=pygetm.CoordinateType.LONLAT,
                     )
                 )

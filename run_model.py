@@ -26,6 +26,7 @@ making multiple sequential simulations making a full simulation
 
 """
 
+import sys
 import os
 from pathlib import Path
 import datetime
@@ -163,7 +164,6 @@ def run(
 
 
 def parse_args():
-    import sys
     import argparse
     from lib import cfg_yaml
 
