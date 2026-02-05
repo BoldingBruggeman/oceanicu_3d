@@ -28,6 +28,7 @@ river_config = {
         "Q": "Q",  # discharge (flow) variable
         "Qmean": "Q_mean",  # discharge (flow) variable
     },
+    # TODO: fix the names for the JRC rivers
     # Example configuration “adolf” – uses slightly different names
     "jrc": {
         "lat": "Latitude",  # e.g. column called “Latitude”
@@ -42,8 +43,8 @@ river_config = {
 
 def _get_river_cfg(config_name: str):
     """
-    Return the latitude, longitude, and discharge variable names for a
-    given configuration. Raises KeyError if the configuration is unknown.
+    Return names to access specific variables - to support different
+    river sources
     """
     river_cfg = river_config[config_name]  # will raise KeyError if not found
     return (
@@ -69,56 +70,26 @@ def create(domain: pygetm.domain.Domain, cfg):
             decode_times=time_coder,
         )
 
-        # print(domain.contains(10, 55))
-        # print(domain.contains.get_boundary())
-        # quit()
-
-        # Limit the available rivers to those inside the model domain
-        # Temporary solution
-        min_lon = -180.0
-        max_lon = 180.0
-        min_lat = -90.0
-        max_lat = 90.0
-        if cfg.setup == "ns":
-            min_lon = -5.125
-            max_lon = 13.375
-            min_lat = 48.39167
-            max_lat = 60.79167
-        if cfg.setup == "ena4":
-            min_lon = -20
-            max_lon = 15.5
-            min_lat = 40
-            max_lat = 70
-        if cfg.setup == "ena8":
-            min_lon = -20
-            max_lon = 15.5
-            min_lat = 40
-            max_lat = 70
-
-        lon_da = ds[lon_name]
-        lat_da = ds[lat_name]
-        valid_lon = (lon_da >= min_lon) & (lon_da <= max_lon)
-        valid_lat = (lat_da >= min_lat) & (lat_da <= max_lat)
-        valid_combined = valid_lon & valid_lat
-
         # Limit available rivers by threshold
-        if cfg.rivers.threshold > 0.0:
-            mean_q = ds[Qmean_name]
-            valid_mean = mean_q > cfg.rivers.threshold
-            valid_combined = valid_combined & valid_mean
+        valid_river = ds[Qmean_name] > cfg.rivers.threshold
+
+        # Limit available rivers by domain area
+        for n in ds[index].values:
+            valid_river[n] = valid_river[n] & domain.contains(
+                ds[lon_name].values[n], ds[lat_name].values[n]
+            )
 
         river_list = []
         # for n in ds["HydroID"]:
-        # Loop over all rivers in the river source file
+        # Loop over all valid rivers and add them
         for n in ds[index].values:
-            # filter out rivers
-            if valid_combined[n]:
-                river_name = f"{ds[name].values[n]}"
+            if valid_river[n]:
                 river_list.append(
                     domain.rivers.add_by_location(
-                        river_name,
-                        lon_da.values[n],
-                        lat_da.values[n],
+                        f"{ds[name].values[n]}",
+                        # river_name,
+                        ds[lon_name].values[n],
+                        ds[lat_name].values[n],
                         coordinate_type=pygetm.CoordinateType.LONLAT,
                     )
                 )
@@ -126,17 +97,22 @@ def create(domain: pygetm.domain.Domain, cfg):
 
 def data(sim, cfg):
     if cfg.rivers.source:
+        index, name, lat_name, lon_name, Q_name, Qmean_name = _get_river_cfg(
+            cfg.rivers.source
+        )
         time_coder = xr.coders.CFDatetimeCoder(use_cftime=True)
         ds = xr.open_dataset(
             cfg.rivers.folder / cfg.rivers.file,
             engine="netcdf4",
             decode_times=time_coder,
         )
+        # TODO: - use non-hardcoded names for index and name
         # Loop over included files and attached river data
         _source = river_config[cfg.rivers.source]
         for river in sim.rivers.values():
-            # get the global index - should be replaced by adding an index attribute
+            # for n in ds[_source[name]].values:
             for n in ds[_source["index"]].values:
                 if river.name == ds[_source["name"]][n].values:
-                    river.flow.set(ds[_source["Q"]][n])
+                    river.flow.set(ds[_source[Q_name]][n])
+                    river["salt"].set(0.0)
                     break
