@@ -263,10 +263,28 @@ def main():
         shutil.copy(sys.argv[0], base_outdir)
         shutil.copy(args.script, base_outdir)
         shutil.copy(args.setup, base_outdir)
+        # Copy GOTM and FABM yaml files
+        # TODO: properly resolve if a gotm.yaml file should be copied
+        f = eval(_get_yaml_value(args.setup, "simulation.gotm"))
+        f = "gotm.yaml"
+        if f is not None and os.path.exists(f):
+            print(f"Copying {f} to {base_outdir}")
+            shutil.copy(f, base_outdir)
+        else:
+            print("No GOTM file copied")
+        f = eval(_get_yaml_value(args.setup, "fabm.file"))
+        if f is not None and os.path.exists(f):
+            print(f"Copying {f} to {base_outdir}")
+            shutil.copy(f, base_outdir)
+        else:
+            print("No FABM file copied")
+
         # print(f"Copying ./lib to {base_outdir}")
         # shutil.copytree("lib", base_outdir)
 
+    print("----------------------------------------")
     print(f"All - {i} - simulation chunks completed!")
+    print("----------------------------------------")
 
 
 if __name__ == "__main__":
