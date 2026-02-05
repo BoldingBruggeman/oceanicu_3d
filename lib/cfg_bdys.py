@@ -15,8 +15,6 @@ are from TPXO. 3D are not used yet.
 import cftime
 import pygetm
 
-#from boundary_specs import boundary_specs
-
 bdy_type = pygetm.constants.CLAMPED
 bdy_type = pygetm.constants.FLATHER_ELEV
 bdy_type = pygetm.constants.FLATHER_TRANSPORT
@@ -47,6 +45,93 @@ def create(domain, cfg):
                 124,
                 27,
                 60,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
+
+        if cfg.setup == "ena4":
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.WEST,
+                0,
+                0,
+                94 + 1,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.WEST,
+                0,
+                105,
+                120 + 1,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.NORTH,
+                120,
+                1,
+                77 + 1,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.SOUTH,
+                0,
+                1,
+                25 + 1,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
+
+        if cfg.setup == "ena8":
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.WEST,
+                0,
+                0,
+                188 + 1,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.WEST,
+                0,
+                209,
+                240 + 1,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.NORTH,
+                240,
+                1,
+                # 161 + 1,
+                153 + 1,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
+
+        if cfg.setup == "amm7":
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.WEST,
+                1,
+                1,
+                353,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.NORTH,
+                373,
+                55,
+                284,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.SOUTH,
+                1,
+                2,
+                100,
                 type_2d=bdy_type,
                 type_3d=0,
             )

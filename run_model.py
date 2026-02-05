@@ -64,8 +64,31 @@ class MySimulation(pygetm.Simulation):
         super()._update_forcing_and_diagnostics(macro_active)
 
 
+def _create_domain_amm7(cfg):
+    import numpy as np
+    import netCDF4
+
+    print(cfg.domain.path)
+    print(cfg.domain.name)
+    with netCDF4.Dataset(cfg.domain.path) as nc:
+        nc.set_auto_mask(False)
+        domain = pygetm.domain.create_spherical(
+            lon=nc["lon"][:],
+            lat=nc["lat"][:],
+            H=np.ma.masked_equal(nc["bathymetry"][...], -10.0),
+            z0=0.01,
+            #            **final_kwargs,
+        )
+    domain.mask_indices(1, 2, 353, 354)
+
+    return domain
+
+
 def create_domain(cfg) -> pygetm.domain.Domain:
-    domain = pygetm.domain.from_xarray(xr.open_dataset(cfg.domain.path))
+    if cfg.setup != "amm7":
+        domain = pygetm.domain.from_xarray(xr.open_dataset(cfg.domain.path))
+    else:
+        domain = _create_domain_amm7(cfg)
 
     cfg_bdys.create(domain, cfg)
 
