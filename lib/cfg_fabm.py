@@ -39,12 +39,12 @@ def _add_coord(nc):  # Nicolas - make more generic later
 def configure(sim, cfg, imonth):
     """The FABM instance is already configured via a FABM yaml file
 
-    Additional configuration based on cfg.fabm.config can be done.
-    This includes providing dependecies, initial conditions, boundary
-    conditions and river loadings.
+    Support for different FABM setups can be configured using the
+    cfg.fabm.config key in the YAML-configuration file.
 
-    Different FABM setups can be configured using the cfg.fabm.config
-    key.
+    There is no limit on which configurations can be done but it
+    includes providing dependecies, initial conditions, boundary
+    conditions and river loadings.
 
     """
 
