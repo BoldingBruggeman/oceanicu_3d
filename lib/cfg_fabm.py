@@ -1,7 +1,9 @@
 """Configuring FABM
 
 Fullfil dependencies, add initial conditions, boundary conditions,
-and river loadings
+and river loadings.
+
+FABM output is configured in lib/cfg_output
 
 """
 

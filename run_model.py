@@ -40,7 +40,7 @@ import pygetm
 # Configuration of some components have been moved outside the main
 # script
 from lib import cfg_airsea
-from lib import cfg_bdys
+from lib import cfg_boundaries
 from lib import cfg_fabm
 from lib import cfg_ic
 from lib import cfg_ip
@@ -90,7 +90,7 @@ def create_domain(cfg) -> pygetm.domain.Domain:
     else:
         domain = _create_domain_amm7(cfg)
 
-    cfg_bdys.create(domain, cfg)
+    cfg_boundaries.create(domain, cfg)
 
     domain.limit_velocity_depth()
     domain.cfl_check()
@@ -140,8 +140,8 @@ def create_simulation(
     if initial:
         cfg_ic.create(sim, cfg, imonth)
 
-    cfg_bdys.data_2d(sim, cfg)
-    cfg_bdys.data_3d(sim, cfg)
+    cfg_boundaries.data_2d(sim, cfg)
+    cfg_boundaries.data_3d(sim, cfg)
 
     cfg_rivers.data(sim, cfg)
 
