@@ -52,7 +52,7 @@ internal_pressure: # 1-> BlumbergMeller, 2 -> ShchepetkinMcwilliams
   type: 2
 hydrography: # "constant", "WOA"
   source: "WOA" # "constant", "WOA", "CMEMS - to come"
-  folder: Path(os.getenv("HYDORGRAPHY_FOLDER", "/data/WOA"))
+  folder: Path(os.getenv("HYDROGRAPHY_FOLDER", "/data/WOA"))
   temp: 15.
   salt: 34.
 tides:
