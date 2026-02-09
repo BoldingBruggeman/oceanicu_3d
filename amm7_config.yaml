@@ -50,7 +50,7 @@ vertical_coordinates: # 1 -> SIGMA, 2 -> GVC, 3-> AVC
   gamma_surf: True
 internal_pressure: # 1-> BlumbergMeller, 2 -> ShchepetkinMcwilliams
   type: 2
-initial_conditions: # "constant", "WOA"
+hydrography: # "constant", "WOA"
   source: "WOA" # "constant", "WOA", "CMEMS - to come"
   folder: Path(os.getenv("HYDORGRAPHY_FOLDER", "/data/WOA"))
   temp: 15.

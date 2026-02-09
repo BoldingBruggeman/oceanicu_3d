@@ -10,13 +10,13 @@ The mandatory command line arguments are:
     2) The simulation start time - "yyyy-mm-dd hh:mi:ss"
     3) The simulation stop time - "yyyy-mm-dd hh:mi:ss"
 
-The are many optional arugemnts falling in two groups:
-    1) options to specify folder and files - if specified they will
+The are many optional arguments falling in two groups:
+    1) options to specify folders and files - if specified they will
     take precedens over values from the YAML-configuration file
     2) various run time switches - many used for convenience - e.g.
     --no_rivers will switch off configurations of rivers alltogether
 
-All configurations are kept in a dictionary - cfg.
+All configurations are internally kept in a dictionary - cfg.
 
 The handling of all commanline configurations takes about 60% of the script.
 The actual setup is done within the top 160 lines.

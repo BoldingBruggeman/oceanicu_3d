@@ -5,11 +5,11 @@
 This script handles all book keeping when running a series of
 sequential simulations to make one full simulation.
 
-The individual simulations are done using the subprocess.run methodi
-build up the command to execute by extending a tuple - command -
+The individual simulations are done using the subprocess.run method
+building up the command to execute by extending a tuple - command -
 with provided information.
 
-A whole-loop is used to loop over the necessary number of simulations
+A while-loop is used to loop over the necessary number of simulations
 keeping track of start- and stop-time for the individial chunks.
 
 The book keeping does:
@@ -24,14 +24,14 @@ simulation period - all with format %Y-%m-%d:
 
     1) SIMULATION_INITIAL_TIME
     2) SIMULATION_START_TIME
-    if None set to SIMULATION_START_TIME
+       if None set to SIMULATION_START_TIME
     3) SIMULATION_STOP_TIME
 
 Further configuration is done via mandatory and optional commandline
 parameters.
 
 The script is intended to be used inside a script e.g. a script for
-a queueing system
+a queueing system - see pml.slurm
 
 """
 
@@ -124,7 +124,7 @@ def main():
 
     annual_chunks = True
 
-    # Get the setup identifier from the YAML file
+    # Get the setup identifier adn meteo.source from the YAML file
     _setup = _get_yaml_value(args.setup, "setup")
     _ = _get_yaml_value(args.setup, "meteo.source")
     calendar = "noleap" if _ == "CMIP6" else "standard"
@@ -133,7 +133,7 @@ def main():
     if args.daily_chunks or args.monthly_chunks:
         annual_chunks = False
 
-    _ = os.getenv("SIMULATION_START_DATE", None)
+    _ = os.getenv("SIMULATION_INITIAL_DATE", None)
     if _:
         initial_date = cftime.datetime.strptime(_, "%Y-%m-%d", calendar=calendar)
     else:
@@ -156,14 +156,14 @@ def main():
 
     start = start_date
 
-    print(f"Total simulation from {start_date} to {stop_date}:")
+    print(f"Total simulation from {initial_date} to {stop_date}:")
 
     if args.exp:
         base_outdir = args.base_outdir / f"{args.exp}"
     else:
         base_outdir = args.base_outdir
 
-    i = 1
+    i = 0
     while start < stop_date:
         command = [
             "mpiexec",
@@ -172,7 +172,6 @@ def main():
             "python",
             str(args.script),
             str(args.setup),
-            # "--dryrun",
         ]
 
         if args.hourly_chunks:
