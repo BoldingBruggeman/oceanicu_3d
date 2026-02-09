@@ -228,7 +228,7 @@ def parse_args():
         "--woa_dir",
         type=Path,
         help="Path to World Ocean Atlas files",
-        default=Path(eval(f"{cfg.initial_conditions.folder}")),
+        default=Path(eval(f"{cfg.hydrography.folder}")),
     )
     p.add_argument(
         "--meteo_dir",
@@ -361,11 +361,11 @@ def parse_args():
         else:
             cfg.tides.folder = eval(cfg.tides.folder)
 
-    if cfg.initial_conditions.source is not None:
+    if cfg.hydrography.source is not None:
         if args.woa_dir:
-            cfg.initial_conditions.folder = Path(args.woa_dir)
+            cfg.hydrography.folder = Path(args.woa_dir)
         else:
-            cfg.initial_conditions.folder = eval(cfg.initial_conditions.folder)
+            cfg.hydrography.folder = eval(cfg.hydrography.folder)
 
     if cfg.meteo.source is not None:
         if cfg.meteo.source == "CMIP6":

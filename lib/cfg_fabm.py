@@ -90,7 +90,7 @@ def configure(sim, cfg, imonth):
             pygetm.input.from_nc(_EMEP_path, "N4_flux", preprocess=_add_coord)
         )
 
-        _woa_folder = cfg.initial_conditions.folder
+        _woa_folder = cfg.hydrography.folder
         sim["N3_n"].set(
             pygetm.input.from_nc(_woa_folder / "woa_n.nc", "n_an").isel(time=imonth)
         )
