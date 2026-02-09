@@ -90,44 +90,45 @@ def configure(sim, cfg, imonth):
             pygetm.input.from_nc(_EMEP_path, "N4_flux", preprocess=_add_coord)
         )
 
-        _woa_folder = cfg.hydrography.folder
-        sim["N3_n"].set(
-            pygetm.input.from_nc(_woa_folder / "woa_n.nc", "n_an").isel(time=imonth)
-        )
-        sim["N1_p"].set(
-            pygetm.input.from_nc(_woa_folder / "woa_p.nc", "p_an").isel(time=imonth)
-        )
-        sim["N5_s"].set(
-            pygetm.input.from_nc(_woa_folder / "woa_i.nc", "i_an").isel(time=imonth)
-        )
-        sim["O2_o"].set(
-            pygetm.input.from_nc(_woa_folder / "woa_o.nc", "o_an").isel(time=imonth)
-        )
+        if cfg.hydrography.source == "WOA":
+            _woa_folder = cfg.hydrography.folder
+            sim["N3_n"].set(
+                pygetm.input.from_nc(_woa_folder / "woa_n.nc", "n_an").isel(time=imonth)
+            )
+            sim["N1_p"].set(
+                pygetm.input.from_nc(_woa_folder / "woa_p.nc", "p_an").isel(time=imonth)
+            )
+            sim["N5_s"].set(
+                pygetm.input.from_nc(_woa_folder / "woa_i.nc", "i_an").isel(time=imonth)
+            )
+            sim["O2_o"].set(
+                pygetm.input.from_nc(_woa_folder / "woa_o.nc", "o_an").isel(time=imonth)
+            )
 
-        sim["N3_n"].open_boundaries.type = pygetm.SPONGE
-        sim["N3_n"].open_boundaries.values.set(
-            pygetm.input.from_nc(_woa_folder / "woa_n.nc", "n_an"),
-            on_grid=False,
-            climatology=True,
-        )
-        sim["N1_p"].open_boundaries.type = pygetm.SPONGE
-        sim["N1_p"].open_boundaries.values.set(
-            pygetm.input.from_nc(_woa_folder / "woa_p.nc", "p_an"),
-            on_grid=False,
-            climatology=True,
-        )
-        sim["N5_s"].open_boundaries.type = pygetm.SPONGE
-        sim["N5_s"].open_boundaries.values.set(
-            pygetm.input.from_nc(_woa_folder / "woa_i.nc", "i_an"),
-            on_grid=False,
-            climatology=True,
-        )
-        sim["O2_o"].open_boundaries.type = pygetm.SPONGE
-        sim["O2_o"].open_boundaries.values.set(
-            pygetm.input.from_nc(_woa_folder / "woa_o.nc", "o_an"),
-            on_grid=False,
-            climatology=True,
-        )
+            sim["N3_n"].open_boundaries.type = pygetm.SPONGE
+            sim["N3_n"].open_boundaries.values.set(
+                pygetm.input.from_nc(_woa_folder / "woa_n.nc", "n_an"),
+                on_grid=False,
+                climatology=True,
+            )
+            sim["N1_p"].open_boundaries.type = pygetm.SPONGE
+            sim["N1_p"].open_boundaries.values.set(
+                pygetm.input.from_nc(_woa_folder / "woa_p.nc", "p_an"),
+                on_grid=False,
+                climatology=True,
+            )
+            sim["N5_s"].open_boundaries.type = pygetm.SPONGE
+            sim["N5_s"].open_boundaries.values.set(
+                pygetm.input.from_nc(_woa_folder / "woa_i.nc", "i_an"),
+                on_grid=False,
+                climatology=True,
+            )
+            sim["O2_o"].open_boundaries.type = pygetm.SPONGE
+            sim["O2_o"].open_boundaries.values.set(
+                pygetm.input.from_nc(_woa_folder / "woa_o.nc", "o_an"),
+                on_grid=False,
+                climatology=True,
+            )
     else:
         sim.logger.critical(
             f"No FABM configuration for {cfg.fabm.config} has been found - add in lib/fabm.py"

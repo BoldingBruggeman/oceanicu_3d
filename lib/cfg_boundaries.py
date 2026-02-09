@@ -162,5 +162,18 @@ def data_2d(sim, cfg):
 
 def data_3d(sim, cfg):
     # Here 3D boundary data can be attached from e.g. WOA or CMEMS
-    if cfg.domain.boundaries:
-        sim.logger.info("setting up 3D boundary conditions")
+    if cfg.hydrography.source == "WOA":
+        if cfg.domain.boundaries:
+            sim.logger.info("setting up 3D boundary conditions")
+            sim["temp"].open_boundaries.type = pygetm.SPONGE
+            sim["temp"].open_boundaries.values.set(
+                pygetm.input.from_nc(cfg.hydrography.folder / "woa_t.nc", "t_an"),
+                on_grid=False,
+                climatology=True,
+            )
+            sim["salt"].open_boundaries.type = pygetm.SPONGE
+            sim["salt"].open_boundaries.values.set(
+                pygetm.input.from_nc(cfg.hydrography.folder / "woa_s.nc", "s_an"),
+                on_grid=False,
+                climatology=True,
+            )
