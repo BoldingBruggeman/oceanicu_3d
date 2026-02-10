@@ -17,6 +17,7 @@ import datetime
 import numpy as np
 
 import pygetm
+from xarray.coding.times import _time_units_to_timedelta
 
 # Definitions of various output lists
 airsea_standard_output = (
@@ -90,6 +91,22 @@ baroclinic_3d_debug_output = (
     "idpdx",
     "idpdy",
 )
+surface_variables_from_3d = (
+    "temp",
+    "salt",
+)
+surface_variables_from_2d = (
+    "zt",
+    # "salt",
+)
+bottom_variables_from_3d = (
+    "temp",
+    "salt",
+)
+bottom_variables_from_2d = (
+    # "zt",
+    # "salt",
+)
 fabm_ersem_output = (
     "P1_c",
     "P2_c",
@@ -117,6 +134,13 @@ fabm_ersem_output = (
     "N5_s_bfl_tot_calculator_result",
     "N5_s_sms_tot_calculator_result",
 )
+# remember a , after the last item
+surface_variables_fabm_ersem_from_3d = ()
+bottom_variables_fabm_ersem_from_3d = ()
+
+# keep empty
+surface_variables_fabm_from_3d = ()
+bottom_variables_fabm_from_3d = ()
 
 
 def create(
@@ -161,31 +185,72 @@ def create(
         output.request(barotropic_2d_debug_output)
 
     if sim.runtype > pygetm.RunType.BAROTROPIC_2D:
-        _path = Path(cfg.runtime.output_folder) / (cfg.setup + "_3d.nc")
+        # 3D variables at monthly frequency
+        _path = Path(cfg.runtime.output_folder) / (cfg.setup + "_3d_monthly.nc")
         output = sim.output_manager.add_netcdf_file(
             str(_path),
-            interval_units=pygetm.TimeUnit.HOURS,
-            interval=6,
-            #interval_units=pygetm.TimeUnit.TIMESTEPS,
-            #interval=30,
-            # time_average=True,
+            interval_units=pygetm.TimeUnit.MONTHS,
+            interval=1,
             sync_interval=None,
             default_dtype=np.float32,
             save_initial=save_initial,
         )
-        output.request(barotropic_3d_output, time_average=False)
+        time_average = True
+        output.request(barotropic_3d_output, time_average=time_average)
         if cfg.runtime.debug_output:
             output.request(barotropic_3d_debug_output, time_average=False)
 
         if sim.runtype == pygetm.RunType.BAROCLINIC:
-            output.request(baroclinic_3d_output, time_average=False)
+            output.request(baroclinic_3d_output, time_average=time_average)
             # if cfg.vertical_coordinates.type == 3: # KB: should be fixed
             if cfg.vertical_coordinates.type == 3:  # KB: should be fixed
                 output.request("hnt", "nug", "ga")
             if sim.fabm:
                 if cfg.fabm.config == "ersem":
-                    output.request(fabm_ersem_output, time_average=False)
+                    surface_variables_fabm_from_3d = (
+                        surface_variables_fabm_ersem_from_3d
+                    )
+                    bottom_variables_fabm_from_3d = bottom_variables_fabm_ersem_from_3d
+
+                    output.request(fabm_ersem_output, time_average=time_average)
                 else:
                     output.request(*sim.fabm.default_outputs)
             if cfg.runtime.debug_output:
-                output.request(baroclinic_3d_debug_output, time_average=False)
+                output.request(baroclinic_3d_debug_output, time_average=time_average)
+
+            # surface variables at daily frequency
+            time_average = False
+            _path = Path(cfg.runtime.output_folder) / (cfg.setup + "_surface_daily.nc")
+            output = sim.output_manager.add_netcdf_file(
+                str(_path),
+                interval_units=pygetm.TimeUnit.DAYS,
+                interval=1,
+                sync_interval=None,
+                default_dtype=np.float32,
+                save_initial=save_initial,
+            )
+            # for n in surface_variables_from_3d + surface_variables_fabm_from_3d:
+            for n in surface_variables_from_3d:
+                output.request(
+                    sim[n].isel(z=-1), output_name=n, time_average=time_average
+                )
+            if surface_variables_from_2d:
+                output.request(surface_variables_from_2d, time_average=time_average)
+
+            # bottom variables at daily frequency
+            _path = Path(cfg.runtime.output_folder) / (cfg.setup + "_bottom_daily.nc")
+            output = sim.output_manager.add_netcdf_file(
+                str(_path),
+                interval_units=pygetm.TimeUnit.DAYS,
+                interval=1,
+                sync_interval=None,
+                default_dtype=np.float32,
+                save_initial=save_initial,
+            )
+            # for n in bottom_variables_from_3d + bottom_variables_fabm_from_3d:
+            for n in bottom_variables_from_3d:
+                output.request(
+                    sim[n].isel(z=0), output_name=n, time_average=time_average
+                )
+            if bottom_variables_from_2d:
+                output.request(bottom_variables_from_2d, time_average=time_average)
