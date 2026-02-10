@@ -92,7 +92,8 @@ def create_domain(cfg) -> pygetm.domain.Domain:
 
     cfg_boundaries.create(domain, cfg)
 
-    domain.limit_velocity_depth()
+    # as suggested by Jorn
+    # domain.limit_velocity_depth()
     domain.cfl_check()
 
     if domain.z0 is not None:
