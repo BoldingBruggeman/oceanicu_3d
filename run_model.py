@@ -349,6 +349,9 @@ def parse_args():
         cfg.meteo.source = None
     cfg.runtime.output = args.output
 
+    if args.profile:
+        cfg.switches.profile = args.profile
+
     if args.bathymetry_file:
         cfg.domain.path = Path(args.bathymetry_file)
     else:
@@ -474,7 +477,7 @@ def main():
     if cfg.runtime.output and not args.dryrun:
         cfg_output.create(sim, cfg, save_initial=load_restart is None)
 
-    profile = cfg.setup if args.profile is not None else None
+    profile = cfg.setup if cfg.switches.profile else None
     run(
         sim,
         simstart,

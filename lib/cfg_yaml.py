@@ -113,6 +113,7 @@ def print_cfg(cfg):
     print(f"Switches:")
     print(f"  dump_on_error:  {cfg.switches.dump_on_error}")
     print(f"  check_finite:   {cfg.switches.check_finite}")
+    print(f"  profile:         {cfg.switches.profile}")
 
 
 # ----------------------------------------------------------------------
