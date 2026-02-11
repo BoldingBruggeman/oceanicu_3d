@@ -17,7 +17,7 @@ import datetime
 import numpy as np
 
 import pygetm
-from xarray.coding.times import _time_units_to_timedelta
+# from xarray.coding.times import _time_units_to_timedelta
 
 # Definitions of various output lists
 airsea_standard_output = (
@@ -134,11 +134,11 @@ fabm_ersem_output = (
     "N5_s_bfl_tot_calculator_result",
     "N5_s_sms_tot_calculator_result",
 )
-# remember a , after the last item
+# 3D ERSEM variables - remember a , after the last item
 surface_variables_fabm_ersem_from_3d = ()
 bottom_variables_fabm_ersem_from_3d = ()
 
-# keep empty
+# keep empty - will be filled further down based on cfg.fabm.config
 surface_variables_fabm_from_3d = ()
 bottom_variables_fabm_from_3d = ()
 
@@ -229,8 +229,7 @@ def create(
                 default_dtype=np.float32,
                 save_initial=save_initial,
             )
-            # for n in surface_variables_from_3d + surface_variables_fabm_from_3d:
-            for n in surface_variables_from_3d:
+            for n in surface_variables_from_3d + surface_variables_fabm_from_3d:
                 output.request(
                     sim[n].isel(z=-1), output_name=n, time_average=time_average
                 )
@@ -247,8 +246,7 @@ def create(
                 default_dtype=np.float32,
                 save_initial=save_initial,
             )
-            # for n in bottom_variables_from_3d + bottom_variables_fabm_from_3d:
-            for n in bottom_variables_from_3d:
+            for n in bottom_variables_from_3d + bottom_variables_fabm_from_3d:
                 output.request(
                     sim[n].isel(z=0), output_name=n, time_average=time_average
                 )
