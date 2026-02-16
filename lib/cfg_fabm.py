@@ -79,15 +79,15 @@ def configure(sim, cfg, imonth):
             sim.fabm.get_dependency("practical_salinity").set(35.0)
             sim.fabm.get_dependency("density").set(1025.0)
 
-        _EMEP_path = _fabm_folder / "Ndep/AMM7-EMEP-NDeposition_y2020.nc"
+        _EMEP_path = _fabm_folder / "Ndep/AMM7-EMEP-NDeposition_y????.nc"
         # EMEP_path = Path(fabm_dir) / f"Ndep/AMM7-EMEP-NDeposition_y{year}.nc"
         #    for year in range(__YEAR__ - 1, __YEAR__ + 2)
         # ]
         sim.fabm.get_dependency("N3_flux/flux").set(
-            pygetm.input.from_nc(_EMEP_path, "N3_flux", preprocess=_add_coord)
+            pygetm.input.from_nc(str(_EMEP_path), "N3_flux", preprocess=_add_coord)
         )
         sim.fabm.get_dependency("N4_flux/flux").set(
-            pygetm.input.from_nc(_EMEP_path, "N4_flux", preprocess=_add_coord)
+            pygetm.input.from_nc(str(_EMEP_path), "N4_flux", preprocess=_add_coord)
         )
 
         if cfg.hydrography.source == "WOA":
