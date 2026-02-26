@@ -81,7 +81,19 @@ runtime:
   split_factor: 30.
   output: True
   debug_output: False
-  output_folder: Path(os.getenv("OUTPUT_FOLDER", "."))
+output:
+  folder: Path(os.getenv("OUTPUT_FOLDER", "."))
+  meteo: True
+  tides: False
+  barotropic:
+    default_2d: False
+    default_3d: False
+  baroclinic:
+    daily:
+      surface: True
+      bottom: True
+    monthly: True
+    default: False
 switches:
   dump_on_error: True
   check_finite: False
