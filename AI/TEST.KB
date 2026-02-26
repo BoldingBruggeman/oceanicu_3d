@@ -1,2 +1,0 @@
-python ./claude5/multi_variable_analysis.py  --obs-folder /data/CCI-SST --obs-pattern sst_2021.nc --model-folder /data/kb/NS/test01/2021/  --model-pattern  ns_surface_daily.nc --variable temperature --obs-var analysed_sst  --model-var temp --output-dir kaj 
-
