@@ -1,0 +1,1 @@
+ncap2 -s "time=time-86400" ns_surface_daily.nc.org ns_surface_daily.nc
