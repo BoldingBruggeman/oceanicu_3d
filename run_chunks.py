@@ -208,7 +208,7 @@ def main():
         x = start.strftime("%Y%m%d")
         y = stop.strftime("%Y%m%d")
 
-        if start == start_date:
+        if start == initial_date:
             print("Initial simulation")
             restart_in = None
         else:
