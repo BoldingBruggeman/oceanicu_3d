@@ -85,3 +85,4 @@ runtime:
 switches:
   dump_on_error: True
   check_finite: False
+  profile: False

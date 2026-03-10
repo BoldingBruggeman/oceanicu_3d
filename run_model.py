@@ -92,7 +92,8 @@ def create_domain(cfg) -> pygetm.domain.Domain:
 
     cfg_boundaries.create(domain, cfg)
 
-    domain.limit_velocity_depth()
+    # as suggested by Jorn
+    # domain.limit_velocity_depth()
     domain.cfl_check()
 
     if domain.z0 is not None:
@@ -125,7 +126,7 @@ def create_simulation(
         vertical_coordinates=_vc,
         Dcrit=cfg.simulation.Dcrit,
         Dmin=cfg.simulation.Dmin,
-        delay_slow_ip=True,
+        delay_slow_ip=False,
     )
 
     initial = not load_restart
@@ -137,11 +138,12 @@ def create_simulation(
 
     sim.momentum.An.set(cfg.momentum.An)
 
-    if initial:
+    if initial and cfg.simulation.runtype > 1:
         cfg_ic.create(sim, cfg, imonth)
 
     cfg_boundaries.data_2d(sim, cfg)
-    cfg_boundaries.data_3d(sim, cfg)
+    if cfg.simulation.runtype > 1:
+        cfg_boundaries.data_3d(sim, cfg)
 
     cfg_rivers.data(sim, cfg)
 
@@ -188,7 +190,7 @@ def run(
 
 def parse_args():
     import argparse
-    from lib import cfg_yaml
+    from lib import yaml_loader
 
     if len(sys.argv) < 2:
         print(f"The first argument to {sys.argv[0]} must be a YAML-configuration file")
@@ -197,9 +199,9 @@ def parse_args():
     if not _cfg_file.exists():
         print(f"{_cfg_file} is not a valid file")
         sys.exit(0)
-    user_cfg = cfg_yaml.load_yaml(Path(_cfg_file))
-    full_cfg_dict = cfg_yaml.merge_dicts(cfg_yaml.DEFAULT_CONFIG.copy(), user_cfg)
-    cfg = cfg_yaml.dict_to_namespace(full_cfg_dict)
+    user_cfg = yaml_loader.load_yaml(Path(_cfg_file))
+    full_cfg_dict = yaml_loader.merge_dicts(yaml_loader.DEFAULT_CONFIG.copy(), user_cfg)
+    cfg = yaml_loader.dict_to_namespace(full_cfg_dict)
 
     p = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     p.add_argument("config", type=Path, help="YAML configuration file")
@@ -283,7 +285,7 @@ def parse_args():
         type=int,
         choices=(pygetm.BAROTROPIC_2D, pygetm.BAROTROPIC_3D, pygetm.BAROCLINIC),
         help="Model run type: 1 -> 2D barotropic, 2 -> 3D baroropic, 4 -> baroclinic",
-        default=pygetm.BAROCLINIC,
+        #default=pygetm.BAROCLINIC,
     )
     p.add_argument(
         "--output_dir",
@@ -341,12 +343,18 @@ def parse_args():
 
     # Switch off configs depending on command line arguments
     cfg.domain.boundaries = args.boundaries
-    cfg.domain.rivers = not args.rivers
+    #KBcfg.domain.rivers = not args.rivers
+    if args.runtype:
+        cfg.simulation.runtype = args.runtype
+
     if not cfg.domain.rivers:
         cfg.rivers.source = None
     if args.meteo:
         cfg.meteo.source = None
     cfg.runtime.output = args.output
+
+    if args.profile:
+        cfg.switches.profile = args.profile
 
     if args.bathymetry_file:
         cfg.domain.path = Path(args.bathymetry_file)
@@ -406,9 +414,9 @@ def parse_args():
 
     if cfg.runtime.output:
         if args.output_dir:
-            cfg.runtime.output_folder = Path(args.output_dir)
+            cfg.output.folder = Path(args.output_dir)
         else:
-            cfg.runtime.output_folder = eval(cfg.runtime.output_folder)
+            cfg.output.folder = eval(cfg.output.folder)
 
     if args.list_output:
         print("Full output list")
@@ -420,7 +428,7 @@ def parse_args():
         sys.exit(0)
 
     if args.print_config:
-        cfg_yaml.print_cfg(cfg)
+        yaml_loader.print_cfg(cfg)
         sys.exit(0)
 
     if args.output_dir != ".":
@@ -473,7 +481,7 @@ def main():
     if cfg.runtime.output and not args.dryrun:
         cfg_output.create(sim, cfg, save_initial=load_restart is None)
 
-    profile = cfg.setup if args.profile is not None else None
+    profile = cfg.setup if cfg.switches.profile else None
     run(
         sim,
         simstart,

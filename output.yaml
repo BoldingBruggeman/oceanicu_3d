@@ -1,0 +1,110 @@
+varlists:
+  airsea:
+    standard:
+      - u10
+      - v10
+      - sp
+      - t2m
+      - tcc
+      - tp
+    fluxes:
+      - swr
+      - shf
+      - tausxu
+      - tausyv
+
+  barotropic:
+    2d:
+      standard:
+        - Ht
+        - zt
+        - Dt
+        - u1
+        - v1
+      tides:
+        - zt
+        - u1
+        - v1
+        - maskt
+      debug:
+        - maskt
+        - masku
+        - maskv
+        - dxt
+        - dyt
+        - Hu
+        - Hv
+        - U
+        - V
+        - Du
+        - Dv
+        - dpdx
+        - dpdy
+        - z0bu
+        - z0bv
+        - z0bt
+        - ru
+        - rv
+    3d:
+      standard:
+        - uk
+        - vk
+        - ww
+        - SS
+        - num
+      debug:
+        - rru
+        - rrv
+        - advpk
+        - advqk
+        - diffpk
+        - diffqk
+    fabm: []   # empty list
+
+  baroclinic:
+    2d:
+      surface:
+        - temp
+        - salt
+      bottom:
+        - temp
+        - salt
+    3d:
+      standard:
+        - temp
+        - salt
+        - rho
+        - nuh
+      debug:
+        - rad
+        - sst
+        - hnt
+        - idpdx
+        - idpdy
+      fabm:
+        - P1_c
+        - P2_c
+        - P3_c
+        - P4_c
+        - O2_o
+        - N3_n
+        - N4_n
+        - N1_p
+        - N5_s
+        - Q6_c
+        - Y2_c
+        - Y3_c
+        - O3_c
+        - O3_fair
+        - Q7_c
+        - Q6_pen_depth_c
+        - ben_col_D1m
+        - ben_col_D2m
+        - N5_s_bdy
+        - N5_s_sms
+        - N5_s_sfl
+        - N5_s_bfl
+        - N5_s_sfl_tot_calculator_result
+        - N5_s_bfl_tot_calculator_result
+        - N5_s_sms_tot_calculator_result
+

@@ -190,6 +190,11 @@ def main():
             stop = start.replace(year=yy, month=mm)
         else:
             stop = start.replace(year=start.year + args.chunk_multiplier)
+            print("kaj", stop.month)
+            # the following years are run from january to jauary
+            # can be used as a spinup - e.g. if start is december 1.
+            if stop.month != 1:
+                stop = stop.replace(month=1)
 
         if stop > stop_date:
             stop = stop_date
@@ -203,7 +208,7 @@ def main():
         x = start.strftime("%Y%m%d")
         y = stop.strftime("%Y%m%d")
 
-        if start == start_date:
+        if start == initial_date:
             print("Initial simulation")
             restart_in = None
         else:

@@ -62,6 +62,4 @@ export SIMULATION_STOP_DATE="2022-01-01"
 #   3) --chunk_size - default is 1 of the chunk size
 #   4) --dryrun - will print the run commands to screen for inspection
 
-conda activate pygetm
-python run_chunks.py run_model.py ns_config.yaml "/data/$USER/NS" "$NP" --exp test
-conda deactivate
+conda run -n pygetm python run_chunks.py run_model.py ns_config.yaml "/data/$USER/NS" "$NP" --exp test
