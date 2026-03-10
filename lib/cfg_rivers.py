@@ -96,7 +96,7 @@ def create(domain: pygetm.domain.Domain, cfg):
 
 
 def data(sim, cfg):
-    if cfg.rivers.source:
+    if cfg.domain.rivers and cfg.rivers.source:
         index, name, lat_name, lon_name, Q_name, Qmean_name = _get_river_cfg(
             cfg.rivers.source
         )
