@@ -1,0 +1,100 @@
+# YAML formatted configuration file for the amm7-setup:
+#
+# The YAML-file is read by the runscript into a dictionary.
+# This dictionary is used for all configuration within the
+# runscript.
+# Adding additional configuration options is easy: just add
+# to this file and inquire the information in the runscript.
+# Also update the print_cfg() routine to view the full
+# configuration.
+#
+# The precedens of the configurations are as follows:
+#   1: the simple values from the YAML file
+#   2: possible overwritten by an environment variable
+#      also specified in the YAML file
+#   3: commandline options during the execution of the
+#      runscript
+#
+# This provides a very flexible - yet transparent - configuration
+# flow.
+# As an option the final configuration can be printed to the
+# terminal when all values are evaluated.
+#
+# Using command line arguments various components can be switched
+# off - e.g. --no_meteo will set airsea.source = None. This will
+# be reflected when the configuration is printed.
+#
+
+setup: "amm7"
+#setup_dir = Path.cwd()
+domain:
+  path: Path("Bathymetry") / "amm7_topo_getm.nc"
+  name: "bathymetry"
+  boundaries: True
+  rivers: True
+  z0: 0.01
+momentum:
+  An: 25.
+  Am: 0.
+  cnpar: 1.
+  #advection: 1 # 1-6
+  #advection_split: 1 # 1-3
+  #coriolis: 1 #
+  avmol: 1.8e-6
+vertical_coordinates: # 1 -> SIGMA, 2 -> GVC, 3-> AVC
+  type: 2
+  nz: 40
+  ddu: 0.75
+  ddl: 0.75
+  Dgamma: 10.0
+  gamma_surf: True
+internal_pressure: # 1-> BlumbergMeller, 2 -> ShchepetkinMcwilliams
+  type: 2
+hydrography: # "constant", "WOA"
+  source: "WOA" # "constant", "WOA", "CMEMS - to come"
+  folder: Path(os.getenv("HYDROGRAPHY_FOLDER", "/data/WOA"))
+  temp: 15.
+  salt: 34.
+tides:
+  folder: Path(os.getenv("TPXO_FOLDER", "/data/TPXO9"))
+meteo:
+  source: "ERA5" # "ERA5", "CMIP6"
+  folder: Path(os.getenv("METEO_FOLDER", "/data/ERA5/NA"))
+  evaporation: True
+rivers:
+  source: "emorid"
+  folder: Path(os.getenv("RIVER_FOLDER", "/data/EMORID"))
+  file: Path(os.getenv("RIVER_FILE", "EMORID_1990_2024.nc"))
+  threshold: 0.
+fabm:
+  file: os.getenv("FABM_YAML_FILE", None)
+  folder: Path(os.getenv("FABM_FOLDER", "/data/FABM"))
+  config: "ersem"
+simulation:
+  gotm: os.getenv("GOTM_YAML_FILE", None)
+  calendar: "standard"
+  runtype: 4 #11 -> 2D, 2 -> 3D barotropic, 4 -> 3D baroclinic
+  Dcrit: 0.5
+  Dmin: 0.1
+runtime:
+  timestep: 10.
+  split_factor: 30.
+  output: True
+  debug_output: False
+output:
+  folder: Path(os.getenv("OUTPUT_FOLDER", "."))
+  meteo: True
+  tides: True
+  barotropic:
+    default_2d: False
+    default_3d: False
+  baroclinic:
+    daily:
+      surface: True
+      bottom: True
+    monthly: True
+    default: False
+switches:
+  dump_on_error: True
+  check_finite: False
+  profile: False
