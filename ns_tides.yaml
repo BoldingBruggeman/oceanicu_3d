@@ -31,7 +31,7 @@ domain:
   path: Path("Bathymetry") / "bathymetry_ns.nc"
   name: "H"
   boundaries: True
-  rivers: True
+  rivers: False
   z0: 0.01
 momentum:
   An: 25.
@@ -73,7 +73,7 @@ fabm:
 simulation:
   gotm: os.getenv("GOTM_YAML_FILE", None)
   calendar: "standard"
-  runtype: 4 # 1 -> 2D, 2 -> 3D barotropic, 4 -> 3D baroclinic
+  runtype: 1 # 1 -> 2D, 2 -> 3D barotropic, 4 -> 3D baroclinic
   Dcrit: 0.5
   Dmin: 0.1
 runtime:
@@ -84,7 +84,7 @@ runtime:
 output:
   folder: Path(os.getenv("OUTPUT_FOLDER", "."))
   meteo: True
-  tides: False
+  tides: True
   barotropic:
     default_2d: False
     default_3d: False

@@ -13,8 +13,8 @@ if [ "$(hostname)" == "orca" ]; then
 
 fi
 
-export SIMULATION_INITIAL_DATE="2020-12-01"
-export SIMULATION_START_DATE="2020-12-01"
-export SIMULATION_STOP_DATE="2022-01-01"
+export SIMULATION_INITIAL_DATE="2016-12-01"
+#export SIMULATION_START_DATE="2020-12-01"
+export SIMULATION_STOP_DATE="2024-01-01"
 
-conda run -n pygetm --no-capture-output python run_chunks.py run_model.py ns_config.yaml "/data/$USER/NS" 6 --exp test
+conda run -n pygetm --no-capture-output python run_chunks.py run_model.py ns_config.yaml "/data/$USER/NS" 6 --exp 01
