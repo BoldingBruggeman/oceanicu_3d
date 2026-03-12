@@ -1,4 +1,4 @@
-# YAML formatted configuration file for the ns-setup:
+# YAML formatted configuration file for the ena4-setup:
 #
 # The YAML-file is read by the runscript into a dictionary.
 # This dictionary is used for all configuration within the
@@ -56,19 +56,19 @@ hydrography: # "constant", "WOA"
   temp: 15.
   salt: 34.
 tides:
-  folder: Path(os.getenv("TPXO", "/data/TPXO9"))
+  folder: Path(os.getenv("TPXO_FOLDER", "/data/TPXO9"))
 meteo:
   source: "ERA5" # "ERA5", "CMIP6"
-  folder: Path(os.getenv("ERA5", "/data/ERA5/NA"))
+  folder: Path(os.getenv("METEO_FOLDER", "/data/ERA5/NA"))
   evaporation: True
 rivers:
   source: "emorid"
-  folder: Path(os.getenv("RIVER_DIR", "/data/EMORID"))
+  folder: Path(os.getenv("RIVER_FOLDER", "/data/EMORID"))
   file: Path(os.getenv("RIVER_FILE", "EMORID_1990_2024.nc"))
   threshold: 0.
 fabm:
   file: os.getenv("FABM_YAML_FILE", None)
-  folder: Path(os.getenv("FABM", "/data/FABM"))
+  folder: Path(os.getenv("FABM_FOLDER", "/data/FABM"))
   config: "ersem"
 simulation:
   gotm: os.getenv("GOTM_YAML_FILE", None)
@@ -81,7 +81,19 @@ runtime:
   split_factor: 30.
   output: True
   debug_output: False
-  output_folder: Path(os.getenv("OUTPUT_FOLDER", "."))
+output:
+  folder: Path(os.getenv("OUTPUT_FOLDER", "."))
+  meteo: True
+  tides: False
+  barotropic:
+    default_2d: False
+    default_3d: False
+  baroclinic:
+    daily:
+      surface: True
+      bottom: True
+    monthly: True
+    default: False
 switches:
   dump_on_error: True
   check_finite: False

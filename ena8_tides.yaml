@@ -1,4 +1,4 @@
-# YAML formatted configuration file for the ns-setup:
+# YAML formatted configuration file for the ena8-setup:
 #
 # The YAML-file is read by the runscript into a dictionary.
 # This dictionary is used for all configuration within the
@@ -25,16 +25,16 @@
 # be reflected when the configuration is printed.
 #
 
-setup: "ns"
+setup: "ena8"
 #setup_dir = Path.cwd()
 domain:
-  path: Path("Bathymetry") / "bathymetry_ns.nc"
+  path: Path("Bathymetry") / "bathymetry_ena8.nc"
   name: "H"
   boundaries: True
   rivers: False
   z0: 0.01
 momentum:
-  An: 25.
+  An: 100.
   Am: 0.
   cnpar: 1.
   #advection: 1 # 1-6
@@ -45,7 +45,7 @@ vertical_coordinates: # 1 -> SIGMA, 2 -> GVC, 3-> AVC
   type: 2
   nz: 40
   ddu: 0.75
-  ddl: 0.75
+  ddl: 0.05
   Dgamma: 10.0
   gamma_surf: True
 internal_pressure: # 1-> BlumbergMeller, 2 -> ShchepetkinMcwilliams
@@ -77,7 +77,7 @@ simulation:
   Dcrit: 0.5
   Dmin: 0.1
 runtime:
-  timestep: 60.
+  timestep: 20.
   split_factor: 30.
   output: True
   debug_output: False

@@ -1,4 +1,4 @@
-# YAML formatted configuration file for the ns-setup:
+# YAML formatted configuration file for the amm7-setup:
 #
 # The YAML-file is read by the runscript into a dictionary.
 # This dictionary is used for all configuration within the
@@ -52,7 +52,7 @@ internal_pressure: # 1-> BlumbergMeller, 2 -> ShchepetkinMcwilliams
   type: 2
 hydrography: # "constant", "WOA"
   source: "WOA" # "constant", "WOA", "CMEMS - to come"
-  folder: Path(os.getenv("HYDORGRAPHY_FOLDER", "/data/WOA"))
+  folder: Path(os.getenv("HYDROGRAPHY_FOLDER", "/data/WOA"))
   temp: 15.
   salt: 34.
 tides:
@@ -81,7 +81,19 @@ runtime:
   split_factor: 30.
   output: True
   debug_output: False
-  output_folder: Path(os.getenv("OUTPUT_FOLDER", "."))
+output:
+  folder: Path(os.getenv("OUTPUT_FOLDER", "."))
+  meteo: True
+  tides: False
+  barotropic:
+    default_2d: False
+    default_3d: False
+  baroclinic:
+    daily:
+      surface: True
+      bottom: True
+    monthly: True
+    default: False
 switches:
   dump_on_error: True
   check_finite: False

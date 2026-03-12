@@ -31,7 +31,7 @@ domain:
   path: Path("Bathymetry") / "amm7_topo_getm.nc"
   name: "bathymetry"
   boundaries: True
-  rivers: True
+  rivers: False
   z0: 0.01
 momentum:
   An: 25.
@@ -73,7 +73,7 @@ fabm:
 simulation:
   gotm: os.getenv("GOTM_YAML_FILE", None)
   calendar: "standard"
-  runtype: 4 #11 -> 2D, 2 -> 3D barotropic, 4 -> 3D baroclinic
+  runtype: 1 #11 -> 2D, 2 -> 3D barotropic, 4 -> 3D baroclinic
   Dcrit: 0.5
   Dmin: 0.1
 runtime:
