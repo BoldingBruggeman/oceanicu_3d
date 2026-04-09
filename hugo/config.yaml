@@ -1,0 +1,123 @@
+baseURL: 'http://localhost:1313/'
+#baseURL: 'https://boldingbruggeman.github.io/oceanicu_3d/'
+languageCode: 'en-us'
+title: 'Ocean Model Validation'
+theme: 'PaperMod'
+
+params:
+  # Theme settings
+  env: production
+  description: "Ocean model validation and analysis dashboard"
+  author: "Ocean Modeling Team"
+  
+  # Prevent PaperMod from auto-listing pages from any section on the home page
+  mainSections: []
+
+  # Theme appearance
+  defaultTheme: auto  # auto, light, dark
+  disableThemeToggle: false
+  
+  # Features
+  ShowReadingTime: false
+  ShowShareButtons: false
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowRssButtonInSectionTermList: false
+  
+  # Table of contents
+  ShowToc: true
+  TocOpen: false
+  UseHugoToc: true   # Use Hugo's built-in TOC (avoids slow regex on large files)
+  
+  # Clean URLs
+  disableSpecial1stPost: false
+  
+  # Cover images
+  cover:
+    linkFullImages: true
+    
+  # Search
+  fuseOpts:
+    isCaseSensitive: false
+    shouldSort: true
+    location: 0
+    distance: 1000
+    threshold: 0.4
+    minMatchCharLength: 0
+    keys: ["title", "permalink", "summary", "content"]
+
+# Menu configuration
+menu:
+  main:
+    - name: Areas
+      url: /areas/
+      weight: 1
+    - name: Simulations
+      url: /simulations/
+      weight: 2
+    - name: Validations
+      url: /validations/
+      weight: 3
+    - name: Scenarios
+      url: /scenarios/
+      weight: 4
+    - name: Rankings
+      url: /rankings/
+      weight: 5
+    - name: Data Sources
+      url: /data-sources/
+      weight: 6
+    - name: Guides
+      url: /guides/
+      weight: 7
+    - name: About
+      url: /about/
+      weight: 8
+
+# Markup settings
+markup:
+  goldmark:
+    extensions:
+      attributes: true   # Enable {style="..."} / {.class} on headings etc.
+    renderer:
+      unsafe: true  # Allow HTML in markdown
+  highlight:
+    style: monokai
+    lineNos: false
+    noClasses: false
+  tableOfContents:
+    endLevel: 3
+    ordered: false
+    startLevel: 2
+
+# Outputs
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON  # For search
+
+# Taxonomies
+taxonomies:
+  tag: tags
+  category: categories
+
+# Permalinks
+permalinks:
+  simulations: /simulations/:slug/
+  areas: /areas/:slug/
+  validations: /validations/:slug/
+  scenarios: /scenarios/:slug/
+  
+# Privacy settings
+privacy:
+  disqus:
+    disable: true
+  googleAnalytics:
+    disable: true
+
+# Build settings
+minify:
+  disableXML: true
+  minifyOutput: true
