@@ -2,67 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/validations/amm7/overview/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/validations/ean4/overview/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/ena4/overview/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/ena8/overview/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/ns/overview/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/areas/amm7/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/amm7-tpxo9/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/scenarios/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/areas/ean4/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/areas/ena4/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/ena4-adaptive-2/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/ena4-obskd/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/ena4-tpxo9/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/areas/ena8/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/ena8-baseline/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/ena8-tpxo9/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/simulations/</loc>
     <lastmod>2026-04-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/areas/</loc>
     <lastmod>2026-04-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/areas/ns/</loc>
+    <loc>http://localhost:1313/areas/ean4/</loc>
     <lastmod>2026-04-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/validations/ns-adaptive-1/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/ns-adaptive-2/</loc>
     <lastmod>2026-04-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/validations/ns-adaptive-3/</loc>
@@ -77,35 +26,11 @@
     <loc>http://localhost:1313/validations/ns-ssr-str/</loc>
     <lastmod>2026-04-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/validations/ns-ssrd-strd/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/ns-tpxo9/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/</loc>
     <lastmod>2026-04-11T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/validations/tidal/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/validations/validation/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/about/</loc>
-    <lastmod>2026-02-18T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/data-sources/</loc>
-    <lastmod>2026-02-18T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/guides/</loc>
-    <lastmod>2026-02-18T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/rankings/</loc>
-    <lastmod>2026-02-18T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>http://localhost:1313/validations/</loc>
-    <lastmod>2026-02-18T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/categories/</loc>
   </url><url>
