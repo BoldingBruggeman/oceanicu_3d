@@ -56,28 +56,28 @@ params:
 menu:
   main:
     - name: Areas
-      url: /areas/
+      url: areas/
       weight: 1
     - name: Simulations
-      url: /simulations/
+      url: simulations/
       weight: 2
     - name: Validations
-      url: /validations/
+      url: validations/
       weight: 3
     - name: Scenarios
-      url: /scenarios/
+      url: scenarios/
       weight: 4
     - name: Rankings
-      url: /rankings/
+      url: rankings/
       weight: 5
     - name: Data Sources
-      url: /data-sources/
+      url: data-sources/
       weight: 6
     - name: Guides
-      url: /guides/
+      url: guides/
       weight: 7
     - name: About
-      url: /about/
+      url: about/
       weight: 8
 
 # Markup settings
