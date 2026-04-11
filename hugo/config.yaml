@@ -4,6 +4,11 @@ languageCode: 'en-us'
 title: 'Ocean Model Validation'
 theme: 'PaperMod'
 
+# Rewrite root-absolute URLs (e.g. /validation-data/...) to include the
+# baseURL subpath.  Required when the site is served from a subdirectory
+# (e.g. https://user.github.io/repo/) rather than a bare domain.
+canonifyURLs: true
+
 params:
   # Theme settings
   env: production
