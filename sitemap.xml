@@ -47,6 +47,9 @@
     <loc>http://localhost:1313/validations/ena8-baseline/</loc>
     <lastmod>2026-04-11T00:00:00+00:00</lastmod>
   </url><url>
+    <loc>http://localhost:1313/validations/ena8-obskd/</loc>
+    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>http://localhost:1313/validations/ena8-tpxo9/</loc>
     <lastmod>2026-04-11T00:00:00+00:00</lastmod>
   </url><url>
@@ -72,6 +75,9 @@
     <lastmod>2026-04-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/validations/ns-obskd/</loc>
+    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/validations/ns-ssr-srt/</loc>
     <lastmod>2026-04-11T00:00:00+00:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/validations/ns-ssr-str/</loc>
