@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Validations on Ocean Model Validation</title>
-    <link>http://localhost:1313/validations/</link>
+    <link>https://bolding-bruggeman.com/oceanicu_3d/validations/</link>
     <description>Recent content in Validations on Ocean Model Validation</description>
     <generator>Hugo -- 0.155.3</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 11 Apr 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/validations/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/validations/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AMM7 — Analysis Overview</title>
-      <link>http://localhost:1313/validations/amm7/overview/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/amm7/overview/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</guid>
       <description>&lt;h1 id=&#34;amm7-analysis-overview&#34;&gt;AMM7 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;AMM7&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
 &lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
@@ -20,7 +20,7 @@
 &lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/amm7-tpxo9/&#34;&gt;TPXO9&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/&#34;&gt;TPXO9&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
 &lt;p&gt;&lt;em&gt;No horizontal bottom-layer validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
@@ -29,9 +29,9 @@
     </item>
     <item>
       <title>EAN4 — Analysis Overview</title>
-      <link>http://localhost:1313/validations/ean4/overview/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ean4/overview/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ean4/overview/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ean4/overview/</guid>
       <description>&lt;h1 id=&#34;ean4-analysis-overview&#34;&gt;EAN4 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;EAN4&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
 &lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
@@ -44,15 +44,15 @@
     </item>
     <item>
       <title>ENA4 — Analysis Overview</title>
-      <link>http://localhost:1313/validations/ena4/overview/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4/overview/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ena4/overview/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4/overview/</guid>
       <description>&lt;h1 id=&#34;ena4-analysis-overview&#34;&gt;ENA4 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA4&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
 &lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
 &lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/ena4-tpxo9/&#34;&gt;TPXO9&lt;/a&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-tpxo9/&#34;&gt;TPXO9&lt;/a&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -89,7 +89,7 @@
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -111,23 +111,23 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ena4-adaptive-2/&#34;&gt;Adaptive_2&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;</description>
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/&#34;&gt;Adaptive_2&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;</description>
     </item>
     <item>
       <title>ENA8 — Analysis Overview</title>
-      <link>http://localhost:1313/validations/ena8/overview/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8/overview/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ena8/overview/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8/overview/</guid>
       <description>&lt;h1 id=&#34;ena8-analysis-overview&#34;&gt;ENA8 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA8&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
 &lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
 &lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/ena8-tpxo9/&#34;&gt;TPXO9&lt;/a&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-tpxo9/&#34;&gt;TPXO9&lt;/a&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -164,7 +164,7 @@
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ena8-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -186,17 +186,17 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/ena8-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ena8-baseline/&#34;&gt;Baseline&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;</description>
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-baseline/&#34;&gt;Baseline&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS — Analysis Overview</title>
-      <link>http://localhost:1313/validations/ns/overview/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ns/overview/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</guid>
       <description>&lt;h1 id=&#34;ns-analysis-overview&#34;&gt;NS Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NS&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
 &lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
@@ -204,11 +204,11 @@
 &lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;h3 id=&#34;ranking&#34;&gt;Ranking&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Salt experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validations/ns-ranking-horizon_surface-salt_surface.png&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validations/ns-ranking-horizon_surface-temp_surface.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Salt experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ranking-horizon_surface-salt_surface.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ranking-horizon_surface-temp_surface.png&#34;&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/&#34;&gt;SSR_STR&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/&#34;&gt;SSR_STR&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -244,17 +244,17 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-ssrd-strd/&#34;&gt;SSRD_STRD&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;</description>
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/&#34;&gt;SSRD_STRD&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;</description>
     </item>
     <item>
       <title>AMM7 - TPXO9 - Tidal Analysis</title>
-      <link>http://localhost:1313/validations/amm7-tpxo9/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/amm7-tpxo9/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/</guid>
       <description>&lt;h1 id=&#34;tidal-analysis---amm7---tpxo9&#34;&gt;Tidal Analysis - AMM7 - TPXO9&lt;/h1&gt;
 &lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
@@ -263,17 +263,17 @@
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/amm7-tpxo9/2019/gesla_station_map.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-tpxo9/2019/gesla_station_map.png&#34;&gt;
 &lt;em&gt;GESLA tide gauge station locations&lt;/em&gt;&lt;/p&gt;
 &lt;h3 id=&#34;year-2019&#34;&gt;Year 2019&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/amm7-tpxo9/2019/K1_gesla_comparison.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-tpxo9/2019/K1_gesla_comparison.png&#34;&gt;
 &lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>ENA4 - Experiment Adaptive_2</title>
-      <link>http://localhost:1313/validations/ena4-adaptive-2/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ena4-adaptive-2/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/</guid>
       <description>&lt;h1 id=&#34;ena4---experiment-adaptive_2&#34;&gt;ENA4 - Experiment Adaptive_2&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -284,18 +284,18 @@
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-adaptive-2/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena4-adaptive-2/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-adaptive-2/pyGETM/2023/surface/temp_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena4-adaptive-2/pyGETM/2023/surface/temp_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;Salinity (bottom) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-adaptive-2/pyGETM/2023/bottom/salt_bottom_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (bottom) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena4-adaptive-2/pyGETM/2023/bottom/salt_bottom_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (bottom) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>ENA4 - Experiment ObsKd</title>
-      <link>http://localhost:1313/validations/ena4-obskd/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ena4-obskd/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/</guid>
       <description>&lt;h1 id=&#34;ena4---experiment-obskd&#34;&gt;ENA4 - Experiment ObsKd&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -342,14 +342,14 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-obskd/pyGETM/2023/surface/temp_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena4-obskd/pyGETM/2023/surface/temp_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>ENA4 - TPXO9 - Tidal Analysis</title>
-      <link>http://localhost:1313/validations/ena4-tpxo9/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-tpxo9/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ena4-tpxo9/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-tpxo9/</guid>
       <description>&lt;h1 id=&#34;tidal-analysis---ena4---tpxo9&#34;&gt;Tidal Analysis - ENA4 - TPXO9&lt;/h1&gt;
 &lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
@@ -358,17 +358,17 @@
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-tpxo9/2020/gesla_station_map.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena4-tpxo9/2020/gesla_station_map.png&#34;&gt;
 &lt;em&gt;GESLA tide gauge station locations&lt;/em&gt;&lt;/p&gt;
 &lt;h3 id=&#34;year-2020&#34;&gt;Year 2020&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-tpxo9/2020/K1_gesla_comparison.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena4-tpxo9/2020/K1_gesla_comparison.png&#34;&gt;
 &lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>ENA8 - Experiment Baseline</title>
-      <link>http://localhost:1313/validations/ena8-baseline/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-baseline/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ena8-baseline/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-baseline/</guid>
       <description>&lt;h1 id=&#34;ena8---experiment-baseline&#34;&gt;ENA8 - Experiment Baseline&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -420,14 +420,14 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena8-baseline/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena8-baseline/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>ENA8 - Experiment ObsKd</title>
-      <link>http://localhost:1313/validations/ena8-obskd/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ena8-obskd/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/</guid>
       <description>&lt;h1 id=&#34;ena8---experiment-obskd&#34;&gt;ENA8 - Experiment ObsKd&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -474,14 +474,14 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena8-obskd/pyGETM/2023/surface/temp_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena8-obskd/pyGETM/2023/surface/temp_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>ENA8 - TPXO9 - Tidal Analysis</title>
-      <link>http://localhost:1313/validations/ena8-tpxo9/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-tpxo9/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ena8-tpxo9/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-tpxo9/</guid>
       <description>&lt;h1 id=&#34;tidal-analysis---ena8---tpxo9&#34;&gt;Tidal Analysis - ENA8 - TPXO9&lt;/h1&gt;
 &lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
@@ -490,17 +490,17 @@
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena8-tpxo9/2020/gesla_station_map.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena8-tpxo9/2020/gesla_station_map.png&#34;&gt;
 &lt;em&gt;GESLA tide gauge station locations&lt;/em&gt;&lt;/p&gt;
 &lt;h3 id=&#34;year-2020&#34;&gt;Year 2020&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena8-tpxo9/2020/K1_gesla_comparison.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena8-tpxo9/2020/K1_gesla_comparison.png&#34;&gt;
 &lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS - Experiment Adaptive_1</title>
-      <link>http://localhost:1313/validations/ns-adaptive-1/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-1/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ns-adaptive-1/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-1/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-adaptive_1&#34;&gt;NS - Experiment Adaptive_1&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -567,14 +567,14 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-adaptive-1/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-adaptive-1/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS - Experiment Adaptive_2</title>
-      <link>http://localhost:1313/validations/ns-adaptive-2/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-2/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ns-adaptive-2/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-2/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-adaptive_2&#34;&gt;NS - Experiment Adaptive_2&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -641,14 +641,14 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-adaptive-2/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-adaptive-2/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS - Experiment Adaptive_3</title>
-      <link>http://localhost:1313/validations/ns-adaptive-3/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-3/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ns-adaptive-3/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-3/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-adaptive_3&#34;&gt;NS - Experiment Adaptive_3&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -715,14 +715,14 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-adaptive-3/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-adaptive-3/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS - Experiment Baseline</title>
-      <link>http://localhost:1313/validations/ns-baseline/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-baseline/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ns-baseline/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-baseline/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-baseline&#34;&gt;NS - Experiment Baseline&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -789,14 +789,14 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-baseline/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-baseline/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS - Experiment ObsKd</title>
-      <link>http://localhost:1313/validations/ns-obskd/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-obskd/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ns-obskd/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-obskd/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-obskd&#34;&gt;NS - Experiment ObsKd&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -863,14 +863,14 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-obskd/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-obskd/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS - Experiment SSR_STR</title>
-      <link>http://localhost:1313/validations/ns-ssr-str/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ns-ssr-str/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-ssr_str&#34;&gt;NS - Experiment SSR_STR&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -937,14 +937,14 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-ssr-str/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-ssr-str/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS - Experiment SSRD_STRD</title>
-      <link>http://localhost:1313/validations/ns-ssrd-strd/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ns-ssrd-strd/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-ssrd_strd&#34;&gt;NS - Experiment SSRD_STRD&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -1011,14 +1011,14 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-ssrd-strd/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-ssrd-strd/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS - TPXO9 - Tidal Analysis</title>
-      <link>http://localhost:1313/validations/ns-tpxo9/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-tpxo9/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ns-tpxo9/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-tpxo9/</guid>
       <description>&lt;h1 id=&#34;tidal-analysis---ns---tpxo9&#34;&gt;Tidal Analysis - NS - TPXO9&lt;/h1&gt;
 &lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
@@ -1027,10 +1027,10 @@
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-tpxo9/2019/gesla_station_map.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-tpxo9/2019/gesla_station_map.png&#34;&gt;
 &lt;em&gt;GESLA tide gauge station locations&lt;/em&gt;&lt;/p&gt;
 &lt;h3 id=&#34;year-2019&#34;&gt;Year 2019&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-tpxo9/2019/K1_gesla_comparison.png&#34;&gt;
+&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-tpxo9/2019/K1_gesla_comparison.png&#34;&gt;
 &lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
     </item>
   </channel>
