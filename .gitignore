@@ -1,6 +1,9 @@
 *.log
-!*.png
 *.nc
 *.prof
 *.prof.stats
 __pycache__
+
+# Generated validation outputs — sync via rsync/manage-analyses, not git
+analyses/
+validation-data/
