@@ -1,5 +1,4 @@
-baseURL: 'http://localhost:1313/'
-#baseURL: 'https://boldingbruggeman.github.io/oceanicu_3d/'
+baseURL: 'https://bolding-bruggeman.com/oceanicu_3d/'
 languageCode: 'en-us'
 title: 'Ocean Model Validation'
 theme: 'PaperMod'
