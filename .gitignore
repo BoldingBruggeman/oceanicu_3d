@@ -7,4 +7,4 @@ __pycache__
 # Generated validation outputs — sync via rsync/manage-analyses, not git
 # analyses/ itself is NOT ignored — it contains hand-authored markdown.
 # analyses/.gitignore handles selective ignoring of generated subdirs.
-validation-data/
+/validation-data/
