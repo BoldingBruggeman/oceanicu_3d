@@ -248,7 +248,7 @@
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-ssr-srt/&#34;&gt;SSR_SRT&lt;/a&gt;&lt;/p&gt;</description>
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-ssrd-strd/&#34;&gt;SSRD_STRD&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;</description>
     </item>
     <item>
       <title>AMM7</title>
@@ -529,7 +529,7 @@
       <link>http://localhost:1313/simulations/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/simulations/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;17 experiments&lt;/strong&gt; across &lt;strong&gt;5 areas&lt;/strong&gt; · last updated 2026-04-11&lt;/p&gt;
+      <description>&lt;p&gt;&lt;strong&gt;16 experiments&lt;/strong&gt; across &lt;strong&gt;5 areas&lt;/strong&gt; · last updated 2026-04-11&lt;/p&gt;
 &lt;p&gt;
 &lt;button class=&#34;sim-sort-btn&#34; data-col=&#34;area&#34;&gt;Sort by area&lt;/button&gt;
 &lt;button class=&#34;sim-sort-btn&#34; data-col=&#34;exp&#34;&gt;Sort by experiment&lt;/button&gt;
@@ -555,7 +555,6 @@
 &lt;tr data-area=&#34;ENA8&#34; data-exp=&#34;Baseline&#34; data-type=&#34;profiles_cruise, validation_2d, validation_3d&#34; data-date=&#34;2026-04-09T16:30:17&#34; data-nruns=&#34;17&#34;&gt;&lt;td&gt;ENA8&lt;/td&gt;&lt;td&gt;&lt;a href=&#34;http://localhost:1313/validations/ena8-baseline/&#34;&gt;Baseline&lt;/a&gt;&lt;/td&gt;&lt;td&gt;profiles_cruise, validation_2d, validation_3d&lt;/td&gt;&lt;td&gt;—&lt;/td&gt;&lt;td&gt;2026-04-09&lt;/td&gt;&lt;td style=&#34;text-align:right&#34;&gt;17&lt;/td&gt;&lt;/tr&gt;
 &lt;tr data-area=&#34;ENA8&#34; data-exp=&#34;Adaptive_2&#34; data-type=&#34;—&#34; data-date=&#34;0000-00-00&#34; data-nruns=&#34;0&#34;&gt;&lt;td&gt;ENA8&lt;/td&gt;&lt;td&gt;&lt;a href=&#34;http://localhost:1313/validations/ena8-adaptive-2/&#34;&gt;Adaptive_2&lt;/a&gt;&lt;/td&gt;&lt;td&gt;—&lt;/td&gt;&lt;td&gt;—&lt;/td&gt;&lt;td&gt;—&lt;/td&gt;&lt;td style=&#34;text-align:right&#34;&gt;—&lt;/td&gt;&lt;/tr&gt;
 &lt;tr data-area=&#34;NS&#34; data-exp=&#34;SSR_STR&#34; data-type=&#34;profiles_cruise, validation_2d, validation_3d&#34; data-date=&#34;2026-04-09T12:27:08&#34; data-nruns=&#34;17&#34;&gt;&lt;td&gt;NS&lt;/td&gt;&lt;td&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/&#34;&gt;SSR_STR&lt;/a&gt;&lt;/td&gt;&lt;td&gt;profiles_cruise, validation_2d, validation_3d&lt;/td&gt;&lt;td&gt;—&lt;/td&gt;&lt;td&gt;2026-04-09&lt;/td&gt;&lt;td style=&#34;text-align:right&#34;&gt;17&lt;/td&gt;&lt;/tr&gt;
-&lt;tr data-area=&#34;NS&#34; data-exp=&#34;SSR_SRT&#34; data-type=&#34;validation_2d&#34; data-date=&#34;2026-04-07T12:22:20&#34; data-nruns=&#34;8&#34;&gt;&lt;td&gt;NS&lt;/td&gt;&lt;td&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-ssr-srt/&#34;&gt;SSR_SRT&lt;/a&gt;&lt;/td&gt;&lt;td&gt;validation_2d&lt;/td&gt;&lt;td&gt;—&lt;/td&gt;&lt;td&gt;2026-04-07&lt;/td&gt;&lt;td style=&#34;text-align:right&#34;&gt;8&lt;/td&gt;&lt;/tr&gt;
 &lt;tr data-area=&#34;NS&#34; data-exp=&#34;SSRD_STRD&#34; data-type=&#34;profiles_cruise, validation_2d, validation_3d&#34; data-date=&#34;2026-04-09T12:27:57&#34; data-nruns=&#34;17&#34;&gt;&lt;td&gt;NS&lt;/td&gt;&lt;td&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-ssrd-strd/&#34;&gt;SSRD_STRD&lt;/a&gt;&lt;/td&gt;&lt;td&gt;profiles_cruise, validation_2d, validation_3d&lt;/td&gt;&lt;td&gt;—&lt;/td&gt;&lt;td&gt;2026-04-09&lt;/td&gt;&lt;td style=&#34;text-align:right&#34;&gt;17&lt;/td&gt;&lt;/tr&gt;
 &lt;tr data-area=&#34;NS&#34; data-exp=&#34;ObsKd&#34; data-type=&#34;3d, bottom, cruise, profiles_cruise, surface, validation_2d, validation_3d&#34; data-date=&#34;2026-04-11T17:15:10&#34; data-nruns=&#34;21&#34;&gt;&lt;td&gt;NS&lt;/td&gt;&lt;td&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/td&gt;&lt;td&gt;3d, bottom, cruise, profiles_cruise, surface, validation_2d, validation_3d&lt;/td&gt;&lt;td&gt;—&lt;/td&gt;&lt;td&gt;2026-04-11&lt;/td&gt;&lt;td style=&#34;text-align:right&#34;&gt;21&lt;/td&gt;&lt;/tr&gt;
 &lt;tr data-area=&#34;NS&#34; data-exp=&#34;Baseline&#34; data-type=&#34;profiles_cruise, validation_2d, validation_3d&#34; data-date=&#34;2026-04-09T12:26:28&#34; data-nruns=&#34;19&#34;&gt;&lt;td&gt;NS&lt;/td&gt;&lt;td&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-baseline/&#34;&gt;Baseline&lt;/a&gt;&lt;/td&gt;&lt;td&gt;profiles_cruise, validation_2d, validation_3d&lt;/td&gt;&lt;td&gt;—&lt;/td&gt;&lt;td&gt;2026-04-09&lt;/td&gt;&lt;td style=&#34;text-align:right&#34;&gt;19&lt;/td&gt;&lt;/tr&gt;
@@ -974,32 +973,6 @@
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
 &lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-obskd/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>NS - Experiment SSR_SRT</title>
-      <link>http://localhost:1313/validations/ns-ssr-srt/</link>
-      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/validations/ns-ssr-srt/</guid>
-      <description>&lt;h1 id=&#34;ns---experiment-ssr_srt&#34;&gt;NS - Experiment SSR_SRT&lt;/h1&gt;
-&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
-&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
-&lt;strong&gt;Experiment&lt;/strong&gt;: SSR_SRT
-&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;:&lt;/p&gt;
-&lt;h2 id=&#34;validation-statistics&#34;&gt;Validation Statistics&lt;/h2&gt;
-&lt;h2 id=&#34;validation-plots&#34;&gt;Validation Plots&lt;/h2&gt;
-&lt;h2 id=&#34;methodology&#34;&gt;Methodology&lt;/h2&gt;
-&lt;h3 id=&#34;horizontal-validation&#34;&gt;Horizontal Validation&lt;/h3&gt;
-&lt;p&gt;Model surface fields compared against gridded satellite products and in-situ observations.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Statistics computed:&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;RMSE&lt;/strong&gt;: Root Mean Square Error&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Bias&lt;/strong&gt;: Mean difference (Model - Observations)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;MAE&lt;/strong&gt;: Mean Absolute Error&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Correlation&lt;/strong&gt;: Pearson correlation coefficient&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;Spatial statistics&lt;/strong&gt; show error distribution across the domain.&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS - Experiment SSR_STR</title>
