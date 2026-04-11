@@ -2,38 +2,38 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Modeling Areas on Ocean Model Validation</title>
-    <link>http://localhost:1313/areas/</link>
+    <link>https://boldingbruggeman.github.io/oceanicu_3d/areas/</link>
     <description>Recent content in Modeling Areas on Ocean Model Validation</description>
     <generator>Hugo -- 0.155.3</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 10 Apr 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1313/areas/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://boldingbruggeman.github.io/oceanicu_3d/areas/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AMM7</title>
-      <link>http://localhost:1313/areas/amm7/</link>
+      <link>https://boldingbruggeman.github.io/oceanicu_3d/areas/amm7/</link>
       <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/areas/amm7/</guid>
+      <guid>https://boldingbruggeman.github.io/oceanicu_3d/areas/amm7/</guid>
       <description>AMM7 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>ENA4</title>
-      <link>http://localhost:1313/areas/ena4/</link>
+      <link>https://boldingbruggeman.github.io/oceanicu_3d/areas/ena4/</link>
       <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/areas/ena4/</guid>
+      <guid>https://boldingbruggeman.github.io/oceanicu_3d/areas/ena4/</guid>
       <description>ENA4 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>ENA8</title>
-      <link>http://localhost:1313/areas/ena8/</link>
+      <link>https://boldingbruggeman.github.io/oceanicu_3d/areas/ena8/</link>
       <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/areas/ena8/</guid>
+      <guid>https://boldingbruggeman.github.io/oceanicu_3d/areas/ena8/</guid>
       <description>ENA8 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>NS</title>
-      <link>http://localhost:1313/areas/ns/</link>
+      <link>https://boldingbruggeman.github.io/oceanicu_3d/areas/ns/</link>
       <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1313/areas/ns/</guid>
+      <guid>https://boldingbruggeman.github.io/oceanicu_3d/areas/ns/</guid>
       <description>NS modeling area — validation results and experiment overview.</description>
     </item>
   </channel>
