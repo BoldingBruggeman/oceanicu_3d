@@ -47,7 +47,1835 @@ Warming ranges from IPCC AR6 (2021), relative to 1850–1900."><meta name=author
 Bias correction is applied using quantile delta mapping (QDM) calibrated against ERA5 reanalysis over the historical period. The plots below show calibration performance and projected trends under each SSP scenario.
 SSP Scenario Reference Scenario Narrative Radiative forcing Approx. warming by 2100 SSP1-1.9 Sustainability — very low emissions 1.9 W m⁻² 1.0–1.8 °C SSP1-2.6 Sustainability — low emissions 2.6 W m⁻² 1.3–2.4 °C SSP2-4.5 Middle of the road 4.5 W m⁻² 2.1–3.5 °C SSP3-7.0 Regional rivalry — high emissions 7.0 W m⁻² 2.8–4.6 °C SSP5-8.5 Fossil-fuelled development 8.5 W m⁻² 3.3–5.7 °C Warming ranges from IPCC AR6 (2021), relative to 1850–1900."><meta property="og:locale" content="en-us"><meta property="og:type" content="website"><meta name=twitter:card content="summary"><meta name=twitter:title content="Atmospheric Forcing — Bias Correction"><meta name=twitter:description content="Ocean model validation and analysis dashboard"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Atmospheric Forcing — Bias Correction","item":"http://localhost:1313/scenarios/"}]}</script></head><body class=list id=top><header class=header><nav class=nav><div class=logo><a href=http://localhost:1313/ accesskey=h title="Ocean Model Validation (Alt + H)">Ocean Model Validation</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
 <svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=http://localhost:1313/areas/ title=Areas><span>Areas</span></a></li><li><a href=http://localhost:1313/simulations/ title=Simulations><span>Simulations</span></a></li><li><a href=http://localhost:1313/validations/ title=Validations><span>Validations</span></a></li><li><a href=http://localhost:1313/scenarios/ title=Scenarios><span class=active>Scenarios</span></a></li><li><a href=http://localhost:1313/rankings/ title=Rankings><span>Rankings</span></a></li><li><a href=http://localhost:1313/data-sources/ title="Data Sources"><span>Data Sources</span></a></li><li><a href=http://localhost:1313/guides/ title=Guides><span>Guides</span></a></li><li><a href=http://localhost:1313/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><header class=page-header><div class=breadcrumbs><a href=http://localhost:1313/>Home</a></div><h1>Atmospheric Forcing — Bias Correction</h1><div class=post-meta><span title='2026-04-11 00:00:00 +0000 UTC'>April 11, 2026</span>&nbsp;·&nbsp;<span>Ocean Modeling Team</span></div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><nav id=TableOfContents><ul><li><a href=#ssp-scenario-reference>SSP Scenario Reference</a></li></ul></nav></div></details></div><div class=post-content><p>Diagnostics for the bias correction of CMIP6 atmospheric forcing fields applied to all regional ocean simulations. Results are scenario-specific and valid across all model domains.</p><p>Bias correction is applied using quantile delta mapping (QDM) calibrated against ERA5 reanalysis over the historical period. The plots below show calibration performance and projected trends under each SSP scenario.</p><h2 id=ssp-scenario-reference>SSP Scenario Reference<a hidden class=anchor aria-hidden=true href=#ssp-scenario-reference>#</a></h2><table><thead><tr><th>Scenario</th><th>Narrative</th><th>Radiative forcing</th><th>Approx. warming by 2100</th></tr></thead><tbody><tr><td><strong>SSP1-1.9</strong></td><td>Sustainability — very low emissions</td><td>1.9 W m⁻²</td><td>1.0–1.8 °C</td></tr><tr><td><strong>SSP1-2.6</strong></td><td>Sustainability — low emissions</td><td>2.6 W m⁻²</td><td>1.3–2.4 °C</td></tr><tr><td><strong>SSP2-4.5</strong></td><td>Middle of the road</td><td>4.5 W m⁻²</td><td>2.1–3.5 °C</td></tr><tr><td><strong>SSP3-7.0</strong></td><td>Regional rivalry — high emissions</td><td>7.0 W m⁻²</td><td>2.8–4.6 °C</td></tr><tr><td><strong>SSP5-8.5</strong></td><td>Fossil-fuelled development</td><td>8.5 W m⁻²</td><td>3.3–5.7 °C</td></tr></tbody></table><p>Warming ranges from IPCC AR6 (2021), relative to 1850–1900.</p><p><em>No bias correction results available yet.</em></p></div></main><footer class=footer><span>&copy; 2026 <a href=http://localhost:1313/>Ocean Model Validation</a></span> ·
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=http://localhost:1313/areas/ title=Areas><span>Areas</span></a></li><li><a href=http://localhost:1313/simulations/ title=Simulations><span>Simulations</span></a></li><li><a href=http://localhost:1313/validations/ title=Validations><span>Validations</span></a></li><li><a href=http://localhost:1313/scenarios/ title=Scenarios><span class=active>Scenarios</span></a></li><li><a href=http://localhost:1313/rankings/ title=Rankings><span>Rankings</span></a></li><li><a href=http://localhost:1313/data-sources/ title="Data Sources"><span>Data Sources</span></a></li><li><a href=http://localhost:1313/guides/ title=Guides><span>Guides</span></a></li><li><a href=http://localhost:1313/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><header class=page-header><div class=breadcrumbs><a href=http://localhost:1313/>Home</a></div><h1>Atmospheric Forcing — Bias Correction</h1><div class=post-meta><span title='2026-04-11 00:00:00 +0000 UTC'>April 11, 2026</span>&nbsp;·&nbsp;<span>Ocean Modeling Team</span></div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><nav id=TableOfContents><ul><li><a href=#ssp-scenario-reference>SSP Scenario Reference</a></li><li><a href=#_other>_OTHER</a><ul><li><a href=#nhx>NHX</a></li><li><a href=#noy>NOY</a></li></ul></li><li><a href=#ssp2-45--intermediate-emissions>SSP2-4.5 — Intermediate emissions</a><ul><li><a href=#precipitation-pr>Precipitation (pr)</a></li><li><a href=#sea-level-pressure-psl>Sea-level Pressure (psl)</a></li><li><a href=#downwelling-longwave-radiation-rlds>Downwelling Longwave Radiation (rlds)</a></li><li><a href=#downwelling-shortwave-radiation-rsds>Downwelling Shortwave Radiation (rsds)</a></li><li><a href=#near-surface-air-temperature-tas>Near-surface Air Temperature (tas)</a></li><li><a href=#uas>UAS</a></li><li><a href=#vas>VAS</a></li></ul></li><li><a href=#ssp5-85--very-high-emissions>SSP5-8.5 — Very high emissions</a><ul><li><a href=#precipitation-pr-1>Precipitation (pr)</a></li><li><a href=#sea-level-pressure-psl-1>Sea-level Pressure (psl)</a></li><li><a href=#downwelling-longwave-radiation-rlds-1>Downwelling Longwave Radiation (rlds)</a></li><li><a href=#downwelling-shortwave-radiation-rsds-1>Downwelling Shortwave Radiation (rsds)</a></li><li><a href=#near-surface-air-temperature-tas-1>Near-surface Air Temperature (tas)</a></li><li><a href=#uas-1>UAS</a></li><li><a href=#vas-1>VAS</a></li></ul></li></ul></nav></div></details></div><div class=post-content><p>Diagnostics for the bias correction of CMIP6 atmospheric forcing fields applied to all regional ocean simulations. Results are scenario-specific and valid across all model domains.</p><p>Bias correction is applied using quantile delta mapping (QDM) calibrated against ERA5 reanalysis over the historical period. The plots below show calibration performance and projected trends under each SSP scenario.</p><h2 id=ssp-scenario-reference>SSP Scenario Reference<a hidden class=anchor aria-hidden=true href=#ssp-scenario-reference>#</a></h2><table><thead><tr><th>Scenario</th><th>Narrative</th><th>Radiative forcing</th><th>Approx. warming by 2100</th></tr></thead><tbody><tr><td><strong>SSP1-1.9</strong></td><td>Sustainability — very low emissions</td><td>1.9 W m⁻²</td><td>1.0–1.8 °C</td></tr><tr><td><strong>SSP1-2.6</strong></td><td>Sustainability — low emissions</td><td>2.6 W m⁻²</td><td>1.3–2.4 °C</td></tr><tr><td><strong>SSP2-4.5</strong></td><td>Middle of the road</td><td>4.5 W m⁻²</td><td>2.1–3.5 °C</td></tr><tr><td><strong>SSP3-7.0</strong></td><td>Regional rivalry — high emissions</td><td>7.0 W m⁻²</td><td>2.8–4.6 °C</td></tr><tr><td><strong>SSP5-8.5</strong></td><td>Fossil-fuelled development</td><td>8.5 W m⁻²</td><td>3.3–5.7 °C</td></tr></tbody></table><p>Warming ranges from IPCC AR6 (2021), relative to 1850–1900.</p><h2 id=_other>_OTHER<a hidden class=anchor aria-hidden=true href=#_other>#</a></h2><h3 id=nhx>NHX<a hidden class=anchor aria-hidden=true href=#nhx>#</a></h3><p><img alt="Calibration maps (historical period), future" loading=lazy src=http://localhost:1313/scenarios/plots/nhx/calibration_maps_future_conservative.png>
+<em>Calibration maps (historical period), future</em></p><p><img alt="Projected future trend, future" loading=lazy src=http://localhost:1313/scenarios/plots/nhx/future_trend_future_conservative.png>
+<em>Projected future trend, future</em></p><p><img alt="Monthly breakdown, future" loading=lazy src=http://localhost:1313/scenarios/plots/nhx/monthly_breakdown_future_conservative.png>
+<em>Monthly breakdown, future</em></p><p><img alt="Seasonal cycle, future" loading=lazy src=http://localhost:1313/scenarios/plots/nhx/seasonal_cycle_future_conservative.png>
+<em>Seasonal cycle, future</em></p><details><summary>Statistics: Statistics Future Conservative</summary><pre tabindex=0><code>################################################################################
+nhx Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 11:56:19
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1992-01-01 – 2014-12-31  |  Model: unknown
+================================================================================
+Analysed: 2026-04-10 11:56:19
+
+--- Model historical vs reference ---
+  RMSE:          2.6023e-08
+  Bias:          +9.0253e-09
+  MAE:           1.4313e-08
+  Correlation:   0.6616
+  N points:      815,880
+  Model mean:    3.0068e-08  (model raw)
+  Ref mean:      2.1042e-08  (reference)
+  Model std:     3.2160e-08
+  Ref std:       2.5036e-08
+
+  Error distribution (model raw − reference):
+    Min:         -5.8038e-07
+    5th pct:     -1.7251e-08
+    25th pct:    +1.4825e-09
+    Median:      +4.5793e-09
+    75th pct:    +1.1431e-08
+    95th pct:    +5.0277e-08
+    Max:         +2.4684e-07
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       3.7793e-08    +2.3423e-08    2.3665e-08  0.8574
+  Feb       3.0587e-08    +1.9450e-08    1.9833e-08  0.8027
+  Mar       2.0767e-08    +8.4964e-09    1.2712e-08  0.7895
+  Apr       2.5607e-08    -6.7847e-09    1.2737e-08  0.7448
+  May       1.8832e-08    +4.9109e-11    8.9566e-09  0.7423
+  Jun       1.7225e-08    +2.2806e-09    8.3818e-09  0.6931
+  Jul       1.8966e-08    +2.0023e-09    9.3802e-09  0.6607
+  Aug       1.9486e-08    -5.5023e-10    9.7624e-09  0.7215
+  Sep       1.9030e-08    +5.9425e-09    1.0166e-08  0.7718
+  Oct       2.3123e-08    +1.3083e-08    1.4346e-08  0.8654
+  Nov       2.9260e-08    +1.7276e-08    1.7903e-08  0.8830
+  Dec       3.9137e-08    +2.3636e-08    2.3913e-08  0.8380
+  --------------------------------------------------------
+  All       2.6023e-08    +9.0253e-09    1.4313e-08  0.6616
+
+================================================================================
+Future: 2015-01-01 – 2100-12-31  |  Model: unknown (bias-corrected)
+================================================================================
+Analysed: 2026-04-10 11:56:19
+
+--- Corrected future (area mean) ---
+  Future mean:     1.5785e-08
+  Future std:      7.4914e-09
+  Reference mean:   2.0453e-08  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2015–2019        1.8477e-08    7.8657e-09
+  2020–2029        1.7936e-08    8.1129e-09
+  2030–2039        1.7625e-08    7.7051e-09
+  2040–2049        1.7285e-08    8.4101e-09
+  2050–2059        1.5025e-08    6.6761e-09
+  2060–2069        1.5307e-08    7.1002e-09
+  2070–2079        1.4679e-08    6.3829e-09
+  2080–2089        1.3503e-08    6.4525e-09
+  2090–2099        1.3792e-08    6.8683e-09
+  2100–2100        1.3631e-08    7.5492e-09
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       8.2863e-09    1.1848e-08    -3.5618e-09
+  Feb       1.0121e-08    1.2435e-08    -2.3146e-09
+  Mar       2.2411e-08    2.8336e-08    -5.9246e-09
+  Apr       2.6267e-08    3.6073e-08    -9.8063e-09
+  May       2.1038e-08    2.6568e-08    -5.5302e-09
+  Jun       1.2788e-08    1.7691e-08    -4.9032e-09
+  Jul       1.2139e-08    1.7414e-08    -5.2750e-09
+  Aug       1.5835e-08    2.1589e-08    -5.7537e-09
+  Sep       1.7980e-08    2.2849e-08    -4.8688e-09
+  Oct       1.9504e-08    2.1744e-08    -2.2405e-09
+  Nov       1.2865e-08    1.7218e-08    -4.3527e-09
+  Dec       1.0191e-08    1.1668e-08    -1.4763e-09
+</code></pre></details><h3 id=noy>NOY<a hidden class=anchor aria-hidden=true href=#noy>#</a></h3><p><img alt="Calibration maps (historical period), future" loading=lazy src=http://localhost:1313/scenarios/plots/noy/calibration_maps_future_conservative.png>
+<em>Calibration maps (historical period), future</em></p><p><img alt="Projected future trend, future" loading=lazy src=http://localhost:1313/scenarios/plots/noy/future_trend_future_conservative.png>
+<em>Projected future trend, future</em></p><p><img alt="Monthly breakdown, future" loading=lazy src=http://localhost:1313/scenarios/plots/noy/monthly_breakdown_future_conservative.png>
+<em>Monthly breakdown, future</em></p><p><img alt="Seasonal cycle, future" loading=lazy src=http://localhost:1313/scenarios/plots/noy/seasonal_cycle_future_conservative.png>
+<em>Seasonal cycle, future</em></p><details><summary>Statistics: Statistics Future Conservative</summary><pre tabindex=0><code>################################################################################
+noy Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 11:56:34
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1992-01-01 – 2014-12-31  |  Model: unknown
+================================================================================
+Analysed: 2026-04-10 11:56:34
+
+--- Model historical vs reference ---
+  RMSE:          1.4877e-08
+  Bias:          -5.6949e-11
+  MAE:           9.5349e-09
+  Correlation:   0.8924
+  N points:      815,880
+  Model mean:    4.0791e-08  (model raw)
+  Ref mean:      4.0848e-08  (reference)
+  Model std:     3.0620e-08
+  Ref std:       3.2845e-08
+
+  Error distribution (model raw − reference):
+    Min:         -2.2388e-07
+    5th pct:     -2.5716e-08
+    25th pct:    -4.5467e-09
+    Median:      +1.0609e-09
+    75th pct:    +6.3932e-09
+    95th pct:    +2.0632e-08
+    Max:         +1.3302e-07
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       1.3930e-08    +1.2302e-10    8.8276e-09  0.9208
+  Feb       1.4406e-08    +2.0734e-09    9.2891e-09  0.8670
+  Mar       1.2314e-08    +1.6940e-09    8.4882e-09  0.9051
+  Apr       1.4222e-08    +5.6062e-11    9.5248e-09  0.8901
+  May       1.1425e-08    +1.9776e-09    7.7021e-09  0.9058
+  Jun       1.4323e-08    +1.0983e-09    9.6759e-09  0.8744
+  Jul       1.9705e-08    +1.1948e-09    1.1994e-08  0.7964
+  Aug       1.7430e-08    -8.4307e-10    1.1180e-08  0.8916
+  Sep       1.3102e-08    +8.4023e-10    8.7532e-09  0.9306
+  Oct       1.3144e-08    -2.5923e-09    8.0581e-09  0.9461
+  Nov       1.5621e-08    -5.2783e-09    9.5972e-09  0.9321
+  Dec       1.6854e-08    -1.0271e-09    1.1329e-08  0.8923
+  --------------------------------------------------------
+  All       1.4877e-08    -5.6949e-11    9.5349e-09  0.8924
+
+================================================================================
+Future: 2015-01-01 – 2100-12-31  |  Model: unknown (bias-corrected)
+================================================================================
+Analysed: 2026-04-10 11:56:34
+
+--- Corrected future (area mean) ---
+  Future mean:     2.6603e-08
+  Future std:      7.6046e-09
+  Reference mean:   3.9348e-08  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2015–2019        2.9715e-08    7.7764e-09
+  2020–2029        2.6659e-08    7.2856e-09
+  2030–2039        2.3728e-08    5.7415e-09
+  2040–2049        2.4516e-08    6.1171e-09
+  2050–2059        2.4532e-08    6.2465e-09
+  2060–2069        2.7644e-08    7.9025e-09
+  2070–2079        2.9645e-08    7.9188e-09
+  2080–2089        2.8023e-08    7.9647e-09
+  2090–2099        2.6855e-08    8.8294e-09
+  2100–2100        2.3301e-08    5.3012e-09
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       2.5973e-08    4.0871e-08    -1.4898e-08
+  Feb       2.5788e-08    3.5441e-08    -9.6526e-09
+  Mar       2.8715e-08    4.3137e-08    -1.4423e-08
+  Apr       2.3927e-08    3.9974e-08    -1.6047e-08
+  May       2.4328e-08    3.7201e-08    -1.2873e-08
+  Jun       2.1569e-08    3.1503e-08    -9.9337e-09
+  Jul       2.2298e-08    3.1954e-08    -9.6561e-09
+  Aug       2.2583e-08    3.6357e-08    -1.3774e-08
+  Sep       2.6565e-08    4.1250e-08    -1.4684e-08
+  Oct       3.6132e-08    4.7301e-08    -1.1169e-08
+  Nov       2.9716e-08    4.5893e-08    -1.6177e-08
+  Dec       3.1644e-08    4.1298e-08    -9.6545e-09
+</code></pre></details><h2 id=ssp2-45--intermediate-emissions>SSP2-4.5 — Intermediate emissions<a hidden class=anchor aria-hidden=true href=#ssp2-45--intermediate-emissions>#</a></h2><h3 id=precipitation-pr>Precipitation (pr)<a hidden class=anchor aria-hidden=true href=#precipitation-pr>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/pr/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/pr/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/pr/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/pr/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/pr/seasonal_cycle_ssp245_bilinear.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
+pr Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-03-31 18:00:17
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-03-31 18:00:17
+
+--- CMIP6 historical vs ERA5 ---
+  RMSE:          0.0001
+  Bias:          -0.0001
+  MAE:           0.0001
+  Correlation:   0.7003
+  N points:      243,612
+  Model mean:    0.0000  (CMIP6 raw)
+  Ref mean:      0.0001  (ERA5)
+  Model std:     0.0000
+  Ref std:       0.0000
+
+  Error distribution (CMIP6 raw − ERA5):
+    Min:         -0.0006
+    5th pct:     -0.0002
+    25th pct:    -0.0001
+    Median:      -0.0001
+    75th pct:    -0.0001
+    95th pct:    -0.0000
+    Max:         -0.0000
+
+  Monthly breakdown:
+  Month       RMSE       Bias       MAE    Corr
+  --------------------------------------------
+  Jan       0.0001    -0.0001    0.0001  0.7388
+  Feb       0.0001    -0.0001    0.0001  0.7231
+  Mar       0.0001    -0.0001    0.0001  0.7032
+  Apr       0.0001    -0.0001    0.0001  0.5759
+  May       0.0001    -0.0001    0.0001  0.6347
+  Jun       0.0001    -0.0001    0.0001  0.7138
+  Jul       0.0001    -0.0001    0.0001  0.7189
+  Aug       0.0001    -0.0001    0.0001  0.6390
+  Sep       0.0001    -0.0001    0.0001  0.6178
+  Oct       0.0001    -0.0001    0.0001  0.6694
+  Nov       0.0001    -0.0001    0.0001  0.6297
+  Dec       0.0001    -0.0001    0.0001  0.6189
+  --------------------------------------------
+  All       0.0001    -0.0001    0.0001  0.7003
+
+================================================================================
+Future: 2020-01-01 – 2029-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-03-31 18:00:17
+
+--- Corrected future (area mean) ---
+  Future mean:     0.0004
+  Future std:      0.0001
+  ERA5 ref mean:   0.0001  (calibration period)
+
+  10-year period means:
+  Period            Mean       Std
+  --------------------------------
+  2020–2029        0.0004    0.0001
+
+  Monthly climatology (area mean):
+  Month    Corrected    ERA5 ref       Diff
+  --------------------------------------------
+  Jan         0.0003      0.0001    +0.0002
+  Feb         0.0003      0.0001    +0.0002
+  Mar         0.0003      0.0001    +0.0002
+  Apr         0.0003      0.0001    +0.0002
+  May         0.0003      0.0001    +0.0002
+  Jun         0.0004      0.0001    +0.0003
+  Jul         0.0004      0.0001    +0.0003
+  Aug         0.0004      0.0001    +0.0003
+  Sep         0.0004      0.0001    +0.0003
+  Oct         0.0004      0.0001    +0.0003
+  Nov         0.0004      0.0001    +0.0003
+  Dec         0.0004      0.0001    +0.0002
+</code></pre></details><details><summary>Statistics: Statistics Ssp245 Bilinear</summary><pre tabindex=0><code>################################################################################
+pr Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 13:58:52
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 13:58:52
+
+--- Model historical vs reference ---
+  RMSE:          3.3231e-05
+  Bias:          +3.0864e-05
+  MAE:           3.0864e-05
+  Correlation:   0.7895
+  N points:      236,412
+  Model mean:    3.0906e-05  (model raw)
+  Ref mean:      4.2799e-08  (reference)
+  Model std:     1.2332e-05
+  Ref std:       1.7854e-08
+
+  Error distribution (model raw − reference):
+    Min:         +2.2784e-06
+    5th pct:     +1.5117e-05
+    25th pct:    +2.2097e-05
+    Median:      +2.8180e-05
+    75th pct:    +3.7417e-05
+    95th pct:    +5.5987e-05
+    Max:         +1.0859e-04
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       3.9012e-05    +3.6158e-05    3.6158e-05  0.8299
+  Feb       3.7286e-05    +3.4379e-05    3.4379e-05  0.8128
+  Mar       3.1149e-05    +2.9372e-05    2.9372e-05  0.8154
+  Apr       2.7600e-05    +2.6327e-05    2.6327e-05  0.7380
+  May       2.6058e-05    +2.4816e-05    2.4816e-05  0.7962
+  Jun       2.6941e-05    +2.5135e-05    2.5135e-05  0.7961
+  Jul       2.6357e-05    +2.4990e-05    2.4990e-05  0.7849
+  Aug       2.7942e-05    +2.6371e-05    2.6371e-05  0.6907
+  Sep       3.3098e-05    +3.1500e-05    3.1500e-05  0.7281
+  Oct       3.6498e-05    +3.4931e-05    3.4931e-05  0.8100
+  Nov       4.0936e-05    +3.8883e-05    3.8883e-05  0.7624
+  Dec       4.0294e-05    +3.7503e-05    3.7503e-05  0.7026
+  --------------------------------------------------------
+  All       3.3231e-05    +3.0864e-05    3.0864e-05  0.7895
+</code></pre></details><h3 id=sea-level-pressure-psl>Sea-level Pressure (psl)<a hidden class=anchor aria-hidden=true href=#sea-level-pressure-psl>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/psl/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/psl/future_trend_ssp245_bilinear.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/psl/monthly_breakdown_ssp245_bilinear.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/psl/seasonal_cycle_ssp245_bilinear.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245 Bilinear</summary><pre tabindex=0><code>################################################################################
+psl Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 13:27:57
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 13:27:57
+
+--- Model historical vs reference ---
+  RMSE:          3.4003e+03
+  Bias:          +1.6093e+03
+  MAE:           1.7020e+03
+  Correlation:   -0.0911
+  N points:      236,412
+  Model mean:    1.0117e+05  (model raw)
+  Ref mean:      9.9562e+04  (reference)
+  Model std:     4.4255e+02
+  Ref std:       2.9225e+03
+
+  Error distribution (model raw − reference):
+    Min:         -7.5948e+02
+    5th pct:     -3.1484e+02
+    25th pct:    +2.7324e+00
+    Median:      +2.3964e+02
+    75th pct:    +1.9850e+03
+    95th pct:    +7.9050e+03
+    Max:         +2.6544e+04
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       3.4104e+03    +1.5303e+03    1.6751e+03  -0.1431
+  Feb       3.4535e+03    +1.5394e+03    1.7509e+03  -0.2122
+  Mar       3.4869e+03    +1.6915e+03    1.7816e+03  -0.2381
+  Apr       3.4001e+03    +1.5802e+03    1.6948e+03  -0.3241
+  May       3.3282e+03    +1.5550e+03    1.6186e+03  0.1237
+  Jun       3.3972e+03    +1.7317e+03    1.7343e+03  0.1059
+  Jul       3.3318e+03    +1.6592e+03    1.6706e+03  0.0396
+  Aug       3.3574e+03    +1.6763e+03    1.6891e+03  -0.0762
+  Sep       3.3971e+03    +1.6789e+03    1.6961e+03  -0.1375
+  Oct       3.4266e+03    +1.7070e+03    1.7110e+03  -0.2385
+  Nov       3.3912e+03    +1.5027e+03    1.6671e+03  -0.2657
+  Dec       3.4204e+03    +1.4591e+03    1.7352e+03  -0.2445
+  --------------------------------------------------------
+  All       3.4003e+03    +1.6093e+03    1.7020e+03  -0.0911
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-04-10 13:27:57
+
+--- Corrected future (area mean) ---
+  Future mean:     9.8926e+04
+  Future std:      7.2479e+02
+  Reference mean:   9.9547e+04  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        9.8910e+04    7.2559e+02
+  2030–2039        9.8889e+04    7.0164e+02
+  2040–2049        9.8937e+04    7.2386e+02
+  2050–2059        9.8897e+04    7.4485e+02
+  2060–2069        9.8975e+04    7.2320e+02
+  2070–2079        9.8910e+04    7.2896e+02
+  2080–2089        9.8931e+04    7.2197e+02
+  2090–2099        9.8955e+04    7.2344e+02
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       9.8773e+04    9.9351e+04    -5.7789e+02
+  Feb       9.8769e+04    9.9409e+04    -6.4031e+02
+  Mar       9.8750e+04    9.9494e+04    -7.4362e+02
+  Apr       9.8943e+04    9.9592e+04    -6.4857e+02
+  May       9.9143e+04    9.9790e+04    -6.4680e+02
+  Jun       9.9121e+04    9.9745e+04    -6.2467e+02
+  Jul       9.9069e+04    9.9677e+04    -6.0825e+02
+  Aug       9.8993e+04    9.9662e+04    -6.6968e+02
+  Sep       9.9047e+04    9.9645e+04    -5.9733e+02
+  Oct       9.8926e+04    9.9490e+04    -5.6358e+02
+  Nov       9.8797e+04    9.9352e+04    -5.5523e+02
+  Dec       9.8769e+04    9.9361e+04    -5.9214e+02
+</code></pre></details><h3 id=downwelling-longwave-radiation-rlds>Downwelling Longwave Radiation (rlds)<a hidden class=anchor aria-hidden=true href=#downwelling-longwave-radiation-rlds>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/rlds/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/rlds/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/rlds/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/rlds/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/rlds/seasonal_cycle_ssp245_bilinear.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
+rlds Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-03-30 11:56:04
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-03-30 11:56:04
+
+--- CMIP6 historical vs ERA5 ---
+  RMSE:          55.0952
+  Bias:          -5.0677
+  MAE:           15.5091
+  Correlation:   0.3809
+  N points:      243,612
+  Model mean:    297.2845  (CMIP6 raw)
+  Ref mean:      302.3522  (ERA5)
+  Model std:     58.9236
+  Ref std:       28.8901
+
+  Error distribution (CMIP6 raw − ERA5):
+    Min:         -382.1557
+    5th pct:     -9.5138
+    25th pct:    +0.0127
+    Median:      +4.4281
+    75th pct:    +8.1961
+    95th pct:    +14.4732
+    Max:         +61.3949
+
+  Monthly breakdown:
+  Month       RMSE       Bias       MAE    Corr
+  --------------------------------------------
+  Jan      50.5523    -7.6498   14.1578  0.3164
+  Feb      50.5761    -3.4929   15.8976  0.2900
+  Mar      51.2667    -1.7229   16.4488  0.2149
+  Apr      52.6232    -3.1408   15.3360  0.1373
+  May      55.7469    -2.8623   16.6363  0.0370
+  Jun      58.7040    -3.8641   16.8322  0.0207
+  Jul      60.6329    -7.7586   15.8148  0.0150
+  Aug      60.6176    -8.1651   15.5613  -0.0187
+  Sep      58.2295    -7.7152   13.8406  0.0438
+  Oct      55.8135    -4.7527   14.9652  0.0993
+  Nov      53.2720    -5.5541   14.6591  0.2018
+  Dec      51.6369    -4.1337   15.9600  0.2617
+  --------------------------------------------
+  All      55.0952    -5.0677   15.5091  0.3809
+
+================================================================================
+Future: 2020-01-01 – 2029-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-03-30 11:56:04
+
+--- Corrected future (area mean) ---
+  Future mean:     310.9966
+  Future std:      24.4258
+  ERA5 ref mean:   304.6667  (calibration period)
+
+  10-year period means:
+  Period            Mean       Std
+  --------------------------------
+  2020–2029      310.9966   24.4258
+
+  Monthly climatology (area mean):
+  Month    Corrected    ERA5 ref       Diff
+  --------------------------------------------
+  Jan       288.2869    279.5898    +8.6972
+  Feb       283.9342    276.5520    +7.3822
+  Mar       283.9140    279.0933    +4.8208
+  Apr       295.8032    288.6030    +7.2003
+  May       311.7837    306.6421    +5.1416
+  Jun       329.6050    326.7072    +2.8978
+  Jul       348.0858    341.6905    +6.3954
+  Aug       346.6076    340.2980    +6.3096
+  Sep       332.6707    326.4264    +6.2443
+  Oct       313.1641    309.6924    +3.4718
+  Nov       302.2703    295.9567    +6.3136
+  Dec       294.0049    284.7491    +9.2558
+</code></pre></details><details><summary>Statistics: Statistics Ssp245 Bilinear</summary><pre tabindex=0><code>################################################################################
+rlds Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 13:42:04
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 13:42:04
+
+--- Model historical vs reference ---
+  RMSE:          7.9012e+00
+  Bias:          +4.3962e+00
+  MAE:           6.3633e+00
+  Correlation:   0.9737
+  N points:      236,412
+  Model mean:    3.0634e+02  (model raw)
+  Ref mean:      3.0194e+02  (reference)
+  Model std:     2.8358e+01
+  Ref std:       2.8748e+01
+
+  Error distribution (model raw − reference):
+    Min:         -4.0244e+01
+    5th pct:     -6.3600e+00
+    25th pct:    +5.2828e-01
+    Median:      +4.6256e+00
+    75th pct:    +8.3225e+00
+    95th pct:    +1.4594e+01
+    Max:         +6.1395e+01
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       7.6212e+00    +9.3989e-01    5.7663e+00  0.9477
+  Feb       9.8723e+00    +5.1621e+00    7.6203e+00  0.9296
+  Mar       9.5600e+00    +7.1295e+00    8.0449e+00  0.9535
+  Apr       7.7357e+00    +5.9743e+00    6.5923e+00  0.9573
+  May       8.9174e+00    +6.7910e+00    7.4024e+00  0.9436
+  Jun       8.1945e+00    +6.3053e+00    7.0578e+00  0.9346
+  Jul       6.6743e+00    +2.6702e+00    5.6314e+00  0.8652
+  Aug       6.3006e+00    +2.2544e+00    5.3670e+00  0.8711
+  Sep       5.0720e+00    +2.3130e+00    3.9989e+00  0.9402
+  Oct       6.9530e+00    +4.8972e+00    5.6264e+00  0.9526
+  Nov       7.2950e+00    +3.6055e+00    5.7769e+00  0.9453
+  Dec       9.1741e+00    +4.7120e+00    7.4745e+00  0.9293
+  --------------------------------------------------------
+  All       7.9012e+00    +4.3962e+00    6.3633e+00  0.9737
+</code></pre></details><h3 id=downwelling-shortwave-radiation-rsds>Downwelling Shortwave Radiation (rsds)<a hidden class=anchor aria-hidden=true href=#downwelling-shortwave-radiation-rsds>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/rsds/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/rsds/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/rsds/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/rsds/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/rsds/seasonal_cycle_ssp245_bilinear.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
+rsds Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-03-30 10:08:53
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-03-30 10:08:53
+
+--- CMIP6 historical vs ERA5 ---
+  RMSE:          31.4725
+  Bias:          -10.8590
+  MAE:           14.4279
+  Correlation:   0.9317
+  N points:      243,612
+  Model mean:    103.1457  (CMIP6 raw)
+  Ref mean:      114.0046  (ERA5)
+  Model std:     79.1849
+  Ref std:       80.4703
+
+  Error distribution (CMIP6 raw − ERA5):
+    Min:         -287.4382
+    5th pct:     -35.7311
+    25th pct:    -15.4436
+    Median:      -4.8098
+    75th pct:    +0.0259
+    95th pct:    +14.2215
+    Max:         +74.7365
+
+  Monthly breakdown:
+  Month       RMSE       Bias       MAE    Corr
+  --------------------------------------------
+  Jan       9.5711    -3.2281    3.5477  0.8613
+  Feb      16.9546    -7.8554    8.2468  0.7816
+  Mar      27.1890   -13.8064   14.8476  0.5974
+  Apr      37.9027   -20.2539   21.5992  0.3331
+  May      43.4333   -19.2902   21.7481  0.2676
+  Jun      47.6531   -13.3681   25.5069  0.2387
+  Jul      47.7736   -15.7953   27.4766  0.4378
+  Aug      40.3149   -14.6004   22.5954  0.6077
+  Sep      27.8042    -8.1648   12.5092  0.7005
+  Oct      17.4930    -6.6177    7.2390  0.7985
+  Nov      10.9855    -4.3413    4.5974  0.8484
+  Dec       8.1669    -2.9859    3.2213  0.8659
+  --------------------------------------------
+  All      31.4725   -10.8590   14.4279  0.9317
+
+================================================================================
+Future: 2020-01-01 – 2029-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-03-30 10:08:53
+
+--- Corrected future (area mean) ---
+  Future mean:     123.9136
+  Future std:      80.7163
+  ERA5 ref mean:   118.0882  (calibration period)
+
+  10-year period means:
+  Period            Mean       Std
+  --------------------------------
+  2020–2029      123.9136   80.7163
+
+  Monthly climatology (area mean):
+  Month    Corrected    ERA5 ref       Diff
+  --------------------------------------------
+  Jan        27.2649     25.2275    +2.0375
+  Feb        57.5401     52.9753    +4.5648
+  Mar       109.5331    104.5923    +4.9409
+  Apr       173.4864    170.3543    +3.1321
+  May       225.6059    217.1653    +8.4406
+  Jun       242.4931    229.3279   +13.1652
+  Jul       220.7766    213.7845    +6.9920
+  Aug       180.4034    174.8543    +5.5491
+  Sep       125.0707    115.9468    +9.1239
+  Oct        68.6856     63.8509    +4.8347
+  Nov        32.9420     30.1113    +2.8307
+  Dec        19.9081     18.8676    +1.0405
+</code></pre></details><details><summary>Statistics: Statistics Ssp245 Bilinear</summary><pre tabindex=0><code>################################################################################
+rsds Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 13:37:20
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 13:37:20
+
+--- Model historical vs reference ---
+  RMSE:          1.4914e+01
+  Bias:          -6.8996e+00
+  MAE:           1.0577e+01
+  Correlation:   0.9864
+  N points:      236,412
+  Model mean:    1.0629e+02  (model raw)
+  Ref mean:      1.1319e+02  (reference)
+  Model std:     7.8277e+01
+  Ref std:       8.0350e+01
+
+  Error distribution (model raw − reference):
+    Min:         -7.8899e+01
+    5th pct:     -3.0619e+01
+    25th pct:    -1.4149e+01
+    Median:      -4.4681e+00
+    75th pct:    +6.6723e-02
+    95th pct:    +1.4530e+01
+    Max:         +7.4736e+01
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       3.6878e+00    -1.8956e+00    2.2250e+00  0.9888
+  Feb       8.9429e+00    -5.6693e+00    6.0726e+00  0.9671
+  Mar       1.4017e+01    -1.0191e+01    1.1263e+01  0.9267
+  Apr       1.9394e+01    -1.5128e+01    1.6514e+01  0.8468
+  May       1.8543e+01    -1.2929e+01    1.5462e+01  0.7674
+  Jun       2.1926e+01    -6.2854e+00    1.8794e+01  0.6594
+  Jul       2.4904e+01    -9.0866e+00    2.1124e+01  0.7884
+  Aug       1.9432e+01    -8.8583e+00    1.7097e+01  0.9147
+  Sep       1.0347e+01    -3.9525e+00    8.4292e+00  0.9619
+  Oct       5.9420e+00    -4.0291e+00    4.6694e+00  0.9843
+  Nov       4.9924e+00    -2.8637e+00    3.1276e+00  0.9843
+  Dec       3.6554e+00    -1.9073e+00    2.1499e+00  0.9845
+  --------------------------------------------------------
+  All       1.4914e+01    -6.8996e+00    1.0577e+01  0.9864
+</code></pre></details><h3 id=near-surface-air-temperature-tas>Near-surface Air Temperature (tas)<a hidden class=anchor aria-hidden=true href=#near-surface-air-temperature-tas>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/tas/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/tas/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/tas/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/tas/future_trend_ssp245_bilinear.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/tas/monthly_breakdown_ssp245_bilinear.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/tas/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/tas/seasonal_cycle_ssp245_bilinear.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
+tas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-03-30 10:20:32
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-03-30 10:20:32
+
+--- CMIP6 historical vs ERA5 ---
+  RMSE:          2.8214
+  Bias:          -1.3717
+  MAE:           1.6736
+  Correlation:   0.9389
+  N points:      243,612
+  Model mean:    6.2979  (CMIP6 raw)
+  Ref mean:      7.6697  (ERA5)
+  Model std:     7.1388
+  Ref std:       6.5072
+
+  Error distribution (CMIP6 raw − ERA5):
+    Min:         -26.0751
+    5th pct:     -4.0257
+    25th pct:    -1.9692
+    Median:      -1.0399
+    75th pct:    -0.2006
+    95th pct:    +1.0056
+    Max:         +10.9825
+
+  Monthly breakdown:
+  Month       RMSE       Bias       MAE    Corr
+  --------------------------------------------
+  Jan       2.6066    -1.7378    1.9497  0.9584
+  Feb       2.5489    -1.5729    1.8766  0.9522
+  Mar       2.5758    -1.6640    1.9596  0.9362
+  Apr       2.7109    -1.7092    1.9274  0.8918
+  May       2.6984    -1.0215    1.4411  0.8120
+  Jun       3.1408    -0.8920    1.5337  0.7624
+  Jul       3.4637    -1.4267    1.6578  0.7516
+  Aug       3.4806    -1.3781    1.6507  0.7207
+  Sep       3.0840    -1.1490    1.5412  0.7617
+  Oct       2.5599    -1.1244    1.3578  0.8596
+  Nov       2.3465    -1.4333    1.5491  0.9362
+  Dec       2.3274    -1.3515    1.6386  0.9532
+  --------------------------------------------
+  All       2.8214    -1.3717    1.6736  0.9389
+
+================================================================================
+Future: 2020-01-01 – 2029-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-03-30 10:20:32
+
+--- Corrected future (area mean) ---
+  Future mean:     9.6995
+  Future std:      5.1701
+  ERA5 ref mean:   8.2494  (calibration period)
+
+  10-year period means:
+  Period            Mean       Std
+  --------------------------------
+  2020–2029        9.6995    5.1701
+
+  Monthly climatology (area mean):
+  Month    Corrected    ERA5 ref       Diff
+  --------------------------------------------
+  Jan         3.5651      2.0792    +1.4860
+  Feb         3.9655      2.1644    +1.8011
+  Mar         4.7797      3.9452    +0.8345
+  Apr         7.8959      6.7769    +1.1190
+  May        11.3904     10.1127    +1.2777
+  Jun        14.2329     13.1437    +1.0892
+  Jul        16.8456     15.3742    +1.4714
+  Aug        16.8662     15.3492    +1.5170
+  Sep        14.6555     12.5642    +2.0913
+  Oct         9.9842      8.9365    +1.0477
+  Nov         7.0400      5.4887    +1.5513
+  Dec         4.8355      3.0582    +1.7773
+</code></pre></details><details><summary>Statistics: Statistics Ssp245 Bilinear</summary><pre tabindex=0><code>################################################################################
+tas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 13:32:38
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 13:32:38
+
+--- Model historical vs reference ---
+  RMSE:          1.7683e+00
+  Bias:          -1.0751e+00
+  MAE:           1.3753e+00
+  Correlation:   0.9838
+  N points:      236,412
+  Model mean:    6.4898e+00  (model raw)
+  Ref mean:      7.5649e+00  (reference)
+  Model std:     7.1603e+00
+  Ref std:       6.4766e+00
+
+  Error distribution (model raw − reference):
+    Min:         -9.2778e+00
+    5th pct:     -3.4514e+00
+    25th pct:    -1.8696e+00
+    Median:      -1.0018e+00
+    75th pct:    -1.7979e-01
+    95th pct:    +1.0067e+00
+    Max:         +7.5324e+00
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       2.2785e+00    -1.6284e+00    1.8134e+00  0.9776
+  Feb       2.2250e+00    -1.4491e+00    1.7346e+00  0.9725
+  Mar       2.1303e+00    -1.4885e+00    1.7729e+00  0.9722
+  Apr       2.0525e+00    -1.4683e+00    1.6837e+00  0.9619
+  May       1.4225e+00    -6.6842e-01    1.0989e+00  0.9495
+  Jun       1.4320e+00    -4.4604e-01    1.1073e+00  0.9463
+  Jul       1.5080e+00    -9.3869e-01    1.1768e+00  0.9621
+  Aug       1.4710e+00    -8.8055e-01    1.1615e+00  0.9586
+  Sep       1.4734e+00    -7.2030e-01    1.1245e+00  0.9629
+  Oct       1.3210e+00    -7.9224e-01    1.0311e+00  0.9736
+  Nov       1.6474e+00    -1.2140e+00    1.3225e+00  0.9830
+  Dec       1.8678e+00    -1.2066e+00    1.4766e+00  0.9804
+  --------------------------------------------------------
+  All       1.7683e+00    -1.0751e+00    1.3753e+00  0.9838
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-04-10 13:32:38
+
+--- Corrected future (area mean) ---
+  Future mean:     2.7661e+02
+  Future std:      6.0144e+00
+  Reference mean:   8.2494e+00  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        2.7520e+02    5.9327e+00
+  2030–2039        2.7568e+02    5.8572e+00
+  2040–2049        2.7592e+02    5.9798e+00
+  2050–2059        2.7615e+02    5.9336e+00
+  2060–2069        2.7671e+02    5.8419e+00
+  2070–2079        2.7704e+02    5.9814e+00
+  2080–2089        2.7785e+02    5.9893e+00
+  2090–2099        2.7832e+02    5.9127e+00
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       2.6910e+02    2.0792e+00    +2.6702e+02
+  Feb       2.7019e+02    2.1644e+00    +2.6802e+02
+  Mar       2.7158e+02    3.9452e+00    +2.6764e+02
+  Apr       2.7443e+02    6.7769e+00    +2.6765e+02
+  May       2.7923e+02    1.0113e+01    +2.6912e+02
+  Jun       2.8247e+02    1.3144e+01    +2.6932e+02
+  Jul       2.8484e+02    1.5374e+01    +2.6947e+02
+  Aug       2.8521e+02    1.5349e+01    +2.6986e+02
+  Sep       2.8148e+02    1.2564e+01    +2.6892e+02
+  Oct       2.7728e+02    8.9365e+00    +2.6835e+02
+  Nov       2.7309e+02    5.4887e+00    +2.6760e+02
+  Dec       2.7000e+02    3.0582e+00    +2.6695e+02
+</code></pre></details><h3 id=uas>UAS<a hidden class=anchor aria-hidden=true href=#uas>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/uas/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/uas/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/uas/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/uas/future_trend_ssp245_bilinear.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/uas/monthly_breakdown_ssp245_bilinear.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/uas/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/uas/seasonal_cycle_ssp245_bilinear.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
+uas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-03-31 12:03:45
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-03-31 12:03:45
+
+--- CMIP6 historical vs ERA5 ---
+  RMSE:          0.8463
+  Bias:          -0.1227
+  MAE:           0.6234
+  Correlation:   0.7966
+  N points:      243,612
+  Model mean:    0.9216  (CMIP6 raw)
+  Ref mean:      1.0443  (ERA5)
+  Model std:     1.3619
+  Ref std:       1.2377
+
+  Error distribution (CMIP6 raw − ERA5):
+    Min:         -5.7898
+    5th pct:     -1.5043
+    25th pct:    -0.5516
+    Median:      -0.0712
+    75th pct:    +0.3939
+    95th pct:    +1.0739
+    Max:         +3.6820
+
+  Monthly breakdown:
+  Month       RMSE       Bias       MAE    Corr
+  --------------------------------------------
+  Jan       0.9161    -0.1849    0.7143  0.8425
+  Feb       1.1272    -0.4082    0.8513  0.7622
+  Mar       0.9132    -0.5784    0.7386  0.7480
+  Apr       0.7508    -0.3337    0.5969  0.6973
+  May       0.5473    -0.1034    0.4212  0.8156
+  Jun       0.4894    -0.2836    0.3660  0.9005
+  Jul       0.5513    +0.1900    0.3887  0.9039
+  Aug       0.6171    +0.3675    0.4741  0.9173
+  Sep       0.6999    +0.3772    0.5445  0.8607
+  Oct       0.5744    +0.0991    0.4097  0.8739
+  Nov       0.9661    -0.1067    0.7639  0.8401
+  Dec       1.4530    -0.5074    1.2110  0.6718
+  --------------------------------------------
+  All       0.8463    -0.1227    0.6234  0.7966
+
+================================================================================
+Future: 2020-01-01 – 2029-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-03-31 12:03:45
+
+--- Corrected future (area mean) ---
+  Future mean:     1.8465
+  Future std:      1.9817
+  ERA5 ref mean:   1.1314  (calibration period)
+
+  10-year period means:
+  Period            Mean       Std
+  --------------------------------
+  2020–2029        1.8465    1.9817
+
+  Monthly climatology (area mean):
+  Month    Corrected    ERA5 ref       Diff
+  --------------------------------------------
+  Jan         2.7912      1.8486    +0.9426
+  Feb         3.0100      1.6383    +1.3717
+  Mar         1.9024      1.3379    +0.5645
+  Apr         1.0774      0.5130    +0.5645
+  May         1.2991      0.3628    +0.9364
+  Jun         1.4877      0.8324    +0.6554
+  Jul         1.6415      1.0370    +0.6045
+  Aug         1.3744      1.0470    +0.3274
+  Sep         1.6649      1.0354    +0.6295
+  Oct         1.5038      0.9217    +0.5821
+  Nov         1.7684      1.2549    +0.5135
+  Dec         2.6938      1.7474    +0.9464
+</code></pre></details><details><summary>Statistics: Statistics Ssp245 Bilinear</summary><pre tabindex=0><code>################################################################################
+uas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 13:47:44
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 13:47:44
+
+--- Model historical vs reference ---
+  RMSE:          7.8361e-01
+  Bias:          -9.6552e-02
+  MAE:           5.9838e-01
+  Correlation:   0.8263
+  N points:      236,412
+  Model mean:    9.4962e-01  (model raw)
+  Ref mean:      1.0462e+00  (reference)
+  Model std:     1.3728e+00
+  Ref std:       1.2181e+00
+
+  Error distribution (model raw − reference):
+    Min:         -2.8799e+00
+    5th pct:     -1.4360e+00
+    25th pct:    -5.3209e-01
+    Median:      -6.2936e-02
+    75th pct:    +3.9921e-01
+    95th pct:    +1.0670e+00
+    Max:         +3.6820e+00
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       7.8157e-01    -1.3818e-01    6.7002e-01  0.8831
+  Feb       1.0511e+00    -3.7725e-01    8.1804e-01  0.7929
+  Mar       8.7026e-01    -5.7007e-01    7.2123e-01  0.7746
+  Apr       7.2146e-01    -3.2712e-01    5.8185e-01  0.7324
+  May       5.2582e-01    -9.5895e-02    4.1003e-01  0.8504
+  Jun       4.4070e-01    -2.7148e-01    3.4748e-01  0.9244
+  Jul       4.4250e-01    +2.3079e-01    3.5670e-01  0.9542
+  Aug       5.3591e-01    +4.0771e-01    4.4852e-01  0.9608
+  Sep       6.4472e-01    +4.1035e-01    5.2574e-01  0.9047
+  Oct       4.9050e-01    +1.2296e-01    3.8046e-01  0.9135
+  Nov       8.6886e-01    -6.7368e-02    7.2696e-01  0.8804
+  Dec       1.4178e+00    -4.8305e-01    1.1935e+00  0.6926
+  --------------------------------------------------------
+  All       7.8361e-01    -9.6552e-02    5.9838e-01  0.8263
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-04-10 13:47:44
+
+--- Corrected future (area mean) ---
+  Future mean:     1.8157e+00
+  Future std:      1.9653e+00
+  Reference mean:   1.1314e+00  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        1.8465e+00    1.9817e+00
+  2030–2039        1.7680e+00    1.9731e+00
+  2040–2049        1.7271e+00    1.8202e+00
+  2050–2059        1.9533e+00    2.0096e+00
+  2060–2069        1.8469e+00    2.0325e+00
+  2070–2079        1.7173e+00    1.9691e+00
+  2080–2089        1.9009e+00    1.9594e+00
+  2090–2099        1.7655e+00    1.9572e+00
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       2.3317e+00    1.8486e+00    +4.8309e-01
+  Feb       2.6524e+00    1.6383e+00    +1.0141e+00
+  Mar       1.6418e+00    1.3379e+00    +3.0390e-01
+  Apr       1.1800e+00    5.1297e-01    +6.6701e-01
+  May       9.8415e-01    3.6275e-01    +6.2139e-01
+  Jun       1.6316e+00    8.3237e-01    +7.9928e-01
+  Jul       1.5494e+00    1.0370e+00    +5.1240e-01
+  Aug       1.5084e+00    1.0470e+00    +4.6139e-01
+  Sep       1.6481e+00    1.0354e+00    +6.1264e-01
+  Oct       1.9019e+00    9.2170e-01    +9.8024e-01
+  Nov       2.0228e+00    1.2549e+00    +7.6794e-01
+  Dec       2.7850e+00    1.7474e+00    +1.0377e+00
+</code></pre></details><h3 id=vas>VAS<a hidden class=anchor aria-hidden=true href=#vas>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/vas/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/vas/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/vas/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/vas/future_trend_ssp245_bilinear.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/vas/monthly_breakdown_ssp245_bilinear.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=http://localhost:1313/scenarios/plots/vas/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/vas/seasonal_cycle_ssp245_bilinear.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
+vas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-03-31 11:32:55
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-03-31 11:32:55
+
+--- CMIP6 historical vs ERA5 ---
+  RMSE:          0.6436
+  Bias:          -0.1757
+  MAE:           0.4642
+  Correlation:   0.8127
+  N points:      243,612
+  Model mean:    0.3611  (CMIP6 raw)
+  Ref mean:      0.5367  (ERA5)
+  Model std:     0.9644
+  Ref std:       1.0439
+
+  Error distribution (CMIP6 raw − ERA5):
+    Min:         -3.3012
+    5th pct:     -1.1921
+    25th pct:    -0.4878
+    Median:      -0.1467
+    75th pct:    +0.1722
+    95th pct:    +0.7557
+    Max:         +7.1070
+
+  Monthly breakdown:
+  Month       RMSE       Bias       MAE    Corr
+  --------------------------------------------
+  Jan       1.1057    -0.6550    0.8338  0.7288
+  Feb       0.6932    -0.1596    0.5284  0.8346
+  Mar       0.5184    -0.1497    0.3754  0.8729
+  Apr       0.4709    -0.0267    0.3576  0.7509
+  May       0.4440    -0.0935    0.3184  0.7123
+  Jun       0.4160    +0.0007    0.3156  0.7777
+  Jul       0.7134    -0.3009    0.5371  0.3909
+  Aug       0.3777    -0.0404    0.2802  0.8428
+  Sep       0.6602    -0.2107    0.4538  0.6620
+  Oct       0.6253    -0.2377    0.4773  0.8154
+  Nov       0.6561    -0.0641    0.5218  0.7922
+  Dec       0.7059    -0.1706    0.5706  0.8210
+  --------------------------------------------
+  All       0.6436    -0.1757    0.4642  0.8127
+
+================================================================================
+Future: 2020-01-01 – 2029-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-03-31 11:32:55
+
+--- Corrected future (area mean) ---
+  Future mean:     1.0091
+  Future std:      2.0875
+  ERA5 ref mean:   0.5474  (calibration period)
+
+  10-year period means:
+  Period            Mean       Std
+  --------------------------------
+  2020–2029        1.0091    2.0875
+
+  Monthly climatology (area mean):
+  Month    Corrected    ERA5 ref       Diff
+  --------------------------------------------
+  Jan         2.4339      1.3689    +1.0650
+  Feb         1.4330      1.0937    +0.3392
+  Mar         0.7101      0.6068    +0.1033
+  Apr         0.1890      0.0382    +0.1508
+  May         0.2846     -0.1892    +0.4738
+  Jun         0.2269     -0.1906    +0.4175
+  Jul         0.7476      0.0583    +0.6893
+  Aug         0.3681      0.3042    +0.0638
+  Sep         1.2725      0.5494    +0.7231
+  Oct         1.1629      0.8329    +0.3301
+  Nov         1.0722      0.8652    +0.2070
+  Dec         2.2044      1.2312    +0.9732
+</code></pre></details><details><summary>Statistics: Statistics Ssp245 Bilinear</summary><pre tabindex=0><code>################################################################################
+vas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 13:53:33
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 13:53:33
+
+--- Model historical vs reference ---
+  RMSE:          6.1018e-01
+  Bias:          -1.8359e-01
+  MAE:           4.5097e-01
+  Correlation:   0.8327
+  N points:      236,412
+  Model mean:    3.7206e-01  (model raw)
+  Ref mean:      5.5565e-01  (reference)
+  Model std:     9.7689e-01
+  Ref std:       1.0279e+00
+
+  Error distribution (model raw − reference):
+    Min:         -2.9012e+00
+    5th pct:     -1.1761e+00
+    25th pct:    -4.8737e-01
+    Median:      -1.5117e-01
+    75th pct:    +1.6216e-01
+    95th pct:    +7.1896e-01
+    Max:         +2.8829e+00
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       1.0759e+00    -6.5657e-01    8.1879e-01  0.7484
+  Feb       6.2755e-01    -1.5049e-01    5.0722e-01  0.8637
+  Mar       4.5490e-01    -1.5072e-01    3.5753e-01  0.9031
+  Apr       4.3428e-01    -4.1048e-02    3.4543e-01  0.7848
+  May       4.2593e-01    -1.0794e-01    3.0985e-01  0.7462
+  Jun       3.9473e-01    -9.4029e-03    3.0412e-01  0.7997
+  Jul       7.0094e-01    -3.2685e-01    5.2727e-01  0.4243
+  Aug       3.3996e-01    -5.8175e-02    2.6398e-01  0.8795
+  Sep       6.4224e-01    -2.2460e-01    4.4223e-01  0.6794
+  Oct       5.9642e-01    -2.4696e-01    4.7200e-01  0.8321
+  Nov       6.2959e-01    -7.2428e-02    5.1581e-01  0.8050
+  Dec       6.4215e-01    -1.5796e-01    5.4745e-01  0.8480
+  --------------------------------------------------------
+  All       6.1018e-01    -1.8359e-01    4.5097e-01  0.8327
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-04-10 13:53:33
+
+--- Corrected future (area mean) ---
+  Future mean:     1.0077e+00
+  Future std:      2.0606e+00
+  Reference mean:   5.4743e-01  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        1.0091e+00    2.0875e+00
+  2030–2039        9.9143e-01    2.1337e+00
+  2040–2049        9.2636e-01    1.9923e+00
+  2050–2059        1.0347e+00    2.0713e+00
+  2060–2069        1.0466e+00    2.0947e+00
+  2070–2079        9.9778e-01    2.0064e+00
+  2080–2089        1.0424e+00    2.0796e+00
+  2090–2099        1.0133e+00    2.0126e+00
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       2.1045e+00    1.3689e+00    +7.3561e-01
+  Feb       1.2633e+00    1.0937e+00    +1.6958e-01
+  Mar       8.5172e-01    6.0684e-01    +2.4488e-01
+  Apr       4.5351e-01    3.8190e-02    +4.1532e-01
+  May       2.6062e-01   -1.8916e-01    +4.4978e-01
+  Jun       2.8184e-01   -1.9057e-01    +4.7241e-01
+  Jul       5.8841e-01    5.8304e-02    +5.3010e-01
+  Aug       3.3751e-01    3.0424e-01    +3.3265e-02
+  Sep       1.0952e+00    5.4939e-01    +5.4583e-01
+  Oct       1.5007e+00    8.3286e-01    +6.6784e-01
+  Nov       1.5045e+00    8.6521e-01    +6.3925e-01
+  Dec       1.8510e+00    1.2312e+00    +6.1981e-01
+</code></pre></details><h2 id=ssp5-85--very-high-emissions>SSP5-8.5 — Very high emissions<a hidden class=anchor aria-hidden=true href=#ssp5-85--very-high-emissions>#</a></h2><h3 id=precipitation-pr-1>Precipitation (pr)<a hidden class=anchor aria-hidden=true href=#precipitation-pr-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/pr/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/pr/seasonal_cycle_ssp585_bilinear.png>
+<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
+pr Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 14:42:44
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 14:42:44
+
+--- Model historical vs reference ---
+  RMSE:          3.3231e-05
+  Bias:          +3.0864e-05
+  MAE:           3.0864e-05
+  Correlation:   0.7895
+  N points:      236,412
+  Model mean:    3.0906e-05  (model raw)
+  Ref mean:      4.2799e-08  (reference)
+  Model std:     1.2332e-05
+  Ref std:       1.7854e-08
+
+  Error distribution (model raw − reference):
+    Min:         +2.2784e-06
+    5th pct:     +1.5117e-05
+    25th pct:    +2.2097e-05
+    Median:      +2.8180e-05
+    75th pct:    +3.7417e-05
+    95th pct:    +5.5987e-05
+    Max:         +1.0859e-04
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       3.9012e-05    +3.6158e-05    3.6158e-05  0.8299
+  Feb       3.7286e-05    +3.4379e-05    3.4379e-05  0.8128
+  Mar       3.1149e-05    +2.9372e-05    2.9372e-05  0.8154
+  Apr       2.7600e-05    +2.6327e-05    2.6327e-05  0.7380
+  May       2.6058e-05    +2.4816e-05    2.4816e-05  0.7962
+  Jun       2.6941e-05    +2.5135e-05    2.5135e-05  0.7961
+  Jul       2.6357e-05    +2.4990e-05    2.4990e-05  0.7849
+  Aug       2.7942e-05    +2.6371e-05    2.6371e-05  0.6907
+  Sep       3.3098e-05    +3.1500e-05    3.1500e-05  0.7281
+  Oct       3.6498e-05    +3.4931e-05    3.4931e-05  0.8100
+  Nov       4.0936e-05    +3.8883e-05    3.8883e-05  0.7624
+  Dec       4.0294e-05    +3.7503e-05    3.7503e-05  0.7026
+  --------------------------------------------------------
+  All       3.3231e-05    +3.0864e-05    3.0864e-05  0.7895
+</code></pre></details><h3 id=sea-level-pressure-psl-1>Sea-level Pressure (psl)<a hidden class=anchor aria-hidden=true href=#sea-level-pressure-psl-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/psl/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/psl/future_trend_ssp585_bilinear.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/psl/monthly_breakdown_ssp585_bilinear.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/psl/seasonal_cycle_ssp585_bilinear.png>
+<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
+psl Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 14:08:04
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 14:08:04
+
+--- Model historical vs reference ---
+  RMSE:          3.4003e+03
+  Bias:          +1.6093e+03
+  MAE:           1.7020e+03
+  Correlation:   -0.0911
+  N points:      236,412
+  Model mean:    1.0117e+05  (model raw)
+  Ref mean:      9.9562e+04  (reference)
+  Model std:     4.4255e+02
+  Ref std:       2.9225e+03
+
+  Error distribution (model raw − reference):
+    Min:         -7.5948e+02
+    5th pct:     -3.1484e+02
+    25th pct:    +2.7324e+00
+    Median:      +2.3964e+02
+    75th pct:    +1.9850e+03
+    95th pct:    +7.9050e+03
+    Max:         +2.6544e+04
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       3.4104e+03    +1.5303e+03    1.6751e+03  -0.1431
+  Feb       3.4535e+03    +1.5394e+03    1.7509e+03  -0.2122
+  Mar       3.4869e+03    +1.6915e+03    1.7816e+03  -0.2381
+  Apr       3.4001e+03    +1.5802e+03    1.6948e+03  -0.3241
+  May       3.3282e+03    +1.5550e+03    1.6186e+03  0.1237
+  Jun       3.3972e+03    +1.7317e+03    1.7343e+03  0.1059
+  Jul       3.3318e+03    +1.6592e+03    1.6706e+03  0.0396
+  Aug       3.3574e+03    +1.6763e+03    1.6891e+03  -0.0762
+  Sep       3.3971e+03    +1.6789e+03    1.6961e+03  -0.1375
+  Oct       3.4266e+03    +1.7070e+03    1.7110e+03  -0.2385
+  Nov       3.3912e+03    +1.5027e+03    1.6671e+03  -0.2657
+  Dec       3.4204e+03    +1.4591e+03    1.7352e+03  -0.2445
+  --------------------------------------------------------
+  All       3.4003e+03    +1.6093e+03    1.7020e+03  -0.0911
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-04-10 14:08:04
+
+--- Corrected future (area mean) ---
+  Future mean:     9.8890e+04
+  Future std:      7.2844e+02
+  Reference mean:   9.9547e+04  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        9.8907e+04    7.4598e+02
+  2030–2039        9.8891e+04    6.9900e+02
+  2040–2049        9.8970e+04    7.3480e+02
+  2050–2059        9.8896e+04    7.1527e+02
+  2060–2069        9.8846e+04    7.4580e+02
+  2070–2079        9.8925e+04    7.1918e+02
+  2080–2089        9.8863e+04    7.0183e+02
+  2090–2099        9.8825e+04    7.5331e+02
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       9.8618e+04    9.9351e+04    -7.3253e+02
+  Feb       9.8765e+04    9.9409e+04    -6.4395e+02
+  Mar       9.8747e+04    9.9494e+04    -7.4675e+02
+  Apr       9.8904e+04    9.9592e+04    -6.8755e+02
+  May       9.9156e+04    9.9790e+04    -6.3340e+02
+  Jun       9.9094e+04    9.9745e+04    -6.5099e+02
+  Jul       9.9025e+04    9.9677e+04    -6.5160e+02
+  Aug       9.8978e+04    9.9662e+04    -6.8433e+02
+  Sep       9.8981e+04    9.9645e+04    -6.6393e+02
+  Oct       9.8933e+04    9.9490e+04    -5.5733e+02
+  Nov       9.8744e+04    9.9352e+04    -6.0836e+02
+  Dec       9.8733e+04    9.9361e+04    -6.2812e+02
+</code></pre></details><h3 id=downwelling-longwave-radiation-rlds-1>Downwelling Longwave Radiation (rlds)<a hidden class=anchor aria-hidden=true href=#downwelling-longwave-radiation-rlds-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/rlds/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/rlds/seasonal_cycle_ssp585_bilinear.png>
+<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
+rlds Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 14:24:08
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 14:24:08
+
+--- Model historical vs reference ---
+  RMSE:          7.9012e+00
+  Bias:          +4.3962e+00
+  MAE:           6.3633e+00
+  Correlation:   0.9737
+  N points:      236,412
+  Model mean:    3.0634e+02  (model raw)
+  Ref mean:      3.0194e+02  (reference)
+  Model std:     2.8358e+01
+  Ref std:       2.8748e+01
+
+  Error distribution (model raw − reference):
+    Min:         -4.0244e+01
+    5th pct:     -6.3600e+00
+    25th pct:    +5.2828e-01
+    Median:      +4.6256e+00
+    75th pct:    +8.3225e+00
+    95th pct:    +1.4594e+01
+    Max:         +6.1395e+01
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       7.6212e+00    +9.3989e-01    5.7663e+00  0.9477
+  Feb       9.8723e+00    +5.1621e+00    7.6203e+00  0.9296
+  Mar       9.5600e+00    +7.1295e+00    8.0449e+00  0.9535
+  Apr       7.7357e+00    +5.9743e+00    6.5923e+00  0.9573
+  May       8.9174e+00    +6.7910e+00    7.4024e+00  0.9436
+  Jun       8.1945e+00    +6.3053e+00    7.0578e+00  0.9346
+  Jul       6.6743e+00    +2.6702e+00    5.6314e+00  0.8652
+  Aug       6.3006e+00    +2.2544e+00    5.3670e+00  0.8711
+  Sep       5.0720e+00    +2.3130e+00    3.9989e+00  0.9402
+  Oct       6.9530e+00    +4.8972e+00    5.6264e+00  0.9526
+  Nov       7.2950e+00    +3.6055e+00    5.7769e+00  0.9453
+  Dec       9.1741e+00    +4.7120e+00    7.4745e+00  0.9293
+  --------------------------------------------------------
+  All       7.9012e+00    +4.3962e+00    6.3633e+00  0.9737
+</code></pre></details><h3 id=downwelling-shortwave-radiation-rsds-1>Downwelling Shortwave Radiation (rsds)<a hidden class=anchor aria-hidden=true href=#downwelling-shortwave-radiation-rsds-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/rsds/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/rsds/seasonal_cycle_ssp585_bilinear.png>
+<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
+rsds Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 14:18:55
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 14:18:55
+
+--- Model historical vs reference ---
+  RMSE:          1.4914e+01
+  Bias:          -6.8996e+00
+  MAE:           1.0577e+01
+  Correlation:   0.9864
+  N points:      236,412
+  Model mean:    1.0629e+02  (model raw)
+  Ref mean:      1.1319e+02  (reference)
+  Model std:     7.8277e+01
+  Ref std:       8.0350e+01
+
+  Error distribution (model raw − reference):
+    Min:         -7.8899e+01
+    5th pct:     -3.0619e+01
+    25th pct:    -1.4149e+01
+    Median:      -4.4681e+00
+    75th pct:    +6.6723e-02
+    95th pct:    +1.4530e+01
+    Max:         +7.4736e+01
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       3.6878e+00    -1.8956e+00    2.2250e+00  0.9888
+  Feb       8.9429e+00    -5.6693e+00    6.0726e+00  0.9671
+  Mar       1.4017e+01    -1.0191e+01    1.1263e+01  0.9267
+  Apr       1.9394e+01    -1.5128e+01    1.6514e+01  0.8468
+  May       1.8543e+01    -1.2929e+01    1.5462e+01  0.7674
+  Jun       2.1926e+01    -6.2854e+00    1.8794e+01  0.6594
+  Jul       2.4904e+01    -9.0866e+00    2.1124e+01  0.7884
+  Aug       1.9432e+01    -8.8583e+00    1.7097e+01  0.9147
+  Sep       1.0347e+01    -3.9525e+00    8.4292e+00  0.9619
+  Oct       5.9420e+00    -4.0291e+00    4.6694e+00  0.9843
+  Nov       4.9924e+00    -2.8637e+00    3.1276e+00  0.9843
+  Dec       3.6554e+00    -1.9073e+00    2.1499e+00  0.9845
+  --------------------------------------------------------
+  All       1.4914e+01    -6.8996e+00    1.0577e+01  0.9864
+</code></pre></details><h3 id=near-surface-air-temperature-tas-1>Near-surface Air Temperature (tas)<a hidden class=anchor aria-hidden=true href=#near-surface-air-temperature-tas-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/tas/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/tas/future_trend_ssp585_bilinear.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/tas/monthly_breakdown_ssp585_bilinear.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/tas/seasonal_cycle_ssp585_bilinear.png>
+<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
+tas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-04 16:55:26
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-04 16:55:26
+
+--- Model historical vs reference ---
+  RMSE:          2.8214e+00
+  Bias:          -1.3717e+00
+  MAE:           1.6736e+00
+  Correlation:   0.9389
+  N points:      243,612
+  Model mean:    6.2979e+00  (model raw)
+  Ref mean:      7.6697e+00  (reference)
+  Model std:     7.1388e+00
+  Ref std:       6.5072e+00
+
+  Error distribution (model raw − reference):
+    Min:         -2.6075e+01
+    5th pct:     -4.0257e+00
+    25th pct:    -1.9692e+00
+    Median:      -1.0399e+00
+    75th pct:    -2.0061e-01
+    95th pct:    +1.0056e+00
+    Max:         +1.0983e+01
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       2.6066e+00    -1.7378e+00    1.9497e+00  0.9584
+  Feb       2.5489e+00    -1.5729e+00    1.8766e+00  0.9522
+  Mar       2.5758e+00    -1.6640e+00    1.9596e+00  0.9362
+  Apr       2.7109e+00    -1.7092e+00    1.9274e+00  0.8918
+  May       2.6984e+00    -1.0215e+00    1.4411e+00  0.8120
+  Jun       3.1408e+00    -8.9203e-01    1.5337e+00  0.7624
+  Jul       3.4637e+00    -1.4267e+00    1.6578e+00  0.7516
+  Aug       3.4806e+00    -1.3781e+00    1.6507e+00  0.7207
+  Sep       3.0840e+00    -1.1490e+00    1.5412e+00  0.7617
+  Oct       2.5599e+00    -1.1244e+00    1.3578e+00  0.8596
+  Nov       2.3465e+00    -1.4333e+00    1.5491e+00  0.9362
+  Dec       2.3274e+00    -1.3515e+00    1.6386e+00  0.9532
+  --------------------------------------------------------
+  All       2.8214e+00    -1.3717e+00    1.6736e+00  0.9389
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-04-04 16:55:26
+
+--- Corrected future (area mean) ---
+  Future mean:     2.7661e+02
+  Future std:      6.0144e+00
+  Reference mean:   8.2494e+00  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        2.7520e+02    5.9327e+00
+  2030–2039        2.7568e+02    5.8572e+00
+  2040–2049        2.7592e+02    5.9798e+00
+  2050–2059        2.7615e+02    5.9336e+00
+  2060–2069        2.7671e+02    5.8419e+00
+  2070–2079        2.7704e+02    5.9814e+00
+  2080–2089        2.7785e+02    5.9893e+00
+  2090–2099        2.7832e+02    5.9127e+00
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       2.6910e+02    2.0792e+00    +2.6702e+02
+  Feb       2.7019e+02    2.1644e+00    +2.6802e+02
+  Mar       2.7158e+02    3.9452e+00    +2.6764e+02
+  Apr       2.7443e+02    6.7769e+00    +2.6765e+02
+  May       2.7923e+02    1.0113e+01    +2.6912e+02
+  Jun       2.8247e+02    1.3144e+01    +2.6932e+02
+  Jul       2.8484e+02    1.5374e+01    +2.6947e+02
+  Aug       2.8521e+02    1.5349e+01    +2.6986e+02
+  Sep       2.8148e+02    1.2564e+01    +2.6892e+02
+  Oct       2.7728e+02    8.9365e+00    +2.6835e+02
+  Nov       2.7309e+02    5.4887e+00    +2.6760e+02
+  Dec       2.7000e+02    3.0582e+00    +2.6695e+02
+</code></pre></details><h3 id=uas-1>UAS<a hidden class=anchor aria-hidden=true href=#uas-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/uas/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/uas/future_trend_ssp585_bilinear.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/uas/monthly_breakdown_ssp585_bilinear.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/uas/seasonal_cycle_ssp585_bilinear.png>
+<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
+uas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 14:30:48
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 14:30:48
+
+--- Model historical vs reference ---
+  RMSE:          7.8361e-01
+  Bias:          -9.6552e-02
+  MAE:           5.9838e-01
+  Correlation:   0.8263
+  N points:      236,412
+  Model mean:    9.4962e-01  (model raw)
+  Ref mean:      1.0462e+00  (reference)
+  Model std:     1.3728e+00
+  Ref std:       1.2181e+00
+
+  Error distribution (model raw − reference):
+    Min:         -2.8799e+00
+    5th pct:     -1.4360e+00
+    25th pct:    -5.3209e-01
+    Median:      -6.2936e-02
+    75th pct:    +3.9921e-01
+    95th pct:    +1.0670e+00
+    Max:         +3.6820e+00
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       7.8157e-01    -1.3818e-01    6.7002e-01  0.8831
+  Feb       1.0511e+00    -3.7725e-01    8.1804e-01  0.7929
+  Mar       8.7026e-01    -5.7007e-01    7.2123e-01  0.7746
+  Apr       7.2146e-01    -3.2712e-01    5.8185e-01  0.7324
+  May       5.2582e-01    -9.5895e-02    4.1003e-01  0.8504
+  Jun       4.4070e-01    -2.7148e-01    3.4748e-01  0.9244
+  Jul       4.4250e-01    +2.3079e-01    3.5670e-01  0.9542
+  Aug       5.3591e-01    +4.0771e-01    4.4852e-01  0.9608
+  Sep       6.4472e-01    +4.1035e-01    5.2574e-01  0.9047
+  Oct       4.9050e-01    +1.2296e-01    3.8046e-01  0.9135
+  Nov       8.6886e-01    -6.7368e-02    7.2696e-01  0.8804
+  Dec       1.4178e+00    -4.8305e-01    1.1935e+00  0.6926
+  --------------------------------------------------------
+  All       7.8361e-01    -9.6552e-02    5.9838e-01  0.8263
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-04-10 14:30:48
+
+--- Corrected future (area mean) ---
+  Future mean:     1.7695e+00
+  Future std:      1.9765e+00
+  Reference mean:   1.1314e+00  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        1.6773e+00    2.0085e+00
+  2030–2039        1.6691e+00    1.9201e+00
+  2040–2049        1.7084e+00    2.0561e+00
+  2050–2059        1.7855e+00    2.0518e+00
+  2060–2069        1.7694e+00    1.9305e+00
+  2070–2079        1.5660e+00    1.8632e+00
+  2080–2089        1.8768e+00    1.9228e+00
+  2090–2099        2.1038e+00    2.0031e+00
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       2.1742e+00    1.8486e+00    +3.2561e-01
+  Feb       2.1282e+00    1.6383e+00    +4.8987e-01
+  Mar       1.9806e+00    1.3379e+00    +6.4272e-01
+  Apr       1.1739e+00    5.1297e-01    +6.6090e-01
+  May       8.4915e-01    3.6275e-01    +4.8639e-01
+  Jun       1.6713e+00    8.3237e-01    +8.3897e-01
+  Jul       1.6462e+00    1.0370e+00    +6.0924e-01
+  Aug       1.4936e+00    1.0470e+00    +4.4657e-01
+  Sep       1.7117e+00    1.0354e+00    +6.7625e-01
+  Oct       1.7849e+00    9.2170e-01    +8.6316e-01
+  Nov       1.8584e+00    1.2549e+00    +6.0350e-01
+  Dec       2.7728e+00    1.7474e+00    +1.0255e+00
+</code></pre></details><h3 id=vas-1>VAS<a hidden class=anchor aria-hidden=true href=#vas-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/vas/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/vas/future_trend_ssp585_bilinear.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/vas/monthly_breakdown_ssp585_bilinear.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=http://localhost:1313/scenarios/plots/vas/seasonal_cycle_ssp585_bilinear.png>
+<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
+vas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-10 14:37:12
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-10 14:37:12
+
+--- Model historical vs reference ---
+  RMSE:          6.1018e-01
+  Bias:          -1.8359e-01
+  MAE:           4.5097e-01
+  Correlation:   0.8327
+  N points:      236,412
+  Model mean:    3.7206e-01  (model raw)
+  Ref mean:      5.5565e-01  (reference)
+  Model std:     9.7689e-01
+  Ref std:       1.0279e+00
+
+  Error distribution (model raw − reference):
+    Min:         -2.9012e+00
+    5th pct:     -1.1761e+00
+    25th pct:    -4.8737e-01
+    Median:      -1.5117e-01
+    75th pct:    +1.6216e-01
+    95th pct:    +7.1896e-01
+    Max:         +2.8829e+00
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       1.0759e+00    -6.5657e-01    8.1879e-01  0.7484
+  Feb       6.2755e-01    -1.5049e-01    5.0722e-01  0.8637
+  Mar       4.5490e-01    -1.5072e-01    3.5753e-01  0.9031
+  Apr       4.3428e-01    -4.1048e-02    3.4543e-01  0.7848
+  May       4.2593e-01    -1.0794e-01    3.0985e-01  0.7462
+  Jun       3.9473e-01    -9.4029e-03    3.0412e-01  0.7997
+  Jul       7.0094e-01    -3.2685e-01    5.2727e-01  0.4243
+  Aug       3.3996e-01    -5.8175e-02    2.6398e-01  0.8795
+  Sep       6.4224e-01    -2.2460e-01    4.4223e-01  0.6794
+  Oct       5.9642e-01    -2.4696e-01    4.7200e-01  0.8321
+  Nov       6.2959e-01    -7.2428e-02    5.1581e-01  0.8050
+  Dec       6.4215e-01    -1.5796e-01    5.4745e-01  0.8480
+  --------------------------------------------------------
+  All       6.1018e-01    -1.8359e-01    4.5097e-01  0.8327
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-04-10 14:37:12
+
+--- Corrected future (area mean) ---
+  Future mean:     1.0116e+00
+  Future std:      2.0303e+00
+  Reference mean:   5.4743e-01  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        7.9378e-01    2.0037e+00
+  2030–2039        1.0423e+00    2.0180e+00
+  2040–2049        9.5612e-01    2.0345e+00
+  2050–2059        9.3596e-01    2.0719e+00
+  2060–2069        1.1721e+00    2.0363e+00
+  2070–2079        9.2390e-01    1.9381e+00
+  2080–2089        1.1340e+00    2.0569e+00
+  2090–2099        1.1346e+00    2.0506e+00
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       2.2718e+00    1.3689e+00    +9.0297e-01
+  Feb       1.3259e+00    1.0937e+00    +2.3216e-01
+  Mar       7.6013e-01    6.0684e-01    +1.5330e-01
+  Apr       3.2015e-01    3.8190e-02    +2.8196e-01
+  May       3.1427e-01   -1.8916e-01    +5.0343e-01
+  Jun       1.7125e-01   -1.9057e-01    +3.6182e-01
+  Jul       5.9815e-01    5.8304e-02    +5.3985e-01
+  Aug       6.0528e-01    3.0424e-01    +3.0104e-01
+  Sep       1.0207e+00    5.4939e-01    +4.7128e-01
+  Oct       1.5883e+00    8.3286e-01    +7.5547e-01
+  Nov       1.4379e+00    8.6521e-01    +5.7266e-01
+  Dec       1.7179e+00    1.2312e+00    +4.8671e-01
+</code></pre></details></div></main><footer class=footer><span>&copy; 2026 <a href=http://localhost:1313/>Ocean Model Validation</a></span> ·
 <span>Powered by
 <a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
 <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
