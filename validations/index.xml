@@ -9,6 +9,443 @@
     <lastBuildDate>Sat, 11 Apr 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:1313/validations/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>AMM7 — Analysis Overview</title>
+      <link>http://localhost:1313/validations/amm7/overview/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/amm7/overview/</guid>
+      <description>&lt;h1 id=&#34;amm7-analysis-overview&#34;&gt;AMM7 Analysis Overview&lt;/h1&gt;
+&lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;AMM7&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
+&lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/amm7-tpxo9/&#34;&gt;TPXO9&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No horizontal bottom-layer validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;gridded-3d-validation&#34;&gt;Gridded 3D Validation&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No gridded 3D profile validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>EAN4 — Analysis Overview</title>
+      <link>http://localhost:1313/validations/ean4/overview/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ean4/overview/</guid>
+      <description>&lt;h1 id=&#34;ean4-analysis-overview&#34;&gt;EAN4 Analysis Overview&lt;/h1&gt;
+&lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;EAN4&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
+&lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No horizontal surface validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No horizontal bottom-layer validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>ENA4 — Analysis Overview</title>
+      <link>http://localhost:1313/validations/ena4/overview/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ena4/overview/</guid>
+      <description>&lt;h1 id=&#34;ena4-analysis-overview&#34;&gt;ENA4 Analysis Overview&lt;/h1&gt;
+&lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA4&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
+&lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/ena4-tpxo9/&#34;&gt;TPXO9&lt;/a&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Constituent&lt;/th&gt;
+          &lt;th&gt;Amp err (m)&lt;/th&gt;
+          &lt;th&gt;Phase err (°)&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;M2&lt;/td&gt;
+          &lt;td&gt;0.217&lt;/td&gt;
+          &lt;td&gt;21.5&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;S2&lt;/td&gt;
+          &lt;td&gt;0.060&lt;/td&gt;
+          &lt;td&gt;26.0&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;K1&lt;/td&gt;
+          &lt;td&gt;0.037&lt;/td&gt;
+          &lt;td&gt;37.5&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;O1&lt;/td&gt;
+          &lt;td&gt;0.014&lt;/td&gt;
+          &lt;td&gt;15.6&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Variable&lt;/th&gt;
+          &lt;th&gt;Dataset&lt;/th&gt;
+          &lt;th&gt;RMSE&lt;/th&gt;
+          &lt;th&gt;Bias&lt;/th&gt;
+          &lt;th&gt;Corr&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TEMP&lt;/td&gt;
+          &lt;td&gt;OSTIA&lt;/td&gt;
+          &lt;td&gt;1.381&lt;/td&gt;
+          &lt;td&gt;+0.176&lt;/td&gt;
+          &lt;td&gt;0.76&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>ENA8 — Analysis Overview</title>
+      <link>http://localhost:1313/validations/ena8/overview/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ena8/overview/</guid>
+      <description>&lt;h1 id=&#34;ena8-analysis-overview&#34;&gt;ENA8 Analysis Overview&lt;/h1&gt;
+&lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA8&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
+&lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/ena8-tpxo9/&#34;&gt;TPXO9&lt;/a&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Constituent&lt;/th&gt;
+          &lt;th&gt;Amp err (m)&lt;/th&gt;
+          &lt;th&gt;Phase err (°)&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;M2&lt;/td&gt;
+          &lt;td&gt;0.445&lt;/td&gt;
+          &lt;td&gt;17.2&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;S2&lt;/td&gt;
+          &lt;td&gt;0.161&lt;/td&gt;
+          &lt;td&gt;26.9&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;K1&lt;/td&gt;
+          &lt;td&gt;0.021&lt;/td&gt;
+          &lt;td&gt;36.3&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;O1&lt;/td&gt;
+          &lt;td&gt;0.029&lt;/td&gt;
+          &lt;td&gt;20.2&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ena8-baseline/&#34;&gt;Baseline&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Variable&lt;/th&gt;
+          &lt;th&gt;Dataset&lt;/th&gt;
+          &lt;th&gt;RMSE&lt;/th&gt;
+          &lt;th&gt;Bias&lt;/th&gt;
+          &lt;th&gt;Corr&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;SALT&lt;/td&gt;
+          &lt;td&gt;CCI-SSS&lt;/td&gt;
+          &lt;td&gt;0.949&lt;/td&gt;
+          &lt;td&gt;+0.233&lt;/td&gt;
+          &lt;td&gt;0.62&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/ena8-baseline/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-baseline/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-baseline/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-baseline/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-baseline/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-baseline/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-baseline/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ena8-baseline/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;a href=&#34;http://localhost:1313/validations/ena8-adaptive-2/&#34;&gt;Adaptive_2&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS — Analysis Overview</title>
+      <link>http://localhost:1313/validations/ns/overview/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ns/overview/</guid>
+      <description>&lt;h1 id=&#34;ns-analysis-overview&#34;&gt;NS Analysis Overview&lt;/h1&gt;
+&lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NS&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
+&lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;h3 id=&#34;ranking&#34;&gt;Ranking&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salt experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validations/ns-ranking-horizon_surface-salt_surface.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validations/ns-ranking-horizon_surface-temp_surface.png&#34;&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/&#34;&gt;SSR_STR&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Variable&lt;/th&gt;
+          &lt;th&gt;Dataset&lt;/th&gt;
+          &lt;th&gt;RMSE&lt;/th&gt;
+          &lt;th&gt;Bias&lt;/th&gt;
+          &lt;th&gt;Corr&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;SALT&lt;/td&gt;
+          &lt;td&gt;CCI-SSS&lt;/td&gt;
+          &lt;td&gt;1.943&lt;/td&gt;
+          &lt;td&gt;+0.476&lt;/td&gt;
+          &lt;td&gt;0.84&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TEMP&lt;/td&gt;
+          &lt;td&gt;CCI-SST&lt;/td&gt;
+          &lt;td&gt;1.095&lt;/td&gt;
+          &lt;td&gt;+0.215&lt;/td&gt;
+          &lt;td&gt;0.86&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TEMP&lt;/td&gt;
+          &lt;td&gt;OSTIA&lt;/td&gt;
+          &lt;td&gt;1.107&lt;/td&gt;
+          &lt;td&gt;+0.117&lt;/td&gt;
+          &lt;td&gt;0.83&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;http://localhost:1313/validations/ns-ssr-str/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;http://localhost:1313/validations/ns-ssrd-strd/&#34;&gt;SSRD_STRD&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>AMM7 - TPXO9 - Tidal Analysis</title>
+      <link>http://localhost:1313/validations/amm7-tpxo9/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/amm7-tpxo9/</guid>
+      <description>&lt;h1 id=&#34;tidal-analysis---amm7---tpxo9&#34;&gt;Tidal Analysis - AMM7 - TPXO9&lt;/h1&gt;
+&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
+&lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-04-11&lt;br&gt;
+&lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
+&lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
+&lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/amm7-tpxo9/2019/gesla_station_map.png&#34;&gt;
+&lt;em&gt;GESLA tide gauge station locations&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id=&#34;year-2019&#34;&gt;Year 2019&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/amm7-tpxo9/2019/K1_gesla_comparison.png&#34;&gt;
+&lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>ENA4 - Experiment Adaptive_2</title>
+      <link>http://localhost:1313/validations/ena4-adaptive-2/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ena4-adaptive-2/</guid>
+      <description>&lt;h1 id=&#34;ena4---experiment-adaptive_2&#34;&gt;ENA4 - Experiment Adaptive_2&lt;/h1&gt;
+&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: ENA4
+&lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_2
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;:
+&lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-adaptive-2/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-adaptive-2/pyGETM/2023/surface/temp_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (bottom) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-adaptive-2/pyGETM/2023/bottom/salt_bottom_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (bottom) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>ENA4 - Experiment ObsKd</title>
+      <link>http://localhost:1313/validations/ena4-obskd/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ena4-obskd/</guid>
+      <description>&lt;h1 id=&#34;ena4---experiment-obskd&#34;&gt;ENA4 - Experiment ObsKd&lt;/h1&gt;
+&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: ENA4
+&lt;strong&gt;Experiment&lt;/strong&gt;: ObsKd
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, TEMP_SURFACE
+&lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
+          &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;0.5593&lt;/td&gt;
+          &lt;td&gt;1.2683&lt;/td&gt;
+          &lt;td&gt;1.4328&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;0.1819&lt;/td&gt;
+          &lt;td&gt;0.5761&lt;/td&gt;
+          &lt;td&gt;0.2337&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.8458&lt;/td&gt;
+          &lt;td&gt;0.9720&lt;/td&gt;
+          &lt;td&gt;0.7563&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;14,040&lt;/td&gt;
+          &lt;td&gt;14,040&lt;/td&gt;
+          &lt;td&gt;489,830&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-obskd/pyGETM/2023/surface/temp_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>ENA4 - TPXO9 - Tidal Analysis</title>
+      <link>http://localhost:1313/validations/ena4-tpxo9/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ena4-tpxo9/</guid>
+      <description>&lt;h1 id=&#34;tidal-analysis---ena4---tpxo9&#34;&gt;Tidal Analysis - ENA4 - TPXO9&lt;/h1&gt;
+&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
+&lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: M2, S2, K1, O1&lt;br&gt;
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-04-11&lt;br&gt;
+&lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
+&lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
+&lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-tpxo9/2020/gesla_station_map.png&#34;&gt;
+&lt;em&gt;GESLA tide gauge station locations&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id=&#34;year-2020&#34;&gt;Year 2020&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena4-tpxo9/2020/K1_gesla_comparison.png&#34;&gt;
+&lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>ENA8 - Experiment Baseline</title>
+      <link>http://localhost:1313/validations/ena8-baseline/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ena8-baseline/</guid>
+      <description>&lt;h1 id=&#34;ena8---experiment-baseline&#34;&gt;ENA8 - Experiment Baseline&lt;/h1&gt;
+&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: ENA8
+&lt;strong&gt;Experiment&lt;/strong&gt;: Baseline
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, PSAL_CTD, TEMP_CTD, SALT_SURFACE
+&lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
+          &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;0.7300&lt;/td&gt;
+          &lt;td&gt;0.4301&lt;/td&gt;
+          &lt;td&gt;1.7252&lt;/td&gt;
+          &lt;td&gt;0.9596&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;-0.0132&lt;/td&gt;
+          &lt;td&gt;-0.0251&lt;/td&gt;
+          &lt;td&gt;-1.0733&lt;/td&gt;
+          &lt;td&gt;0.1781&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.8645&lt;/td&gt;
+          &lt;td&gt;0.7354&lt;/td&gt;
+          &lt;td&gt;0.9565&lt;/td&gt;
+          &lt;td&gt;0.6260&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;55,464&lt;/td&gt;
+          &lt;td&gt;249,892&lt;/td&gt;
+          &lt;td&gt;269,464&lt;/td&gt;
+          &lt;td&gt;8,943,595&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena8-baseline/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>ENA8 - TPXO9 - Tidal Analysis</title>
+      <link>http://localhost:1313/validations/ena8-tpxo9/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ena8-tpxo9/</guid>
+      <description>&lt;h1 id=&#34;tidal-analysis---ena8---tpxo9&#34;&gt;Tidal Analysis - ENA8 - TPXO9&lt;/h1&gt;
+&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
+&lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: M2, S2, K1, O1&lt;br&gt;
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-04-11&lt;br&gt;
+&lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
+&lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
+&lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena8-tpxo9/2020/gesla_station_map.png&#34;&gt;
+&lt;em&gt;GESLA tide gauge station locations&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id=&#34;year-2020&#34;&gt;Year 2020&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ena8-tpxo9/2020/K1_gesla_comparison.png&#34;&gt;
+&lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>NS - Experiment Adaptive_1</title>
       <link>http://localhost:1313/validations/ns-adaptive-1/</link>
       <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
@@ -80,6 +517,80 @@
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
 &lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-adaptive-1/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS - Experiment Adaptive_2</title>
+      <link>http://localhost:1313/validations/ns-adaptive-2/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ns-adaptive-2/</guid>
+      <description>&lt;h1 id=&#34;ns---experiment-adaptive_2&#34;&gt;NS - Experiment Adaptive_2&lt;/h1&gt;
+&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
+&lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_2
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
+          &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
+          &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;0.6929&lt;/td&gt;
+          &lt;td&gt;1.4043&lt;/td&gt;
+          &lt;td&gt;1.9954&lt;/td&gt;
+          &lt;td&gt;1.3504&lt;/td&gt;
+          &lt;td&gt;1.9626&lt;/td&gt;
+          &lt;td&gt;1.0337&lt;/td&gt;
+          &lt;td&gt;1.0368&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;-0.3766&lt;/td&gt;
+          &lt;td&gt;-0.5764&lt;/td&gt;
+          &lt;td&gt;-0.6272&lt;/td&gt;
+          &lt;td&gt;-0.7443&lt;/td&gt;
+          &lt;td&gt;0.2917&lt;/td&gt;
+          &lt;td&gt;0.0760&lt;/td&gt;
+          &lt;td&gt;0.1376&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.8628&lt;/td&gt;
+          &lt;td&gt;0.9168&lt;/td&gt;
+          &lt;td&gt;0.4589&lt;/td&gt;
+          &lt;td&gt;0.9178&lt;/td&gt;
+          &lt;td&gt;0.8263&lt;/td&gt;
+          &lt;td&gt;0.8670&lt;/td&gt;
+          &lt;td&gt;0.8807&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;58,068&lt;/td&gt;
+          &lt;td&gt;58,068&lt;/td&gt;
+          &lt;td&gt;524&lt;/td&gt;
+          &lt;td&gt;469&lt;/td&gt;
+          &lt;td&gt;2,064,075&lt;/td&gt;
+          &lt;td&gt;1,998,375&lt;/td&gt;
+          &lt;td&gt;2,150,185&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-adaptive-2/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
@@ -377,6 +888,99 @@
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
 &lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-ssr-str/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS - Experiment SSRD_STRD</title>
+      <link>http://localhost:1313/validations/ns-ssrd-strd/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ns-ssrd-strd/</guid>
+      <description>&lt;h1 id=&#34;ns---experiment-ssrd_strd&#34;&gt;NS - Experiment SSRD_STRD&lt;/h1&gt;
+&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
+&lt;strong&gt;Experiment&lt;/strong&gt;: SSRD_STRD
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
+          &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
+          &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;0.6774&lt;/td&gt;
+          &lt;td&gt;1.3877&lt;/td&gt;
+          &lt;td&gt;1.9567&lt;/td&gt;
+          &lt;td&gt;1.3208&lt;/td&gt;
+          &lt;td&gt;1.9631&lt;/td&gt;
+          &lt;td&gt;1.0620&lt;/td&gt;
+          &lt;td&gt;1.0747&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;-0.3730&lt;/td&gt;
+          &lt;td&gt;-0.5285&lt;/td&gt;
+          &lt;td&gt;-0.5955&lt;/td&gt;
+          &lt;td&gt;-0.7218&lt;/td&gt;
+          &lt;td&gt;0.3449&lt;/td&gt;
+          &lt;td&gt;0.2023&lt;/td&gt;
+          &lt;td&gt;0.2660&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.8494&lt;/td&gt;
+          &lt;td&gt;0.9143&lt;/td&gt;
+          &lt;td&gt;0.4518&lt;/td&gt;
+          &lt;td&gt;0.9190&lt;/td&gt;
+          &lt;td&gt;0.8297&lt;/td&gt;
+          &lt;td&gt;0.8559&lt;/td&gt;
+          &lt;td&gt;0.8703&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;58,068&lt;/td&gt;
+          &lt;td&gt;58,068&lt;/td&gt;
+          &lt;td&gt;524&lt;/td&gt;
+          &lt;td&gt;469&lt;/td&gt;
+          &lt;td&gt;2,064,075&lt;/td&gt;
+          &lt;td&gt;1,998,375&lt;/td&gt;
+          &lt;td&gt;2,150,185&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-ssrd-strd/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS - TPXO9 - Tidal Analysis</title>
+      <link>http://localhost:1313/validations/ns-tpxo9/</link>
+      <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/validations/ns-tpxo9/</guid>
+      <description>&lt;h1 id=&#34;tidal-analysis---ns---tpxo9&#34;&gt;Tidal Analysis - NS - TPXO9&lt;/h1&gt;
+&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
+&lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-04-11&lt;br&gt;
+&lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
+&lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
+&lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-tpxo9/2019/gesla_station_map.png&#34;&gt;
+&lt;em&gt;GESLA tide gauge station locations&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id=&#34;year-2019&#34;&gt;Year 2019&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;http://localhost:1313/validation-data/ns-tpxo9/2019/K1_gesla_comparison.png&#34;&gt;
+&lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
