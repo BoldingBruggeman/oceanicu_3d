@@ -6,12 +6,12 @@
     <description>Recent content on Ocean Model Validation</description>
     <generator>Hugo -- 0.155.3</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 12 Apr 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 15 Apr 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:1313/oceanicu_3d/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AMM7 — Analysis Overview</title>
       <link>http://localhost:1313/oceanicu_3d/validations/amm7/overview/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/amm7/overview/</guid>
       <description>&lt;h1 id=&#34;amm7-analysis-overview&#34;&gt;AMM7 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;AMM7&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -30,7 +30,7 @@
     <item>
       <title>EAN4 — Analysis Overview</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ean4/overview/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ean4/overview/</guid>
       <description>&lt;h1 id=&#34;ean4-analysis-overview&#34;&gt;EAN4 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;EAN4&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -45,7 +45,7 @@
     <item>
       <title>ENA4 — Analysis Overview</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ena4/overview/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ena4/overview/</guid>
       <description>&lt;h1 id=&#34;ena4-analysis-overview&#34;&gt;ENA4 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA4&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -120,7 +120,7 @@
     <item>
       <title>ENA8 — Analysis Overview</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ena8/overview/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ena8/overview/</guid>
       <description>&lt;h1 id=&#34;ena8-analysis-overview&#34;&gt;ENA8 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA8&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -195,7 +195,7 @@
     <item>
       <title>NS — Analysis Overview</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ns/overview/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ns/overview/</guid>
       <description>&lt;h1 id=&#34;ns-analysis-overview&#34;&gt;NS Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NS&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -253,28 +253,28 @@
     <item>
       <title>AMM7</title>
       <link>http://localhost:1313/oceanicu_3d/areas/amm7/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/areas/amm7/</guid>
       <description>AMM7 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>EAN4</title>
       <link>http://localhost:1313/oceanicu_3d/areas/ean4/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/areas/ean4/</guid>
       <description>EAN4 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>ENA4</title>
       <link>http://localhost:1313/oceanicu_3d/areas/ena4/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/areas/ena4/</guid>
       <description>ENA4 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>ENA4 - Experiment Adaptive_2</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ena4-adaptive-2/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ena4-adaptive-2/</guid>
       <description>&lt;h1 id=&#34;ena4---experiment-adaptive_2&#34;&gt;ENA4 - Experiment Adaptive_2&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -296,7 +296,7 @@
     <item>
       <title>ENA4 - Experiment ObsKd</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ena4-obskd/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ena4-obskd/</guid>
       <description>&lt;h1 id=&#34;ena4---experiment-obskd&#34;&gt;ENA4 - Experiment ObsKd&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -350,13 +350,13 @@
     <item>
       <title>ENA4 - TPXO9 - Tidal Analysis</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ena4-tpxo9/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ena4-tpxo9/</guid>
       <description>&lt;h1 id=&#34;tidal-analysis---ena4---tpxo9&#34;&gt;Tidal Analysis - ENA4 - TPXO9&lt;/h1&gt;
 &lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: M2, S2, K1, O1&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-04-12&lt;br&gt;
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-04-15&lt;br&gt;
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
@@ -369,14 +369,14 @@
     <item>
       <title>ENA8</title>
       <link>http://localhost:1313/oceanicu_3d/areas/ena8/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/areas/ena8/</guid>
       <description>ENA8 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>ENA8 - Experiment Baseline</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ena8-baseline/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ena8-baseline/</guid>
       <description>&lt;h1 id=&#34;ena8---experiment-baseline&#34;&gt;ENA8 - Experiment Baseline&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -435,7 +435,7 @@
     <item>
       <title>ENA8 - Experiment ObsKd</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ena8-obskd/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ena8-obskd/</guid>
       <description>&lt;h1 id=&#34;ena8---experiment-obskd&#34;&gt;ENA8 - Experiment ObsKd&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -489,13 +489,13 @@
     <item>
       <title>ENA8 - TPXO9 - Tidal Analysis</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ena8-tpxo9/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ena8-tpxo9/</guid>
       <description>&lt;h1 id=&#34;tidal-analysis---ena8---tpxo9&#34;&gt;Tidal Analysis - ENA8 - TPXO9&lt;/h1&gt;
 &lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: M2, S2, K1, O1&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-04-12&lt;br&gt;
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-04-15&lt;br&gt;
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
@@ -508,9 +508,9 @@
     <item>
       <title>Model Simulation Inventory</title>
       <link>http://localhost:1313/oceanicu_3d/simulations/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/simulations/</guid>
-      <description>&lt;p&gt;&lt;strong&gt;16 experiments&lt;/strong&gt; across &lt;strong&gt;5 areas&lt;/strong&gt; · last updated 2026-04-12&lt;/p&gt;
+      <description>&lt;p&gt;&lt;strong&gt;16 experiments&lt;/strong&gt; across &lt;strong&gt;5 areas&lt;/strong&gt; · last updated 2026-04-15&lt;/p&gt;
 &lt;p&gt;
 &lt;button class=&#34;sim-sort-btn&#34; data-col=&#34;area&#34;&gt;Sort by area&lt;/button&gt;
 &lt;button class=&#34;sim-sort-btn&#34; data-col=&#34;exp&#34;&gt;Sort by experiment&lt;/button&gt;
@@ -581,14 +581,14 @@
     <item>
       <title>NS</title>
       <link>http://localhost:1313/oceanicu_3d/areas/ns/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/areas/ns/</guid>
       <description>NS modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>NS - Experiment Adaptive_1</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ns-adaptive-1/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ns-adaptive-1/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-adaptive_1&#34;&gt;NS - Experiment Adaptive_1&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -662,7 +662,7 @@
     <item>
       <title>NS - Experiment Adaptive_2</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ns-adaptive-2/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ns-adaptive-2/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-adaptive_2&#34;&gt;NS - Experiment Adaptive_2&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -736,7 +736,7 @@
     <item>
       <title>NS - Experiment Adaptive_3</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ns-adaptive-3/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ns-adaptive-3/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-adaptive_3&#34;&gt;NS - Experiment Adaptive_3&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -810,7 +810,7 @@
     <item>
       <title>NS - Experiment Baseline</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ns-baseline/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ns-baseline/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-baseline&#34;&gt;NS - Experiment Baseline&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -884,7 +884,7 @@
     <item>
       <title>NS - Experiment ObsKd</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ns-obskd/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ns-obskd/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-obskd&#34;&gt;NS - Experiment ObsKd&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -958,7 +958,7 @@
     <item>
       <title>NS - Experiment SSR_STR</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ns-ssr-str/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ns-ssr-str/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-ssr_str&#34;&gt;NS - Experiment SSR_STR&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -1032,7 +1032,7 @@
     <item>
       <title>NS - Experiment SSRD_STRD</title>
       <link>http://localhost:1313/oceanicu_3d/validations/ns-ssrd-strd/</link>
-      <pubDate>Sun, 12 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 15 Apr 2026 00:00:00 +0000</pubDate>
       <guid>http://localhost:1313/oceanicu_3d/validations/ns-ssrd-strd/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-ssrd_strd&#34;&gt;NS - Experiment SSRD_STRD&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
