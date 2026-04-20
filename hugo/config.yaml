@@ -2,6 +2,8 @@ baseURL: 'https://bolding-bruggeman.com/oceanicu_3d/'
 languageCode: 'en-us'
 title: 'Ocean Model Validation'
 theme: 'PaperMod'
+pagination:
+  pagerSize: 50
 
 # Rewrite root-absolute URLs (e.g. /validation-data/...) to include the
 # baseURL subpath.  Required when the site is served from a subdirectory
@@ -57,12 +59,9 @@ menu:
     - name: Areas
       url: areas/
       weight: 1
-    - name: Simulations
-      url: simulations/
-      weight: 2
     - name: Validations
       url: validations/
-      weight: 3
+      weight: 2
     - name: Scenarios
       url: scenarios/
       weight: 4
@@ -109,7 +108,6 @@ taxonomies:
 
 # Permalinks
 permalinks:
-  simulations: /simulations/:slug/
   areas: /areas/:slug/
   validations: /validations/:slug/
   scenarios: /scenarios/:slug/
