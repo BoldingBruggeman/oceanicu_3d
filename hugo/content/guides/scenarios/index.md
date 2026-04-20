@@ -277,6 +277,11 @@ reference_period:
   start: "1985-01-01"
   end:   "2014-12-31"
 
+# comparison_name sets the output subdirectory under areas/<area>/scenarios/.
+# If omitted, it is auto-derived by joining the experiment names:
+# e.g.  ssp126_ssp245_ssp585
+comparison_name: ssp_all
+
 output:
   base_dir: ./analyses
 ```
@@ -291,8 +296,12 @@ multi-scenario --config config/multi_scenario.yaml
 
 ### Output
 
+Output goes to `analyses/areas/<area>/scenarios/<comparison_name>/`,
+where `comparison_name` is set in the config or auto-derived from the
+experiment names (e.g. `ssp126_ssp245_ssp585`).
+
 ```
-analyses/areas/NS/multi_scenario/
+analyses/areas/NS/scenarios/ssp_all/
     plots/
         temp_timeseries_comparison.png   — all SSPs on one axis
         temp_change_map_ssp585.png       — spatial change per scenario
