@@ -144,6 +144,29 @@ glodap-profiles --config config/glodap_profiles.yaml
 
 ---
 
+### ICES Point Observation Profiles
+
+Validates model output against the ICES/ECOVAL point observation database — up
+to 55 years of in-situ profiles covering 14 physics and biogeochemical variables
+(temperature, salinity, oxygen, nitrate, phosphate, silicate, chlorophyll, pH,
+pCO₂, alkalinity, ammonium, POC, DOC, PFT) for the North-West European Shelf.
+
+Observation data are prepared by the
+[OceanVal toolkit](https://oceanval.readthedocs.io/en/latest/recipes.html) and
+stored as feather files under `<data_dir>/<variable>/*_<variable>_<year>.feather`.
+
+**Outputs:** station map, Hovmöller diagrams per variable.
+
+```bash
+ices-profiles --config config/ices_profiles.yaml
+ices-profiles --config config/ices_profiles.yaml --no-model
+ices-profiles --config config/ices_profiles.yaml --variables temperature salinity
+```
+
+> Full documentation: [Profile Validation guide](/guides/profile-validation/)
+
+---
+
 ### Fixed Platform Profiles
 
 Discovers fixed platforms (moorings, bottom landers, coastal buoys) from the
