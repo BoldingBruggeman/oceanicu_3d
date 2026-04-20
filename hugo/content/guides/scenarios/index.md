@@ -237,7 +237,7 @@ single-scenario --config config/single_scenario.yaml --scenario ssp585
 ### Output
 
 ```
-analyses/areas/NS/validations/ssp245/
+analyses/areas/NS/scenarios/ssp245/
     plots/
         temp_trend_map.png          — linear trend per grid point
         temp_timeseries.png         — area-mean annual time series
