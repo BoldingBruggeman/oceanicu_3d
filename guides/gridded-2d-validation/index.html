@@ -1,0 +1,197 @@
+<!doctype html><html lang=en dir=auto data-theme=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Gridded 2D Validation | Ocean Model Validation</title><meta name=keywords content><meta name=description content="Gridded 2D Validation Guide
+Overview
+gridded-2d-validation compares any horizontal 2-D model field against a
+gridded observation product.  Three layer modes are supported:
+
+  
+      
+          Layer
+          Description
+          Typical use
+      
+  
+  
+      
+          surface
+          2-D field or top of 3-D output
+          SST, SSS, SSH
+      
+      
+          bottom
+          Deepest wet cell of 3-D output
+          Bottom temperature / salinity
+      
+      
+          <depth_m>
+          Horizontal slice at a fixed depth (m)
+          Depth-layer climatology
+      
+  
+
+Multiple layers can be run in a single invocation.
+Prerequisites
+
+Model NetCDF output accessible as a file-glob pattern
+A gridded observation file (local or Copernicus Marine / WOA)
+pip install -e . with the ocean-stats package
+
+Recommended observation sources
+
+  
+      
+          Variable
+          Source
+          CMEMS product ID
+      
+  
+  
+      
+          SST
+          OSTIA (CMEMS)
+          METOFFICE-GLO-SST-L4-REP-OBS-SST (analysed_sst)
+      
+      
+          Bottom temperature
+          NW Shelf reanalysis
+          cmems_mod_nws_phy-bottomt_my_7km-2D_P1M-m
+      
+      
+          Bottom salinity
+          NW Shelf reanalysis
+          cmems_mod_nws_phy-so_my_7km-3D_P1M-m
+      
+      
+          Depth-level T/S
+          WOA23
+          local file, NOAA/NCEI
+      
+  
+
+OSTIA SST is delivered in Kelvin — add offset: -273.15 in the obs config block."><meta name=author content="Ocean Modeling Team"><link rel=canonical href=https://bolding-bruggeman.com/oceanicu_3d/guides/gridded-2d-validation/><link crossorigin=anonymous href=https://bolding-bruggeman.com/oceanicu_3d/assets/css/stylesheet.5c32b88afd32dc4c1bada2cd6c30fcbfb4c7d2a24edf1077d91c50ae185d0c15.css integrity="sha256-XDK4iv0y3EwbraLNbDD8v7TH0qJO3xB32RxQrhhdDBU=" rel="preload stylesheet" as=style><link rel=icon href=https://bolding-bruggeman.com/oceanicu_3d/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://bolding-bruggeman.com/oceanicu_3d/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://bolding-bruggeman.com/oceanicu_3d/favicon-32x32.png><link rel=apple-touch-icon href=https://bolding-bruggeman.com/oceanicu_3d/apple-touch-icon.png><link rel=mask-icon href=https://bolding-bruggeman.com/oceanicu_3d/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://bolding-bruggeman.com/oceanicu_3d/guides/gridded-2d-validation/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51);color-scheme:dark}.list{background:var(--theme)}.toc{background:var(--entry)}}@media(prefers-color-scheme:light){.list::-webkit-scrollbar-thumb{border-color:var(--code-bg)}}</style></noscript><script>localStorage.getItem("pref-theme")==="dark"?document.querySelector("html").dataset.theme="dark":localStorage.getItem("pref-theme")==="light"?document.querySelector("html").dataset.theme="light":window.matchMedia("(prefers-color-scheme: dark)").matches?document.querySelector("html").dataset.theme="dark":document.querySelector("html").dataset.theme="light"</script><meta property="og:url" content="https://bolding-bruggeman.com/oceanicu_3d/guides/gridded-2d-validation/"><meta property="og:site_name" content="Ocean Model Validation"><meta property="og:title" content="Gridded 2D Validation"><meta property="og:description" content="Gridded 2D Validation Guide Overview gridded-2d-validation compares any horizontal 2-D model field against a gridded observation product. Three layer modes are supported:
+Layer Description Typical use surface 2-D field or top of 3-D output SST, SSS, SSH bottom Deepest wet cell of 3-D output Bottom temperature / salinity <depth_m> Horizontal slice at a fixed depth (m) Depth-layer climatology Multiple layers can be run in a single invocation.
+Prerequisites Model NetCDF output accessible as a file-glob pattern A gridded observation file (local or Copernicus Marine / WOA) pip install -e . with the ocean-stats package Recommended observation sources Variable Source CMEMS product ID SST OSTIA (CMEMS) METOFFICE-GLO-SST-L4-REP-OBS-SST (analysed_sst) Bottom temperature NW Shelf reanalysis cmems_mod_nws_phy-bottomt_my_7km-2D_P1M-m Bottom salinity NW Shelf reanalysis cmems_mod_nws_phy-so_my_7km-3D_P1M-m Depth-level T/S WOA23 local file, NOAA/NCEI OSTIA SST is delivered in Kelvin — add offset: -273.15 in the obs config block."><meta property="og:locale" content="en-us"><meta property="og:type" content="article"><meta property="article:section" content="guides"><meta name=twitter:card content="summary"><meta name=twitter:title content="Gridded 2D Validation"><meta name=twitter:description content="Gridded 2D Validation Guide
+Overview
+gridded-2d-validation compares any horizontal 2-D model field against a
+gridded observation product.  Three layer modes are supported:
+
+  
+      
+          Layer
+          Description
+          Typical use
+      
+  
+  
+      
+          surface
+          2-D field or top of 3-D output
+          SST, SSS, SSH
+      
+      
+          bottom
+          Deepest wet cell of 3-D output
+          Bottom temperature / salinity
+      
+      
+          <depth_m>
+          Horizontal slice at a fixed depth (m)
+          Depth-layer climatology
+      
+  
+
+Multiple layers can be run in a single invocation.
+Prerequisites
+
+Model NetCDF output accessible as a file-glob pattern
+A gridded observation file (local or Copernicus Marine / WOA)
+pip install -e . with the ocean-stats package
+
+Recommended observation sources
+
+  
+      
+          Variable
+          Source
+          CMEMS product ID
+      
+  
+  
+      
+          SST
+          OSTIA (CMEMS)
+          METOFFICE-GLO-SST-L4-REP-OBS-SST (analysed_sst)
+      
+      
+          Bottom temperature
+          NW Shelf reanalysis
+          cmems_mod_nws_phy-bottomt_my_7km-2D_P1M-m
+      
+      
+          Bottom salinity
+          NW Shelf reanalysis
+          cmems_mod_nws_phy-so_my_7km-3D_P1M-m
+      
+      
+          Depth-level T/S
+          WOA23
+          local file, NOAA/NCEI
+      
+  
+
+OSTIA SST is delivered in Kelvin — add offset: -273.15 in the obs config block."><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Guides","item":"https://bolding-bruggeman.com/oceanicu_3d/guides/"},{"@type":"ListItem","position":2,"name":"Gridded 2D Validation","item":"https://bolding-bruggeman.com/oceanicu_3d/guides/gridded-2d-validation/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Gridded 2D Validation","name":"Gridded 2D Validation","description":"Gridded 2D Validation Guide Overview gridded-2d-validation compares any horizontal 2-D model field against a gridded observation product. Three layer modes are supported:\nLayer Description Typical use surface 2-D field or top of 3-D output SST, SSS, SSH bottom Deepest wet cell of 3-D output Bottom temperature / salinity \u0026lt;depth_m\u0026gt; Horizontal slice at a fixed depth (m) Depth-layer climatology Multiple layers can be run in a single invocation.\nPrerequisites Model NetCDF output accessible as a file-glob pattern A gridded observation file (local or Copernicus Marine / WOA) pip install -e . with the ocean-stats package Recommended observation sources Variable Source CMEMS product ID SST OSTIA (CMEMS) METOFFICE-GLO-SST-L4-REP-OBS-SST (analysed_sst) Bottom temperature NW Shelf reanalysis cmems_mod_nws_phy-bottomt_my_7km-2D_P1M-m Bottom salinity NW Shelf reanalysis cmems_mod_nws_phy-so_my_7km-3D_P1M-m Depth-level T/S WOA23 local file, NOAA/NCEI OSTIA SST is delivered in Kelvin — add offset: -273.15 in the obs config block.\n","keywords":[],"articleBody":"Gridded 2D Validation Guide Overview gridded-2d-validation compares any horizontal 2-D model field against a gridded observation product. Three layer modes are supported:\nLayer Description Typical use surface 2-D field or top of 3-D output SST, SSS, SSH bottom Deepest wet cell of 3-D output Bottom temperature / salinity Horizontal slice at a fixed depth (m) Depth-layer climatology Multiple layers can be run in a single invocation.\nPrerequisites Model NetCDF output accessible as a file-glob pattern A gridded observation file (local or Copernicus Marine / WOA) pip install -e . with the ocean-stats package Recommended observation sources Variable Source CMEMS product ID SST OSTIA (CMEMS) METOFFICE-GLO-SST-L4-REP-OBS-SST (analysed_sst) Bottom temperature NW Shelf reanalysis cmems_mod_nws_phy-bottomt_my_7km-2D_P1M-m Bottom salinity NW Shelf reanalysis cmems_mod_nws_phy-so_my_7km-3D_P1M-m Depth-level T/S WOA23 local file, NOAA/NCEI OSTIA SST is delivered in Kelvin — add offset: -273.15 in the obs config block.\nConfig file # config/gridded_2d_validation.yaml area: NS experiment: Baseline years: [2010, 2011, 2012] model: base_path: /data/model/NS/ filename_pattern: \"getm_{year}*.nc\" variable_map: temp: sst # rename model variable if needed variables: [temp] observations: temp: - name: OSTIA path: source: copernicus dataset_id: METOFFICE-GLO-SST-L4-REP-OBS-SST variable: analysed_sst offset: -273.15 processing: layers: [surface, bottom] # or a single string / list including depths chunking: time_chunk: 30 # days per processing chunk output: base_dir: ./analyses Config file on GitHub: config/gridded_2d_validation.yaml\nUsage # Surface only (config default) gridded-2d-validation --config config/gridded_2d_validation.yaml # Surface + bottom in one run gridded-2d-validation --config config/gridded_2d_validation.yaml \\ --layers surface bottom # Surface + 50 m depth slice + bottom gridded-2d-validation --config config/gridded_2d_validation.yaml \\ --layers surface 50 bottom The --layers flag overrides processing.layers in the config.\nOutput Results are written to analyses/areas//validations//:\nplots//// surface/ ← time-mean maps, monthly bias maps, scatter plots bottom/ 50m/ tables/// _validation_statistics.txt Statistics text files contain overall + monthly RMSE, bias, MAE, and correlation.\nNotes Observations are regridded onto the model grid using bilinear interpolation (xESMF); weight files are cached by MD5 hash under regrid_weights/. For bottom layer: the deepest non-NaN cell is selected per column using sigma-coordinate-aware extraction. For depth slices: the model field is interpolated vertically to the requested depth before regridding. ","wordCount":"341","inLanguage":"en","datePublished":"0001-01-01T00:00:00Z","dateModified":"0001-01-01T00:00:00Z","author":{"@type":"Person","name":"Ocean Modeling Team"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://bolding-bruggeman.com/oceanicu_3d/guides/gridded-2d-validation/"},"publisher":{"@type":"Organization","name":"Ocean Model Validation","logo":{"@type":"ImageObject","url":"https://bolding-bruggeman.com/oceanicu_3d/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=nav><div class=logo><a href=https://bolding-bruggeman.com/oceanicu_3d/ accesskey=h title="Ocean Model Validation (Alt + H)">Ocean Model Validation</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://bolding-bruggeman.com/oceanicu_3d/areas/ title=Areas><span>Areas</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/validations/ title=Validations><span>Validations</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ title=Scenarios><span>Scenarios</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/rankings/ title=Rankings><span>Rankings</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/data-sources/ title="Data Sources"><span>Data Sources</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/guides/ title=Guides><span>Guides</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://bolding-bruggeman.com/oceanicu_3d/>Home</a>&nbsp;»&nbsp;<a href=https://bolding-bruggeman.com/oceanicu_3d/guides/>Guides</a></div><h1 class="post-title entry-hint-parent">Gridded 2D Validation</h1><div class=post-meta><span>Ocean Modeling Team</span></div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><nav id=TableOfContents><ul><li><a href=#overview>Overview</a></li><li><a href=#prerequisites>Prerequisites</a></li><li><a href=#recommended-observation-sources>Recommended observation sources</a></li><li><a href=#config-file>Config file</a></li><li><a href=#usage>Usage</a></li><li><a href=#output>Output</a></li><li><a href=#notes>Notes</a></li></ul></nav></div></details></div><div class=post-content><h1 id=gridded-2d-validation-guide>Gridded 2D Validation Guide<a hidden class=anchor aria-hidden=true href=#gridded-2d-validation-guide>#</a></h1><h2 id=overview>Overview<a hidden class=anchor aria-hidden=true href=#overview>#</a></h2><p><code>gridded-2d-validation</code> compares any horizontal 2-D model field against a
+gridded observation product. Three layer modes are supported:</p><table><thead><tr><th>Layer</th><th>Description</th><th>Typical use</th></tr></thead><tbody><tr><td><code>surface</code></td><td>2-D field or top of 3-D output</td><td>SST, SSS, SSH</td></tr><tr><td><code>bottom</code></td><td>Deepest wet cell of 3-D output</td><td>Bottom temperature / salinity</td></tr><tr><td><code>&lt;depth_m></code></td><td>Horizontal slice at a fixed depth (m)</td><td>Depth-layer climatology</td></tr></tbody></table><p>Multiple layers can be run in a single invocation.</p><h2 id=prerequisites>Prerequisites<a hidden class=anchor aria-hidden=true href=#prerequisites>#</a></h2><ul><li>Model NetCDF output accessible as a file-glob pattern</li><li>A gridded observation file (local or Copernicus Marine / WOA)</li><li><code>pip install -e .</code> with the <code>ocean-stats</code> package</li></ul><h2 id=recommended-observation-sources>Recommended observation sources<a hidden class=anchor aria-hidden=true href=#recommended-observation-sources>#</a></h2><table><thead><tr><th>Variable</th><th>Source</th><th>CMEMS product ID</th></tr></thead><tbody><tr><td>SST</td><td>OSTIA (CMEMS)</td><td><code>METOFFICE-GLO-SST-L4-REP-OBS-SST</code> (<code>analysed_sst</code>)</td></tr><tr><td>Bottom temperature</td><td>NW Shelf reanalysis</td><td><code>cmems_mod_nws_phy-bottomt_my_7km-2D_P1M-m</code></td></tr><tr><td>Bottom salinity</td><td>NW Shelf reanalysis</td><td><code>cmems_mod_nws_phy-so_my_7km-3D_P1M-m</code></td></tr><tr><td>Depth-level T/S</td><td>WOA23</td><td>local file, NOAA/NCEI</td></tr></tbody></table><p>OSTIA SST is delivered in Kelvin — add <code>offset: -273.15</code> in the obs config block.</p><h2 id=config-file>Config file<a hidden class=anchor aria-hidden=true href=#config-file>#</a></h2><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=c># config/gridded_2d_validation.yaml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>area</span><span class=p>:</span><span class=w> </span><span class=l>NS</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>experiment</span><span class=p>:</span><span class=w> </span><span class=l>Baseline</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>years</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=m>2010</span><span class=p>,</span><span class=w> </span><span class=m>2011</span><span class=p>,</span><span class=w> </span><span class=m>2012</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>model</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>base_path</span><span class=p>:</span><span class=w> </span><span class=l>/data/model/NS/</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>filename_pattern</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;getm_{year}*.nc&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>variable_map</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>temp</span><span class=p>:</span><span class=w> </span><span class=l>sst       </span><span class=w> </span><span class=c># rename model variable if needed</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>variables</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>temp]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>observations</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>temp</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>OSTIA</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>path</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>source</span><span class=p>:</span><span class=w> </span><span class=l>copernicus</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>dataset_id</span><span class=p>:</span><span class=w> </span><span class=l>METOFFICE-GLO-SST-L4-REP-OBS-SST</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>variable</span><span class=p>:</span><span class=w> </span><span class=l>analysed_sst</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>offset</span><span class=p>:</span><span class=w> </span>-<span class=m>273.15</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>processing</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>layers</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>surface, bottom]    </span><span class=w> </span><span class=c># or a single string / list including depths</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>chunking</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>time_chunk</span><span class=p>:</span><span class=w> </span><span class=m>30</span><span class=w>              </span><span class=c># days per processing chunk</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>output</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>base_dir</span><span class=p>:</span><span class=w> </span><span class=l>./analyses</span><span class=w>
+</span></span></span></code></pre></div><p>Config file on GitHub: <a href=https://github.com/BoldingBruggeman/stats/blob/main/config/gridded_2d_validation.yaml><code>config/gridded_2d_validation.yaml</code></a></p><h2 id=usage>Usage<a hidden class=anchor aria-hidden=true href=#usage>#</a></h2><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Surface only (config default)</span>
+</span></span><span class=line><span class=cl>gridded-2d-validation --config config/gridded_2d_validation.yaml
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Surface + bottom in one run</span>
+</span></span><span class=line><span class=cl>gridded-2d-validation --config config/gridded_2d_validation.yaml <span class=se>\
+</span></span></span><span class=line><span class=cl>    --layers surface bottom
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Surface + 50 m depth slice + bottom</span>
+</span></span><span class=line><span class=cl>gridded-2d-validation --config config/gridded_2d_validation.yaml <span class=se>\
+</span></span></span><span class=line><span class=cl>    --layers surface <span class=m>50</span> bottom
+</span></span></code></pre></div><p>The <code>--layers</code> flag overrides <code>processing.layers</code> in the config.</p><h2 id=output>Output<a hidden class=anchor aria-hidden=true href=#output>#</a></h2><p>Results are written to <code>analyses/areas/&lt;area>/validations/&lt;experiment>/</code>:</p><pre tabindex=0><code>plots/&lt;domain&gt;/&lt;model&gt;/&lt;period&gt;/
+    surface/        ← time-mean maps, monthly bias maps, scatter plots
+    bottom/
+    50m/
+tables/&lt;domain&gt;/&lt;model&gt;/
+    &lt;variable&gt;_validation_statistics.txt
+</code></pre><p>Statistics text files contain overall + monthly RMSE, bias, MAE, and
+correlation.</p><h2 id=notes>Notes<a hidden class=anchor aria-hidden=true href=#notes>#</a></h2><ul><li>Observations are regridded onto the model grid using bilinear interpolation
+(xESMF); weight files are cached by MD5 hash under <code>regrid_weights/</code>.</li><li>For bottom layer: the deepest non-NaN cell is selected per column using
+sigma-coordinate-aware extraction.</li><li>For depth slices: the model field is interpolated vertically to the
+requested depth before regridding.</li></ul></div><footer class=post-footer><ul class=post-tags></ul></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://bolding-bruggeman.com/oceanicu_3d/>Ocean Model Validation</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{const e=document.querySelector("html");e.dataset.theme==="dark"?(e.dataset.theme="light",localStorage.setItem("pref-theme","light")):(e.dataset.theme="dark",localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

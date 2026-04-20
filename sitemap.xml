@@ -3,111 +3,137 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ean4/overview/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4/overview/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8/overview/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/data-loader/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/tidal-analysis/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/gridded-2d-validation/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/gridded-3d-validation/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/profile-validation/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/mle-comparison/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/run-validation/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/bias-correction/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/scenarios/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/update-from-remote/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/manage-analyses/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/simulation-list/</loc>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/reporting/</loc>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/ean4/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/ena4/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-tpxo9/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/ena8/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-baseline/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-tpxo9/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/simulations/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-1/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-2/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-3/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-baseline/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-obskd/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/tidal/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/validation/</loc>
-    <lastmod>2026-04-16T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-tpxo9/</loc>
-    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/about/</loc>
-    <lastmod>2026-02-18T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/</loc>
+    <lastmod>2026-04-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-adaptive-2/</loc>
+    <lastmod>2026-04-17T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/data-sources/</loc>
-    <lastmod>2026-02-18T00:00:00+00:00</lastmod>
+    <lastmod>2026-04-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-tpxo9/</loc>
+    <lastmod>2026-04-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/</loc>
+    <lastmod>2026-04-17T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/</loc>
+    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/</loc>
+    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-obskd/</loc>
+    <lastmod>2026-04-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/</loc>
+    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-baseline/</loc>
+    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-1/</loc>
+    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-2/</loc>
+    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-3/</loc>
+    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-baseline/</loc>
+    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/</loc>
+    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/</loc>
+    <lastmod>2026-04-09T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-tpxo9/</loc>
+    <lastmod>2026-03-31T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-tpxo9/</loc>
+    <lastmod>2026-03-31T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/</loc>
     <lastmod>2026-02-18T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/rankings/</loc>
-    <lastmod>2026-02-18T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/</loc>
     <lastmod>2026-02-18T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/categories/</loc>

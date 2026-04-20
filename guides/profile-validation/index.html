@@ -1,0 +1,217 @@
+<!doctype html><html lang=en dir=auto data-theme=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Profile Validation | Ocean Model Validation</title><meta name=keywords content><meta name=description content='Profile Validation Guide
+Overview
+Five scripts share the same profile validation workflow:
+
+  
+      
+          Command
+          Observation source
+      
+  
+  
+      
+          argo-profiles
+          Argo floats (Ifremer ERDDAP)
+      
+      
+          glodap-profiles
+          GLODAP v2.2023 bottle data
+      
+      
+          wod-profiles
+          World Ocean Database
+      
+      
+          cruise-ctd-profiles
+          ICES / EMODnet cruise CTD casts
+      
+      
+          fixed-platform
+          Moorings and fixed buoy profiles
+      
+  
+
+All five follow the same config structure, output layout, and command-line flags.
+Config structure
+Annotated example configs:
+config/argo_profiles.yaml ·
+config/glodap_profiles.yaml ·
+config/cruise_ctd_profiles.yaml ·
+config/wod_profiles.yaml ·
+config/fixed_platform.yaml
+# .stats.yaml (shared identity — set once per project)
+metadata:
+  author:    "K. Bolding"
+  institute: "BB"
+  project:   "NorthSea-MFC"
+model:
+  name:    "pyGETM"
+output:
+  base_dir: "./analyses"
+# config/argo_profiles.yaml (per-run)
+area:       NS
+experiment: Baseline
+
+domain:
+  lon_min: -5.0
+  lon_max: 10.0
+  lat_min: 50.0
+  lat_max: 62.0
+
+years: [2015, 2022]           # or year: 2020 for a single year
+variables: [TEMP, PSAL, DOXY] # subset of available variables
+
+model:
+  base_path:        /data/model/NS/
+  filename_pattern: "ns_{year}.nc"
+
+output:
+  prefix: ns_argo             # filename prefix for plots and tables
+Required keys: area, experiment, model.base_path, model.filename_pattern.'><meta name=author content="Ocean Modeling Team"><link rel=canonical href=https://bolding-bruggeman.com/oceanicu_3d/guides/profile-validation/><link crossorigin=anonymous href=https://bolding-bruggeman.com/oceanicu_3d/assets/css/stylesheet.5c32b88afd32dc4c1bada2cd6c30fcbfb4c7d2a24edf1077d91c50ae185d0c15.css integrity="sha256-XDK4iv0y3EwbraLNbDD8v7TH0qJO3xB32RxQrhhdDBU=" rel="preload stylesheet" as=style><link rel=icon href=https://bolding-bruggeman.com/oceanicu_3d/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://bolding-bruggeman.com/oceanicu_3d/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://bolding-bruggeman.com/oceanicu_3d/favicon-32x32.png><link rel=apple-touch-icon href=https://bolding-bruggeman.com/oceanicu_3d/apple-touch-icon.png><link rel=mask-icon href=https://bolding-bruggeman.com/oceanicu_3d/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://bolding-bruggeman.com/oceanicu_3d/guides/profile-validation/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51);color-scheme:dark}.list{background:var(--theme)}.toc{background:var(--entry)}}@media(prefers-color-scheme:light){.list::-webkit-scrollbar-thumb{border-color:var(--code-bg)}}</style></noscript><script>localStorage.getItem("pref-theme")==="dark"?document.querySelector("html").dataset.theme="dark":localStorage.getItem("pref-theme")==="light"?document.querySelector("html").dataset.theme="light":window.matchMedia("(prefers-color-scheme: dark)").matches?document.querySelector("html").dataset.theme="dark":document.querySelector("html").dataset.theme="light"</script><meta property="og:url" content="https://bolding-bruggeman.com/oceanicu_3d/guides/profile-validation/"><meta property="og:site_name" content="Ocean Model Validation"><meta property="og:title" content="Profile Validation"><meta property="og:description" content='Profile Validation Guide Overview Five scripts share the same profile validation workflow:
+Command Observation source argo-profiles Argo floats (Ifremer ERDDAP) glodap-profiles GLODAP v2.2023 bottle data wod-profiles World Ocean Database cruise-ctd-profiles ICES / EMODnet cruise CTD casts fixed-platform Moorings and fixed buoy profiles All five follow the same config structure, output layout, and command-line flags.
+Config structure Annotated example configs: config/argo_profiles.yaml · config/glodap_profiles.yaml · config/cruise_ctd_profiles.yaml · config/wod_profiles.yaml · config/fixed_platform.yaml
+# .stats.yaml (shared identity — set once per project) metadata: author: "K. Bolding" institute: "BB" project: "NorthSea-MFC" model: name: "pyGETM" output: base_dir: "./analyses" # config/argo_profiles.yaml (per-run) area: NS experiment: Baseline domain: lon_min: -5.0 lon_max: 10.0 lat_min: 50.0 lat_max: 62.0 years: [2015, 2022] # or year: 2020 for a single year variables: [TEMP, PSAL, DOXY] # subset of available variables model: base_path: /data/model/NS/ filename_pattern: "ns_{year}.nc" output: prefix: ns_argo # filename prefix for plots and tables Required keys: area, experiment, model.base_path, model.filename_pattern.'><meta property="og:locale" content="en-us"><meta property="og:type" content="article"><meta property="article:section" content="guides"><meta name=twitter:card content="summary"><meta name=twitter:title content="Profile Validation"><meta name=twitter:description content='Profile Validation Guide
+Overview
+Five scripts share the same profile validation workflow:
+
+  
+      
+          Command
+          Observation source
+      
+  
+  
+      
+          argo-profiles
+          Argo floats (Ifremer ERDDAP)
+      
+      
+          glodap-profiles
+          GLODAP v2.2023 bottle data
+      
+      
+          wod-profiles
+          World Ocean Database
+      
+      
+          cruise-ctd-profiles
+          ICES / EMODnet cruise CTD casts
+      
+      
+          fixed-platform
+          Moorings and fixed buoy profiles
+      
+  
+
+All five follow the same config structure, output layout, and command-line flags.
+Config structure
+Annotated example configs:
+config/argo_profiles.yaml ·
+config/glodap_profiles.yaml ·
+config/cruise_ctd_profiles.yaml ·
+config/wod_profiles.yaml ·
+config/fixed_platform.yaml
+# .stats.yaml (shared identity — set once per project)
+metadata:
+  author:    "K. Bolding"
+  institute: "BB"
+  project:   "NorthSea-MFC"
+model:
+  name:    "pyGETM"
+output:
+  base_dir: "./analyses"
+# config/argo_profiles.yaml (per-run)
+area:       NS
+experiment: Baseline
+
+domain:
+  lon_min: -5.0
+  lon_max: 10.0
+  lat_min: 50.0
+  lat_max: 62.0
+
+years: [2015, 2022]           # or year: 2020 for a single year
+variables: [TEMP, PSAL, DOXY] # subset of available variables
+
+model:
+  base_path:        /data/model/NS/
+  filename_pattern: "ns_{year}.nc"
+
+output:
+  prefix: ns_argo             # filename prefix for plots and tables
+Required keys: area, experiment, model.base_path, model.filename_pattern.'><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Guides","item":"https://bolding-bruggeman.com/oceanicu_3d/guides/"},{"@type":"ListItem","position":2,"name":"Profile Validation","item":"https://bolding-bruggeman.com/oceanicu_3d/guides/profile-validation/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Profile Validation","name":"Profile Validation","description":"Profile Validation Guide Overview Five scripts share the same profile validation workflow:\nCommand Observation source argo-profiles Argo floats (Ifremer ERDDAP) glodap-profiles GLODAP v2.2023 bottle data wod-profiles World Ocean Database cruise-ctd-profiles ICES / EMODnet cruise CTD casts fixed-platform Moorings and fixed buoy profiles All five follow the same config structure, output layout, and command-line flags.\nConfig structure Annotated example configs: config/argo_profiles.yaml · config/glodap_profiles.yaml · config/cruise_ctd_profiles.yaml · config/wod_profiles.yaml · config/fixed_platform.yaml\n# .stats.yaml (shared identity — set once per project) metadata: author: \u0026#34;K. Bolding\u0026#34; institute: \u0026#34;BB\u0026#34; project: \u0026#34;NorthSea-MFC\u0026#34; model: name: \u0026#34;pyGETM\u0026#34; output: base_dir: \u0026#34;./analyses\u0026#34; # config/argo_profiles.yaml (per-run) area: NS experiment: Baseline domain: lon_min: -5.0 lon_max: 10.0 lat_min: 50.0 lat_max: 62.0 years: [2015, 2022] # or year: 2020 for a single year variables: [TEMP, PSAL, DOXY] # subset of available variables model: base_path: /data/model/NS/ filename_pattern: \u0026#34;ns_{year}.nc\u0026#34; output: prefix: ns_argo # filename prefix for plots and tables Required keys: area, experiment, model.base_path, model.filename_pattern.\n","keywords":[],"articleBody":"Profile Validation Guide Overview Five scripts share the same profile validation workflow:\nCommand Observation source argo-profiles Argo floats (Ifremer ERDDAP) glodap-profiles GLODAP v2.2023 bottle data wod-profiles World Ocean Database cruise-ctd-profiles ICES / EMODnet cruise CTD casts fixed-platform Moorings and fixed buoy profiles All five follow the same config structure, output layout, and command-line flags.\nConfig structure Annotated example configs: config/argo_profiles.yaml · config/glodap_profiles.yaml · config/cruise_ctd_profiles.yaml · config/wod_profiles.yaml · config/fixed_platform.yaml\n# .stats.yaml (shared identity — set once per project) metadata: author: \"K. Bolding\" institute: \"BB\" project: \"NorthSea-MFC\" model: name: \"pyGETM\" output: base_dir: \"./analyses\" # config/argo_profiles.yaml (per-run) area: NS experiment: Baseline domain: lon_min: -5.0 lon_max: 10.0 lat_min: 50.0 lat_max: 62.0 years: [2015, 2022] # or year: 2020 for a single year variables: [TEMP, PSAL, DOXY] # subset of available variables model: base_path: /data/model/NS/ filename_pattern: \"ns_{year}.nc\" output: prefix: ns_argo # filename prefix for plots and tables Required keys: area, experiment, model.base_path, model.filename_pattern.\nCommon command-line flags All five scripts accept:\nFlag Description --config FILE YAML config file --area NAME Override area --experiment NAME Override experiment --years START END Override year range --variables VAR … Override variables --analyses-dir DIR Override output.base_dir --no-staging Skip writing to simulation registry --save-residuals Write model-minus-obs residuals parquet (needed for mle-comparison) Script-specific flags:\nargo-profiles: no extra flags glodap-profiles: --no-model (skip model comparison, obs diagnostics only) cruise-ctd-profiles: --dataset-name LABEL (tag the statistics section) fixed-platform: --station NAME (select a single named station) What each run produces analyses//validations// ├── plots/ │ └── / ← physics | bio │ └── / ← e.g. pyGETM │ └── / ← e.g. 2020 | 2015-2022 │ └── argo/ ← or glodap/, wod/, cruise/, platform/ │ ├── _overview.png │ ├── _hovmoller_TEMP.png │ └── _profiles_YYYY.png └── tables/ └── / └── / └── argo/ └── _profile_validation_statistics.txt The overview figure typically has 6 panels:\nfloat/station/cruise map coloured by platform or time temperature vs depth scatter salinity vs depth scatter T-S diagram mean vertical profiles (normalised) profile or observation count per platform Running multiple experiments Run the script once per experiment, changing experiment: in the config (or passing --experiment). All outputs go into separate subdirectories:\nargo-profiles --config config/argo_profiles.yaml --experiment Baseline argo-profiles --config config/argo_profiles.yaml --experiment ObsKd argo-profiles --config config/argo_profiles.yaml --experiment HighRes Generating residuals for MLE comparison Pass --save-residuals alongside the normal run. This writes an additional parquet file that mle-comparison consumes:\nargo-profiles --config config/argo_profiles.yaml \\ --experiment Baseline --save-residuals argo-profiles --config config/argo_profiles.yaml \\ --experiment ObsKd --save-residuals Residuals are written to:\nanalyses/areas//validations//argo_residuals.parquet The parquet has columns: time, lat, lon, depth, variable, value (obs), model_value, and optionally profile_id.\nSee guides/mle-comparison.md for the ranking workflow.\nGLODAP-specific notes The GLODAP v2.2023 merged master file (~300 MB) is downloaded automatically on first run and cached locally. Set glodap.cache_dir in the config to control where it lands:\nglodap: cache_dir: /data/obs/glodap/ qc_flags: [2] # 2 = good data; 0 includes unqualified Pass --no-model to produce observation-only diagnostics (station map, T-S diagram, profile climatology) without loading any model output.\nFixed-platform notes The fixed-platform script reads from the station catalogue (config/station_catalogue.yaml). Named stations include L4, E1, Stonehaven, Helgoland, and the MARNET and CEFAS SmartBuoy networks. Use download-station to fetch and cache station data before running fixed-platform.\ndownload-station download --station L4 --output-dir /data/stations fixed-platform --config config/fixed_platform.yaml --station L4 ","wordCount":"522","inLanguage":"en","datePublished":"0001-01-01T00:00:00Z","dateModified":"0001-01-01T00:00:00Z","author":{"@type":"Person","name":"Ocean Modeling Team"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://bolding-bruggeman.com/oceanicu_3d/guides/profile-validation/"},"publisher":{"@type":"Organization","name":"Ocean Model Validation","logo":{"@type":"ImageObject","url":"https://bolding-bruggeman.com/oceanicu_3d/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=nav><div class=logo><a href=https://bolding-bruggeman.com/oceanicu_3d/ accesskey=h title="Ocean Model Validation (Alt + H)">Ocean Model Validation</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://bolding-bruggeman.com/oceanicu_3d/areas/ title=Areas><span>Areas</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/validations/ title=Validations><span>Validations</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ title=Scenarios><span>Scenarios</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/rankings/ title=Rankings><span>Rankings</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/data-sources/ title="Data Sources"><span>Data Sources</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/guides/ title=Guides><span>Guides</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://bolding-bruggeman.com/oceanicu_3d/>Home</a>&nbsp;»&nbsp;<a href=https://bolding-bruggeman.com/oceanicu_3d/guides/>Guides</a></div><h1 class="post-title entry-hint-parent">Profile Validation</h1><div class=post-meta><span>Ocean Modeling Team</span></div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><nav id=TableOfContents><ul><li><a href=#overview>Overview</a></li><li><a href=#config-structure>Config structure</a></li><li><a href=#common-command-line-flags>Common command-line flags</a></li><li><a href=#what-each-run-produces>What each run produces</a></li><li><a href=#running-multiple-experiments>Running multiple experiments</a></li><li><a href=#generating-residuals-for-mle-comparison>Generating residuals for MLE comparison</a></li><li><a href=#glodap-specific-notes>GLODAP-specific notes</a></li><li><a href=#fixed-platform-notes>Fixed-platform notes</a></li></ul></nav></div></details></div><div class=post-content><h1 id=profile-validation-guide>Profile Validation Guide<a hidden class=anchor aria-hidden=true href=#profile-validation-guide>#</a></h1><h2 id=overview>Overview<a hidden class=anchor aria-hidden=true href=#overview>#</a></h2><p>Five scripts share the same profile validation workflow:</p><table><thead><tr><th>Command</th><th>Observation source</th></tr></thead><tbody><tr><td><code>argo-profiles</code></td><td>Argo floats (Ifremer ERDDAP)</td></tr><tr><td><code>glodap-profiles</code></td><td>GLODAP v2.2023 bottle data</td></tr><tr><td><code>wod-profiles</code></td><td>World Ocean Database</td></tr><tr><td><code>cruise-ctd-profiles</code></td><td>ICES / EMODnet cruise CTD casts</td></tr><tr><td><code>fixed-platform</code></td><td>Moorings and fixed buoy profiles</td></tr></tbody></table><p>All five follow the same config structure, output layout, and command-line flags.</p><h2 id=config-structure>Config structure<a hidden class=anchor aria-hidden=true href=#config-structure>#</a></h2><p>Annotated example configs:
+<a href=https://github.com/bolding/stats/blob/main/config/argo_profiles.yaml>config/argo_profiles.yaml</a> ·
+<a href=https://github.com/bolding/stats/blob/main/config/glodap_profiles.yaml>config/glodap_profiles.yaml</a> ·
+<a href=https://github.com/bolding/stats/blob/main/config/cruise_ctd_profiles.yaml>config/cruise_ctd_profiles.yaml</a> ·
+<a href=https://github.com/bolding/stats/blob/main/config/wod_profiles.yaml>config/wod_profiles.yaml</a> ·
+<a href=https://github.com/bolding/stats/blob/main/config/fixed_platform.yaml>config/fixed_platform.yaml</a></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=c># .stats.yaml (shared identity — set once per project)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>metadata</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>author</span><span class=p>:</span><span class=w>    </span><span class=s2>&#34;K. Bolding&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>institute</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;BB&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>project</span><span class=p>:</span><span class=w>   </span><span class=s2>&#34;NorthSea-MFC&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>model</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>name</span><span class=p>:</span><span class=w>    </span><span class=s2>&#34;pyGETM&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>output</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>base_dir</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;./analyses&#34;</span><span class=w>
+</span></span></span></code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=c># config/argo_profiles.yaml (per-run)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>area</span><span class=p>:</span><span class=w>       </span><span class=l>NS</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>experiment</span><span class=p>:</span><span class=w> </span><span class=l>Baseline</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>domain</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>lon_min</span><span class=p>:</span><span class=w> </span>-<span class=m>5.0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>lon_max</span><span class=p>:</span><span class=w> </span><span class=m>10.0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>lat_min</span><span class=p>:</span><span class=w> </span><span class=m>50.0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>lat_max</span><span class=p>:</span><span class=w> </span><span class=m>62.0</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>years: [2015, 2022]           # or year</span><span class=p>:</span><span class=w> </span><span class=m>2020</span><span class=w> </span><span class=l>for a single year</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>variables</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=l>TEMP, PSAL, DOXY]</span><span class=w> </span><span class=c># subset of available variables</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>model</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>base_path</span><span class=p>:</span><span class=w>        </span><span class=l>/data/model/NS/</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>filename_pattern</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;ns_{year}.nc&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>output</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>prefix</span><span class=p>:</span><span class=w> </span><span class=l>ns_argo            </span><span class=w> </span><span class=c># filename prefix for plots and tables</span><span class=w>
+</span></span></span></code></pre></div><p>Required keys: <code>area</code>, <code>experiment</code>, <code>model.base_path</code>, <code>model.filename_pattern</code>.</p><h2 id=common-command-line-flags>Common command-line flags<a hidden class=anchor aria-hidden=true href=#common-command-line-flags>#</a></h2><p>All five scripts accept:</p><table><thead><tr><th>Flag</th><th>Description</th></tr></thead><tbody><tr><td><code>--config FILE</code></td><td>YAML config file</td></tr><tr><td><code>--area NAME</code></td><td>Override area</td></tr><tr><td><code>--experiment NAME</code></td><td>Override experiment</td></tr><tr><td><code>--years START END</code></td><td>Override year range</td></tr><tr><td><code>--variables VAR …</code></td><td>Override variables</td></tr><tr><td><code>--analyses-dir DIR</code></td><td>Override <code>output.base_dir</code></td></tr><tr><td><code>--no-staging</code></td><td>Skip writing to simulation registry</td></tr><tr><td><code>--save-residuals</code></td><td>Write model-minus-obs residuals parquet (needed for <code>mle-comparison</code>)</td></tr></tbody></table><p>Script-specific flags:</p><ul><li><code>argo-profiles</code>: no extra flags</li><li><code>glodap-profiles</code>: <code>--no-model</code> (skip model comparison, obs diagnostics only)</li><li><code>cruise-ctd-profiles</code>: <code>--dataset-name LABEL</code> (tag the statistics section)</li><li><code>fixed-platform</code>: <code>--station NAME</code> (select a single named station)</li></ul><h2 id=what-each-run-produces>What each run produces<a hidden class=anchor aria-hidden=true href=#what-each-run-produces>#</a></h2><pre tabindex=0><code>analyses/&lt;AREA&gt;/validations/&lt;EXPERIMENT&gt;/
+├── plots/
+│   └── &lt;domain&gt;/              ← physics | bio
+│       └── &lt;model&gt;/           ← e.g. pyGETM
+│           └── &lt;period&gt;/      ← e.g. 2020 | 2015-2022
+│               └── argo/      ← or glodap/, wod/, cruise/, platform/
+│                   ├── &lt;prefix&gt;_overview.png
+│                   ├── &lt;prefix&gt;_hovmoller_TEMP.png
+│                   └── &lt;prefix&gt;_profiles_YYYY.png
+└── tables/
+    └── &lt;domain&gt;/
+        └── &lt;model&gt;/
+            └── argo/
+                └── &lt;prefix&gt;_profile_validation_statistics.txt
+</code></pre><p>The overview figure typically has 6 panels:</p><ul><li>float/station/cruise map coloured by platform or time</li><li>temperature vs depth scatter</li><li>salinity vs depth scatter</li><li>T-S diagram</li><li>mean vertical profiles (normalised)</li><li>profile or observation count per platform</li></ul><h2 id=running-multiple-experiments>Running multiple experiments<a hidden class=anchor aria-hidden=true href=#running-multiple-experiments>#</a></h2><p>Run the script once per experiment, changing <code>experiment:</code> in the config (or
+passing <code>--experiment</code>). All outputs go into separate subdirectories:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>argo-profiles --config config/argo_profiles.yaml --experiment Baseline
+</span></span><span class=line><span class=cl>argo-profiles --config config/argo_profiles.yaml --experiment ObsKd
+</span></span><span class=line><span class=cl>argo-profiles --config config/argo_profiles.yaml --experiment HighRes
+</span></span></code></pre></div><h2 id=generating-residuals-for-mle-comparison>Generating residuals for MLE comparison<a hidden class=anchor aria-hidden=true href=#generating-residuals-for-mle-comparison>#</a></h2><p>Pass <code>--save-residuals</code> alongside the normal run. This writes an additional
+parquet file that <code>mle-comparison</code> consumes:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>argo-profiles --config config/argo_profiles.yaml <span class=se>\
+</span></span></span><span class=line><span class=cl>    --experiment Baseline --save-residuals
+</span></span><span class=line><span class=cl>argo-profiles --config config/argo_profiles.yaml <span class=se>\
+</span></span></span><span class=line><span class=cl>    --experiment ObsKd    --save-residuals
+</span></span></code></pre></div><p>Residuals are written to:</p><pre tabindex=0><code>analyses/areas/&lt;AREA&gt;/validations/&lt;EXPERIMENT&gt;/argo_residuals.parquet
+</code></pre><p>The parquet has columns: <code>time</code>, <code>lat</code>, <code>lon</code>, <code>depth</code>, <code>variable</code>, <code>value</code>
+(obs), <code>model_value</code>, and optionally <code>profile_id</code>.</p><p>See <a href=mle-comparison.md>guides/mle-comparison.md</a> for the ranking workflow.</p><h2 id=glodap-specific-notes>GLODAP-specific notes<a hidden class=anchor aria-hidden=true href=#glodap-specific-notes>#</a></h2><p>The GLODAP v2.2023 merged master file (~300 MB) is downloaded automatically on
+first run and cached locally. Set <code>glodap.cache_dir</code> in the config to control
+where it lands:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>glodap</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>cache_dir</span><span class=p>:</span><span class=w> </span><span class=l>/data/obs/glodap/</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>qc_flags</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=m>2</span><span class=p>]</span><span class=w>   </span><span class=c># 2 = good data; 0 includes unqualified</span><span class=w>
+</span></span></span></code></pre></div><p>Pass <code>--no-model</code> to produce observation-only diagnostics (station map, T-S
+diagram, profile climatology) without loading any model output.</p><h2 id=fixed-platform-notes>Fixed-platform notes<a hidden class=anchor aria-hidden=true href=#fixed-platform-notes>#</a></h2><p>The fixed-platform script reads from the station catalogue
+(<code>config/station_catalogue.yaml</code>). Named stations include L4, E1, Stonehaven,
+Helgoland, and the MARNET and CEFAS SmartBuoy networks. Use <code>download-station</code>
+to fetch and cache station data before running <code>fixed-platform</code>.</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>download-station download --station L4 --output-dir /data/stations
+</span></span><span class=line><span class=cl>fixed-platform --config config/fixed_platform.yaml --station L4
+</span></span></code></pre></div></div><footer class=post-footer><ul class=post-tags></ul></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://bolding-bruggeman.com/oceanicu_3d/>Ocean Model Validation</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{const e=document.querySelector("html");e.dataset.theme==="dark"?(e.dataset.theme="light",localStorage.setItem("pref-theme","light")):(e.dataset.theme="dark",localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

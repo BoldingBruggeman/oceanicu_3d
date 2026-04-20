@@ -1,0 +1,176 @@
+<!doctype html><html lang=en dir=auto data-theme=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Run Validation | Ocean Model Validation</title><meta name=keywords content><meta name=description content='run-validation Guide
+Overview
+run-validation is the master orchestrator.  It reads a single
+master_config.yaml and runs all configured analysis steps in sequence,
+handling logging, error recovery, and simulation registry updates.
+Use it when you want to run all validation types for an experiment in one
+command.  For individual analysis types, run the dedicated scripts directly
+(e.g. argo-profiles, tidal-analysis).
+Config structure
+Individual per-analysis configs are in config/:
+config/gridded_2d_validation.yaml ·
+config/tidal_analysis.yaml ·
+config/argo_profiles.yaml
+# master_config.yaml
+
+experiment:
+  area:          NS
+  experiment_id: Baseline
+  name:          "Baseline run 2015–2022"
+
+model:
+  base_path:        /data/model/NS/
+  filename_pattern: "ns_{year}.nc"
+  name:    pyGETM
+  version: ""
+
+output:
+  base_dir: ./analyses
+
+workflow:
+  years: [2015, 2022]
+
+analyses:
+  gridded_2d:
+    enabled: true
+    config: config/gridded_2d_validation.yaml
+
+  gridded_3d:
+    enabled: false
+    config: config/gridded_3d_validation.yaml
+
+  tidal_analysis:
+    enabled: true
+    config: config/tidal_analysis.yaml
+
+  argo_profiles:
+    enabled: true
+    config: config/argo_profiles.yaml
+
+  cruise_ctd_profiles:
+    enabled: false
+    config: config/cruise_ctd_profiles.yaml
+Required top-level sections: experiment, analyses, output, workflow.'><meta name=author content="Ocean Modeling Team"><link rel=canonical href=https://bolding-bruggeman.com/oceanicu_3d/guides/run-validation/><link crossorigin=anonymous href=https://bolding-bruggeman.com/oceanicu_3d/assets/css/stylesheet.5c32b88afd32dc4c1bada2cd6c30fcbfb4c7d2a24edf1077d91c50ae185d0c15.css integrity="sha256-XDK4iv0y3EwbraLNbDD8v7TH0qJO3xB32RxQrhhdDBU=" rel="preload stylesheet" as=style><link rel=icon href=https://bolding-bruggeman.com/oceanicu_3d/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://bolding-bruggeman.com/oceanicu_3d/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://bolding-bruggeman.com/oceanicu_3d/favicon-32x32.png><link rel=apple-touch-icon href=https://bolding-bruggeman.com/oceanicu_3d/apple-touch-icon.png><link rel=mask-icon href=https://bolding-bruggeman.com/oceanicu_3d/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://bolding-bruggeman.com/oceanicu_3d/guides/run-validation/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51);color-scheme:dark}.list{background:var(--theme)}.toc{background:var(--entry)}}@media(prefers-color-scheme:light){.list::-webkit-scrollbar-thumb{border-color:var(--code-bg)}}</style></noscript><script>localStorage.getItem("pref-theme")==="dark"?document.querySelector("html").dataset.theme="dark":localStorage.getItem("pref-theme")==="light"?document.querySelector("html").dataset.theme="light":window.matchMedia("(prefers-color-scheme: dark)").matches?document.querySelector("html").dataset.theme="dark":document.querySelector("html").dataset.theme="light"</script><meta property="og:url" content="https://bolding-bruggeman.com/oceanicu_3d/guides/run-validation/"><meta property="og:site_name" content="Ocean Model Validation"><meta property="og:title" content="Run Validation"><meta property="og:description" content='run-validation Guide Overview run-validation is the master orchestrator. It reads a single master_config.yaml and runs all configured analysis steps in sequence, handling logging, error recovery, and simulation registry updates.
+Use it when you want to run all validation types for an experiment in one command. For individual analysis types, run the dedicated scripts directly (e.g. argo-profiles, tidal-analysis).
+Config structure Individual per-analysis configs are in config/: config/gridded_2d_validation.yaml · config/tidal_analysis.yaml · config/argo_profiles.yaml
+# master_config.yaml experiment: area: NS experiment_id: Baseline name: "Baseline run 2015–2022" model: base_path: /data/model/NS/ filename_pattern: "ns_{year}.nc" name: pyGETM version: "" output: base_dir: ./analyses workflow: years: [2015, 2022] analyses: gridded_2d: enabled: true config: config/gridded_2d_validation.yaml gridded_3d: enabled: false config: config/gridded_3d_validation.yaml tidal_analysis: enabled: true config: config/tidal_analysis.yaml argo_profiles: enabled: true config: config/argo_profiles.yaml cruise_ctd_profiles: enabled: false config: config/cruise_ctd_profiles.yaml Required top-level sections: experiment, analyses, output, workflow.'><meta property="og:locale" content="en-us"><meta property="og:type" content="article"><meta property="article:section" content="guides"><meta name=twitter:card content="summary"><meta name=twitter:title content="Run Validation"><meta name=twitter:description content='run-validation Guide
+Overview
+run-validation is the master orchestrator.  It reads a single
+master_config.yaml and runs all configured analysis steps in sequence,
+handling logging, error recovery, and simulation registry updates.
+Use it when you want to run all validation types for an experiment in one
+command.  For individual analysis types, run the dedicated scripts directly
+(e.g. argo-profiles, tidal-analysis).
+Config structure
+Individual per-analysis configs are in config/:
+config/gridded_2d_validation.yaml ·
+config/tidal_analysis.yaml ·
+config/argo_profiles.yaml
+# master_config.yaml
+
+experiment:
+  area:          NS
+  experiment_id: Baseline
+  name:          "Baseline run 2015–2022"
+
+model:
+  base_path:        /data/model/NS/
+  filename_pattern: "ns_{year}.nc"
+  name:    pyGETM
+  version: ""
+
+output:
+  base_dir: ./analyses
+
+workflow:
+  years: [2015, 2022]
+
+analyses:
+  gridded_2d:
+    enabled: true
+    config: config/gridded_2d_validation.yaml
+
+  gridded_3d:
+    enabled: false
+    config: config/gridded_3d_validation.yaml
+
+  tidal_analysis:
+    enabled: true
+    config: config/tidal_analysis.yaml
+
+  argo_profiles:
+    enabled: true
+    config: config/argo_profiles.yaml
+
+  cruise_ctd_profiles:
+    enabled: false
+    config: config/cruise_ctd_profiles.yaml
+Required top-level sections: experiment, analyses, output, workflow.'><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Guides","item":"https://bolding-bruggeman.com/oceanicu_3d/guides/"},{"@type":"ListItem","position":2,"name":"Run Validation","item":"https://bolding-bruggeman.com/oceanicu_3d/guides/run-validation/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Run Validation","name":"Run Validation","description":"run-validation Guide Overview run-validation is the master orchestrator. It reads a single master_config.yaml and runs all configured analysis steps in sequence, handling logging, error recovery, and simulation registry updates.\nUse it when you want to run all validation types for an experiment in one command. For individual analysis types, run the dedicated scripts directly (e.g. argo-profiles, tidal-analysis).\nConfig structure Individual per-analysis configs are in config/: config/gridded_2d_validation.yaml · config/tidal_analysis.yaml · config/argo_profiles.yaml\n# master_config.yaml experiment: area: NS experiment_id: Baseline name: \u0026#34;Baseline run 2015–2022\u0026#34; model: base_path: /data/model/NS/ filename_pattern: \u0026#34;ns_{year}.nc\u0026#34; name: pyGETM version: \u0026#34;\u0026#34; output: base_dir: ./analyses workflow: years: [2015, 2022] analyses: gridded_2d: enabled: true config: config/gridded_2d_validation.yaml gridded_3d: enabled: false config: config/gridded_3d_validation.yaml tidal_analysis: enabled: true config: config/tidal_analysis.yaml argo_profiles: enabled: true config: config/argo_profiles.yaml cruise_ctd_profiles: enabled: false config: config/cruise_ctd_profiles.yaml Required top-level sections: experiment, analyses, output, workflow.\n","keywords":[],"articleBody":"run-validation Guide Overview run-validation is the master orchestrator. It reads a single master_config.yaml and runs all configured analysis steps in sequence, handling logging, error recovery, and simulation registry updates.\nUse it when you want to run all validation types for an experiment in one command. For individual analysis types, run the dedicated scripts directly (e.g. argo-profiles, tidal-analysis).\nConfig structure Individual per-analysis configs are in config/: config/gridded_2d_validation.yaml · config/tidal_analysis.yaml · config/argo_profiles.yaml\n# master_config.yaml experiment: area: NS experiment_id: Baseline name: \"Baseline run 2015–2022\" model: base_path: /data/model/NS/ filename_pattern: \"ns_{year}.nc\" name: pyGETM version: \"\" output: base_dir: ./analyses workflow: years: [2015, 2022] analyses: gridded_2d: enabled: true config: config/gridded_2d_validation.yaml gridded_3d: enabled: false config: config/gridded_3d_validation.yaml tidal_analysis: enabled: true config: config/tidal_analysis.yaml argo_profiles: enabled: true config: config/argo_profiles.yaml cruise_ctd_profiles: enabled: false config: config/cruise_ctd_profiles.yaml Required top-level sections: experiment, analyses, output, workflow.\nUsage # Run all enabled steps run-validation --config master_config.yaml # Run a single step (useful for debugging or re-running one analysis) run-validation --config master_config.yaml --step tidal_analysis # List all recognised step names run-validation --list-steps Step names Step name Analysis run gridded_2d gridded-2d-validation gridded_3d gridded-3d-validation tidal_analysis tidal-analysis argo_profiles argo-profiles glodap_profiles glodap-profiles wod_profiles wod-profiles cruise_ctd_profiles cruise-ctd-profiles fixed_platform fixed-platform Error handling Each step runs independently. If one step fails it is logged and the orchestrator continues with the remaining steps. Failed steps are listed in the final summary. Exit code is non-zero if any step failed.\nPartial runs with –step --step is useful when:\nA single step failed and needs to be re-run after fixing the config. You want to add a new analysis type without re-running everything. You are debugging a specific script. # Re-run only tidal analysis after fixing the tidal config run-validation --config master_config.yaml --step tidal_analysis Relationship to individual scripts run-validation delegates to the same individual scripts that you can call directly. The per-step config files (e.g. config/argo_profiles.yaml) are passed through unchanged. The master config adds the experiment block that the individual scripts normally get from .stats.yaml or command-line flags.\nFor fine-grained control — custom flags, --no-model, --save-residuals — run the individual scripts directly instead of going through the orchestrator.\n","wordCount":"340","inLanguage":"en","datePublished":"0001-01-01T00:00:00Z","dateModified":"0001-01-01T00:00:00Z","author":{"@type":"Person","name":"Ocean Modeling Team"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://bolding-bruggeman.com/oceanicu_3d/guides/run-validation/"},"publisher":{"@type":"Organization","name":"Ocean Model Validation","logo":{"@type":"ImageObject","url":"https://bolding-bruggeman.com/oceanicu_3d/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=nav><div class=logo><a href=https://bolding-bruggeman.com/oceanicu_3d/ accesskey=h title="Ocean Model Validation (Alt + H)">Ocean Model Validation</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://bolding-bruggeman.com/oceanicu_3d/areas/ title=Areas><span>Areas</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/validations/ title=Validations><span>Validations</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ title=Scenarios><span>Scenarios</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/rankings/ title=Rankings><span>Rankings</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/data-sources/ title="Data Sources"><span>Data Sources</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/guides/ title=Guides><span>Guides</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><article class=post-single><header class=post-header><div class=breadcrumbs><a href=https://bolding-bruggeman.com/oceanicu_3d/>Home</a>&nbsp;»&nbsp;<a href=https://bolding-bruggeman.com/oceanicu_3d/guides/>Guides</a></div><h1 class="post-title entry-hint-parent">Run Validation</h1><div class=post-meta><span>Ocean Modeling Team</span></div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><nav id=TableOfContents><ul><li><a href=#overview>Overview</a></li><li><a href=#config-structure>Config structure</a></li><li><a href=#usage>Usage</a></li><li><a href=#step-names>Step names</a></li><li><a href=#error-handling>Error handling</a></li><li><a href=#partial-runs-with-step>Partial runs with &ndash;step</a></li><li><a href=#relationship-to-individual-scripts>Relationship to individual scripts</a></li></ul></nav></div></details></div><div class=post-content><h1 id=run-validation-guide>run-validation Guide<a hidden class=anchor aria-hidden=true href=#run-validation-guide>#</a></h1><h2 id=overview>Overview<a hidden class=anchor aria-hidden=true href=#overview>#</a></h2><p><code>run-validation</code> is the master orchestrator. It reads a single
+<code>master_config.yaml</code> and runs all configured analysis steps in sequence,
+handling logging, error recovery, and simulation registry updates.</p><p>Use it when you want to run all validation types for an experiment in one
+command. For individual analysis types, run the dedicated scripts directly
+(e.g. <code>argo-profiles</code>, <code>tidal-analysis</code>).</p><h2 id=config-structure>Config structure<a hidden class=anchor aria-hidden=true href=#config-structure>#</a></h2><p>Individual per-analysis configs are in <code>config/</code>:
+<a href=https://github.com/bolding/stats/blob/main/config/gridded_2d_validation.yaml>config/gridded_2d_validation.yaml</a> ·
+<a href=https://github.com/bolding/stats/blob/main/config/tidal_analysis.yaml>config/tidal_analysis.yaml</a> ·
+<a href=https://github.com/bolding/stats/blob/main/config/argo_profiles.yaml>config/argo_profiles.yaml</a></p><div class=highlight><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=c># master_config.yaml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>experiment</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>area</span><span class=p>:</span><span class=w>          </span><span class=l>NS</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>experiment_id</span><span class=p>:</span><span class=w> </span><span class=l>Baseline</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>name</span><span class=p>:</span><span class=w>          </span><span class=s2>&#34;Baseline run 2015–2022&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>model</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>base_path</span><span class=p>:</span><span class=w>        </span><span class=l>/data/model/NS/</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>filename_pattern</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;ns_{year}.nc&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>name</span><span class=p>:</span><span class=w>    </span><span class=l>pyGETM</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>version</span><span class=p>:</span><span class=w> </span><span class=s2>&#34;&#34;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>output</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>base_dir</span><span class=p>:</span><span class=w> </span><span class=l>./analyses</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>workflow</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>years</span><span class=p>:</span><span class=w> </span><span class=p>[</span><span class=m>2015</span><span class=p>,</span><span class=w> </span><span class=m>2022</span><span class=p>]</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=nt>analyses</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>gridded_2d</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>config</span><span class=p>:</span><span class=w> </span><span class=l>config/gridded_2d_validation.yaml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>gridded_3d</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class=kc>false</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>config</span><span class=p>:</span><span class=w> </span><span class=l>config/gridded_3d_validation.yaml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>tidal_analysis</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>config</span><span class=p>:</span><span class=w> </span><span class=l>config/tidal_analysis.yaml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>argo_profiles</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>config</span><span class=p>:</span><span class=w> </span><span class=l>config/argo_profiles.yaml</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>cruise_ctd_profiles</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>enabled</span><span class=p>:</span><span class=w> </span><span class=kc>false</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>config</span><span class=p>:</span><span class=w> </span><span class=l>config/cruise_ctd_profiles.yaml</span><span class=w>
+</span></span></span></code></pre></div><p>Required top-level sections: <code>experiment</code>, <code>analyses</code>, <code>output</code>, <code>workflow</code>.</p><h2 id=usage>Usage<a hidden class=anchor aria-hidden=true href=#usage>#</a></h2><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Run all enabled steps</span>
+</span></span><span class=line><span class=cl>run-validation --config master_config.yaml
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Run a single step (useful for debugging or re-running one analysis)</span>
+</span></span><span class=line><span class=cl>run-validation --config master_config.yaml --step tidal_analysis
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># List all recognised step names</span>
+</span></span><span class=line><span class=cl>run-validation --list-steps
+</span></span></code></pre></div><h2 id=step-names>Step names<a hidden class=anchor aria-hidden=true href=#step-names>#</a></h2><table><thead><tr><th>Step name</th><th>Analysis run</th></tr></thead><tbody><tr><td><code>gridded_2d</code></td><td><code>gridded-2d-validation</code></td></tr><tr><td><code>gridded_3d</code></td><td><code>gridded-3d-validation</code></td></tr><tr><td><code>tidal_analysis</code></td><td><code>tidal-analysis</code></td></tr><tr><td><code>argo_profiles</code></td><td><code>argo-profiles</code></td></tr><tr><td><code>glodap_profiles</code></td><td><code>glodap-profiles</code></td></tr><tr><td><code>wod_profiles</code></td><td><code>wod-profiles</code></td></tr><tr><td><code>cruise_ctd_profiles</code></td><td><code>cruise-ctd-profiles</code></td></tr><tr><td><code>fixed_platform</code></td><td><code>fixed-platform</code></td></tr></tbody></table><h2 id=error-handling>Error handling<a hidden class=anchor aria-hidden=true href=#error-handling>#</a></h2><p>Each step runs independently. If one step fails it is logged and the
+orchestrator continues with the remaining steps. Failed steps are listed in
+the final summary. Exit code is non-zero if any step failed.</p><h2 id=partial-runs-with-step>Partial runs with &ndash;step<a hidden class=anchor aria-hidden=true href=#partial-runs-with-step>#</a></h2><p><code>--step</code> is useful when:</p><ul><li>A single step failed and needs to be re-run after fixing the config.</li><li>You want to add a new analysis type without re-running everything.</li><li>You are debugging a specific script.</li></ul><div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl><span class=c1># Re-run only tidal analysis after fixing the tidal config</span>
+</span></span><span class=line><span class=cl>run-validation --config master_config.yaml --step tidal_analysis
+</span></span></code></pre></div><h2 id=relationship-to-individual-scripts>Relationship to individual scripts<a hidden class=anchor aria-hidden=true href=#relationship-to-individual-scripts>#</a></h2><p><code>run-validation</code> delegates to the same individual scripts that you can call
+directly. The per-step config files (e.g. <code>config/argo_profiles.yaml</code>) are
+passed through unchanged. The master config adds the <code>experiment</code> block that
+the individual scripts normally get from <code>.stats.yaml</code> or command-line flags.</p><p>For fine-grained control — custom flags, <code>--no-model</code>, <code>--save-residuals</code> —
+run the individual scripts directly instead of going through the orchestrator.</p></div><footer class=post-footer><ul class=post-tags></ul></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://bolding-bruggeman.com/oceanicu_3d/>Ocean Model Validation</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{const e=document.querySelector("html");e.dataset.theme==="dark"?(e.dataset.theme="light",localStorage.setItem("pref-theme","light")):(e.dataset.theme="dark",localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>
