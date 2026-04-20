@@ -16,13 +16,13 @@ CMIP6 forcing  ──► bc correct ──► bias-corrected forcing
                                         │
                          ┌─────────────┴─────────────┐
                    single-scenario              multi-scenario
-                  (trends, changes)       (SSP comparison)
+                  (trends, changes)       (ssp comparison)
 ```
 
 1. **Bias-correct** CMIP6 atmospheric forcing against ERA5 (or equivalent)
    so its statistical properties match the observational reference over the
    calibration period.
-2. **Run the ocean model** with the corrected forcing for each SSP scenario.
+2. **Run the ocean model** with the corrected forcing for each ssp scenario.
 3. **Analyse** the ocean output — trend maps, time series, regional means —
    for one scenario at a time or across multiple scenarios simultaneously.
 
@@ -250,7 +250,7 @@ analyses/areas/NS/scenarios/ssp245/
 
 ## Step 3 — Multi-scenario comparison
 
-`multi-scenario` loads output from multiple SSP runs and overlays them —
+`multi-scenario` loads output from multiple ssp runs and overlays them —
 time series, spatial change maps, spread envelopes.
 
 ### Config
@@ -266,11 +266,11 @@ model:
 variables: [temp, salt]
 
 scenarios:
-  - name: SSP1-2.6
+  - name: ssp1-2.6
     experiment: ssp126
-  - name: SSP2-4.5
+  - name: ssp2-4.5
     experiment: ssp245
-  - name: SSP5-8.5
+  - name: ssp5-8.5
     experiment: ssp585
 
 reference_period:
@@ -303,7 +303,7 @@ experiment names (e.g. `ssp126_ssp245_ssp585`).
 ```
 analyses/areas/NS/scenarios/ssp_all/
     plots/
-        temp_timeseries_comparison.png   — all SSPs on one axis
+        temp_timeseries_comparison.png   — all ssps on one axis
         temp_change_map_ssp585.png       — spatial change per scenario
         temp_spread_envelope.png         — min/max across scenarios
     tables/
