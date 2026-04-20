@@ -335,38 +335,6 @@ command.  For individual analysis types, run the dedicated scripts directly
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Required top-level sections: &lt;code&gt;experiment&lt;/code&gt;, &lt;code&gt;analyses&lt;/code&gt;, &lt;code&gt;output&lt;/code&gt;, &lt;code&gt;workflow&lt;/code&gt;.&lt;/p&gt;</description>
     </item>
     <item>
-      <title>Bias Correction</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/bias-correction/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/bias-correction/</guid>
-      <description>&lt;h1 id=&#34;bias-correction-guide&#34;&gt;Bias Correction Guide&lt;/h1&gt;
-&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
-&lt;p&gt;The bias correction workflow adjusts CMIP6 (or other) atmospheric forcing fields
-so their statistical properties match an observational reference (typically ERA5)
-over a calibration period.  The corrected output is used as forcing for future
-ocean model projections.&lt;/p&gt;
-&lt;p&gt;Two commands share the same YAML config:&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;Command&lt;/th&gt;
-          &lt;th&gt;Role&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;bc correct&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;Apply bias correction → write NetCDF output&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;bc diagnostics&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;Inspect the correction → write maps, seasonal cycles, trend plots, statistics table&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;Both can also be called via the aliases &lt;code&gt;bc-correct&lt;/code&gt; and &lt;code&gt;bc-diagnostics&lt;/code&gt;.&lt;/p&gt;</description>
-    </item>
-    <item>
       <title>Scenario Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/scenarios/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
