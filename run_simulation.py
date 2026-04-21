@@ -175,6 +175,19 @@ def _copy_file(src: Path, dst: Path, dry_run: bool) -> None:
         print(f"  copied {src.name}")
 
 
+def _conda_env_bin(conda_env: str) -> str | None:
+    """Return the bin/ directory of a named conda environment, or None."""
+    try:
+        result = subprocess.run(
+            ['conda', 'info', '--base'],
+            capture_output=True, text=True, check=True,
+        )
+        base = result.stdout.strip()
+        return str(Path(base) / 'envs' / conda_env / 'bin')
+    except Exception:
+        return None
+
+
 def _build_run_chunks_cmd(
     source_dir: Path,
     outdir: Path,
@@ -184,14 +197,22 @@ def _build_run_chunks_cmd(
     chunk_multiplier: int,
     conda_env: str | None,
     dry_run: bool,
-) -> list[str]:
-    """Return the full command list for run_chunks.py."""
-    cmd: list[str] = []
+) -> tuple[list[str], dict]:
+    """Return (command, extra_env) for run_chunks.py.
 
+    When conda_env is set the env's bin/ is prepended to PATH so that
+    both python and mpiexec resolve from the right environment — avoids
+    the 'pop_var_context' bash error that conda run triggers in subprocesses.
+    """
+    extra_env: dict = {}
     if conda_env:
-        cmd += ['conda', 'run', '-n', conda_env, '--no-capture-output']
+        bin_dir = _conda_env_bin(conda_env)
+        if bin_dir:
+            extra_env['PATH'] = bin_dir + ':' + os.environ.get('PATH', '')
+        else:
+            print(f"  WARNING: could not locate conda env {conda_env!r}; using current PATH")
 
-    cmd += [
+    cmd: list[str] = [
         'python',
         str(source_dir / 'run_chunks.py'),
         str(outdir / 'run_model.py'),   # script arg — inside outdir
@@ -211,7 +232,7 @@ def _build_run_chunks_cmd(
     if dry_run:
         cmd.append('--dryrun')
 
-    return cmd
+    return cmd, extra_env
 
 
 # ---------------------------------------------------------------------------
@@ -289,7 +310,7 @@ def run_one(run_cfg: dict, global_cfg: dict, source_dir: Path,
     if start_date:
         env['SIMULATION_START_DATE'] = str(start_date)
 
-    cmd = _build_run_chunks_cmd(
+    cmd, extra_env = _build_run_chunks_cmd(
         source_dir=source_dir,
         outdir=outdir,
         model_yaml=model_yaml,
@@ -299,7 +320,10 @@ def run_one(run_cfg: dict, global_cfg: dict, source_dir: Path,
         conda_env=conda_env,
         dry_run=dry_run,
     )
+    env.update(extra_env)
 
+    if extra_env.get('PATH'):
+        print(f"  PATH prefix: {extra_env['PATH'].split(':')[0]}")
     print(f"\n  Command:\n    {' '.join(cmd)}\n")
 
     if not dry_run:
