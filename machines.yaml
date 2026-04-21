@@ -1,0 +1,21 @@
+# Machine-specific environment variables for data folders.
+# Keyed by hostname (exact match, or prefix match for cluster nodes).
+# Run: python -c "import socket; print(socket.gethostname())" to find yours.
+
+orca:
+  env:
+    HYDROGRAPHY_FOLDER: /server/data/WOA
+    TPXO_FOLDER:        /server/data/TPXO9
+    METEO_FOLDER:       /data/ERA5/NA
+    RIVER_FOLDER:       /data/EMORID
+    RIVER_FILE:         EMORID_1990_2024.nc
+    FABM_FOLDER:        /data/FABM
+
+bb-server1:
+  env:
+    HYDROGRAPHY_FOLDER: /data/WOA
+    TPXO_FOLDER:        /data/TPXO9
+    RIVER_FOLDER:       /data/EMORID
+    RIVER_FILE:         EMORID_1990_2024.nc
+    FABM_FOLDER:        /data/FABM
+    METEO_FOLDER:       /data/BiasCorrected/MPI-ESM1-2-HR

@@ -1,0 +1,32 @@
+# NS simulation campaign — replace kb.bash
+#
+# Single run:
+#   python run_simulation.py ns_run.yaml
+#
+# Override from CLI:
+#   python run_simulation.py ns_run.yaml --experiment Sensitivity1
+#
+# Dry run (print what would happen):
+#   python run_simulation.py ns_run.yaml --dryrun
+
+base_outdir: "/data/{user}/{area}"
+conda_env: pygetm
+
+# Files copied to outdir (captured for reproducibility)
+copy:
+  - gotm.yaml
+
+# Dirs/files symlinked into outdir (needed for relative paths in model YAML)
+symlinks:
+  - Bathymetry
+
+# ── Simulation parameters ──────────────────────────────────────────────────
+area:       NS
+experiment: Baseline
+model_yaml: ns_validation.yaml
+np:         15
+initial_date: "2015-12-01"
+stop_date:    "2024-01-01"
+# start_date: "2020-01-01"   # uncomment to resume from a different date
+chunks:           annual      # annual | monthly | daily
+chunk_multiplier: 1
