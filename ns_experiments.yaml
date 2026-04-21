@@ -23,7 +23,8 @@ runs:
     experiment: Baseline
     model_yaml: ns_validation.yaml
     np: 15
-    # ERA5 is default — no env override needed
+    env:
+      METEO_FOLDER: "{ERA5_FOLDER}"
 
   - area: NS
     experiment: ssp585
@@ -31,7 +32,7 @@ runs:
     np: 15
     env:
       METEO_SOURCE: CMIP6
-      METEO_FOLDER: "{METEO_FOLDER}/{experiment}"
+      METEO_FOLDER: "{CMIP6_FOLDER}/{experiment}"
 
   - area: NS
     experiment: ssp126
@@ -39,4 +40,4 @@ runs:
     np: 15
     env:
       METEO_SOURCE: CMIP6
-      METEO_FOLDER: "{METEO_FOLDER}/{experiment}"
+      METEO_FOLDER: "{CMIP6_FOLDER}/{experiment}"
