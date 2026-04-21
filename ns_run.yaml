@@ -30,3 +30,9 @@ stop_date:    "2024-01-01"
 # start_date: "2020-01-01"   # uncomment to resume from a different date
 chunks:           annual      # annual | monthly | daily
 chunk_multiplier: 1
+
+# Set METEO_FOLDER for ERA5 (default) or CMIP6 runs
+env:
+  METEO_FOLDER: "{ERA5_FOLDER}"
+  # METEO_SOURCE: CMIP6
+  # METEO_FOLDER: "{CMIP6_FOLDER}/{experiment}"
