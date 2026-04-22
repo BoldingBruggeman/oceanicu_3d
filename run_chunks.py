@@ -241,7 +241,10 @@ def main():
             print(command)
             print(" ".join(command))
         else:
-            subprocess.run(command)
+            result = subprocess.run(command)
+            if result.returncode != 0:
+                print(f"\nERROR: chunk {i:03d} failed with exit code {result.returncode} — stopping.")
+                sys.exit(result.returncode)
 
         start = stop
 
