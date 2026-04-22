@@ -34,38 +34,44 @@ domain:
   rivers: True
   z0: 0.01
 momentum:
-  An: 100.
-  Am: 0.
-  cnpar: 1.
+  An: 100
+  Am: 0
+  cnpar: 1
   #advection: 1 # 1-6
   #advection_split: 1 # 1-3
   #coriolis: 1 #
   avmol: 1.8e-6
-vertical_coordinates: # 1 -> SIGMA, 2 -> GVC, 3-> AVC
+vertical_coordinates:
+  # 1 -> SIGMA, 2 -> GVC, 3-> AVC
   type: 2
   nz: 40
   ddu: 0.75
   ddl: 0.05
   Dgamma: 10.0
   gamma_surf: True
-internal_pressure: # 1-> BlumbergMeller, 2 -> ShchepetkinMcwilliams
+internal_pressure:
+  # 1-> BlumbergMeller, 2 -> ShchepetkinMcwilliams
   type: 2
-hydrography: # "constant", "WOA"
+hydrography:
+  # "constant", "WOA"
   source: "WOA" # "constant", "WOA", "CMEMS - to come"
   folder: Path(os.getenv("HYDROGRAPHY_FOLDER", "/data/WOA"))
-  temp: 15.
-  salt: 34.
+  temp: 15
+  salt: 34
 tides:
   folder: Path(os.getenv("TPXO_FOLDER", "/data/TPXO9"))
 meteo:
-  source: os.getenv("METEO_SOURCE", "ERA5")  # "ERA5" | "CMIP6"
+  source: os.getenv("METEO_SOURCE", "ERA5") # "ERA5" | "CMIP6"
   folder: Path(os.getenv("METEO_FOLDER", "/data/ERA5/NA"))
   evaporation: True
+  # ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
+  shortwave_method: -1
+  longwave_method: -2
 rivers:
   source: "emorid"
   folder: Path(os.getenv("RIVER_FOLDER", "/data/EMORID"))
   file: Path(os.getenv("RIVER_FILE", "EMORID_1990_2024.nc"))
-  threshold: 0.
+  threshold: 0
 fabm:
   file: os.getenv("FABM_YAML_FILE", None)
   folder: Path(os.getenv("FABM_FOLDER", "/data/FABM"))
@@ -76,9 +82,10 @@ simulation:
   runtype: 4 # 1 -> 2D, 2 -> 3D barotropic, 4 -> 3D baroclinic
   Dcrit: 0.5
   Dmin: 0.1
+  ObsKd: True
 runtime:
-  timestep: 40.
-  split_factor: 30.
+  timestep: 40
+  split_factor: 30
   output: True
   debug_output: False
 output:
