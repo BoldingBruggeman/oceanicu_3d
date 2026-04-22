@@ -35,7 +35,7 @@ python run_simulation.py ns_experiments.yaml --experiment Baseline --np 8
 
 ## Configuration files
 
-### Model YAML (`ns_validation.yaml`, `ena4_3d.yaml`, …)
+### Model YAML (`ns_model_config.yaml`, `ena4_3d.yaml`, …)
 
 Describes the physical setup: domain, forcing sources, output, switches.
 Values can reference environment variables:
@@ -58,7 +58,7 @@ Controls which experiments to run and when.
 ```yaml
 area:        NS
 experiment:  Baseline
-model_yaml:  ns_validation.yaml
+model_yaml:  ns_model_config.yaml
 np:          15
 initial_date: "2015-12-01"
 stop_date:    "2024-01-01"
@@ -86,12 +86,12 @@ symlinks: [Bathymetry]
 runs:
   - area: NS
     experiment: Baseline
-    model_yaml: ns_validation.yaml
+    model_yaml: ns_model_config.yaml
     np: 15
 
   - area: NS
     experiment: ssp585
-    model_yaml: ns_validation.yaml
+    model_yaml: ns_model_config.yaml
     np: 15
     env:
       METEO_SOURCE: CMIP6
@@ -165,7 +165,7 @@ After a completed run:
     lib/                  ← exact copy of lib/ used for this run
     run_model.py          ← exact run script used
     run_simulation.py     ← launcher used
-    ns_validation.yaml    ← model config used
+    ns_model_config.yaml    ← model config used
     gotm.yaml             ← GOTM config used
     Bathymetry -> ...     ← symlink to bathymetry directory
     2016/                 ← output for year 2016
@@ -186,7 +186,7 @@ Set `METEO_SOURCE` and `METEO_FOLDER` in the `env:` block of the run entry:
 ```yaml
 - area: NS
   experiment: ssp585
-  model_yaml: ns_validation.yaml
+  model_yaml: ns_model_config.yaml
   np: 15
   env:
     METEO_SOURCE: CMIP6

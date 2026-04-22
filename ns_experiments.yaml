@@ -22,14 +22,14 @@ chunk_multiplier: 1
 runs:
   - area: NS
     experiment: Baseline
-    model_yaml: ns_validation.yaml
+    model_yaml: ns_model_config.yaml
     np: 15
     env:
       METEO_FOLDER: "{ERA5_FOLDER}"
 
   - area: NS
     experiment: ssp585
-    model_yaml: ns_validation.yaml
+    model_yaml: ns_model_config.yaml
     np: 15
     env:
       METEO_SOURCE: CMIP6
@@ -37,7 +37,7 @@ runs:
 
   - area: NS
     experiment: ssp126
-    model_yaml: ns_validation.yaml
+    model_yaml: ns_model_config.yaml
     np: 15
     env:
       METEO_SOURCE: CMIP6

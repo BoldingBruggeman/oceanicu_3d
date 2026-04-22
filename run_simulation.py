@@ -32,7 +32,7 @@ Single run:
 
     area: NS
     experiment: Baseline
-    model_yaml: ns_validation.yaml
+    model_yaml: ns_model_config.yaml
     np: 15
     initial_date: "2015-12-01"
     stop_date:    "2024-01-01"
@@ -60,7 +60,7 @@ Multiple runs (shared settings + per-run overrides):
     runs:
       - area: NS
         experiment: Baseline
-        model_yaml: ns_validation.yaml
+        model_yaml: ns_model_config.yaml
         np: 15
       - area: ENA4
         experiment: ObsKd
