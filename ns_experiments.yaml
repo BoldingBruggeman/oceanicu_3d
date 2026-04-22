@@ -12,7 +12,8 @@ copy:
   - gotm.yaml
   - output.yaml
 symlinks:
-  - Bathymetry
+  - name: Bathymetry
+    target: "{BATHYMETRY_FOLDER}"
 
 initial_date: "2015-12-01"
 stop_date:    "2024-01-01"

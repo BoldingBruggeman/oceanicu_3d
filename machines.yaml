@@ -4,19 +4,21 @@
 
 orca:
   env:
-    HYDROGRAPHY_FOLDER: /server/data/WOA
-    TPXO_FOLDER:        /server/data/TPXO9
-    ERA5_FOLDER:        /data/ERA5/NA
-    RIVER_FOLDER:       /data/EMORID
-    RIVER_FILE:         EMORID_1990_2024.nc
-    FABM_FOLDER:        /data/FABM
+    HYDROGRAPHY_FOLDER:  /server/data/WOA
+    TPXO_FOLDER:         /server/data/TPXO9
+    ERA5_FOLDER:         /data/ERA5/NA
+    RIVER_FOLDER:        /data/EMORID
+    RIVER_FILE:          EMORID_1990_2024.nc
+    FABM_FOLDER:         /data/FABM
+    BATHYMETRY_FOLDER:   /data/Bathymetry/NS
 
 bb-server1:
   env:
-    HYDROGRAPHY_FOLDER: /data/WOA
-    TPXO_FOLDER:        /data/TPXO9
-    ERA5_FOLDER:        /data/ERA5/NA
-    CMIP6_FOLDER:       /data/BiasCorrected/MPI-ESM1-2-HR
-    RIVER_FOLDER:       /data/EMORID
-    RIVER_FILE:         EMORID_1990_2024.nc
-    FABM_FOLDER:        /data/FABM
+    HYDROGRAPHY_FOLDER:  /data/WOA
+    TPXO_FOLDER:         /data/TPXO9
+    ERA5_FOLDER:         /data/ERA5/NA
+    CMIP6_FOLDER:        /data/BiasCorrected/MPI-ESM1-2-HR
+    RIVER_FOLDER:        /data/EMORID
+    RIVER_FILE:          EMORID_1990_2024.nc
+    FABM_FOLDER:         /data/FABM
+    BATHYMETRY_FOLDER:   /data/Bathymetry/NS

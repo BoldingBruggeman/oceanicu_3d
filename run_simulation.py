@@ -44,7 +44,8 @@ Single run:
     copy:                        # files to copy into outdir
       - gotm.yaml
     symlinks:                    # dirs/files to symlink into outdir
-      - Bathymetry
+      - name: Bathymetry         # link name in outdir
+        target: "{BATHYMETRY_FOLDER}"  # resolved from machines.yaml
 
 Multiple runs (shared settings + per-run overrides):
 
@@ -152,20 +153,19 @@ def _setup_outdir(outdir: Path, source_dir: Path,
         else:
             print(f"  SKIP  {name} (not found)")
 
-    # Create symlinks for large dirs / data files
-    for name in symlinks:
-        src = source_dir / name
-        dst = outdir / name
+    # Create symlinks — symlink_pairs is a list of (link_name, target_path)
+    for link_name, target in symlinks:
+        dst = outdir / link_name
         if dry_run:
-            print(f"  symlink  {src}  →  {dst}")
+            print(f"  symlink  {link_name}  →  {target}")
         else:
-            if dst.exists() or dst.is_symlink():
-                dst.unlink() if dst.is_symlink() else None
-            if src.exists():
-                dst.symlink_to(src.resolve())
-                print(f"  symlinked {name}")
+            if dst.is_symlink():
+                dst.unlink()
+            if target.exists() or target.is_symlink():
+                dst.symlink_to(target.resolve() if target.exists() else target)
+                print(f"  symlinked {link_name} → {target}")
             else:
-                print(f"  SKIP symlink {name} (source not found)")
+                print(f"  SKIP symlink {link_name} → {target} (not found)")
 
 
 def _copy_file(src: Path, dst: Path, dry_run: bool) -> None:
@@ -265,10 +265,36 @@ def run_one(run_cfg: dict, global_cfg: dict, source_dir: Path,
     base_outdir  = cfg['base_outdir']
     conda_env    = cfg.get('conda_env')
     copy_files   = cfg.get('copy', [])
-    symlinks     = cfg.get('symlinks', [])
+    symlink_cfg  = cfg.get('symlinks', [])
     dry_run      = cfg.get('dryrun', False)
 
     outdir = _resolve_outdir(base_outdir, area) / experiment
+
+    # Build env first — needed for symlink target expansion.
+    user = os.getenv('USER', os.getenv('LOGNAME', 'user'))
+    _tmpl = dict(user=user, area=area, experiment=experiment)
+    machine_env = _load_machine_env(machines_file)
+    # Unknown keys are left as-is so dry-runs work on machines that lack some vars.
+    class _SafeDict(dict):
+        def __missing__(self, key): return '{' + key + '}'
+    _expand = _SafeDict({**_tmpl, **machine_env})
+
+    # Resolve symlink targets.
+    # Each entry can be a bare name (resolved relative to source_dir) or a
+    # dict {name: X, target: Y}.  Targets support {TEMPLATE} expansion so
+    # machine-specific paths (e.g. {BATHYMETRY_FOLDER}) work correctly.
+    symlink_pairs: list[tuple[str, Path]] = []
+    for entry in symlink_cfg:
+        if isinstance(entry, dict):
+            lname  = str(entry['name'])
+            target = Path(str(entry['target']).format_map(_expand))
+        else:
+            expanded = str(entry).format_map(_expand)
+            target   = Path(expanded)
+            lname    = target.name if target.is_absolute() else expanded
+            if not target.is_absolute():
+                target = source_dir / expanded
+        symlink_pairs.append((lname, target))
 
     print(f"\n{'='*60}")
     print(f"  area:       {area}")
@@ -283,20 +309,11 @@ def run_one(run_cfg: dict, global_cfg: dict, source_dir: Path,
 
     # Set up the experiment directory (skip if folder already prepared)
     if not cfg.get('skip_setup'):
-        _setup_outdir(outdir, source_dir, model_yaml, copy_files, symlinks, dry_run)
+        _setup_outdir(outdir, source_dir, model_yaml, copy_files, symlink_pairs, dry_run)
     else:
         print(f"\n  Skipping setup — using existing: {outdir}")
 
-    # Build env: machine defaults → per-run overrides
-    # Values support {user}, {area}, {experiment} substitution.
-    user = os.getenv('USER', os.getenv('LOGNAME', 'user'))
-    _tmpl = dict(user=user, area=area, experiment=experiment)
-    machine_env = _load_machine_env(machines_file)
-    # Expand {user}/{area}/{experiment} AND any machine env var (e.g. {BC_METEO_BASE}).
-    # Unknown keys are left as-is so dry-runs work on machines that lack some vars.
-    class _SafeDict(dict):
-        def __missing__(self, key): return '{' + key + '}'
-    _expand = _SafeDict({**_tmpl, **machine_env})
+    # Build remaining env for subprocess.
     run_env = {k: str(v).format_map(_expand) for k, v in (cfg.get('env') or {}).items()}
     env = os.environ.copy()
     env.update(machine_env)
