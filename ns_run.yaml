@@ -15,6 +15,7 @@ conda_env: pygetm
 # Files copied to outdir (captured for reproducibility)
 copy:
   - gotm.yaml
+  - output.yaml
 
 # Dirs/files symlinked into outdir (needed for relative paths in model YAML)
 symlinks:

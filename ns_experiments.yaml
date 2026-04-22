@@ -10,6 +10,7 @@ conda_env: pygetm
 
 copy:
   - gotm.yaml
+  - output.yaml
 symlinks:
   - Bathymetry
 

@@ -280,8 +280,11 @@ def run_one(run_cfg: dict, global_cfg: dict, source_dir: Path,
         print("  [DRY RUN]")
     print(f"{'='*60}")
 
-    # Set up the experiment directory
-    _setup_outdir(outdir, source_dir, model_yaml, copy_files, symlinks, dry_run)
+    # Set up the experiment directory (skip if folder already prepared)
+    if not cfg.get('skip_setup'):
+        _setup_outdir(outdir, source_dir, model_yaml, copy_files, symlinks, dry_run)
+    else:
+        print(f"\n  Skipping setup — using existing: {outdir}")
 
     # Build env: machine defaults → per-run overrides
     # Values support {user}, {area}, {experiment} substitution.
@@ -326,13 +329,16 @@ def run_one(run_cfg: dict, global_cfg: dict, source_dir: Path,
         print(f"  PATH prefix: {extra_env['PATH'].split(':')[0]}")
     print(f"\n  Command:\n    {' '.join(cmd)}\n")
 
-    if not dry_run:
-        # Save this launcher script and sim config to outdir for reproducibility
+    if dry_run or cfg.get('prepare_only'):
+        return
+
+    if not cfg.get('skip_setup'):
         shutil.copy2(source_dir / 'run_simulation.py', outdir / 'run_simulation.py')
-        result = subprocess.run(cmd, cwd=outdir, env=env)
-        if result.returncode != 0:
-            print(f"\nERROR: run_chunks.py exited with code {result.returncode}")
-            sys.exit(result.returncode)
+
+    result = subprocess.run(cmd, cwd=outdir, env=env)
+    if result.returncode != 0:
+        print(f"\nERROR: run_chunks.py exited with code {result.returncode}")
+        sys.exit(result.returncode)
 
 
 # ---------------------------------------------------------------------------
@@ -352,6 +358,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument('--np',         type=int, help='Override number of MPI processes')
     p.add_argument('--dryrun',     action='store_true',
                    help='Print commands without executing')
+    g = p.add_mutually_exclusive_group()
+    g.add_argument('--prepare',    action='store_true',
+                   help='Set up outdir (copy/symlink) but do not run')
+    g.add_argument('--skip-setup', action='store_true',
+                   help='Skip setup and run in an already-prepared outdir')
     p.add_argument('--machines',   type=Path,
                    help='Path to machines.yaml (default: machines.yaml next to this script)')
     return p.parse_args()
@@ -373,7 +384,11 @@ def main() -> None:
     if args.np:
         cli_overrides['np']         = args.np
     if args.dryrun:
-        cli_overrides['dryrun']     = True
+        cli_overrides['dryrun']       = True
+    if args.prepare:
+        cli_overrides['prepare_only'] = True
+    if args.skip_setup:
+        cli_overrides['skip_setup']   = True
 
     # Separate global (shared) config from per-run list
     runs = sim_cfg.pop('runs', None)
