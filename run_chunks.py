@@ -190,7 +190,6 @@ def main():
             stop = start.replace(year=yy, month=mm)
         else:
             stop = start.replace(year=start.year + args.chunk_multiplier)
-            print("kaj", stop.month)
             # the following years are run from january to jauary
             # can be used as a spinup - e.g. if start is december 1.
             if stop.month != 1:
