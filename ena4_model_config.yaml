@@ -1,4 +1,4 @@
-# YAML formatted configuration file for the ena8-setup:
+# YAML formatted configuration file for the ena4-setup:
 #
 # The YAML-file is read by the runscript into a dictionary.
 # This dictionary is used for all configuration within the
@@ -25,10 +25,10 @@
 # be reflected when the configuration is printed.
 #
 
-setup: "ena8"
+setup: "ena4"
 #setup_dir = Path.cwd()
 domain:
-  path: Path("Bathymetry") / "bathymetry_ena8.nc"
+  path: Path("Bathymetry") / "bathymetry_ena4.nc"
   name: "H"
   boundaries: True
   rivers: True
@@ -58,7 +58,7 @@ hydrography: # "constant", "WOA"
 tides:
   folder: Path(os.getenv("TPXO_FOLDER", "/data/TPXO9"))
 meteo:
-  source: "ERA5" # "ERA5", "CMIP6"
+  source: os.getenv("METEO_SOURCE", "ERA5")  # "ERA5" | "CMIP6"
   folder: Path(os.getenv("METEO_FOLDER", "/data/ERA5/NA"))
   evaporation: True
 rivers:
@@ -77,7 +77,7 @@ simulation:
   Dcrit: 0.5
   Dmin: 0.1
 runtime:
-  timestep: 20.
+  timestep: 40.
   split_factor: 30.
   output: True
   debug_output: False
