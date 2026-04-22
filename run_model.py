@@ -153,7 +153,11 @@ def create_simulation(
         # sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)
         sim.radiation.A.set(0.7)
         sim.radiation.kc1.set(0.54)  # 1/g1 in gotm
-        sim.radiation.kc2.set(3.23)
+        if not cfg.simulation.ObsKd:
+            sim.radiation.kc2.set(3.23)
+        else:
+            attenuation_path = "/data/Kd490/KD490_clim.nc"
+            sim.radiation.kc2.set(pygetm.input.from_nc(attenuation_path, "KD490_filled"),climatology=True)
 
     cfg_fabm.configure(sim, cfg, imonth)
 
@@ -376,6 +380,8 @@ def parse_args():
             cfg.hydrography.folder = eval(cfg.hydrography.folder)
 
     if cfg.meteo.source is not None:
+        if isinstance(cfg.meteo.source, str) and '(' in cfg.meteo.source:
+            cfg.meteo.source = eval(cfg.meteo.source)
         if cfg.meteo.source == "CMIP6":
             cfg.simulation.calendar = "noleap"
         if args.meteo_dir:

@@ -61,6 +61,9 @@ meteo:
   source: os.getenv("METEO_SOURCE", "ERA5")  # "ERA5" | "CMIP6"
   folder: Path(os.getenv("METEO_FOLDER", "/data/ERA5/NA"))
   evaporation: True
+  # ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
+  shortwave_method: -1 
+  longwave_method: -2
 rivers:
   source: "emorid"
   folder: Path(os.getenv("RIVER_FOLDER", "/data/EMORID"))
@@ -76,6 +79,7 @@ simulation:
   runtype: 4 # 1 -> 2D, 2 -> 3D barotropic, 4 -> 3D baroclinic
   Dcrit: 0.5
   Dmin: 0.1
+  ObsKd: True
 runtime:
   timestep: 60.
   split_factor: 30.
