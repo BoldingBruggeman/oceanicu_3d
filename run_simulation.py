@@ -121,7 +121,8 @@ def _setup_outdir(outdir: Path, source_dir: Path,
     print(f"\n  Setting up: {outdir}")
 
     if outdir.exists() and not dry_run:
-        print(f"  WARNING: {outdir} already exists — contents may be overwritten")
+        print(f"ERROR: {outdir} already exists — move or delete it first")
+        sys.exit(1)
     if not dry_run:
         outdir.mkdir(parents=True, exist_ok=True)
 
