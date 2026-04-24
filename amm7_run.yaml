@@ -23,7 +23,7 @@ symlinks:
     target: "{BATHYMETRY_FOLDER}"
 
 # ── Simulation parameters ──────────────────────────────────────────────────
-area:       NS
+area:       AMM7
 experiment: Baseline
 model_yaml: amm7_model_config.yaml
 np:         15
