@@ -397,6 +397,22 @@ pressure equals the saturation vapour pressure.  ERA5 stores this as the 2 m
 dew-point temperature.&lt;/p&gt;</description>
     </item>
     <item>
+      <title>Radiation Bias Correction</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/radiation-bc/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/radiation-bc/</guid>
+      <description>&lt;h1 id=&#34;radiation-bias-correction-guide&#34;&gt;Radiation Bias Correction Guide&lt;/h1&gt;
+&lt;h2 id=&#34;background-downwelling-vs-net-radiation&#34;&gt;Background: downwelling vs net radiation&lt;/h2&gt;
+&lt;p&gt;Surface radiation comes in two forms relevant for bias correction:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Downwelling radiation&lt;/strong&gt; is what the atmosphere delivers to the surface —
+shortwave (&lt;code&gt;ssrd&lt;/code&gt; / &lt;code&gt;rsds&lt;/code&gt;) from the sun and longwave (&lt;code&gt;strd&lt;/code&gt; / &lt;code&gt;rlds&lt;/code&gt;) from
+greenhouse gases and clouds.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Net radiation&lt;/strong&gt; is what the surface actually exchanges after reflection and
+re-emission.  For shortwave this is &lt;code&gt;ssr = ssrd − reflected SW&lt;/code&gt;; for longwave
+&lt;code&gt;str = strd − surface upwelling LW&lt;/code&gt;.  Net radiation is the physically relevant
+quantity for the ocean heat balance.&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>River Flow and Nutrient Load Projection</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/river-projection/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
