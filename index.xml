@@ -6,12 +6,12 @@
     <description>Recent content on Ocean Model Validation</description>
     <generator>Hugo -- 0.155.3</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 20 Apr 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 30 Apr 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AMM7 — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 30 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</guid>
       <description>&lt;h1 id=&#34;amm7-analysis-overview&#34;&gt;AMM7 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;AMM7&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -30,7 +30,7 @@
     <item>
       <title>EAN4 — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ean4/overview/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 30 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ean4/overview/</guid>
       <description>&lt;h1 id=&#34;ean4-analysis-overview&#34;&gt;EAN4 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;EAN4&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -45,7 +45,7 @@
     <item>
       <title>ENA4 — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4/overview/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 30 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4/overview/</guid>
       <description>&lt;h1 id=&#34;ena4-analysis-overview&#34;&gt;ENA4 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA4&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -57,7 +57,7 @@
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -79,25 +79,25 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/&#34;&gt;Adaptive_2&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/&#34;&gt;Adaptive_2&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;</description>
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;</description>
     </item>
     <item>
       <title>ENA8 — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8/overview/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 30 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8/overview/</guid>
       <description>&lt;h1 id=&#34;ena8-analysis-overview&#34;&gt;ENA8 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA8&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -109,7 +109,7 @@
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -131,7 +131,7 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
@@ -166,7 +166,7 @@
     <item>
       <title>NS — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 30 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</guid>
       <description>&lt;h1 id=&#34;ns-analysis-overview&#34;&gt;NS Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NS&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -175,7 +175,9 @@
 &lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;h3 id=&#34;ranking&#34;&gt;Ranking&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Psal_Ices experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ranking-horizon_surface-psal_ices.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;Salt experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ranking-horizon_surface-salt_surface.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Temp_Ices experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ranking-horizon_surface-temp_ices.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ranking-horizon_surface-temp_surface.png&#34;&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -192,11 +194,25 @@
   &lt;/thead&gt;
   &lt;tbody&gt;
       &lt;tr&gt;
+          &lt;td&gt;PSAL_ICES&lt;/td&gt;
+          &lt;td&gt;ICES point observations&lt;/td&gt;
+          &lt;td&gt;2.613&lt;/td&gt;
+          &lt;td&gt;+0.548&lt;/td&gt;
+          &lt;td&gt;0.95&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
           &lt;td&gt;SALT&lt;/td&gt;
           &lt;td&gt;CCI-SSS&lt;/td&gt;
           &lt;td&gt;1.943&lt;/td&gt;
           &lt;td&gt;+0.476&lt;/td&gt;
           &lt;td&gt;0.84&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TEMP_ICES&lt;/td&gt;
+          &lt;td&gt;ICES point observations&lt;/td&gt;
+          &lt;td&gt;1.533&lt;/td&gt;
+          &lt;td&gt;-0.375&lt;/td&gt;
+          &lt;td&gt;0.91&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;TEMP&lt;/td&gt;
@@ -215,7 +231,7 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
@@ -594,6 +610,54 @@ for one scenario at a time or across multiple scenarios simultaneously.&lt;/li&g
 &lt;p&gt;Aliases: &lt;code&gt;bc-correct&lt;/code&gt;, &lt;code&gt;bc-diagnostics&lt;/code&gt;.&lt;/p&gt;</description>
     </item>
     <item>
+      <title>Humidity Bias Correction</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/humidity-bc/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/humidity-bc/</guid>
+      <description>&lt;h1 id=&#34;humidity-bias-correction-guide&#34;&gt;Humidity Bias Correction Guide&lt;/h1&gt;
+&lt;h2 id=&#34;background-two-ways-to-express-atmospheric-humidity&#34;&gt;Background: two ways to express atmospheric humidity&lt;/h2&gt;
+&lt;p&gt;The atmosphere can hold a limited amount of water vapour, and that limit rises
+strongly with temperature.  Near-surface humidity is routinely reported in two
+different forms:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Dew-point temperature&lt;/strong&gt; (&lt;code&gt;d2m&lt;/code&gt;, unit K or °C) is the temperature to which a
+parcel of air must be cooled at constant pressure before water vapour begins to
+condense.  At the dew point the air is exactly saturated — its actual vapour
+pressure equals the saturation vapour pressure.  ERA5 stores this as the 2 m
+dew-point temperature.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>River Flow and Nutrient Load Projection</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/river-projection/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/river-projection/</guid>
+      <description>&lt;h1 id=&#34;river-flow-and-nutrient-load-projection-guide&#34;&gt;River Flow and Nutrient Load Projection Guide&lt;/h1&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;p&gt;This guide describes how to project future river flows and nutrient loadings
+using the &lt;strong&gt;delta-change method&lt;/strong&gt;: bias-corrected gridded precipitation (P) and
+evapotranspiration (E) from CMIP6 are used to scale the observed seasonal
+discharge cycle from the EMORID dataset forward in time.  Nutrient loads are
+then computed by multiplying projected discharge by an observed
+flow-weighted mean concentration.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;EMORID observed Q + nutrients
+        │
+        ├─── monthly Q climatology ──────────────────────────┐
+        │    (calibration period)                            │
+        │                                                    ▼
+ERA5 P, E (reference)                            Q_future = Q_clim(month) × ΔPE(t)
+        │                                                    │
+        └─── P–E climatology ────────────────► ΔPE(t)       │
+             (calibration period, denominator)               │
+                                                             │
+BC future P, E (CMIP6)                                       ▼
+        │                                        nutrient loads = Q_future × FWMC
+        └─── future P–E ──────────────────────► (numerator)
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;command&#34;&gt;Command&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection --config config/river_projection.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection --config config/river_projection.yaml --scenario ssp585
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection --config config/river_projection.yaml --dry-run
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Config on GitHub: &lt;a href=&#34;https://github.com/bolding/stats/blob/main/config/river_projection.yaml&#34;&gt;&lt;code&gt;config/river_projection.yaml&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>Update From Remote</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/update-from-remote/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -642,6 +706,10 @@ All subcommands default to a &lt;strong&gt;dry run&lt;/strong&gt; — add &lt;co
           &lt;td&gt;&lt;code&gt;sync&lt;/code&gt;&lt;/td&gt;
           &lt;td&gt;Rsync the remote analyses tree to a local directory&lt;/td&gt;
       &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;import-stats&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Import existing CSV statistics files into &lt;code&gt;statistics.db&lt;/code&gt;&lt;/td&gt;
+      &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h2 id=&#34;clean&#34;&gt;clean&lt;/h2&gt;
@@ -682,6 +750,55 @@ multiple analysis scripts run in parallel:&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;--base-dir&lt;/code&gt; defaults to &lt;code&gt;./analyses&lt;/code&gt;.&lt;/p&gt;</description>
     </item>
     <item>
+      <title>Statistics Database</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/statistics-db/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/statistics-db/</guid>
+      <description>&lt;h1 id=&#34;statistics-database-guide&#34;&gt;Statistics Database Guide&lt;/h1&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Every analysis script writes its results to human-readable TXT/CSV files inside
+the &lt;code&gt;analyses/&lt;/code&gt; tree &lt;strong&gt;and&lt;/strong&gt; records the same numbers in a SQLite database at
+&lt;code&gt;analyses/statistics.db&lt;/code&gt;.  The database makes it easy to compare experiments,
+track how metrics change over time, and query across areas and variables without
+parsing text files.&lt;/p&gt;
+&lt;p&gt;The database is managed by &lt;code&gt;lib/stats_db.py&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;tables&#34;&gt;Tables&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Table&lt;/th&gt;
+          &lt;th&gt;Purpose&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;statistics&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Core metrics from 2-D gridded, 3-D, and profile analyses&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;monthly_statistics&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Month-by-month breakdown (child of &lt;code&gt;statistics&lt;/code&gt;)&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;tidal_statistics&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Tidal constituent summary aggregated across stations&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;mle_rankings&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;MLE cross-experiment ranking rows&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;bc_statistics&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Bias-correction calibration and future-period metrics&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;statistics&#34;&gt;statistics&lt;/h3&gt;
+&lt;p&gt;One row per &lt;em&gt;(area, experiment, variable, period, layer, model, obs_source,
+depth_label)&lt;/em&gt; combination.  A &lt;code&gt;UNIQUE&lt;/code&gt; constraint on those eight columns means
+re-running an analysis &lt;strong&gt;upserts&lt;/strong&gt; the row rather than duplicating it.&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>Reporting</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/reporting/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -704,42 +821,125 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
     <item>
       <title>AMM7</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 30 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</guid>
       <description>AMM7 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>EAN4</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ean4/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 30 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ean4/</guid>
       <description>EAN4 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>ENA4</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ena4/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 30 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ena4/</guid>
       <description>ENA4 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>ENA8</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ena8/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 30 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ena8/</guid>
       <description>ENA8 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>NS</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 30 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</guid>
       <description>NS modeling area — validation results and experiment overview.</description>
     </item>
     <item>
+      <title>MLE Comparison — NS</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-mle-comparison/</link>
+      <pubDate>Tue, 21 Apr 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-mle-comparison/</guid>
+      <description>&lt;h1 id=&#34;mle-cross-experiment-comparison--ns&#34;&gt;MLE Cross-Experiment Comparison — NS&lt;/h1&gt;
+&lt;p&gt;SVD-reduced maximum-likelihood ranking of model experiments against a common observation footprint.&lt;/p&gt;
+&lt;h2 id=&#34;ranking&#34;&gt;Ranking&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;experiment&lt;/th&gt;
+          &lt;th&gt;log_likelihood&lt;/th&gt;
+          &lt;th&gt;rank&lt;/th&gt;
+          &lt;th&gt;delta_log_L&lt;/th&gt;
+          &lt;th&gt;aic&lt;/th&gt;
+          &lt;th&gt;explained_variance_captured&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Adaptive_1&lt;/td&gt;
+          &lt;td&gt;-0.4931060701266537&lt;/td&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;0.0&lt;/td&gt;
+          &lt;td&gt;2.9862121402533073&lt;/td&gt;
+          &lt;td&gt;0.9995992011786063&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Adaptive_2&lt;/td&gt;
+          &lt;td&gt;-0.49384210921662985&lt;/td&gt;
+          &lt;td&gt;2&lt;/td&gt;
+          &lt;td&gt;-0.0007360390899761593&lt;/td&gt;
+          &lt;td&gt;2.9876842184332597&lt;/td&gt;
+          &lt;td&gt;0.9995992011786063&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Adaptive_3&lt;/td&gt;
+          &lt;td&gt;-0.49426420996128145&lt;/td&gt;
+          &lt;td&gt;3&lt;/td&gt;
+          &lt;td&gt;-0.0011581398346277583&lt;/td&gt;
+          &lt;td&gt;2.988528419922563&lt;/td&gt;
+          &lt;td&gt;0.9995992011786063&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Baseline&lt;/td&gt;
+          &lt;td&gt;-0.4963875364067734&lt;/td&gt;
+          &lt;td&gt;4&lt;/td&gt;
+          &lt;td&gt;-0.003281466280119716&lt;/td&gt;
+          &lt;td&gt;2.9927750728135467&lt;/td&gt;
+          &lt;td&gt;0.9995992011786063&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;SSR_STR&lt;/td&gt;
+          &lt;td&gt;-0.4987738325300034&lt;/td&gt;
+          &lt;td&gt;5&lt;/td&gt;
+          &lt;td&gt;-0.005667762403349708&lt;/td&gt;
+          &lt;td&gt;2.997547665060007&lt;/td&gt;
+          &lt;td&gt;0.9995992011786063&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;ObsKd&lt;/td&gt;
+          &lt;td&gt;-0.5104420517248947&lt;/td&gt;
+          &lt;td&gt;6&lt;/td&gt;
+          &lt;td&gt;-0.017335981598240957&lt;/td&gt;
+          &lt;td&gt;3.0208841034497893&lt;/td&gt;
+          &lt;td&gt;0.9995992011786063&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;SSRD_STRD&lt;/td&gt;
+          &lt;td&gt;-0.5131841900337638&lt;/td&gt;
+          &lt;td&gt;7&lt;/td&gt;
+          &lt;td&gt;-0.020078119907110115&lt;/td&gt;
+          &lt;td&gt;3.0263683800675274&lt;/td&gt;
+          &lt;td&gt;0.9995992011786063&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;diagnostic-plots&#34;&gt;Diagnostic Plots&lt;/h2&gt;
+&lt;p&gt;&lt;img alt=&#34;mode_loadings_mode0&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-mle-comparison/mode_loadings_mode0.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;per_mode_contributions&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-mle-comparison/per_mode_contributions.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;scree_plot&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-mle-comparison/scree_plot.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>NS - Experiment Adaptive_1</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-1/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 21 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-1/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-adaptive_1&#34;&gt;NS - Experiment Adaptive_1&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -747,7 +947,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_1
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -758,6 +958,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
           &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
           &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
+          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -770,6 +972,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;1.3715&lt;/td&gt;
           &lt;td&gt;1.9973&lt;/td&gt;
           &lt;td&gt;1.3349&lt;/td&gt;
+          &lt;td&gt;2.5983&lt;/td&gt;
+          &lt;td&gt;1.5157&lt;/td&gt;
           &lt;td&gt;1.9663&lt;/td&gt;
           &lt;td&gt;1.0238&lt;/td&gt;
           &lt;td&gt;1.0278&lt;/td&gt;
@@ -780,6 +984,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;-0.5514&lt;/td&gt;
           &lt;td&gt;-0.6306&lt;/td&gt;
           &lt;td&gt;-0.7386&lt;/td&gt;
+          &lt;td&gt;0.5417&lt;/td&gt;
+          &lt;td&gt;-0.3820&lt;/td&gt;
           &lt;td&gt;0.2989&lt;/td&gt;
           &lt;td&gt;0.0755&lt;/td&gt;
           &lt;td&gt;0.1374&lt;/td&gt;
@@ -790,6 +996,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;0.9200&lt;/td&gt;
           &lt;td&gt;0.4578&lt;/td&gt;
           &lt;td&gt;0.9196&lt;/td&gt;
+          &lt;td&gt;0.9533&lt;/td&gt;
+          &lt;td&gt;0.9148&lt;/td&gt;
           &lt;td&gt;0.8258&lt;/td&gt;
           &lt;td&gt;0.8685&lt;/td&gt;
           &lt;td&gt;0.8820&lt;/td&gt;
@@ -800,6 +1008,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;524&lt;/td&gt;
           &lt;td&gt;469&lt;/td&gt;
+          &lt;td&gt;2,236,819&lt;/td&gt;
+          &lt;td&gt;2,246,185&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -813,7 +1023,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
     <item>
       <title>NS - Experiment Adaptive_2</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-2/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 21 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-2/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-adaptive_2&#34;&gt;NS - Experiment Adaptive_2&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -821,7 +1031,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_2
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -832,6 +1042,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
           &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
           &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
+          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -844,6 +1056,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;1.4043&lt;/td&gt;
           &lt;td&gt;1.9954&lt;/td&gt;
           &lt;td&gt;1.3504&lt;/td&gt;
+          &lt;td&gt;2.6006&lt;/td&gt;
+          &lt;td&gt;1.5284&lt;/td&gt;
           &lt;td&gt;1.9626&lt;/td&gt;
           &lt;td&gt;1.0337&lt;/td&gt;
           &lt;td&gt;1.0368&lt;/td&gt;
@@ -854,6 +1068,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;-0.5764&lt;/td&gt;
           &lt;td&gt;-0.6272&lt;/td&gt;
           &lt;td&gt;-0.7443&lt;/td&gt;
+          &lt;td&gt;0.5477&lt;/td&gt;
+          &lt;td&gt;-0.3879&lt;/td&gt;
           &lt;td&gt;0.2917&lt;/td&gt;
           &lt;td&gt;0.0760&lt;/td&gt;
           &lt;td&gt;0.1376&lt;/td&gt;
@@ -864,6 +1080,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;0.9168&lt;/td&gt;
           &lt;td&gt;0.4589&lt;/td&gt;
           &lt;td&gt;0.9178&lt;/td&gt;
+          &lt;td&gt;0.9533&lt;/td&gt;
+          &lt;td&gt;0.9138&lt;/td&gt;
           &lt;td&gt;0.8263&lt;/td&gt;
           &lt;td&gt;0.8670&lt;/td&gt;
           &lt;td&gt;0.8807&lt;/td&gt;
@@ -874,6 +1092,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;524&lt;/td&gt;
           &lt;td&gt;469&lt;/td&gt;
+          &lt;td&gt;2,236,727&lt;/td&gt;
+          &lt;td&gt;2,246,093&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -887,7 +1107,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
     <item>
       <title>NS - Experiment Adaptive_3</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-3/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 21 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-3/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-adaptive_3&#34;&gt;NS - Experiment Adaptive_3&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -895,7 +1115,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_3
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -906,6 +1126,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
           &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
           &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
+          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -918,6 +1140,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;1.3662&lt;/td&gt;
           &lt;td&gt;2.0022&lt;/td&gt;
           &lt;td&gt;1.3333&lt;/td&gt;
+          &lt;td&gt;2.6013&lt;/td&gt;
+          &lt;td&gt;1.5151&lt;/td&gt;
           &lt;td&gt;1.9744&lt;/td&gt;
           &lt;td&gt;1.0228&lt;/td&gt;
           &lt;td&gt;1.0268&lt;/td&gt;
@@ -928,6 +1152,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;-0.5475&lt;/td&gt;
           &lt;td&gt;-0.6326&lt;/td&gt;
           &lt;td&gt;-0.7528&lt;/td&gt;
+          &lt;td&gt;0.5436&lt;/td&gt;
+          &lt;td&gt;-0.3804&lt;/td&gt;
           &lt;td&gt;0.3048&lt;/td&gt;
           &lt;td&gt;0.0723&lt;/td&gt;
           &lt;td&gt;0.1344&lt;/td&gt;
@@ -938,6 +1164,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;0.9205&lt;/td&gt;
           &lt;td&gt;0.4560&lt;/td&gt;
           &lt;td&gt;0.9208&lt;/td&gt;
+          &lt;td&gt;0.9532&lt;/td&gt;
+          &lt;td&gt;0.9145&lt;/td&gt;
           &lt;td&gt;0.8242&lt;/td&gt;
           &lt;td&gt;0.8682&lt;/td&gt;
           &lt;td&gt;0.8817&lt;/td&gt;
@@ -948,6 +1176,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;524&lt;/td&gt;
           &lt;td&gt;469&lt;/td&gt;
+          &lt;td&gt;2,236,795&lt;/td&gt;
+          &lt;td&gt;2,246,161&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -961,7 +1191,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
     <item>
       <title>NS - Experiment Baseline</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-baseline/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 21 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-baseline/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-baseline&#34;&gt;NS - Experiment Baseline&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -969,7 +1199,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: Baseline
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -980,6 +1210,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
           &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
           &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
+          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -992,6 +1224,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;1.4438&lt;/td&gt;
           &lt;td&gt;1.0578&lt;/td&gt;
           &lt;td&gt;1.8765&lt;/td&gt;
+          &lt;td&gt;2.6065&lt;/td&gt;
+          &lt;td&gt;1.5217&lt;/td&gt;
           &lt;td&gt;1.9455&lt;/td&gt;
           &lt;td&gt;1.0222&lt;/td&gt;
           &lt;td&gt;1.0262&lt;/td&gt;
@@ -1002,6 +1236,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;-0.6020&lt;/td&gt;
           &lt;td&gt;0.0936&lt;/td&gt;
           &lt;td&gt;-0.5919&lt;/td&gt;
+          &lt;td&gt;0.5403&lt;/td&gt;
+          &lt;td&gt;-0.3850&lt;/td&gt;
           &lt;td&gt;0.2789&lt;/td&gt;
           &lt;td&gt;0.0686&lt;/td&gt;
           &lt;td&gt;0.1327&lt;/td&gt;
@@ -1012,6 +1248,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;0.9107&lt;/td&gt;
           &lt;td&gt;0.8323&lt;/td&gt;
           &lt;td&gt;0.9306&lt;/td&gt;
+          &lt;td&gt;0.9532&lt;/td&gt;
+          &lt;td&gt;0.9137&lt;/td&gt;
           &lt;td&gt;0.8305&lt;/td&gt;
           &lt;td&gt;0.8694&lt;/td&gt;
           &lt;td&gt;0.8826&lt;/td&gt;
@@ -1022,6 +1260,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;19,421&lt;/td&gt;
           &lt;td&gt;19,278&lt;/td&gt;
+          &lt;td&gt;2,239,481&lt;/td&gt;
+          &lt;td&gt;2,248,854&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -1035,7 +1275,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
     <item>
       <title>NS - Experiment ObsKd</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-obskd/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 21 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-obskd/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-obskd&#34;&gt;NS - Experiment ObsKd&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -1043,7 +1283,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: ObsKd
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -1054,6 +1294,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
           &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
           &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
+          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -1066,6 +1308,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;1.0894&lt;/td&gt;
           &lt;td&gt;1.9713&lt;/td&gt;
           &lt;td&gt;1.2332&lt;/td&gt;
+          &lt;td&gt;2.6434&lt;/td&gt;
+          &lt;td&gt;1.3815&lt;/td&gt;
           &lt;td&gt;1.9584&lt;/td&gt;
           &lt;td&gt;0.8943&lt;/td&gt;
           &lt;td&gt;0.9187&lt;/td&gt;
@@ -1076,6 +1320,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;-0.2402&lt;/td&gt;
           &lt;td&gt;-0.6175&lt;/td&gt;
           &lt;td&gt;-0.5168&lt;/td&gt;
+          &lt;td&gt;0.5740&lt;/td&gt;
+          &lt;td&gt;-0.1003&lt;/td&gt;
           &lt;td&gt;0.3305&lt;/td&gt;
           &lt;td&gt;0.1413&lt;/td&gt;
           &lt;td&gt;0.2053&lt;/td&gt;
@@ -1086,6 +1332,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;0.9417&lt;/td&gt;
           &lt;td&gt;0.4525&lt;/td&gt;
           &lt;td&gt;0.9197&lt;/td&gt;
+          &lt;td&gt;0.9531&lt;/td&gt;
+          &lt;td&gt;0.9258&lt;/td&gt;
           &lt;td&gt;0.8300&lt;/td&gt;
           &lt;td&gt;0.8773&lt;/td&gt;
           &lt;td&gt;0.8892&lt;/td&gt;
@@ -1096,6 +1344,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;524&lt;/td&gt;
           &lt;td&gt;469&lt;/td&gt;
+          &lt;td&gt;2,239,479&lt;/td&gt;
+          &lt;td&gt;2,248,852&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -1109,7 +1359,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
     <item>
       <title>NS - Experiment SSR_STR</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 21 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-ssr_str&#34;&gt;NS - Experiment SSR_STR&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -1117,7 +1367,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: SSR_STR
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -1128,6 +1378,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
           &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
           &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
+          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -1140,6 +1392,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;1.4635&lt;/td&gt;
           &lt;td&gt;1.9716&lt;/td&gt;
           &lt;td&gt;1.4271&lt;/td&gt;
+          &lt;td&gt;2.6128&lt;/td&gt;
+          &lt;td&gt;1.5333&lt;/td&gt;
           &lt;td&gt;1.9518&lt;/td&gt;
           &lt;td&gt;1.1347&lt;/td&gt;
           &lt;td&gt;1.1342&lt;/td&gt;
@@ -1150,6 +1404,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;-0.6476&lt;/td&gt;
           &lt;td&gt;-0.6294&lt;/td&gt;
           &lt;td&gt;-0.8487&lt;/td&gt;
+          &lt;td&gt;0.5482&lt;/td&gt;
+          &lt;td&gt;-0.3752&lt;/td&gt;
           &lt;td&gt;0.2972&lt;/td&gt;
           &lt;td&gt;0.0944&lt;/td&gt;
           &lt;td&gt;0.1586&lt;/td&gt;
@@ -1160,6 +1416,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;0.9107&lt;/td&gt;
           &lt;td&gt;0.4519&lt;/td&gt;
           &lt;td&gt;0.9128&lt;/td&gt;
+          &lt;td&gt;0.9532&lt;/td&gt;
+          &lt;td&gt;0.9111&lt;/td&gt;
           &lt;td&gt;0.8299&lt;/td&gt;
           &lt;td&gt;0.8350&lt;/td&gt;
           &lt;td&gt;0.8535&lt;/td&gt;
@@ -1170,6 +1428,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;524&lt;/td&gt;
           &lt;td&gt;469&lt;/td&gt;
+          &lt;td&gt;2,239,481&lt;/td&gt;
+          &lt;td&gt;2,248,854&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -1183,7 +1443,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
     <item>
       <title>NS - Experiment SSRD_STRD</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/</link>
-      <pubDate>Mon, 20 Apr 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 21 Apr 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/</guid>
       <description>&lt;h1 id=&#34;ns---experiment-ssrd_strd&#34;&gt;NS - Experiment SSRD_STRD&lt;/h1&gt;
 &lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
@@ -1191,7 +1451,7 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: SSRD_STRD
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -1202,6 +1462,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
           &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
           &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
+          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
+          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -1214,6 +1476,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;1.3877&lt;/td&gt;
           &lt;td&gt;1.9567&lt;/td&gt;
           &lt;td&gt;1.3208&lt;/td&gt;
+          &lt;td&gt;2.6506&lt;/td&gt;
+          &lt;td&gt;1.4965&lt;/td&gt;
           &lt;td&gt;1.9631&lt;/td&gt;
           &lt;td&gt;1.0620&lt;/td&gt;
           &lt;td&gt;1.0747&lt;/td&gt;
@@ -1224,6 +1488,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;-0.5285&lt;/td&gt;
           &lt;td&gt;-0.5955&lt;/td&gt;
           &lt;td&gt;-0.7218&lt;/td&gt;
+          &lt;td&gt;0.5833&lt;/td&gt;
+          &lt;td&gt;-0.2993&lt;/td&gt;
           &lt;td&gt;0.3449&lt;/td&gt;
           &lt;td&gt;0.2023&lt;/td&gt;
           &lt;td&gt;0.2660&lt;/td&gt;
@@ -1234,6 +1500,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;0.9143&lt;/td&gt;
           &lt;td&gt;0.4518&lt;/td&gt;
           &lt;td&gt;0.9190&lt;/td&gt;
+          &lt;td&gt;0.9531&lt;/td&gt;
+          &lt;td&gt;0.9141&lt;/td&gt;
           &lt;td&gt;0.8297&lt;/td&gt;
           &lt;td&gt;0.8559&lt;/td&gt;
           &lt;td&gt;0.8703&lt;/td&gt;
@@ -1244,6 +1512,8 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;524&lt;/td&gt;
           &lt;td&gt;469&lt;/td&gt;
+          &lt;td&gt;2,239,484&lt;/td&gt;
+          &lt;td&gt;2,248,857&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -1253,62 +1523,6 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
 &lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-ssrd-strd/physics/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
 &lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>AMM7 - Experiment TPXO9</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/</link>
-      <pubDate>Fri, 17 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/</guid>
-      <description>&lt;h1 id=&#34;amm7---experiment-tpxo9&#34;&gt;AMM7 - Experiment TPXO9&lt;/h1&gt;
-&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
-&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: AMM7
-&lt;strong&gt;Experiment&lt;/strong&gt;: TPXO9
-&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;:
-&lt;strong&gt;Period&lt;/strong&gt;: 2019–2022&lt;/p&gt;
-&lt;h2 id=&#34;validation-statistics&#34;&gt;Validation Statistics&lt;/h2&gt;
-&lt;h2 id=&#34;validation-plots&#34;&gt;Validation Plots&lt;/h2&gt;
-&lt;hr&gt;
-&lt;h3 style=&#34;text-align:center&#34; id=&#34;year-2019&#34;&gt;Year 2019&lt;/h3&gt;
-&lt;h4 id=&#34;k-lunar-solar-diurnal--amplitudephase-comparison-with-gesla-tide-gauges&#34;&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/h4&gt;
-&lt;details&gt;
-&lt;summary&gt;Show 1 plot&lt;/summary&gt;
-&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-tpxo9/physics/2019/tidal/K1_gesla_comparison.png&#34;&gt;
-&lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;
-&lt;/details&gt;
-&lt;hr style=&#34;border:none;border-top:1px dashed #bbb;margin:1.5em 0&#34;&gt;
-&lt;h4 id=&#34;k-lunar-solar-semi-diurnal--amplitudephase-comparison-with-gesla-tide-gauges&#34;&gt;K₂ (lunar-solar semi-diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/h4&gt;
-&lt;details&gt;
-&lt;summary&gt;Show 1 plot&lt;/summary&gt;
-&lt;p&gt;&lt;img alt=&#34;K₂ (lunar-solar semi-diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-tpxo9/physics/2019/tidal/K2_gesla_comparison.png&#34;&gt;
-&lt;em&gt;K₂ (lunar-solar semi-diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>ENA8 - Experiment Adaptive_2</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-adaptive-2/</link>
-      <pubDate>Fri, 17 Apr 2026 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-adaptive-2/</guid>
-      <description>&lt;h1 id=&#34;ena8---experiment-adaptive_2&#34;&gt;ENA8 - Experiment Adaptive_2&lt;/h1&gt;
-&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
-&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: ENA8
-&lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_2
-&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;:&lt;/p&gt;
-&lt;h2 id=&#34;validation-statistics&#34;&gt;Validation Statistics&lt;/h2&gt;
-&lt;h2 id=&#34;validation-plots&#34;&gt;Validation Plots&lt;/h2&gt;
-&lt;h2 id=&#34;methodology&#34;&gt;Methodology&lt;/h2&gt;
-&lt;h3 id=&#34;horizontal-validation&#34;&gt;Horizontal Validation&lt;/h3&gt;
-&lt;p&gt;Model surface fields compared against gridded satellite products and in-situ observations.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Statistics computed:&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;RMSE&lt;/strong&gt;: Root Mean Square Error&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Bias&lt;/strong&gt;: Mean difference (Model - Observations)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;MAE&lt;/strong&gt;: Mean Absolute Error&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Correlation&lt;/strong&gt;: Pearson correlation coefficient&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;Spatial statistics&lt;/strong&gt; show error distribution across the domain.&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS - Experiment TPXO9</title>

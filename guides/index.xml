@@ -381,6 +381,54 @@ for one scenario at a time or across multiple scenarios simultaneously.&lt;/li&g
 &lt;p&gt;Aliases: &lt;code&gt;bc-correct&lt;/code&gt;, &lt;code&gt;bc-diagnostics&lt;/code&gt;.&lt;/p&gt;</description>
     </item>
     <item>
+      <title>Humidity Bias Correction</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/humidity-bc/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/humidity-bc/</guid>
+      <description>&lt;h1 id=&#34;humidity-bias-correction-guide&#34;&gt;Humidity Bias Correction Guide&lt;/h1&gt;
+&lt;h2 id=&#34;background-two-ways-to-express-atmospheric-humidity&#34;&gt;Background: two ways to express atmospheric humidity&lt;/h2&gt;
+&lt;p&gt;The atmosphere can hold a limited amount of water vapour, and that limit rises
+strongly with temperature.  Near-surface humidity is routinely reported in two
+different forms:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Dew-point temperature&lt;/strong&gt; (&lt;code&gt;d2m&lt;/code&gt;, unit K or °C) is the temperature to which a
+parcel of air must be cooled at constant pressure before water vapour begins to
+condense.  At the dew point the air is exactly saturated — its actual vapour
+pressure equals the saturation vapour pressure.  ERA5 stores this as the 2 m
+dew-point temperature.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>River Flow and Nutrient Load Projection</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/river-projection/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/river-projection/</guid>
+      <description>&lt;h1 id=&#34;river-flow-and-nutrient-load-projection-guide&#34;&gt;River Flow and Nutrient Load Projection Guide&lt;/h1&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;p&gt;This guide describes how to project future river flows and nutrient loadings
+using the &lt;strong&gt;delta-change method&lt;/strong&gt;: bias-corrected gridded precipitation (P) and
+evapotranspiration (E) from CMIP6 are used to scale the observed seasonal
+discharge cycle from the EMORID dataset forward in time.  Nutrient loads are
+then computed by multiplying projected discharge by an observed
+flow-weighted mean concentration.&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;EMORID observed Q + nutrients
+        │
+        ├─── monthly Q climatology ──────────────────────────┐
+        │    (calibration period)                            │
+        │                                                    ▼
+ERA5 P, E (reference)                            Q_future = Q_clim(month) × ΔPE(t)
+        │                                                    │
+        └─── P–E climatology ────────────────► ΔPE(t)       │
+             (calibration period, denominator)               │
+                                                             │
+BC future P, E (CMIP6)                                       ▼
+        │                                        nutrient loads = Q_future × FWMC
+        └─── future P–E ──────────────────────► (numerator)
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;command&#34;&gt;Command&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection --config config/river_projection.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection --config config/river_projection.yaml --scenario ssp585
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection --config config/river_projection.yaml --dry-run
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Config on GitHub: &lt;a href=&#34;https://github.com/bolding/stats/blob/main/config/river_projection.yaml&#34;&gt;&lt;code&gt;config/river_projection.yaml&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>Update From Remote</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/update-from-remote/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -429,6 +477,10 @@ All subcommands default to a &lt;strong&gt;dry run&lt;/strong&gt; — add &lt;co
           &lt;td&gt;&lt;code&gt;sync&lt;/code&gt;&lt;/td&gt;
           &lt;td&gt;Rsync the remote analyses tree to a local directory&lt;/td&gt;
       &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;import-stats&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Import existing CSV statistics files into &lt;code&gt;statistics.db&lt;/code&gt;&lt;/td&gt;
+      &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h2 id=&#34;clean&#34;&gt;clean&lt;/h2&gt;
@@ -467,6 +519,55 @@ multiple analysis scripts run in parallel:&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# Migrate a legacy YAML registry into the DB&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;simulation-list to-sqlite old_registry.yaml &lt;span class=&#34;o&#34;&gt;[&lt;/span&gt;--base-dir DIR&lt;span class=&#34;o&#34;&gt;]&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;--base-dir&lt;/code&gt; defaults to &lt;code&gt;./analyses&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Statistics Database</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/statistics-db/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/statistics-db/</guid>
+      <description>&lt;h1 id=&#34;statistics-database-guide&#34;&gt;Statistics Database Guide&lt;/h1&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Every analysis script writes its results to human-readable TXT/CSV files inside
+the &lt;code&gt;analyses/&lt;/code&gt; tree &lt;strong&gt;and&lt;/strong&gt; records the same numbers in a SQLite database at
+&lt;code&gt;analyses/statistics.db&lt;/code&gt;.  The database makes it easy to compare experiments,
+track how metrics change over time, and query across areas and variables without
+parsing text files.&lt;/p&gt;
+&lt;p&gt;The database is managed by &lt;code&gt;lib/stats_db.py&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;tables&#34;&gt;Tables&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Table&lt;/th&gt;
+          &lt;th&gt;Purpose&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;statistics&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Core metrics from 2-D gridded, 3-D, and profile analyses&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;monthly_statistics&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Month-by-month breakdown (child of &lt;code&gt;statistics&lt;/code&gt;)&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;tidal_statistics&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Tidal constituent summary aggregated across stations&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;mle_rankings&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;MLE cross-experiment ranking rows&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;bc_statistics&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Bias-correction calibration and future-period metrics&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;statistics&#34;&gt;statistics&lt;/h3&gt;
+&lt;p&gt;One row per &lt;em&gt;(area, experiment, variable, period, layer, model, obs_source,
+depth_label)&lt;/em&gt; combination.  A &lt;code&gt;UNIQUE&lt;/code&gt; constraint on those eight columns means
+re-running an analysis &lt;strong&gt;upserts&lt;/strong&gt; the row rather than duplicating it.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Reporting</title>
