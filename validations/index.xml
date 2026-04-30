@@ -16,8 +16,10 @@
       <description>&lt;h1 id=&#34;amm7-analysis-overview&#34;&gt;AMM7 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;AMM7&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
 &lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
 &lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
 &lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -71,12 +73,13 @@
       <description>&lt;h1 id=&#34;ean4-analysis-overview&#34;&gt;EAN4 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;EAN4&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
 &lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
 &lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
 &lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
-&lt;p&gt;&lt;em&gt;No horizontal surface validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
-&lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
-&lt;p&gt;&lt;em&gt;No horizontal bottom-layer validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;</description>
+&lt;p&gt;&lt;em&gt;No horizontal surface validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>ENA4 — Analysis Overview</title>
@@ -93,7 +96,7 @@
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -115,20 +118,20 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/&#34;&gt;Adaptive_2&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/&#34;&gt;Adaptive_2&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-adaptive-2/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;</description>
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena4-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;</description>
     </item>
     <item>
       <title>ENA8 — Analysis Overview</title>
@@ -145,7 +148,7 @@
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/&#34;&gt;ObsKd&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -167,7 +170,7 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ena8-obskd/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
@@ -207,8 +210,10 @@
       <description>&lt;h1 id=&#34;ns-analysis-overview&#34;&gt;NS Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NS&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
 &lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
 &lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
 &lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;h3 id=&#34;ranking&#34;&gt;Ranking&lt;/h3&gt;
 &lt;p&gt;&lt;img alt=&#34;Psal_Ices experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ranking-horizon_surface-psal_ices.png&#34;&gt;&lt;/p&gt;
@@ -217,61 +222,7 @@
 &lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ranking-horizon_surface-temp_surface.png&#34;&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/&#34;&gt;SSR_STR&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;Variable&lt;/th&gt;
-          &lt;th&gt;Dataset&lt;/th&gt;
-          &lt;th&gt;RMSE&lt;/th&gt;
-          &lt;th&gt;Bias&lt;/th&gt;
-          &lt;th&gt;Corr&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;PSAL_ICES&lt;/td&gt;
-          &lt;td&gt;ICES point observations&lt;/td&gt;
-          &lt;td&gt;2.613&lt;/td&gt;
-          &lt;td&gt;+0.548&lt;/td&gt;
-          &lt;td&gt;0.95&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;SALT&lt;/td&gt;
-          &lt;td&gt;CCI-SSS&lt;/td&gt;
-          &lt;td&gt;1.943&lt;/td&gt;
-          &lt;td&gt;+0.476&lt;/td&gt;
-          &lt;td&gt;0.84&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;TEMP_ICES&lt;/td&gt;
-          &lt;td&gt;ICES point observations&lt;/td&gt;
-          &lt;td&gt;1.533&lt;/td&gt;
-          &lt;td&gt;-0.375&lt;/td&gt;
-          &lt;td&gt;0.91&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;TEMP&lt;/td&gt;
-          &lt;td&gt;CCI-SST&lt;/td&gt;
-          &lt;td&gt;1.095&lt;/td&gt;
-          &lt;td&gt;+0.215&lt;/td&gt;
-          &lt;td&gt;0.86&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;TEMP&lt;/td&gt;
-          &lt;td&gt;OSTIA&lt;/td&gt;
-          &lt;td&gt;1.107&lt;/td&gt;
-          &lt;td&gt;+0.117&lt;/td&gt;
-          &lt;td&gt;0.83&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2016&#34;&gt;2016&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2017&#34;&gt;2017&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2018&#34;&gt;2018&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2019&#34;&gt;2019&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2020&#34;&gt;2020&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2021&#34;&gt;2021&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2022&#34;&gt;2022&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/#year-2023&#34;&gt;2023&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/&#34;&gt;SSRD_STRD&lt;/a&gt;&lt;/strong&gt; — 2016–2023&lt;/p&gt;</description>
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/&#34;&gt;SSR_STR&lt;/a&gt;&lt;/strong&gt; — 2016-2023–2023&lt;/p&gt;</description>
     </item>
     <item>
       <title>AMM7 - Experiment Baseline</title>
@@ -284,47 +235,331 @@
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: AMM7
 &lt;strong&gt;Experiment&lt;/strong&gt;: Baseline
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: PSAL_ICES, TEMP_ICES, TEMP_SURFACE&lt;/p&gt;
+&lt;strong&gt;Variables&lt;/strong&gt;: TEMP_SURFACE&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
           &lt;th&gt;Metric&lt;/th&gt;
-          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
-          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
       &lt;/tr&gt;
   &lt;/thead&gt;
   &lt;tbody&gt;
       &lt;tr&gt;
           &lt;td&gt;RMSE&lt;/td&gt;
-          &lt;td&gt;1.0428&lt;/td&gt;
-          &lt;td&gt;1.1857&lt;/td&gt;
           &lt;td&gt;0.9160&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;Bias&lt;/td&gt;
-          &lt;td&gt;0.2043&lt;/td&gt;
-          &lt;td&gt;0.1009&lt;/td&gt;
           &lt;td&gt;0.3920&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;Corr&lt;/td&gt;
-          &lt;td&gt;0.6842&lt;/td&gt;
-          &lt;td&gt;0.9567&lt;/td&gt;
           &lt;td&gt;0.9651&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;N points&lt;/td&gt;
-          &lt;td&gt;4,479,562&lt;/td&gt;
-          &lt;td&gt;4,488,796&lt;/td&gt;
           &lt;td&gt;151,821,276&lt;/td&gt;
       &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
 &lt;p&gt;&lt;img alt=&#34;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-baseline/physics/pyGETM/2016-2023/surface/temp_surface_timeseries_statistics.png&#34;&gt;
-&lt;em&gt;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+&lt;em&gt;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;validation-statistics&#34;&gt;Validation Statistics&lt;/h2&gt;
+&lt;h3 id=&#34;temp_surface&#34;&gt;TEMP_SURFACE&lt;/h3&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;OSTIA&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;0.9160&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;+0.3920&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MAE&lt;/td&gt;
+          &lt;td&gt;0.7266&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.9651&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Model mean&lt;/td&gt;
+          &lt;td&gt;12.2628&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Obs mean&lt;/td&gt;
+          &lt;td&gt;11.8707&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;details&gt;
+&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
+TEMP_SURFACE Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-28 10:54:47
+  Author:       RT
+  Project:      OceanICU
+  Institute:    BB
+  Area:         AMM7
+  Experiment:   Baseline
+################################################################################
+
+================================================================================
+Period: 2016-2023  |  Model: pyGETM
+================================================================================
+Analysed: 2026-04-29  17:02:48
+
+--- OSTIA ---
+  RMSE:          0.9160
+  Bias:         +0.3920
+  MAE:           0.7266
+  Correlation:   0.9651
+  N points:      151,821,276
+  Model mean:   12.2628
+  Obs mean:     11.8707
+  Model std:    4.0162
+  Obs std:      3.8133
+
+  Error distribution:
+    Min:         -9.7834
+    5th pct:      -0.8868
+    25th pct:     -0.0976
+    Median:       +0.3996
+    75th pct:     +0.8998
+    95th pct:     +1.6521
+    Max:         +10.0921
+
+  Monthly breakdown:
+  Month      RMSE      Bias      MAE    Corr
+  --------------------------------------------
+  Jan      0.9340   +0.3050   0.7263  0.9555
+  Feb      0.9121   +0.2936   0.6972  0.9589
+  Mar      0.8415   +0.2331   0.6405  0.9637
+  Apr      0.7604   +0.1807   0.5835  0.9705
+  May      0.8391   +0.3735   0.6565  0.9716
+  Jun      1.2281   +0.7980   0.9955  0.9552
+  Jul      1.3036   +0.8952   1.0867  0.9534
+  Aug      1.0455   +0.6093   0.8451  0.9626
+  Sep      0.7555   +0.2528   0.5822  0.9765
+  Oct      0.6902   +0.1415   0.5374  0.9778
+  Nov      0.7899   +0.2486   0.6275  0.9688
+  Dec      0.9270   +0.3613   0.7343  0.9595
+  --------------------------------------------
+  All      0.9160   +0.3920   0.7266  0.9651
+
+================================================================================
+Period: 2016  |  Model: pyGETM
+================================================================================
+Analysed: 2026-04-29  17:02:48
+
+--- OSTIA ---
+  RMSE:          0.8768
+  Bias:         +0.1957
+  MAE:           0.6889
+  Correlation:   0.9610
+  N points:      19,016,628
+  Model mean:   12.0692
+  Obs mean:     11.8735
+  Model std:    3.9886
+  Obs std:      3.7392
+
+  Error distribution:
+    Min:         -8.4243
+    5th pct:      -1.0961
+    25th pct:     -0.2904
+    Median:       +0.2150
+    75th pct:     +0.7203
+    95th pct:     +1.4537
+    Max:         +6.9846
+
+================================================================================
+Period: 2017  |  Model: pyGETM
+================================================================================
+Analysed: 2026-04-29  17:02:48
+
+--- OSTIA ---
+  RMSE:          0.8807
+  Bias:         +0.3935
+  MAE:           0.7007
+  Correlation:   0.9662
+  N points:      18,964,670
+  Model mean:   12.2909
+  Obs mean:     11.8974
+  Model std:    3.8412
+  Obs std:      3.6558
+
+  Error distribution:
+    Min:         -6.1325
+    5th pct:      -0.8441
+    25th pct:     -0.0802
+    Median:       +0.4026
+    75th pct:     +0.8828
+    95th pct:     +1.6333
+    Max:         +8.6925
+
+================================================================================
+Period: 2018  |  Model: pyGETM
+================================================================================
+Analysed: 2026-04-29  17:02:48
+
+--- OSTIA ---
+  RMSE:          0.9849
+  Bias:         +0.4776
+  MAE:           0.7812
+  Correlation:   0.9629
+  N points:      18,964,670
+  Model mean:   12.1215
+  Obs mean:     11.6439
+  Model std:    4.1821
+  Obs std:      3.9844
+
+  Error distribution:
+    Min:         -9.7834
+    5th pct:      -0.8793
+    25th pct:     -0.0494
+    Median:       +0.4812
+    75th pct:     +1.0063
+    95th pct:     +1.8040
+    Max:         +8.3029
+
+================================================================================
+Period: 2019  |  Model: pyGETM
+================================================================================
+Analysed: 2026-04-29  17:02:48
+
+--- OSTIA ---
+  RMSE:          0.9111
+  Bias:         +0.4732
+  MAE:           0.7328
+  Correlation:   0.9687
+  N points:      18,964,670
+  Model mean:   12.2363
+  Obs mean:     11.7631
+  Model std:    3.9060
+  Obs std:      3.6817
+
+  Error distribution:
+    Min:         -7.1780
+    5th pct:      -0.7480
+    25th pct:     -0.0108
+    Median:       +0.4761
+    75th pct:     +0.9800
+    95th pct:     +1.6861
+    Max:         +7.3279
+
+================================================================================
+Period: 2020  |  Model: pyGETM
+================================================================================
+Analysed: 2026-04-29  17:02:48
+
+--- OSTIA ---
+  RMSE:          0.8991
+  Bias:         +0.4208
+  MAE:           0.7118
+  Correlation:   0.9673
+  N points:      19,016,628
+  Model mean:   12.2002
+  Obs mean:     11.7794
+  Model std:    3.8771
+  Obs std:      3.6783
+
+  Error distribution:
+    Min:         -8.2411
+    5th pct:      -0.8051
+    25th pct:     -0.0540
+    Median:       +0.4241
+    75th pct:     +0.9163
+    95th pct:     +1.6575
+    Max:         +8.3450
+
+================================================================================
+Period: 2021  |  Model: pyGETM
+================================================================================
+Analysed: 2026-04-29  17:02:48
+
+--- OSTIA ---
+  RMSE:          0.9805
+  Bias:         +0.4560
+  MAE:           0.7747
+  Correlation:   0.9601
+  N points:      18,964,670
+  Model mean:   12.1911
+  Obs mean:     11.7351
+  Model std:    4.0802
+  Obs std:      3.8776
+
+  Error distribution:
+    Min:         -8.5194
+    5th pct:      -0.8656
+    25th pct:     -0.0653
+    Median:       +0.4509
+    75th pct:     +0.9944
+    95th pct:     +1.8046
+    Max:         +8.3180
+
+================================================================================
+Period: 2022  |  Model: pyGETM
+================================================================================
+Analysed: 2026-04-29  17:02:48
+
+--- OSTIA ---
+  RMSE:          0.8457
+  Bias:         +0.3520
+  MAE:           0.6691
+  Correlation:   0.9713
+  N points:      18,964,670
+  Model mean:   12.4037
+  Obs mean:     12.0517
+  Model std:    4.0073
+  Obs std:      3.8585
+
+  Error distribution:
+    Min:         -6.4934
+    5th pct:      -0.8451
+    25th pct:     -0.1163
+    Median:       +0.3536
+    75th pct:     +0.8264
+    95th pct:     +1.5326
+    Max:         +6.9722
+
+================================================================================
+Period: 2023  |  Model: pyGETM
+================================================================================
+Analysed: 2026-04-29  17:02:48
+
+--- OSTIA ---
+  RMSE:          0.9464
+  Bias:         +0.3678
+  MAE:           0.7539
+  Correlation:   0.9640
+  N points:      18,964,670
+  Model mean:   12.5899
+  Obs mean:     12.2221
+  Model std:    4.2069
+  Obs std:      3.9821
+
+  Error distribution:
+    Min:         -8.7341
+    5th pct:      -1.0365
+    25th pct:     -0.1473
+    Median:       +0.3920
+    75th pct:     +0.9128
+    95th pct:     +1.6738
+    Max:         +10.0921
+&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-baseline/temp_surface_validation_statistics.txt&#34;&gt;📄 Download Statistics Report&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>MLE Comparison — NS</title>
@@ -420,7 +655,7 @@
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_1
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -429,10 +664,6 @@
           &lt;th&gt;Metric&lt;/th&gt;
           &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
-          &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
-          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -443,10 +674,6 @@
           &lt;td&gt;RMSE&lt;/td&gt;
           &lt;td&gt;0.7038&lt;/td&gt;
           &lt;td&gt;1.3715&lt;/td&gt;
-          &lt;td&gt;1.9973&lt;/td&gt;
-          &lt;td&gt;1.3349&lt;/td&gt;
-          &lt;td&gt;2.5983&lt;/td&gt;
-          &lt;td&gt;1.5157&lt;/td&gt;
           &lt;td&gt;1.9663&lt;/td&gt;
           &lt;td&gt;1.0238&lt;/td&gt;
           &lt;td&gt;1.0278&lt;/td&gt;
@@ -455,10 +682,6 @@
           &lt;td&gt;Bias&lt;/td&gt;
           &lt;td&gt;-0.3967&lt;/td&gt;
           &lt;td&gt;-0.5514&lt;/td&gt;
-          &lt;td&gt;-0.6306&lt;/td&gt;
-          &lt;td&gt;-0.7386&lt;/td&gt;
-          &lt;td&gt;0.5417&lt;/td&gt;
-          &lt;td&gt;-0.3820&lt;/td&gt;
           &lt;td&gt;0.2989&lt;/td&gt;
           &lt;td&gt;0.0755&lt;/td&gt;
           &lt;td&gt;0.1374&lt;/td&gt;
@@ -467,10 +690,6 @@
           &lt;td&gt;Corr&lt;/td&gt;
           &lt;td&gt;0.8617&lt;/td&gt;
           &lt;td&gt;0.9200&lt;/td&gt;
-          &lt;td&gt;0.4578&lt;/td&gt;
-          &lt;td&gt;0.9196&lt;/td&gt;
-          &lt;td&gt;0.9533&lt;/td&gt;
-          &lt;td&gt;0.9148&lt;/td&gt;
           &lt;td&gt;0.8258&lt;/td&gt;
           &lt;td&gt;0.8685&lt;/td&gt;
           &lt;td&gt;0.8820&lt;/td&gt;
@@ -479,10 +698,6 @@
           &lt;td&gt;N points&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
-          &lt;td&gt;524&lt;/td&gt;
-          &lt;td&gt;469&lt;/td&gt;
-          &lt;td&gt;2,236,819&lt;/td&gt;
-          &lt;td&gt;2,246,185&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -504,7 +719,7 @@
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_2
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -513,10 +728,6 @@
           &lt;th&gt;Metric&lt;/th&gt;
           &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
-          &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
-          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -527,10 +738,6 @@
           &lt;td&gt;RMSE&lt;/td&gt;
           &lt;td&gt;0.6929&lt;/td&gt;
           &lt;td&gt;1.4043&lt;/td&gt;
-          &lt;td&gt;1.9954&lt;/td&gt;
-          &lt;td&gt;1.3504&lt;/td&gt;
-          &lt;td&gt;2.6006&lt;/td&gt;
-          &lt;td&gt;1.5284&lt;/td&gt;
           &lt;td&gt;1.9626&lt;/td&gt;
           &lt;td&gt;1.0337&lt;/td&gt;
           &lt;td&gt;1.0368&lt;/td&gt;
@@ -539,10 +746,6 @@
           &lt;td&gt;Bias&lt;/td&gt;
           &lt;td&gt;-0.3766&lt;/td&gt;
           &lt;td&gt;-0.5764&lt;/td&gt;
-          &lt;td&gt;-0.6272&lt;/td&gt;
-          &lt;td&gt;-0.7443&lt;/td&gt;
-          &lt;td&gt;0.5477&lt;/td&gt;
-          &lt;td&gt;-0.3879&lt;/td&gt;
           &lt;td&gt;0.2917&lt;/td&gt;
           &lt;td&gt;0.0760&lt;/td&gt;
           &lt;td&gt;0.1376&lt;/td&gt;
@@ -551,10 +754,6 @@
           &lt;td&gt;Corr&lt;/td&gt;
           &lt;td&gt;0.8628&lt;/td&gt;
           &lt;td&gt;0.9168&lt;/td&gt;
-          &lt;td&gt;0.4589&lt;/td&gt;
-          &lt;td&gt;0.9178&lt;/td&gt;
-          &lt;td&gt;0.9533&lt;/td&gt;
-          &lt;td&gt;0.9138&lt;/td&gt;
           &lt;td&gt;0.8263&lt;/td&gt;
           &lt;td&gt;0.8670&lt;/td&gt;
           &lt;td&gt;0.8807&lt;/td&gt;
@@ -563,10 +762,6 @@
           &lt;td&gt;N points&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
-          &lt;td&gt;524&lt;/td&gt;
-          &lt;td&gt;469&lt;/td&gt;
-          &lt;td&gt;2,236,727&lt;/td&gt;
-          &lt;td&gt;2,246,093&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -588,7 +783,7 @@
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_3
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -597,10 +792,6 @@
           &lt;th&gt;Metric&lt;/th&gt;
           &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
-          &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
-          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -611,10 +802,6 @@
           &lt;td&gt;RMSE&lt;/td&gt;
           &lt;td&gt;0.7101&lt;/td&gt;
           &lt;td&gt;1.3662&lt;/td&gt;
-          &lt;td&gt;2.0022&lt;/td&gt;
-          &lt;td&gt;1.3333&lt;/td&gt;
-          &lt;td&gt;2.6013&lt;/td&gt;
-          &lt;td&gt;1.5151&lt;/td&gt;
           &lt;td&gt;1.9744&lt;/td&gt;
           &lt;td&gt;1.0228&lt;/td&gt;
           &lt;td&gt;1.0268&lt;/td&gt;
@@ -623,10 +810,6 @@
           &lt;td&gt;Bias&lt;/td&gt;
           &lt;td&gt;-0.4061&lt;/td&gt;
           &lt;td&gt;-0.5475&lt;/td&gt;
-          &lt;td&gt;-0.6326&lt;/td&gt;
-          &lt;td&gt;-0.7528&lt;/td&gt;
-          &lt;td&gt;0.5436&lt;/td&gt;
-          &lt;td&gt;-0.3804&lt;/td&gt;
           &lt;td&gt;0.3048&lt;/td&gt;
           &lt;td&gt;0.0723&lt;/td&gt;
           &lt;td&gt;0.1344&lt;/td&gt;
@@ -635,10 +818,6 @@
           &lt;td&gt;Corr&lt;/td&gt;
           &lt;td&gt;0.8615&lt;/td&gt;
           &lt;td&gt;0.9205&lt;/td&gt;
-          &lt;td&gt;0.4560&lt;/td&gt;
-          &lt;td&gt;0.9208&lt;/td&gt;
-          &lt;td&gt;0.9532&lt;/td&gt;
-          &lt;td&gt;0.9145&lt;/td&gt;
           &lt;td&gt;0.8242&lt;/td&gt;
           &lt;td&gt;0.8682&lt;/td&gt;
           &lt;td&gt;0.8817&lt;/td&gt;
@@ -647,10 +826,6 @@
           &lt;td&gt;N points&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
-          &lt;td&gt;524&lt;/td&gt;
-          &lt;td&gt;469&lt;/td&gt;
-          &lt;td&gt;2,236,795&lt;/td&gt;
-          &lt;td&gt;2,246,161&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -672,7 +847,7 @@
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: Baseline
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -681,10 +856,6 @@
           &lt;th&gt;Metric&lt;/th&gt;
           &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
-          &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
-          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -695,10 +866,6 @@
           &lt;td&gt;RMSE&lt;/td&gt;
           &lt;td&gt;0.7135&lt;/td&gt;
           &lt;td&gt;1.4438&lt;/td&gt;
-          &lt;td&gt;1.0578&lt;/td&gt;
-          &lt;td&gt;1.8765&lt;/td&gt;
-          &lt;td&gt;2.6065&lt;/td&gt;
-          &lt;td&gt;1.5217&lt;/td&gt;
           &lt;td&gt;1.9455&lt;/td&gt;
           &lt;td&gt;1.0222&lt;/td&gt;
           &lt;td&gt;1.0262&lt;/td&gt;
@@ -707,10 +874,6 @@
           &lt;td&gt;Bias&lt;/td&gt;
           &lt;td&gt;-0.4132&lt;/td&gt;
           &lt;td&gt;-0.6020&lt;/td&gt;
-          &lt;td&gt;0.0936&lt;/td&gt;
-          &lt;td&gt;-0.5919&lt;/td&gt;
-          &lt;td&gt;0.5403&lt;/td&gt;
-          &lt;td&gt;-0.3850&lt;/td&gt;
           &lt;td&gt;0.2789&lt;/td&gt;
           &lt;td&gt;0.0686&lt;/td&gt;
           &lt;td&gt;0.1327&lt;/td&gt;
@@ -719,10 +882,6 @@
           &lt;td&gt;Corr&lt;/td&gt;
           &lt;td&gt;0.8470&lt;/td&gt;
           &lt;td&gt;0.9107&lt;/td&gt;
-          &lt;td&gt;0.8323&lt;/td&gt;
-          &lt;td&gt;0.9306&lt;/td&gt;
-          &lt;td&gt;0.9532&lt;/td&gt;
-          &lt;td&gt;0.9137&lt;/td&gt;
           &lt;td&gt;0.8305&lt;/td&gt;
           &lt;td&gt;0.8694&lt;/td&gt;
           &lt;td&gt;0.8826&lt;/td&gt;
@@ -731,10 +890,6 @@
           &lt;td&gt;N points&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
-          &lt;td&gt;19,421&lt;/td&gt;
-          &lt;td&gt;19,278&lt;/td&gt;
-          &lt;td&gt;2,239,481&lt;/td&gt;
-          &lt;td&gt;2,248,854&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -756,7 +911,7 @@
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: ObsKd
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -765,10 +920,6 @@
           &lt;th&gt;Metric&lt;/th&gt;
           &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
-          &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
-          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -779,10 +930,6 @@
           &lt;td&gt;RMSE&lt;/td&gt;
           &lt;td&gt;0.6816&lt;/td&gt;
           &lt;td&gt;1.0894&lt;/td&gt;
-          &lt;td&gt;1.9713&lt;/td&gt;
-          &lt;td&gt;1.2332&lt;/td&gt;
-          &lt;td&gt;2.6434&lt;/td&gt;
-          &lt;td&gt;1.3815&lt;/td&gt;
           &lt;td&gt;1.9584&lt;/td&gt;
           &lt;td&gt;0.8943&lt;/td&gt;
           &lt;td&gt;0.9187&lt;/td&gt;
@@ -791,10 +938,6 @@
           &lt;td&gt;Bias&lt;/td&gt;
           &lt;td&gt;-0.3776&lt;/td&gt;
           &lt;td&gt;-0.2402&lt;/td&gt;
-          &lt;td&gt;-0.6175&lt;/td&gt;
-          &lt;td&gt;-0.5168&lt;/td&gt;
-          &lt;td&gt;0.5740&lt;/td&gt;
-          &lt;td&gt;-0.1003&lt;/td&gt;
           &lt;td&gt;0.3305&lt;/td&gt;
           &lt;td&gt;0.1413&lt;/td&gt;
           &lt;td&gt;0.2053&lt;/td&gt;
@@ -803,10 +946,6 @@
           &lt;td&gt;Corr&lt;/td&gt;
           &lt;td&gt;0.8507&lt;/td&gt;
           &lt;td&gt;0.9417&lt;/td&gt;
-          &lt;td&gt;0.4525&lt;/td&gt;
-          &lt;td&gt;0.9197&lt;/td&gt;
-          &lt;td&gt;0.9531&lt;/td&gt;
-          &lt;td&gt;0.9258&lt;/td&gt;
           &lt;td&gt;0.8300&lt;/td&gt;
           &lt;td&gt;0.8773&lt;/td&gt;
           &lt;td&gt;0.8892&lt;/td&gt;
@@ -815,10 +954,6 @@
           &lt;td&gt;N points&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
-          &lt;td&gt;524&lt;/td&gt;
-          &lt;td&gt;469&lt;/td&gt;
-          &lt;td&gt;2,239,479&lt;/td&gt;
-          &lt;td&gt;2,248,852&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -840,7 +975,7 @@
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: SSR_STR
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -849,10 +984,6 @@
           &lt;th&gt;Metric&lt;/th&gt;
           &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
-          &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
-          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -863,10 +994,6 @@
           &lt;td&gt;RMSE&lt;/td&gt;
           &lt;td&gt;0.7074&lt;/td&gt;
           &lt;td&gt;1.4635&lt;/td&gt;
-          &lt;td&gt;1.9716&lt;/td&gt;
-          &lt;td&gt;1.4271&lt;/td&gt;
-          &lt;td&gt;2.6128&lt;/td&gt;
-          &lt;td&gt;1.5333&lt;/td&gt;
           &lt;td&gt;1.9518&lt;/td&gt;
           &lt;td&gt;1.1347&lt;/td&gt;
           &lt;td&gt;1.1342&lt;/td&gt;
@@ -875,10 +1002,6 @@
           &lt;td&gt;Bias&lt;/td&gt;
           &lt;td&gt;-0.4074&lt;/td&gt;
           &lt;td&gt;-0.6476&lt;/td&gt;
-          &lt;td&gt;-0.6294&lt;/td&gt;
-          &lt;td&gt;-0.8487&lt;/td&gt;
-          &lt;td&gt;0.5482&lt;/td&gt;
-          &lt;td&gt;-0.3752&lt;/td&gt;
           &lt;td&gt;0.2972&lt;/td&gt;
           &lt;td&gt;0.0944&lt;/td&gt;
           &lt;td&gt;0.1586&lt;/td&gt;
@@ -887,10 +1010,6 @@
           &lt;td&gt;Corr&lt;/td&gt;
           &lt;td&gt;0.8469&lt;/td&gt;
           &lt;td&gt;0.9107&lt;/td&gt;
-          &lt;td&gt;0.4519&lt;/td&gt;
-          &lt;td&gt;0.9128&lt;/td&gt;
-          &lt;td&gt;0.9532&lt;/td&gt;
-          &lt;td&gt;0.9111&lt;/td&gt;
           &lt;td&gt;0.8299&lt;/td&gt;
           &lt;td&gt;0.8350&lt;/td&gt;
           &lt;td&gt;0.8535&lt;/td&gt;
@@ -899,10 +1018,6 @@
           &lt;td&gt;N points&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
-          &lt;td&gt;524&lt;/td&gt;
-          &lt;td&gt;469&lt;/td&gt;
-          &lt;td&gt;2,239,481&lt;/td&gt;
-          &lt;td&gt;2,248,854&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -924,7 +1039,7 @@
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
 &lt;strong&gt;Experiment&lt;/strong&gt;: SSRD_STRD
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, PSAL_CTD, TEMP_CTD, PSAL_ICES, TEMP_ICES, SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, SALT_SURFACE, TEMP_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -933,10 +1048,6 @@
           &lt;th&gt;Metric&lt;/th&gt;
           &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
           &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
-          &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;PSAL_ICES / ICES point observations&lt;/th&gt;
-          &lt;th&gt;TEMP_ICES / ICES point observations&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
@@ -947,10 +1058,6 @@
           &lt;td&gt;RMSE&lt;/td&gt;
           &lt;td&gt;0.6774&lt;/td&gt;
           &lt;td&gt;1.3877&lt;/td&gt;
-          &lt;td&gt;1.9567&lt;/td&gt;
-          &lt;td&gt;1.3208&lt;/td&gt;
-          &lt;td&gt;2.6506&lt;/td&gt;
-          &lt;td&gt;1.4965&lt;/td&gt;
           &lt;td&gt;1.9631&lt;/td&gt;
           &lt;td&gt;1.0620&lt;/td&gt;
           &lt;td&gt;1.0747&lt;/td&gt;
@@ -959,10 +1066,6 @@
           &lt;td&gt;Bias&lt;/td&gt;
           &lt;td&gt;-0.3730&lt;/td&gt;
           &lt;td&gt;-0.5285&lt;/td&gt;
-          &lt;td&gt;-0.5955&lt;/td&gt;
-          &lt;td&gt;-0.7218&lt;/td&gt;
-          &lt;td&gt;0.5833&lt;/td&gt;
-          &lt;td&gt;-0.2993&lt;/td&gt;
           &lt;td&gt;0.3449&lt;/td&gt;
           &lt;td&gt;0.2023&lt;/td&gt;
           &lt;td&gt;0.2660&lt;/td&gt;
@@ -971,10 +1074,6 @@
           &lt;td&gt;Corr&lt;/td&gt;
           &lt;td&gt;0.8494&lt;/td&gt;
           &lt;td&gt;0.9143&lt;/td&gt;
-          &lt;td&gt;0.4518&lt;/td&gt;
-          &lt;td&gt;0.9190&lt;/td&gt;
-          &lt;td&gt;0.9531&lt;/td&gt;
-          &lt;td&gt;0.9141&lt;/td&gt;
           &lt;td&gt;0.8297&lt;/td&gt;
           &lt;td&gt;0.8559&lt;/td&gt;
           &lt;td&gt;0.8703&lt;/td&gt;
@@ -983,10 +1082,6 @@
           &lt;td&gt;N points&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
           &lt;td&gt;58,068&lt;/td&gt;
-          &lt;td&gt;524&lt;/td&gt;
-          &lt;td&gt;469&lt;/td&gt;
-          &lt;td&gt;2,239,484&lt;/td&gt;
-          &lt;td&gt;2,248,857&lt;/td&gt;
           &lt;td&gt;2,064,075&lt;/td&gt;
           &lt;td&gt;1,998,375&lt;/td&gt;
           &lt;td&gt;2,150,185&lt;/td&gt;
@@ -1168,7 +1263,7 @@
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: ENA8
 &lt;strong&gt;Experiment&lt;/strong&gt;: Baseline
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, PSAL_CTD, TEMP_CTD, SALT_SURFACE
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, SALT_SURFACE
 &lt;strong&gt;Period&lt;/strong&gt;: 2016–2023&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
@@ -1176,8 +1271,6 @@
       &lt;tr&gt;
           &lt;th&gt;Metric&lt;/th&gt;
           &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
-          &lt;th&gt;PSAL_CTD / ICES cruise CTD profiles&lt;/th&gt;
-          &lt;th&gt;TEMP_CTD / ICES cruise CTD profiles&lt;/th&gt;
           &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
       &lt;/tr&gt;
   &lt;/thead&gt;
@@ -1185,36 +1278,30 @@
       &lt;tr&gt;
           &lt;td&gt;RMSE&lt;/td&gt;
           &lt;td&gt;0.7300&lt;/td&gt;
-          &lt;td&gt;0.4301&lt;/td&gt;
-          &lt;td&gt;1.7252&lt;/td&gt;
           &lt;td&gt;0.9596&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;Bias&lt;/td&gt;
           &lt;td&gt;-0.0132&lt;/td&gt;
-          &lt;td&gt;-0.0251&lt;/td&gt;
-          &lt;td&gt;-1.0733&lt;/td&gt;
           &lt;td&gt;0.1781&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;Corr&lt;/td&gt;
           &lt;td&gt;0.8645&lt;/td&gt;
-          &lt;td&gt;0.7354&lt;/td&gt;
-          &lt;td&gt;0.9565&lt;/td&gt;
           &lt;td&gt;0.6260&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;N points&lt;/td&gt;
           &lt;td&gt;55,464&lt;/td&gt;
-          &lt;td&gt;249,892&lt;/td&gt;
-          &lt;td&gt;269,464&lt;/td&gt;
           &lt;td&gt;8,943,595&lt;/td&gt;
       &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
 &lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena8-baseline/physics/pyGETM/2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
-&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (bottom) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ena8-baseline/physics/pyGETM/2023/bottom/salt_bottom_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (bottom) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>ENA4 - TPXO9 - Tidal Analysis</title>
