@@ -31,14 +31,11 @@ def create(cfg) -> pygetm.airsea:
             humidity_measure = pygetm.HumidityMeasure.DEW_POINT_TEMPERATURE
         if cfg.meteo.source == "CMIP6":
             humidity_measure = pygetm.HumidityMeasure.SPECIFIC_HUMIDITY
+        _shortwave_method = cfg.meteo.shortwave_method
+        _longwave_method = cfg.meteo.longwave_method
         airsea = pygetm.airsea.FluxesFromMeteo(
-            # shortwave_method=pygetm.ShortwaveMethod.ROSATI_MIYAKODA,
-            # shortwave_method=pygetm.NET_FLUX,
-            # shortwave_method=pygetm.DOWNWARD_FLUX,
-            # longwave_method=pygetm.LongwaveMethod.CLARK,  # HASTENRATH_LAMB, BIGNAMI, BERLIAND_BERLIAND, JOSEY1, JOSEY2
-            # longwave_method=pygetm.NET_FLUX,
-            # longwave_method=pygetm.DOWNWARD_FLUX,
-            # albedo_method=pygetm.AlbedoMethod.PAYNE,  # COGLEY
+            shortwave_method=_shortwave_method,
+            longwave_method=_longwave_method,
             humidity_measure=humidity_measure,
             calculate_evaporation=cfg.meteo.evaporation,
         )
