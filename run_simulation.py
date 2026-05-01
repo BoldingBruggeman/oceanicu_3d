@@ -18,10 +18,11 @@ machines.yaml (or the file given by ``machines_file:`` in the sim config).
 Usage
 -----
     run_simulation.py <sim_yaml> [--area AREA] [--experiment EXP]
-                                  [--np N] [--dryrun]
+                                  [--base-outdir DIR] [--np N] [--dryrun]
 
     # single-run config with CLI overrides
     run_simulation.py ns_run.yaml --experiment Sensitivity1
+    run_simulation.py ns_run.yaml --base-outdir /scratch/{user}/{area}
 
     # multi-run config (runs: list in YAML)
     run_simulation.py campaign.yaml --dryrun
@@ -159,13 +160,16 @@ def _setup_outdir(outdir: Path, source_dir: Path,
         if dry_run:
             print(f"  symlink  {link_name}  →  {target}")
         else:
-            if dst.is_symlink():
-                dst.unlink()
-            if target.exists() or target.is_symlink():
-                dst.symlink_to(target.resolve() if target.exists() else target)
+            if dst.is_symlink() or dst.exists():
+                if dst.is_symlink():
+                    dst.unlink()
+                else:
+                    dst.unlink() if dst.is_file() else shutil.rmtree(dst)
+            dst.symlink_to(target)
+            if target.exists():
                 print(f"  symlinked {link_name} → {target}")
             else:
-                print(f"  SKIP symlink {link_name} → {target} (not found)")
+                print(f"  symlinked {link_name} → {target}  (target not mounted)")
 
 
 def _copy_file(src: Path, dst: Path, dry_run: bool) -> None:
@@ -371,9 +375,11 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument('sim_yaml', type=Path,
                    help='Simulation configuration YAML file')
-    p.add_argument('--area',       help='Override area from YAML')
-    p.add_argument('--experiment', help='Override experiment name from YAML')
-    p.add_argument('--np',         type=int, help='Override number of MPI processes')
+    p.add_argument('--area',         help='Override area from YAML')
+    p.add_argument('--experiment',   help='Override experiment name from YAML')
+    p.add_argument('--base-outdir',  dest='base_outdir',
+                   help='Override base_outdir from YAML (supports {user}/{area} templates)')
+    p.add_argument('--np',           type=int, help='Override number of MPI processes')
     p.add_argument('--dryrun',     action='store_true',
                    help='Print commands without executing')
     g = p.add_mutually_exclusive_group()
@@ -396,9 +402,11 @@ def main() -> None:
     # CLI overrides apply to every run
     cli_overrides: dict = {}
     if args.area:
-        cli_overrides['area']       = args.area
+        cli_overrides['area']        = args.area
     if args.experiment:
-        cli_overrides['experiment'] = args.experiment
+        cli_overrides['experiment']  = args.experiment
+    if args.base_outdir:
+        cli_overrides['base_outdir'] = args.base_outdir
     if args.np:
         cli_overrides['np']         = args.np
     if args.dryrun:
