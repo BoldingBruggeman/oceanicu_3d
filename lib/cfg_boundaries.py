@@ -147,16 +147,17 @@ def data_2d(sim, cfg):
             bdy_lon = sim.open_boundaries.lon
             bdy_lat = sim.open_boundaries.lat
             # Use the TPXO class to get elevations and velocities/transports
+            tpxo_folder = cfg.boundaries.barotropic.tpxo_folder
             sim.open_boundaries.z.set(
-                tpxo.get(bdy_lon, bdy_lat, root=cfg.tides.folder),
+                tpxo.get(bdy_lon, bdy_lat, root=tpxo_folder),
                 on_grid=True,
             )
             sim.open_boundaries.u.set(
-                tpxo.get(bdy_lon, bdy_lat, variable="u", root=cfg.tides.folder),
+                tpxo.get(bdy_lon, bdy_lat, variable="u", root=tpxo_folder),
                 on_grid=True,
             )
             sim.open_boundaries.v.set(
-                tpxo.get(bdy_lon, bdy_lat, variable="v", root=cfg.tides.folder),
+                tpxo.get(bdy_lon, bdy_lat, variable="v", root=tpxo_folder),
                 on_grid=True,
             )
 
