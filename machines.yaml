@@ -39,4 +39,3 @@ scylla:
     RIVER_FILE:                 EMORID_1990_2024.nc
     FABM_FOLDER:                /work/shared/oceanICU/FABM
 #    METEO_FOLDER:             /work/shared/oceanICU/BiasCorrected/MPI-ESM1-2-HR
-
