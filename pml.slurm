@@ -32,7 +32,15 @@ module load intel_ipp_intel64/latest
 
 
 # conda run -n pygetm  python /scyllapfs/scratch/rict/run/oceanicu_3d/run_simulation.py /scyllapfs/scratch/rict/run/oceanicu_3d/ns_run.yaml  --experiment Baseline --skip-setup --np $NP
-conda run -n pygetm  python /scyllapfs/scratch/rict/run/oceanicu_3d/run_simulation.py /scyllapfs/scratch/rict/run/oceanicu_3d/amm7_run.yaml  --experiment Baseline --skip-setup --np $NP
+#
+# List of experiments - with date completed
+# Baseline - 2026-04-??
+experiment="ObsKd"
+#experiment="CMESM"
+#experiment="CMESM_ObsKd"
+#experiment="CMESM_SSR_STR"
+
+conda run -n pygetm  python /scyllapfs/scratch/rict/run/oceanicu_3d/run_simulation.py /scyllapfs/scratch/rict/run/oceanicu_3d/amm7_run.yaml  --experiment $experiments --skip-setup --np $NP
 
 #python /scyllapfs/scratch/rict/run/oceanicu_3d/run_chunks.py /work/rict/run/oceanICU/NS/Baseline/run_model.py /work/rict/run/oceanICU/NS/Baseline/ns_model_config.yaml /work/rict/run/oceanICU/NS/Baseline $NP --skip-setup 
 #conda run -n pygetm python run_chunks.py run_model.py ns_config.yaml "/data/$USER/NS" "$NP" --exp test
