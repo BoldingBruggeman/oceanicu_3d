@@ -213,3 +213,8 @@ Notes:
 - To run the create_bathymetry.py script it is necessary to have scikit-image installed.
 
 *This work was funded by the European Union under grant agreement no. 101083922 (OceanICU) and UK Research and Innovation (UKRI) under the UK government’s Horizon Europe funding guarantee [grant number 10054454, 10063673, 10064020, 10059241, 10079684, 10059012, 10048179].*
+
+## TODO
+
+- [ ] Move KdObs hard coded directory path in run_model.py to machines.yaml
+
