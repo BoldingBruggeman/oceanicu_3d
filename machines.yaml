@@ -22,3 +22,13 @@ bb-server1:
     RIVER_FILE:          EMORID_1990_2024.nc
     FABM_FOLDER:         /data/FABM
     BATHYMETRY_FOLDER:   /data/Bathymetry/NS
+scylla:
+    env:
+      HYDROGRAPHY_FOLDER: /work/shared/oceanICU/WOA
+      ERA5_FOLDER:       /work/shared/oceanICU/ERA5/NA
+      BATHYMETRY_FOLDER:   /work/shared/oceanICU/Bathymetry/     
+      TPXO_FOLDER:        /work/shared/oceanICU/TPXO9
+      RIVER_FOLDER:       /work/shared/oceanICU/EMORID
+      RIVER_FILE:         EMORID_1990_2024.nc
+      FABM_FOLDER:        /work/shared/oceanICU/FABM
+#      METEO_FOLDER:       /work/shared/oceanICU/BiasCorrected/MPI-ESM1-2-HR

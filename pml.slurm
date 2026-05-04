@@ -2,17 +2,18 @@
 
 # Make queue settings here -from Gennadis amm7 script
 
-#SBATCH --job-name=test
+#SBATCH --job-name=oceanICU_amm7
 ###SBATCH --error=job_%j.err
 ###SBATCH --output=job_%j.out
-#SBATCH --nodes=12
+#SBATCH --nodes=4
 #SBATCH --ntasks-per-core=1
+##SBATCH --nodelist=scyllacpu13,scyllacpu14,scyllacpu15,,scyllacpu16
 #SBATCH --exclusive
-####SBATCH --ntasks-per-node=63
-####SBATCH --cpus-per-task=1
-#SBATCH --time=06:00:00
-###SBATCH --mail-type=END,FAIL
-###SBATCH --mail-user=gle@pml.ac.uk
+#SBATCH --ntasks-per-node=64
+#SBATCH --cpus-per-task=1
+#SBATCH --time=24:00:00
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=rict@pml.ac.uk
 ###SBATCH --partition=mod
 ###SBATCH --mem=32GB
 
@@ -21,45 +22,17 @@ export SRUN_CPUS_PER_TASK=$SLURM_CPUS_PER_TASK
 NP=$SLURM_NPROCS
 
 module purge
-##module load openmpi/4.1.6-gcc-11.4.1
-##module load netcdf-hdf5parallel/4.9.2-ogr-2024.10
+prgenv=igi
+vprgenv=2024.1
+module load ${prgenv}/${vprgenv}
+module load ucx/1.16.0.mlx
+module load hdf5-parallel/1.14.5-${prgenv}-${vprgenv}
+module load netcdf-hdf5parallel/4.9.2-${prgenv}-${vprgenv}
+module load intel_ipp_intel64/latest
 
-module load amd/2024.10
-module load netcdf-hdf5parallel/4.9.2-amd-2024.10
 
-# Simulation configuration
+# conda run -n pygetm  python /scyllapfs/scratch/rict/run/oceanicu_3d/run_simulation.py /scyllapfs/scratch/rict/run/oceanicu_3d/ns_run.yaml  --experiment Baseline --skip-setup --np $NP
+conda run -n pygetm  python /scyllapfs/scratch/rict/run/oceanicu_3d/run_simulation.py /scyllapfs/scratch/rict/run/oceanicu_3d/amm7_run.yaml  --experiment Baseline --skip-setup --np $NP
 
-# Setup file/path environment variables
-
-# Tidal boundary conditions
-#export TPXO_FOLDER="/server/data/TPXO9"
-
-# Initial and boundary conditions - WOA (CMEMS)
-#export HYDROGRAPHY_FOLDER="/server/data/WOA"
-
-# River settings
-#export RIVER_FOLDER="/data/emorid"
-#export RIVER_FILE="EMORID_1990_2024.nc"
-
-# Setup dates defining the simulation period
-# If SIMULATION_START_DATE is not set it will
-# default to SIMULATION_INITIAL_DATE
-export SIMULATION_INITIAL_DATE="2020-01-01"
-export SIMULATION_START_DATE="2020-01-01"
-export SIMULATION_STOP_DATE="2022-01-01"
-
-# python run_chunks.py -h
-#
-# 4 Mandatory arguments:
-#   1) python run-script
-#   2) setup specific yaml configutration file
-#   3) Base output folder
-#   4) number of cores to use
-
-# 3 Optional arguments:
-#   1) --exp - append to output folder
-#   2) --daily_chunks, monthly_chunks - default is annual chunks
-#   3) --chunk_size - default is 1 of the chunk size
-#   4) --dryrun - will print the run commands to screen for inspection
-
-conda run -n pygetm python run_chunks.py run_model.py ns_config.yaml "/data/$USER/NS" "$NP" --exp test
+#python /scyllapfs/scratch/rict/run/oceanicu_3d/run_chunks.py /work/rict/run/oceanICU/NS/Baseline/run_model.py /work/rict/run/oceanICU/NS/Baseline/ns_model_config.yaml /work/rict/run/oceanICU/NS/Baseline $NP --skip-setup 
+#conda run -n pygetm python run_chunks.py run_model.py ns_config.yaml "/data/$USER/NS" "$NP" --exp test
