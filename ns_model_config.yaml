@@ -58,15 +58,25 @@ hydrography:
   folder: Path(os.getenv("HYDROGRAPHY_FOLDER", "/data/WOA"))
   temp: 15
   salt: 34
-tides:
-  folder: Path(os.getenv("TPXO_FOLDER", "/data/TPXO9"))
+boundaries:
+  barotropic:
+    #source: "TPXO" # "TPXO", "CMEMS"
+    tpxo_folder: Path(os.getenv("TPXO_FOLDER", "/data/TPXO9"))
+    source: "CMEMS" # "TPXO", "CMEMS"
+    folder: Path(os.getenv("BOUNDARY_FOLDER_BAROTROPIC", "/data/WOA"))
+    filename: "hourly_2015-01-01_to_2025-01-01.nc"
+  baroclinic:
+    #source: "WOA" # "constant", "WOA", "CMEMS - to come"
+    source: "CMEMS" # "constant", "WOA", "CMEMS - to come"
+    folder: Path(os.getenv("BOUNDARY_FOLDER_BAROCLINIC", "/data/WOA"))
+    filename: "daily_2015-01-01_to_2025-01-01.nc"
 meteo:
   source: os.getenv("METEO_SOURCE", "ERA5") # "ERA5" | "CMIP6"
   folder: Path(os.getenv("METEO_FOLDER", "/data/ERA5/NA"))
   evaporation: True
   # ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
-  shortwave_method: -1
-  longwave_method: -2
+  shortwave_method: 1
+  longwave_method: 1
 rivers:
   source: "emorid"
   folder: Path(os.getenv("RIVER_FOLDER", "/data/EMORID"))

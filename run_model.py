@@ -68,8 +68,6 @@ def _create_domain_amm7(cfg):
     import numpy as np
     import netCDF4
 
-    print(cfg.domain.path)
-    print(cfg.domain.name)
     with netCDF4.Dataset(cfg.domain.path) as nc:
         nc.set_auto_mask(False)
         domain = pygetm.domain.create_spherical(
@@ -100,6 +98,13 @@ def create_domain(cfg) -> pygetm.domain.Domain:
         domain.z0[...] = cfg.domain.z0
 
     cfg_rivers.create(domain, cfg)
+    print_boundary_points = False
+    if print_boundary_points:
+        with open("boundary_lonlat.txt", 'w') as of:
+            of.write("T-grid\nlon,lat\n")               
+            for n in range(len(domain.open_boundaries.lon)): 
+                of.write(f"{domain.open_boundaries.lon[n]:,.5f},{domain.open_boundaries.lat[n]:.5f}\n")               
+        quit()
 
     return domain
 
@@ -228,7 +233,7 @@ def parse_args():
         "--tpxo_dir",
         type=Path,
         help="Path to TPXO configuration files - v9 and v10 supported",
-        default=Path(eval(f"{cfg.tides.folder}")),
+        default=Path(eval(f"{cfg.boundaries.barotropic.folder}")),
     )
     p.add_argument(
         "--woa_dir",
@@ -368,10 +373,16 @@ def parse_args():
         cfg.domain.name = args.bathymetry_name
 
     if cfg.domain.boundaries:
-        if args.tpxo_dir:
-            cfg.tides.folder = Path(args.tpxo_dir)
-        else:
-            cfg.tides.folder = eval(cfg.tides.folder)
+        if cfg.boundaries.barotropic.source == "TPXO":
+            if args.tpxo_dir:
+                cfg.boundaries.barotropic.tpxo_folder = Path(args.tpxo_dir)
+            else:
+                cfg.boundaries.barotropic.tpxo_folder = eval(cfg.boundaries.barotropic.tpxo_folder)
+        if cfg.boundaries.barotropic.source == "CMEMS":
+            cfg.boundaries.barotropic.folder = eval(cfg.boundaries.barotropic.folder)
+
+        if cfg.boundaries.baroclinic.source == "CMEMS":
+            cfg.boundaries.baroclinic.folder = eval(cfg.boundaries.baroclinic.folder)
 
     if cfg.hydrography.source is not None:
         if args.woa_dir:

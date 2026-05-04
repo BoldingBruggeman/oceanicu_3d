@@ -4,31 +4,38 @@
 
 orca:
   env:
-    HYDROGRAPHY_FOLDER:  /server/data/WOA
-    TPXO_FOLDER:         /server/data/TPXO9
-    ERA5_FOLDER:         /data/ERA5/NA
-    RIVER_FOLDER:        /data/EMORID
-    RIVER_FILE:          EMORID_1990_2024.nc
-    FABM_FOLDER:         /data/FABM
-    BATHYMETRY_FOLDER:   /data/Bathymetry/NS
+    HYDROGRAPHY_FOLDER:         /server/data/WOA
+    TPXO_FOLDER:                /server/data/TPXO9
+    BOUNDARY_FOLDER_BAROTROPIC: /home/kb/source/repos/boundaries/boundary_data/ns/hourly/
+    BOUNDARY_FOLDER_BAROCLINIC: /home/kb/source/repos/boundaries/boundary_data/ns/daily/
+    ERA5_FOLDER:                /data/ERA5/NA
+    RIVER_FOLDER:               /data/EMORID
+    RIVER_FILE:                 EMORID_1990_2024.nc
+    FABM_FOLDER:                /data/FABM
+    BATHYMETRY_FOLDER:          /data/Bathymetry/NS
 
 bb-server1:
   env:
-    HYDROGRAPHY_FOLDER:  /data/WOA
-    TPXO_FOLDER:         /data/TPXO9
-    ERA5_FOLDER:         /data/ERA5/NA
-    CMIP6_FOLDER:        /data/BiasCorrected/MPI-ESM1-2-HR
-    RIVER_FOLDER:        /data/EMORID
-    RIVER_FILE:          EMORID_1990_2024.nc
-    FABM_FOLDER:         /data/FABM
-    BATHYMETRY_FOLDER:   /data/Bathymetry/NS
+    HYDROGRAPHY_FOLDER:         /data/WOA
+    TPXO_FOLDER:                /data/TPXO9
+    BOUNDARY_FOLDER_BAROTROPIC: /data/kb/NS/boundary_data/hourly/
+    BOUNDARY_FOLDER_BAROCLINIC: /data/kb/NS/boundary_data/daily/
+    ERA5_FOLDER:                /data/ERA5/NA
+    CMIP6_FOLDER:               /data/BiasCorrected/MPI-ESM1-2-HR
+    RIVER_FOLDER:               /data/EMORID
+    RIVER_FILE:                 EMORID_1990_2024.nc
+    FABM_FOLDER:                /data/FABM
+    BATHYMETRY_FOLDER:          /data/Bathymetry/NS
+
 scylla:
-    env:
-      HYDROGRAPHY_FOLDER: /work/shared/oceanICU/WOA
-      ERA5_FOLDER:       /work/shared/oceanICU/ERA5/NA
-      BATHYMETRY_FOLDER:   /work/shared/oceanICU/Bathymetry/     
-      TPXO_FOLDER:        /work/shared/oceanICU/TPXO9
-      RIVER_FOLDER:       /work/shared/oceanICU/EMORID
-      RIVER_FILE:         EMORID_1990_2024.nc
-      FABM_FOLDER:        /work/shared/oceanICU/FABM
-#      METEO_FOLDER:       /work/shared/oceanICU/BiasCorrected/MPI-ESM1-2-HR
+  env:
+    HYDROGRAPHY_FOLDER:         /work/shared/oceanICU/WOA
+    TPXO_FOLDER:                /work/shared/oceanICU/TPXO9
+    BOUNDARY_FOLDER_BAROTROPIC: /work/shared/OceanICU/AMM7/boundary_data/hourly/
+    BOUNDARY_FOLDER_BAROCLINIC: /work/shared/OceanICU/AMM7/boundary_data/daily/
+    ERA5_FOLDER:                /work/shared/oceanICU/ERA5/NA
+    BATHYMETRY_FOLDER:          /work/shared/oceanICU/Bathymetry/
+    RIVER_FOLDER:               /work/shared/oceanICU/EMORID
+    RIVER_FILE:                 EMORID_1990_2024.nc
+    FABM_FOLDER:                /work/shared/oceanICU/FABM
+#    METEO_FOLDER:             /work/shared/oceanICU/BiasCorrected/MPI-ESM1-2-HR

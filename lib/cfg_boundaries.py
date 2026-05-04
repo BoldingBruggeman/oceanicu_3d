@@ -15,8 +15,8 @@ are from TPXO. 3D are not used yet.
 import cftime
 import pygetm
 
-bdy_type = pygetm.constants.CLAMPED
 bdy_type = pygetm.constants.FLATHER_ELEV
+bdy_type = pygetm.constants.CLAMPED
 bdy_type = pygetm.constants.FLATHER_TRANSPORT
 
 
@@ -28,7 +28,7 @@ def create(domain, cfg):
                 pygetm.Side.WEST,
                 0,
                 1,
-                17,
+                16,
                 type_2d=bdy_type,
                 type_3d=0,
             )
@@ -135,36 +135,56 @@ def create(domain, cfg):
 def data_2d(sim, cfg):
     # if domain.open_boundaries:
     if cfg.domain.boundaries:
-        from pygetm.input import tpxo
+        if cfg.boundaries.barotropic.source == "TPXO":
+            from pygetm.input import tpxo
 
-        # Allow using TPXO for both standard and no_leap calendar
-        pygetm.otps2.reference_time = cftime.datetime(
-            1858, 11, 17, calendar=cfg.simulation.calendar
-        )
+            # Allow using TPXO for both standard and no_leap calendar
+            pygetm.otps2.reference_time = cftime.datetime(
+                1858, 11, 17, calendar=cfg.simulation.calendar
+            )
 
-        sim.logger.info("Getting 2D boundary data from TPXO")
-        bdy_lon = sim.open_boundaries.lon
-        bdy_lat = sim.open_boundaries.lat
-        # Use the TPXO class to get elevations and velocities/transports
-        sim.open_boundaries.z.set(
-            tpxo.get(bdy_lon, bdy_lat, root=cfg.tides.folder),
-            on_grid=True,
-        )
-        sim.open_boundaries.u.set(
-            tpxo.get(bdy_lon, bdy_lat, variable="u", root=cfg.tides.folder),
-            on_grid=True,
-        )
-        sim.open_boundaries.v.set(
-            tpxo.get(bdy_lon, bdy_lat, variable="v", root=cfg.tides.folder),
-            on_grid=True,
-        )
+            sim.logger.info("Getting 2D boundary data from TPXO")
+            bdy_lon = sim.open_boundaries.lon
+            bdy_lat = sim.open_boundaries.lat
+            # Use the TPXO class to get elevations and velocities/transports
+            sim.open_boundaries.z.set(
+                tpxo.get(bdy_lon, bdy_lat, root=cfg.tides.folder),
+                on_grid=True,
+            )
+            sim.open_boundaries.u.set(
+                tpxo.get(bdy_lon, bdy_lat, variable="u", root=cfg.tides.folder),
+                on_grid=True,
+            )
+            sim.open_boundaries.v.set(
+                tpxo.get(bdy_lon, bdy_lat, variable="v", root=cfg.tides.folder),
+                on_grid=True,
+            )
+
+        if cfg.boundaries.barotropic.source == "CMEMS":
+
+            sim.logger.info("Getting 2D boundary data from CMEMS")
+            fn = cfg.boundaries.barotropic.folder / cfg.boundaries.barotropic.filename 
+            bdy_lon = sim.open_boundaries.lon
+            bdy_lat = sim.open_boundaries.lat
+            sim.open_boundaries.z.set(
+                pygetm.input.from_nc(fn, "zos"),
+                on_grid=True,
+            )
+            sim.open_boundaries.u.set(
+                pygetm.input.from_nc(fn, "uo"),
+                on_grid=True,
+            )
+            sim.open_boundaries.v.set(
+                pygetm.input.from_nc(fn, "vo"),
+                on_grid=True,
+            )
 
 
 def data_3d(sim, cfg):
     # Here 3D boundary data can be attached from e.g. WOA or CMEMS
-    if cfg.hydrography.source == "WOA":
-        if cfg.domain.boundaries:
-            sim.logger.info("setting up 3D boundary conditions")
+    if cfg.domain.boundaries:
+        if cfg.boundaries.baroclinic.source == "WOA":
+            sim.logger.info("setting up 3D WOA boundary conditions")
             sim["temp"].open_boundaries.type = pygetm.SPONGE
             sim["temp"].open_boundaries.values.set(
                 pygetm.input.from_nc(cfg.hydrography.folder / "woa_t.nc", "t_an"),
@@ -176,4 +196,19 @@ def data_3d(sim, cfg):
                 pygetm.input.from_nc(cfg.hydrography.folder / "woa_s.nc", "s_an"),
                 on_grid=False,
                 climatology=True,
+            )
+        if cfg.boundaries.baroclinic.source == "CMEMS":
+            sim.logger.info("setting up 3D CMEMS boundary conditions")
+            fn = cfg.boundaries.baroclinic.folder / cfg.boundaries.baroclinic.filename 
+            sim["temp"].open_boundaries.type = pygetm.SPONGE
+            sim["temp"].open_boundaries.values.set(
+                pygetm.input.from_nc(fn, "thetao"),
+                on_grid=True,
+                climatology=False,
+            )
+            sim["salt"].open_boundaries.type = pygetm.SPONGE
+            sim["salt"].open_boundaries.values.set(
+                pygetm.input.from_nc(fn, "so"),
+                on_grid=True,
+                climatology=False,
             )
