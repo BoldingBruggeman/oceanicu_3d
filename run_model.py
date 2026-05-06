@@ -100,10 +100,11 @@ def create_domain(cfg) -> pygetm.domain.Domain:
     cfg_rivers.create(domain, cfg)
     print_boundary_points = False
     if print_boundary_points:
-        with open("boundary_lonlat.txt", 'w') as of:
+        with open(f"{cfg.setup}_bdy_lonlat.txt", 'w') as of:
             of.write("T-grid\nlon,lat\n")               
             for n in range(len(domain.open_boundaries.lon)): 
                 of.write(f"{domain.open_boundaries.lon[n]:,.5f},{domain.open_boundaries.lat[n]:.5f}\n")               
+        print("Boundary positions has been saved to file")
         quit()
 
     return domain
@@ -233,7 +234,7 @@ def parse_args():
         "--tpxo_dir",
         type=Path,
         help="Path to TPXO configuration files - v9 and v10 supported",
-        default=Path(eval(f"{cfg.boundaries.barotropic.folder}")),
+        default=Path(eval(f"{cfg.boundaries.barotropic.tpxo_folder}")),
     )
     p.add_argument(
         "--woa_dir",

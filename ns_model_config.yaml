@@ -60,14 +60,14 @@ hydrography:
   salt: 34
 boundaries:
   barotropic:
-    #source: "TPXO" # "TPXO", "CMEMS"
+    source: "TPXO"
+    #source: CMEMS
     tpxo_folder: Path(os.getenv("TPXO_FOLDER", "/data/TPXO9"))
-    source: "CMEMS" # "TPXO", "CMEMS"
     folder: Path(os.getenv("BOUNDARY_FOLDER_BAROTROPIC", "/data/WOA"))
     filename: "hourly_2015-01-01_to_2025-01-01.nc"
   baroclinic:
-    #source: "WOA" # "constant", "WOA", "CMEMS - to come"
-    source: "CMEMS" # "constant", "WOA", "CMEMS - to come"
+    source: "WOA"
+    #source: "CMEMS"
     folder: Path(os.getenv("BOUNDARY_FOLDER_BAROCLINIC", "/data/WOA"))
     filename: "daily_2015-01-01_to_2025-01-01.nc"
 meteo:
