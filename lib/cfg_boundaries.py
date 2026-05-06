@@ -48,6 +48,14 @@ def create(domain, cfg):
                 type_2d=bdy_type,
                 type_3d=0,
             )
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.EAST,
+                111,
+                62,
+                70,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
 
         if cfg.setup == "ena4":
             domain.open_boundaries.add_by_index(
@@ -130,6 +138,22 @@ def create(domain, cfg):
                 type_2d=bdy_type,
                 type_3d=0,
             )
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.SOUTH,
+                247,
+                273,
+                276,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
+            domain.open_boundaries.add_by_index(
+                pygetm.Side.SOUTH,
+                247,
+                277,
+                296,
+                type_2d=bdy_type,
+                type_3d=0,
+            )
 
 
 def data_2d(sim, cfg):
@@ -164,7 +188,10 @@ def data_2d(sim, cfg):
         if cfg.boundaries.barotropic.source == "CMEMS":
 
             sim.logger.info("Getting 2D boundary data from CMEMS")
-            fn = cfg.boundaries.barotropic.folder / cfg.boundaries.barotropic.filename 
+            _ = cfg.setup.upper()
+            fn = cfg.boundaries.barotropic.folder / \
+                 f"{_}/boundary_data/hourly" / \
+                 cfg.boundaries.barotropic.filename 
             bdy_lon = sim.open_boundaries.lon
             bdy_lat = sim.open_boundaries.lat
             sim.open_boundaries.z.set(
@@ -198,9 +225,14 @@ def data_3d(sim, cfg):
                 on_grid=False,
                 climatology=True,
             )
+
         if cfg.boundaries.baroclinic.source == "CMEMS":
             sim.logger.info("setting up 3D CMEMS boundary conditions")
-            fn = cfg.boundaries.baroclinic.folder / cfg.boundaries.baroclinic.filename 
+            _ = cfg.setup.upper()
+            print(cfg.boundaries.baroclinic.folder)
+            fn = cfg.boundaries.baroclinic.folder / \
+                 f"{_}/boundary_data/daily" / \
+                 cfg.boundaries.baroclinic.filename 
             sim["temp"].open_boundaries.type = pygetm.SPONGE
             sim["temp"].open_boundaries.values.set(
                 pygetm.input.from_nc(fn, "thetao"),
