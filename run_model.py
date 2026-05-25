@@ -162,7 +162,7 @@ def create_simulation(
         if not cfg.simulation.ObsKd:
             sim.radiation.kc2.set(3.23)
         else:
-            attenuation_path = "/data/Kd490/KD490_clim.nc"
+            attenuation_path = "/work/shared/oceanICU/Kd490/KD490_clim.nc"
             sim.radiation.kc2.set(pygetm.input.from_nc(attenuation_path, "KD490_filled"),climatology=True)
 
     cfg_fabm.configure(sim, cfg, imonth)
@@ -474,14 +474,16 @@ def main():
     simstop = cftime.datetime.strptime(
         args.stop, "%Y-%m-%d %H:%M:%S", calendar=cfg.simulation.calendar
     )
-
-    sim = create_simulation(
-        domain,
-        cfg,
-        load_restart,
-        simstart.month - 1,
-    )
-
+    try:
+        sim = create_simulation(
+            domain,
+            cfg,
+            load_restart,
+            simstart.month - 1,
+        )
+    except Exception as e:
+        domain.logger.error(f"Error during simulation creation: {e}")
+        sys.exit(1)
     if args.plot_domain:
         f = domain.plot(show_mesh=True, show_subdomains=True, tiling=sim.tiling)
         if f is not None:
