@@ -31,11 +31,11 @@ scylla:
   env:
     HYDROGRAPHY_FOLDER:         /work/shared/oceanICU/WOA
     TPXO_FOLDER:                /work/shared/oceanICU/TPXO9
-    BOUNDARY_FOLDER_BAROTROPIC: /work/shared/OceanICU/boundary_data/hourly/
-    BOUNDARY_FOLDER_BAROCLINIC: /work/shared/OceanICU/boundary_data/daily/
+    BOUNDARY_FOLDER_BAROTROPIC: /work/rict/run/experiment_setups/experiments
+    BOUNDARY_FOLDER_BAROCLINIC: /work/rict/run/experiment_setups/experiments
     ERA5_FOLDER:                /work/shared/oceanICU/ERA5/NA
     BATHYMETRY_FOLDER:          /work/shared/oceanICU/Bathymetry/
     RIVER_FOLDER:               /work/shared/oceanICU/EMORID
-    RIVER_FILE:                 EMORID_1990_2024.nc
+    RIVER_FILE:                 EMORID_1990_2024_concentrations.nc
     FABM_FOLDER:                /work/shared/oceanICU/FABM
 #    METEO_FOLDER:             /work/shared/oceanICU/BiasCorrected/MPI-ESM1-2-HR
