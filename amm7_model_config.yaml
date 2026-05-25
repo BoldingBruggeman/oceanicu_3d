@@ -92,7 +92,7 @@ simulation:
   runtype: 4 # 1 -> 2D, 2 -> 3D barotropic, 4 -> 3D baroclinic
   Dcrit: 0.5
   Dmin: 0.1
-  ObsKd: False
+  ObsKd: True
 runtime:
   timestep: 10
   split_factor: 30
@@ -100,7 +100,7 @@ runtime:
   debug_output: False
 output:
   folder: Path(os.getenv("OUTPUT_FOLDER", "."))
-  meteo: True
+  meteo: False
   tides: False
   barotropic:
     default_2d: False
