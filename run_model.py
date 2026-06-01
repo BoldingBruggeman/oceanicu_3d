@@ -134,6 +134,8 @@ def create_simulation(
         Dmin=cfg.simulation.Dmin,
         delay_slow_ip=False,
     )
+    print(cfg.fabm.file)
+    quit()
 
     initial = not load_restart
     sim = MySimulation(
@@ -162,7 +164,8 @@ def create_simulation(
         if not cfg.simulation.ObsKd:
             sim.radiation.kc2.set(3.23)
         else:
-            attenuation_path = "/data/Kd490/KD490_clim.nc"
+            #attenuation_path = "/data/Kd490/KD490_clim.nc"
+            attenuation_path = cfg.simulation.kd_folder / cfg.simulation.kd_file
             sim.radiation.kc2.set(pygetm.input.from_nc(attenuation_path, "KD490_filled"),climatology=True)
 
     cfg_fabm.configure(sim, cfg, imonth)
