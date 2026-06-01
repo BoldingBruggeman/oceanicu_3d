@@ -161,7 +161,7 @@ def create(
 
             if sim.fabm:
                 if cfg.fabm.config == "ersem":
-                    output.reques(
+                    output.request(
                         tuple(_vars["baroclinic"]["3d"]["fabm"]),
                         time_average=time_average,
                     )
