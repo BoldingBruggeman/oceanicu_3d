@@ -47,10 +47,12 @@ Warming ranges from IPCC AR6 (2021), relative to 1850–1900."><meta name=author
 Bias correction is applied using quantile delta mapping (QDM) calibrated against ERA5 reanalysis over the historical period. The plots below show calibration performance and projected trends under each SSP scenario.
 SSP Scenario Reference Scenario Narrative Radiative forcing Approx. warming by 2100 SSP1-1.9 Sustainability — very low emissions 1.9 W m⁻² 1.0–1.8 °C SSP1-2.6 Sustainability — low emissions 2.6 W m⁻² 1.3–2.4 °C SSP2-4.5 Middle of the road 4.5 W m⁻² 2.1–3.5 °C SSP3-7.0 Regional rivalry — high emissions 7.0 W m⁻² 2.8–4.6 °C SSP5-8.5 Fossil-fuelled development 8.5 W m⁻² 3.3–5.7 °C Warming ranges from IPCC AR6 (2021), relative to 1850–1900."><meta property="og:locale" content="en-us"><meta property="og:type" content="website"><meta name=twitter:card content="summary"><meta name=twitter:title content="Atmospheric Forcing — Bias Correction"><meta name=twitter:description content="Ocean model validation and analysis dashboard"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Atmospheric Forcing — Bias Correction","item":"https://bolding-bruggeman.com/oceanicu_3d/scenarios/"}]}</script></head><body class=list id=top><header class=header><nav class=nav><div class=logo><a href=https://bolding-bruggeman.com/oceanicu_3d/ accesskey=h title="Ocean Model Validation (Alt + H)">Ocean Model Validation</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
 <svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://bolding-bruggeman.com/oceanicu_3d/areas/ title=Areas><span>Areas</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/validations/ title=Validations><span>Validations</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ title=Scenarios><span class=active>Scenarios</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/rankings/ title=Rankings><span>Rankings</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/data-sources/ title="Data Sources"><span>Data Sources</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/guides/ title=Guides><span>Guides</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><header class=page-header><div class=breadcrumbs><a href=https://bolding-bruggeman.com/oceanicu_3d/>Home</a></div><h1>Atmospheric Forcing — Bias Correction</h1><div class=post-meta><span title='2026-05-07 00:00:00 +0000 UTC'>May 7, 2026</span>&nbsp;·&nbsp;<span>Ocean Modeling Team</span></div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><nav id=TableOfContents><ul><li><a href=#ssp-scenario-reference>SSP Scenario Reference</a></li><li><a href=#ssp1-26--low-emissions>SSP1-2.6 — Low emissions</a><ul><li><a href=#evspsbl>EVSPSBL</a></li><li><a href=#nhx>NHX</a></li><li><a href=#noy>NOY</a></li><li><a href=#precipitation-pr>Precipitation (pr)</a></li><li><a href=#sea-level-pressure-psl>Sea-level Pressure (psl)</a></li><li><a href=#downwelling-longwave-radiation-rlds>Downwelling Longwave Radiation (rlds)</a></li><li><a href=#downwelling-shortwave-radiation-rsds>Downwelling Shortwave Radiation (rsds)</a></li><li><a href=#near-surface-air-temperature-tas>Near-surface Air Temperature (tas)</a></li><li><a href=#uas>UAS</a></li><li><a href=#vas>VAS</a></li></ul></li><li><a href=#ssp2-45--intermediate-emissions>SSP2-4.5 — Intermediate emissions</a><ul><li><a href=#evspsbl-1>EVSPSBL</a></li><li><a href=#net_lw>NET_LW</a></li><li><a href=#net_sw>NET_SW</a></li><li><a href=#precipitation-pr-1>Precipitation (pr)</a></li><li><a href=#sea-level-pressure-psl-1>Sea-level Pressure (psl)</a></li><li><a href=#downwelling-longwave-radiation-rlds-1>Downwelling Longwave Radiation (rlds)</a></li><li><a href=#downwelling-shortwave-radiation-rsds-1>Downwelling Shortwave Radiation (rsds)</a></li><li><a href=#near-surface-air-temperature-tas-1>Near-surface Air Temperature (tas)</a></li><li><a href=#uas-1>UAS</a></li><li><a href=#vas-1>VAS</a></li></ul></li><li><a href=#ssp3-70--high-emissions>SSP3-7.0 — High emissions</a><ul><li><a href=#evspsbl-2>EVSPSBL</a></li><li><a href=#nhx-1>NHX</a></li><li><a href=#noy-1>NOY</a></li><li><a href=#precipitation-pr-2>Precipitation (pr)</a></li><li><a href=#sea-level-pressure-psl-2>Sea-level Pressure (psl)</a></li><li><a href=#downwelling-longwave-radiation-rlds-2>Downwelling Longwave Radiation (rlds)</a></li><li><a href=#downwelling-shortwave-radiation-rsds-2>Downwelling Shortwave Radiation (rsds)</a></li><li><a href=#near-surface-air-temperature-tas-2>Near-surface Air Temperature (tas)</a></li><li><a href=#uas-2>UAS</a></li><li><a href=#vas-2>VAS</a></li></ul></li><li><a href=#ssp5-85--very-high-emissions>SSP5-8.5 — Very high emissions</a><ul><li><a href=#evspsbl-3>EVSPSBL</a></li><li><a href=#nhx-2>NHX</a></li><li><a href=#noy-2>NOY</a></li><li><a href=#precipitation-pr-3>Precipitation (pr)</a></li><li><a href=#sea-level-pressure-psl-3>Sea-level Pressure (psl)</a></li><li><a href=#downwelling-longwave-radiation-rlds-3>Downwelling Longwave Radiation (rlds)</a></li><li><a href=#downwelling-shortwave-radiation-rsds-3>Downwelling Shortwave Radiation (rsds)</a></li><li><a href=#near-surface-air-temperature-tas-3>Near-surface Air Temperature (tas)</a></li><li><a href=#uas-3>UAS</a></li><li><a href=#vas-3>VAS</a></li></ul></li></ul></nav></div></details></div><div class=post-content><p>Diagnostics for the bias correction of CMIP6 atmospheric forcing fields applied to all regional ocean simulations. Results are scenario-specific and valid across all model domains.</p><p>Bias correction is applied using quantile delta mapping (QDM) calibrated against ERA5 reanalysis over the historical period. The plots below show calibration performance and projected trends under each SSP scenario.</p><h2 id=ssp-scenario-reference>SSP Scenario Reference<a hidden class=anchor aria-hidden=true href=#ssp-scenario-reference>#</a></h2><table><thead><tr><th>Scenario</th><th>Narrative</th><th>Radiative forcing</th><th>Approx. warming by 2100</th></tr></thead><tbody><tr><td><strong>SSP1-1.9</strong></td><td>Sustainability — very low emissions</td><td>1.9 W m⁻²</td><td>1.0–1.8 °C</td></tr><tr><td><strong>SSP1-2.6</strong></td><td>Sustainability — low emissions</td><td>2.6 W m⁻²</td><td>1.3–2.4 °C</td></tr><tr><td><strong>SSP2-4.5</strong></td><td>Middle of the road</td><td>4.5 W m⁻²</td><td>2.1–3.5 °C</td></tr><tr><td><strong>SSP3-7.0</strong></td><td>Regional rivalry — high emissions</td><td>7.0 W m⁻²</td><td>2.8–4.6 °C</td></tr><tr><td><strong>SSP5-8.5</strong></td><td>Fossil-fuelled development</td><td>8.5 W m⁻²</td><td>3.3–5.7 °C</td></tr></tbody></table><p>Warming ranges from IPCC AR6 (2021), relative to 1850–1900.</p><h2 id=ssp1-26--low-emissions>SSP1-2.6 — Low emissions<a hidden class=anchor aria-hidden=true href=#ssp1-26--low-emissions>#</a></h2><h3 id=evspsbl>EVSPSBL<a hidden class=anchor aria-hidden=true href=#evspsbl>#</a></h3><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/evspsbl/plots/calibration_maps_ssp126_bilinear.png>
-<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/evspsbl/plots/future_trend_ssp126_bilinear.png>
-<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/evspsbl/plots/monthly_breakdown_ssp126_bilinear.png>
-<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/evspsbl/plots/seasonal_cycle_ssp126_bilinear.png>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://bolding-bruggeman.com/oceanicu_3d/areas/ title=Areas><span>Areas</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/validations/ title=Validations><span>Validations</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ title=Scenarios><span class=active>Scenarios</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/rankings/ title=Rankings><span>Rankings</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/data-sources/ title="Data Sources"><span>Data Sources</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/guides/ title=Guides><span>Guides</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><header class=page-header><div class=breadcrumbs><a href=https://bolding-bruggeman.com/oceanicu_3d/>Home</a></div><h1>Atmospheric Forcing — Bias Correction</h1><div class=post-meta><span title='2026-06-01 00:00:00 +0000 UTC'>June 1, 2026</span>&nbsp;·&nbsp;<span>Ocean Modeling Team</span></div></header><div class=toc><details><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><nav id=TableOfContents><ul><li><a href=#ssp-scenario-reference>SSP Scenario Reference</a></li><li><a href=#summary>Summary</a><ul><li><a href=#calibration-statistics>Calibration statistics</a></li><li><a href=#future-mean-by-model-and-scenario>Future mean by model and scenario</a></li></ul></li><li><a href=#mpi-esm1-2-hr>MPI-ESM1-2-HR</a><ul><li><a href=#ssp1-26--low-emissions>SSP1-2.6 — Low emissions</a></li><li><a href=#ssp2-45--intermediate-emissions>SSP2-4.5 — Intermediate emissions</a></li><li><a href=#ssp3-70--high-emissions>SSP3-7.0 — High emissions</a></li><li><a href=#ssp5-85--very-high-emissions>SSP5-8.5 — Very high emissions</a></li></ul></li></ul></nav></div></details></div><div class=post-content><p>Diagnostics for the bias correction of CMIP6 atmospheric forcing fields applied to all regional ocean simulations. Results are scenario-specific and valid across all model domains.</p><p>Bias correction is applied using quantile delta mapping (QDM) calibrated against ERA5 reanalysis over the historical period. The plots below show calibration performance and projected trends under each SSP scenario.</p><h2 id=ssp-scenario-reference>SSP Scenario Reference<a hidden class=anchor aria-hidden=true href=#ssp-scenario-reference>#</a></h2><table><thead><tr><th>Scenario</th><th>Narrative</th><th>Radiative forcing</th><th>Approx. warming by 2100</th></tr></thead><tbody><tr><td><strong>SSP1-1.9</strong></td><td>Sustainability — very low emissions</td><td>1.9 W m⁻²</td><td>1.0–1.8 °C</td></tr><tr><td><strong>SSP1-2.6</strong></td><td>Sustainability — low emissions</td><td>2.6 W m⁻²</td><td>1.3–2.4 °C</td></tr><tr><td><strong>SSP2-4.5</strong></td><td>Middle of the road</td><td>4.5 W m⁻²</td><td>2.1–3.5 °C</td></tr><tr><td><strong>SSP3-7.0</strong></td><td>Regional rivalry — high emissions</td><td>7.0 W m⁻²</td><td>2.8–4.6 °C</td></tr><tr><td><strong>SSP5-8.5</strong></td><td>Fossil-fuelled development</td><td>8.5 W m⁻²</td><td>3.3–5.7 °C</td></tr></tbody></table><p>Warming ranges from IPCC AR6 (2021), relative to 1850–1900.</p><h2 id=summary>Summary<a hidden class=anchor aria-hidden=true href=#summary>#</a></h2><p><img alt="Calibration quality — RMSE and Correlation heatmap across models and variables" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/_summary/bc_calibration_summary.png>
+<em>Calibration quality: RMSE (left) and Correlation (right) for each model and variable against ERA5. Darker red = higher RMSE; darker green = higher correlation.</em></p><p><img alt="Future mean by model and scenario" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/_summary/bc_future_summary.png>
+<em>Future area-mean of the bias-corrected field for each model and SSP scenario. Black tick marks show the ERA5 calibration period mean.</em></p><h3 id=calibration-statistics>Calibration statistics<a hidden class=anchor aria-hidden=true href=#calibration-statistics>#</a></h3><p><strong>Evaporation (evspsbl)</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>0.0001</td><td>-0.0001</td><td>0.8917</td></tr></tbody></table><p><strong>Net Longwave Radiation (net_lw)</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>17.7570</td><td>+7.0133</td><td>0.1896</td></tr></tbody></table><p><strong>Net Shortwave Radiation (net_sw)</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>42.9700</td><td>-5.3910</td><td>0.8237</td></tr></tbody></table><p><strong>NHX</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>0.0000</td><td>+0.0000</td><td>0.6616</td></tr></tbody></table><p><strong>NOY</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>0.0000</td><td>-0.0000</td><td>0.8924</td></tr></tbody></table><p><strong>Precipitation (pr)</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>0.0000</td><td>+0.0000</td><td>0.4826</td></tr></tbody></table><p><strong>Sea-level Pressure (psl)</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>634.6700</td><td>-69.1080</td><td>-0.0497</td></tr></tbody></table><p><strong>Downwelling Longwave Radiation (rlds)</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>27.6760</td><td>+4.2339</td><td>0.5458</td></tr></tbody></table><p><strong>Downwelling Shortwave Radiation (rsds)</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>46.1410</td><td>-6.9422</td><td>0.8356</td></tr></tbody></table><p><strong>Near-surface Air Temperature (tas)</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>1.7683</td><td>-1.0751</td><td>0.9838</td></tr></tbody></table><p><strong>Eastward Wind (uas)</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>0.7836</td><td>-0.0966</td><td>0.8263</td></tr></tbody></table><p><strong>Northward Wind (vas)</strong></p><table><thead><tr><th>Model</th><th>RMSE</th><th>Bias</th><th>Correlation</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>0.6102</td><td>-0.1836</td><td>0.8327</td></tr></tbody></table><h3 id=future-mean-by-model-and-scenario>Future mean by model and scenario<a hidden class=anchor aria-hidden=true href=#future-mean-by-model-and-scenario>#</a></h3><p><strong>Evaporation (evspsbl)</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>9.363e-05</td><td>8.899e-05</td><td>9.033e-05</td><td>8.863e-05</td></tr></tbody></table><p><strong>Net Longwave Radiation (net_lw)</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>—</td><td>-52.9</td><td>—</td><td>—</td></tr></tbody></table><p><strong>Net Shortwave Radiation (net_sw)</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>—</td><td>105.9</td><td>—</td><td>—</td></tr></tbody></table><p><strong>NHX</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>1.572e-08</td><td>—</td><td>2.387e-08</td><td>1.578e-08</td></tr></tbody></table><p><strong>NOY</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>9.846e-09</td><td>—</td><td>1.74e-08</td><td>2.66e-08</td></tr></tbody></table><p><strong>Precipitation (pr)</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>3.832e-05</td><td>3.837e-05</td><td>3.947e-05</td><td>3.96e-05</td></tr></tbody></table><p><strong>Sea-level Pressure (psl)</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>1.024e+05</td><td>9.893e+04</td><td>1.024e+05</td><td>—</td></tr></tbody></table><p><strong>Downwelling Longwave Radiation (rlds)</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>—</td><td>310.7</td><td>—</td><td>314.9</td></tr></tbody></table><p><strong>Downwelling Shortwave Radiation (rsds)</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>—</td><td>120</td><td>—</td><td>119.1</td></tr></tbody></table><p><strong>Near-surface Air Temperature (tas)</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>283.4</td><td>9.443</td><td>284.1</td><td>284.2</td></tr></tbody></table><p><strong>Eastward Wind (uas)</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>1.199</td><td>1.321</td><td>1.266</td><td>1.273</td></tr></tbody></table><p><strong>Northward Wind (vas)</strong></p><table><thead><tr><th>Model</th><th>SSP1-2.6</th><th>SSP2-4.5</th><th>SSP3-7.0</th><th>SSP5-8.5</th></tr></thead><tbody><tr><td>MPI-ESM1-2-HR</td><td>0.5417</td><td>0.5416</td><td>0.5951</td><td>0.5456</td></tr></tbody></table><h2 id=mpi-esm1-2-hr>MPI-ESM1-2-HR<a hidden class=anchor aria-hidden=true href=#mpi-esm1-2-hr>#</a></h2><h3 id=ssp1-26--low-emissions>SSP1-2.6 — Low emissions<a hidden class=anchor aria-hidden=true href=#ssp1-26--low-emissions>#</a></h3><h4 id=evaporation-evspsbl>Evaporation (evspsbl)<a hidden class=anchor aria-hidden=true href=#evaporation-evspsbl>#</a></h4><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/evspsbl/plots/calibration_maps_ssp126_bilinear.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/evspsbl/plots/future_trend_ssp126_bilinear.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/evspsbl/plots/monthly_breakdown_ssp126_bilinear.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/evspsbl/plots/seasonal_cycle_ssp126_bilinear.png>
 <em>Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp126 Bilinear</summary><pre tabindex=0><code>################################################################################
 evspsbl Bias Correction Statistics
 ################################################################################
@@ -143,10 +145,10 @@ Analysed: 2026-04-29 21:15:30
   Oct       8.9069e-05    7.5940e-05    +1.3129e-05
   Nov       8.8825e-05    7.4227e-05    +1.4598e-05
   Dec       9.7658e-05    7.1482e-05    +2.6176e-05
-</code></pre></details><h3 id=nhx>NHX<a hidden class=anchor aria-hidden=true href=#nhx>#</a></h3><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/nhx/plots/calibration_maps_ssp126_conservative.png>
-<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/nhx/plots/future_trend_ssp126_conservative.png>
-<em>Projected future trend — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/nhx/plots/monthly_breakdown_ssp126_conservative.png>
-<em>Monthly breakdown — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/nhx/plots/seasonal_cycle_ssp126_conservative.png>
+</code></pre></details><h4 id=nhx>NHX<a hidden class=anchor aria-hidden=true href=#nhx>#</a></h4><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/nhx/plots/calibration_maps_ssp126_conservative.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/nhx/plots/future_trend_ssp126_conservative.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/nhx/plots/monthly_breakdown_ssp126_conservative.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/nhx/plots/seasonal_cycle_ssp126_conservative.png>
 <em>Seasonal cycle — SSP1-2.6 — Low emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp126 Conservative</summary><pre tabindex=0><code>################################################################################
 nhx Bias Correction Statistics
 ################################################################################
@@ -241,10 +243,10 @@ Analysed: 2026-04-14 18:30:50
   Oct       1.8360e-08    2.1744e-08    -3.3841e-09
   Nov       1.3174e-08    1.7218e-08    -4.0436e-09
   Dec       9.7304e-09    1.1668e-08    -1.9374e-09
-</code></pre></details><h3 id=noy>NOY<a hidden class=anchor aria-hidden=true href=#noy>#</a></h3><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/noy/plots/calibration_maps_ssp126_conservative.png>
-<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/noy/plots/future_trend_ssp126_conservative.png>
-<em>Projected future trend — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/noy/plots/monthly_breakdown_ssp126_conservative.png>
-<em>Monthly breakdown — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/noy/plots/seasonal_cycle_ssp126_conservative.png>
+</code></pre></details><h4 id=noy>NOY<a hidden class=anchor aria-hidden=true href=#noy>#</a></h4><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/noy/plots/calibration_maps_ssp126_conservative.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/noy/plots/future_trend_ssp126_conservative.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/noy/plots/monthly_breakdown_ssp126_conservative.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/noy/plots/seasonal_cycle_ssp126_conservative.png>
 <em>Seasonal cycle — SSP1-2.6 — Low emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp126 Conservative</summary><pre tabindex=0><code>################################################################################
 noy Bias Correction Statistics
 ################################################################################
@@ -339,10 +341,10 @@ Analysed: 2026-04-14 18:31:04
   Oct       1.2853e-08    4.7301e-08    -3.4448e-08
   Nov       1.0353e-08    4.5893e-08    -3.5540e-08
   Dec       9.6861e-09    4.1298e-08    -3.1612e-08
-</code></pre></details><h3 id=precipitation-pr>Precipitation (pr)<a hidden class=anchor aria-hidden=true href=#precipitation-pr>#</a></h3><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/pr/plots/calibration_maps_ssp126_conservative.png>
-<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/pr/plots/future_trend_ssp126_conservative.png>
-<em>Projected future trend — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/pr/plots/monthly_breakdown_ssp126_conservative.png>
-<em>Monthly breakdown — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/pr/plots/seasonal_cycle_ssp126_conservative.png>
+</code></pre></details><h4 id=precipitation-pr>Precipitation (pr)<a hidden class=anchor aria-hidden=true href=#precipitation-pr>#</a></h4><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/pr/plots/calibration_maps_ssp126_conservative.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/pr/plots/future_trend_ssp126_conservative.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/pr/plots/monthly_breakdown_ssp126_conservative.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/pr/plots/seasonal_cycle_ssp126_conservative.png>
 <em>Seasonal cycle — SSP1-2.6 — Low emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp126 Conservative</summary><pre tabindex=0><code>################################################################################
 pr Bias Correction Statistics
 ################################################################################
@@ -435,15 +437,15 @@ Analysed: 2026-04-16 08:39:14
   Oct       4.2137e-05    4.9203e-08    +4.2087e-05
   Nov       4.3609e-05    5.0310e-08    +4.3559e-05
   Dec       4.5775e-05    4.9542e-08    +4.5725e-05
-</code></pre></details><h3 id=sea-level-pressure-psl>Sea-level Pressure (psl)<a hidden class=anchor aria-hidden=true href=#sea-level-pressure-psl>#</a></h3><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/psl/plots/calibration_maps_ssp126_bilinear.png>
-<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/psl/plots/future_trend_ssp126_bilinear.png>
-<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/psl/plots/monthly_breakdown_ssp126_bilinear.png>
-<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/psl/plots/seasonal_cycle_ssp126_bilinear.png>
+</code></pre></details><h4 id=sea-level-pressure-psl>Sea-level Pressure (psl)<a hidden class=anchor aria-hidden=true href=#sea-level-pressure-psl>#</a></h4><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/psl/plots/calibration_maps_ssp126_bilinear.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/psl/plots/future_trend_ssp126_bilinear.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/psl/plots/monthly_breakdown_ssp126_bilinear.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/psl/plots/seasonal_cycle_ssp126_bilinear.png>
 <em>Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp126 Bilinear</summary><pre tabindex=0><code>################################################################################
 psl Bias Correction Statistics
 ################################################################################
   Format:     1.1
-  Created:    2026-04-16 09:42:02
+  Created:    2026-05-30 20:00:08
   Author:     
   Project:    
   Institute:  
@@ -452,87 +454,87 @@ psl Bias Correction Statistics
 ################################################################################
 
 ================================================================================
-Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+Calibration: 1990-01-01 – 2019-12-31  |  Model: GFDL-ESM4
 ================================================================================
-Analysed: 2026-04-16 09:42:02
+Analysed: 2026-05-30 20:00:08
 
 --- Model historical vs reference ---
-  RMSE:          3.4003e+03
-  Bias:          +1.6093e+03
-  MAE:           1.7020e+03
-  Correlation:   -0.0911
-  N points:      236,412
-  Model mean:    1.0117e+05  (model raw)
-  Ref mean:      9.9562e+04  (reference)
-  Model std:     4.4255e+02
-  Ref std:       2.9225e+03
+  RMSE:          6.3467e+02
+  Bias:          -6.9108e+01
+  MAE:           4.9139e+02
+  Correlation:   -0.0497
+  N points:      229,320
+  Model mean:    1.0115e+05  (model raw)
+  Ref mean:      1.0122e+05  (reference)
+  Model std:     4.1714e+02
+  Ref std:       4.5306e+02
 
   Error distribution (model raw − reference):
-    Min:         -7.5948e+02
-    5th pct:     -3.1484e+02
-    25th pct:    +2.7324e+00
-    Median:      +2.3964e+02
-    75th pct:    +1.9850e+03
-    95th pct:    +7.9050e+03
-    Max:         +2.6544e+04
+    Min:         -1.9163e+03
+    5th pct:     -1.1531e+03
+    25th pct:    -5.0897e+02
+    Median:      +1.8047e+01
+    75th pct:    +3.0884e+02
+    95th pct:    +9.4809e+02
+    Max:         +1.7911e+03
 
   Monthly breakdown:
   Month           RMSE           Bias           MAE    Corr
   --------------------------------------------------------
-  Jan       3.4104e+03    +1.5303e+03    1.6751e+03  -0.1431
-  Feb       3.4535e+03    +1.5394e+03    1.7509e+03  -0.2122
-  Mar       3.4869e+03    +1.6915e+03    1.7816e+03  -0.2381
-  Apr       3.4001e+03    +1.5802e+03    1.6948e+03  -0.3241
-  May       3.3282e+03    +1.5550e+03    1.6186e+03  0.1237
-  Jun       3.3972e+03    +1.7317e+03    1.7343e+03  0.1059
-  Jul       3.3318e+03    +1.6592e+03    1.6706e+03  0.0396
-  Aug       3.3574e+03    +1.6763e+03    1.6891e+03  -0.0762
-  Sep       3.3971e+03    +1.6789e+03    1.6961e+03  -0.1375
-  Oct       3.4266e+03    +1.7070e+03    1.7110e+03  -0.2385
-  Nov       3.3912e+03    +1.5027e+03    1.6671e+03  -0.2657
-  Dec       3.4204e+03    +1.4591e+03    1.7352e+03  -0.2445
+  Jan       8.4650e+02    -1.2252e+02    7.3856e+02  -0.2255
+  Feb       8.7572e+02    -8.7703e+01    7.6289e+02  -0.3484
+  Mar       6.2466e+02    +4.6054e+01    5.4854e+02  -0.6689
+  Apr       9.5061e+01    +3.9995e+01    8.1404e+01  0.8532
+  May       1.3127e+02    +5.5751e+01    1.1090e+02  0.4634
+  Jun       2.2945e+02    +1.4395e+02    1.9491e+02  0.4300
+  Jul       3.5436e+02    +2.8025e+01    3.1108e+02  -0.5005
+  Aug       5.2902e+02    -1.0911e+02    4.6357e+02  -0.7424
+  Sep       7.1786e+02    -2.0285e+02    6.3458e+02  -0.6627
+  Oct       5.7428e+02    -2.2170e+01    5.1031e+02  -0.0063
+  Nov       6.6447e+02    -2.4374e+02    5.7900e+02  0.0152
+  Dec       1.0905e+03    -3.5498e+02    9.6092e+02  -0.6031
   --------------------------------------------------------
-  All       3.4003e+03    +1.6093e+03    1.7020e+03  -0.0911
+  All       6.3467e+02    -6.9108e+01    4.9139e+02  -0.0497
 
 ================================================================================
-Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+Future: 2020-01-01 – 2099-12-31  |  Model: GFDL-ESM4 (bias-corrected)
 ================================================================================
-Analysed: 2026-04-16 09:42:02
+Analysed: 2026-05-30 20:00:08
 
 --- Corrected future (area mean) ---
-  Future mean:     9.8895e+04
-  Future std:      7.3316e+02
-  Reference mean:   9.9547e+04  (calibration period)
+  Future mean:     1.0241e+05
+  Future std:      7.6075e+02
+  Reference mean:   1.0128e+05  (calibration period)
 
   10-year period means:
   Period                Mean           Std
   ----------------------------------------
-  2020–2029        9.8903e+04    7.3430e+02
-  2030–2039        9.8912e+04    7.2085e+02
-  2040–2049        9.8920e+04    7.4085e+02
-  2050–2059        9.8913e+04    7.3327e+02
-  2060–2069        9.8922e+04    7.0351e+02
-  2070–2079        9.8866e+04    7.5285e+02
-  2080–2089        9.8843e+04    7.3731e+02
-  2090–2099        9.8879e+04    7.3738e+02
+  2020–2029        1.0235e+05    7.5905e+02
+  2030–2039        1.0240e+05    7.1471e+02
+  2040–2049        1.0248e+05    7.7795e+02
+  2050–2059        1.0237e+05    7.5448e+02
+  2060–2069        1.0240e+05    7.6628e+02
+  2070–2079        1.0245e+05    7.6983e+02
+  2080–2089        1.0240e+05    7.6647e+02
+  2090–2099        1.0246e+05    7.6639e+02
 
   Monthly climatology (area mean):
   Month      Corrected     Reference           Diff
   --------------------------------------------------
-  Jan       9.8642e+04    9.9351e+04    -7.0909e+02
-  Feb       9.8837e+04    9.9409e+04    -5.7193e+02
-  Mar       9.8761e+04    9.9494e+04    -7.3313e+02
-  Apr       9.8904e+04    9.9592e+04    -6.8766e+02
-  May       9.9121e+04    9.9790e+04    -6.6813e+02
-  Jun       9.9082e+04    9.9745e+04    -6.6366e+02
-  Jul       9.9081e+04    9.9677e+04    -5.9627e+02
-  Aug       9.8988e+04    9.9662e+04    -6.7457e+02
-  Sep       9.9009e+04    9.9645e+04    -6.3595e+02
-  Oct       9.8956e+04    9.9490e+04    -5.3359e+02
-  Nov       9.8689e+04    9.9352e+04    -6.6291e+02
-  Dec       9.8667e+04    9.9361e+04    -6.9382e+02
-</code></pre></details><h3 id=downwelling-longwave-radiation-rlds>Downwelling Longwave Radiation (rlds)<a hidden class=anchor aria-hidden=true href=#downwelling-longwave-radiation-rlds>#</a></h3><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/rlds/plots/calibration_maps_ssp126_conservative.png>
-<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/rlds/plots/seasonal_cycle_ssp126_conservative.png>
+  Jan       1.0228e+05    1.0113e+05    +1.1497e+03
+  Feb       1.0239e+05    1.0118e+05    +1.2121e+03
+  Mar       1.0236e+05    1.0125e+05    +1.1127e+03
+  Apr       1.0248e+05    1.0132e+05    +1.1597e+03
+  May       1.0259e+05    1.0150e+05    +1.0927e+03
+  Jun       1.0262e+05    1.0144e+05    +1.1822e+03
+  Jul       1.0250e+05    1.0136e+05    +1.1395e+03
+  Aug       1.0249e+05    1.0135e+05    +1.1470e+03
+  Sep       1.0251e+05    1.0135e+05    +1.1622e+03
+  Oct       1.0229e+05    1.0122e+05    +1.0704e+03
+  Nov       1.0220e+05    1.0110e+05    +1.0991e+03
+  Dec       1.0226e+05    1.0113e+05    +1.1260e+03
+</code></pre></details><h4 id=downwelling-longwave-radiation-rlds>Downwelling Longwave Radiation (rlds)<a hidden class=anchor aria-hidden=true href=#downwelling-longwave-radiation-rlds>#</a></h4><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/rlds/plots/calibration_maps_ssp126_conservative.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/rlds/plots/seasonal_cycle_ssp126_conservative.png>
 <em>Seasonal cycle — SSP1-2.6 — Low emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp126 Conservative</summary><pre tabindex=0><code>################################################################################
 rlds Bias Correction Statistics
 ################################################################################
@@ -587,8 +589,8 @@ Analysed: 2026-04-16 08:56:35
   Dec       3.0023e+01    +4.6163e+00    2.4794e+01  -0.0023
   --------------------------------------------------------
   All       2.7676e+01    +4.2339e+00    2.2766e+01  0.5458
-</code></pre></details><h3 id=downwelling-shortwave-radiation-rsds>Downwelling Shortwave Radiation (rsds)<a hidden class=anchor aria-hidden=true href=#downwelling-shortwave-radiation-rsds>#</a></h3><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/rsds/plots/calibration_maps_ssp126_conservative.png>
-<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/rsds/plots/seasonal_cycle_ssp126_conservative.png>
+</code></pre></details><h4 id=downwelling-shortwave-radiation-rsds>Downwelling Shortwave Radiation (rsds)<a hidden class=anchor aria-hidden=true href=#downwelling-shortwave-radiation-rsds>#</a></h4><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/rsds/plots/calibration_maps_ssp126_conservative.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/rsds/plots/seasonal_cycle_ssp126_conservative.png>
 <em>Seasonal cycle — SSP1-2.6 — Low emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp126 Conservative</summary><pre tabindex=0><code>################################################################################
 rsds Bias Correction Statistics
 ################################################################################
@@ -643,10 +645,10 @@ Analysed: 2026-04-16 08:47:56
   Dec       2.7029e+01    -2.0141e+00    2.2885e+01  -0.8281
   --------------------------------------------------------
   All       4.6141e+01    -6.9422e+00    3.6466e+01  0.8356
-</code></pre></details><h3 id=near-surface-air-temperature-tas>Near-surface Air Temperature (tas)<a hidden class=anchor aria-hidden=true href=#near-surface-air-temperature-tas>#</a></h3><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/tas/plots/calibration_maps_ssp126_bilinear.png>
-<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/tas/plots/future_trend_ssp126_bilinear.png>
-<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/tas/plots/monthly_breakdown_ssp126_bilinear.png>
-<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/tas/plots/seasonal_cycle_ssp126_bilinear.png>
+</code></pre></details><h4 id=near-surface-air-temperature-tas>Near-surface Air Temperature (tas)<a hidden class=anchor aria-hidden=true href=#near-surface-air-temperature-tas>#</a></h4><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/tas/plots/calibration_maps_ssp126_bilinear.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/tas/plots/future_trend_ssp126_bilinear.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/tas/plots/monthly_breakdown_ssp126_bilinear.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/tas/plots/seasonal_cycle_ssp126_bilinear.png>
 <em>Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp126 Bilinear</summary><pre tabindex=0><code>################################################################################
 tas Bias Correction Statistics
 ################################################################################
@@ -739,10 +741,10 @@ Analysed: 2026-04-16 08:31:41
   Oct       2.8394e+02    8.9365e+00    +2.7500e+02
   Nov       2.7988e+02    5.4887e+00    +2.7439e+02
   Dec       2.7685e+02    3.0582e+00    +2.7380e+02
-</code></pre></details><h3 id=uas>UAS<a hidden class=anchor aria-hidden=true href=#uas>#</a></h3><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/uas/plots/calibration_maps_ssp126_bilinear.png>
-<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/uas/plots/future_trend_ssp126_bilinear.png>
-<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/uas/plots/monthly_breakdown_ssp126_bilinear.png>
-<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/uas/plots/seasonal_cycle_ssp126_bilinear.png>
+</code></pre></details><h4 id=eastward-wind-uas>Eastward Wind (uas)<a hidden class=anchor aria-hidden=true href=#eastward-wind-uas>#</a></h4><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/uas/plots/calibration_maps_ssp126_bilinear.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/uas/plots/future_trend_ssp126_bilinear.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/uas/plots/monthly_breakdown_ssp126_bilinear.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/uas/plots/seasonal_cycle_ssp126_bilinear.png>
 <em>Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp126 Bilinear</summary><pre tabindex=0><code>################################################################################
 uas Bias Correction Statistics
 ################################################################################
@@ -835,10 +837,10 @@ Analysed: 2026-04-16 09:07:35
   Oct       1.2676e+00    9.2170e-01    +3.4587e-01
   Nov       1.3271e+00    1.2549e+00    +7.2291e-02
   Dec       2.1280e+00    1.7474e+00    +3.8062e-01
-</code></pre></details><h3 id=vas>VAS<a hidden class=anchor aria-hidden=true href=#vas>#</a></h3><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/vas/plots/calibration_maps_ssp126_bilinear.png>
-<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/vas/plots/future_trend_ssp126_bilinear.png>
-<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/vas/plots/monthly_breakdown_ssp126_bilinear.png>
-<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp126/vas/plots/seasonal_cycle_ssp126_bilinear.png>
+</code></pre></details><h4 id=northward-wind-vas>Northward Wind (vas)<a hidden class=anchor aria-hidden=true href=#northward-wind-vas>#</a></h4><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/vas/plots/calibration_maps_ssp126_bilinear.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/vas/plots/future_trend_ssp126_bilinear.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/vas/plots/monthly_breakdown_ssp126_bilinear.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/vas/plots/seasonal_cycle_ssp126_bilinear.png>
 <em>Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp126 Bilinear</summary><pre tabindex=0><code>################################################################################
 vas Bias Correction Statistics
 ################################################################################
@@ -931,10 +933,10 @@ Analysed: 2026-04-16 09:24:37
   Oct       1.1094e+00    8.3286e-01    +2.7652e-01
   Nov       9.9750e-01    8.6521e-01    +1.3229e-01
   Dec       1.3525e+00    1.2312e+00    +1.2129e-01
-</code></pre></details><h2 id=ssp2-45--intermediate-emissions>SSP2-4.5 — Intermediate emissions<a hidden class=anchor aria-hidden=true href=#ssp2-45--intermediate-emissions>#</a></h2><h3 id=evspsbl-1>EVSPSBL<a hidden class=anchor aria-hidden=true href=#evspsbl-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/evspsbl/plots/calibration_maps_ssp245_bilinear.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/evspsbl/plots/future_trend_ssp245_bilinear.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/evspsbl/plots/monthly_breakdown_ssp245_bilinear.png>
-<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/evspsbl/plots/seasonal_cycle_ssp245_bilinear.png>
+</code></pre></details><h3 id=ssp2-45--intermediate-emissions>SSP2-4.5 — Intermediate emissions<a hidden class=anchor aria-hidden=true href=#ssp2-45--intermediate-emissions>#</a></h3><h4 id=evaporation-evspsbl-1>Evaporation (evspsbl)<a hidden class=anchor aria-hidden=true href=#evaporation-evspsbl-1>#</a></h4><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/evspsbl/plots/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/evspsbl/plots/future_trend_ssp245_bilinear.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/evspsbl/plots/monthly_breakdown_ssp245_bilinear.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/evspsbl/plots/seasonal_cycle_ssp245_bilinear.png>
 <em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245 Bilinear</summary><pre tabindex=0><code>################################################################################
 evspsbl Bias Correction Statistics
 ################################################################################
@@ -1027,10 +1029,10 @@ Analysed: 2026-04-30 07:22:09
   Oct       9.1777e-05    7.5940e-05    +1.5837e-05
   Nov       8.0245e-05    7.4227e-05    +6.0177e-06
   Dec       9.3355e-05    7.1482e-05    +2.1873e-05
-</code></pre></details><h3 id=net_lw>NET_LW<a hidden class=anchor aria-hidden=true href=#net_lw>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/net_lw/plots/calibration_maps_ssp245_conservative.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/net_lw/plots/future_trend_ssp245_conservative.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/net_lw/plots/monthly_breakdown_ssp245_conservative.png>
-<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/net_lw/plots/seasonal_cycle_ssp245_conservative.png>
+</code></pre></details><h4 id=net-longwave-radiation-net_lw>Net Longwave Radiation (net_lw)<a hidden class=anchor aria-hidden=true href=#net-longwave-radiation-net_lw>#</a></h4><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/net_lw/plots/calibration_maps_ssp245_conservative.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/net_lw/plots/future_trend_ssp245_conservative.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/net_lw/plots/monthly_breakdown_ssp245_conservative.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/net_lw/plots/seasonal_cycle_ssp245_conservative.png>
 <em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp245 Conservative</summary><pre tabindex=0><code>################################################################################
 net_lw Bias Correction Statistics
 ################################################################################
@@ -1123,10 +1125,10 @@ Analysed: 2026-04-30 13:54:42
   Oct      -5.1803e+01   -5.1169e+01    -6.3403e-01
   Nov      -4.7587e+01   -4.8687e+01    +1.0995e+00
   Dec      -4.8463e+01   -4.8324e+01    -1.3865e-01
-</code></pre></details><h3 id=net_sw>NET_SW<a hidden class=anchor aria-hidden=true href=#net_sw>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/net_sw/plots/calibration_maps_ssp245_conservative.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/net_sw/plots/future_trend_ssp245_conservative.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/net_sw/plots/monthly_breakdown_ssp245_conservative.png>
-<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/net_sw/plots/seasonal_cycle_ssp245_conservative.png>
+</code></pre></details><h4 id=net-shortwave-radiation-net_sw>Net Shortwave Radiation (net_sw)<a hidden class=anchor aria-hidden=true href=#net-shortwave-radiation-net_sw>#</a></h4><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/net_sw/plots/calibration_maps_ssp245_conservative.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/net_sw/plots/future_trend_ssp245_conservative.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/net_sw/plots/monthly_breakdown_ssp245_conservative.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/net_sw/plots/seasonal_cycle_ssp245_conservative.png>
 <em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp245 Conservative</summary><pre tabindex=0><code>################################################################################
 net_sw Bias Correction Statistics
 ################################################################################
@@ -1219,15 +1221,15 @@ Analysed: 2026-04-30 13:47:33
   Oct       5.7064e+01    5.6495e+01    +5.6912e-01
   Nov       2.5166e+01    2.6088e+01    -9.2220e-01
   Dec       1.6555e+01    1.5706e+01    +8.4876e-01
-</code></pre></details><h3 id=precipitation-pr-1>Precipitation (pr)<a hidden class=anchor aria-hidden=true href=#precipitation-pr-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/pr/plots/calibration_maps_ssp245.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/pr/plots/calibration_maps_ssp245_bilinear.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/pr/plots/calibration_maps_ssp245_conservative.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/pr/plots/future_trend_ssp245.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/pr/plots/future_trend_ssp245_conservative.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/pr/plots/monthly_breakdown_ssp245_conservative.png>
-<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/pr/plots/seasonal_cycle_ssp245.png>
-<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/pr/plots/seasonal_cycle_ssp245_bilinear.png>
-<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/pr/plots/seasonal_cycle_ssp245_conservative.png>
+</code></pre></details><h4 id=precipitation-pr-1>Precipitation (pr)<a hidden class=anchor aria-hidden=true href=#precipitation-pr-1>#</a></h4><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/pr/plots/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/pr/plots/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/pr/plots/calibration_maps_ssp245_conservative.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/pr/plots/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/pr/plots/future_trend_ssp245_conservative.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/pr/plots/monthly_breakdown_ssp245_conservative.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/pr/plots/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/pr/plots/seasonal_cycle_ssp245_bilinear.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/pr/plots/seasonal_cycle_ssp245_conservative.png>
 <em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
 pr Bias Correction Statistics
 ################################################################################
@@ -1459,10 +1461,10 @@ Analysed: 2026-04-15 17:59:03
   Oct       4.5186e-05    4.9203e-08    +4.5137e-05
   Nov       4.4354e-05    5.0310e-08    +4.4304e-05
   Dec       4.5936e-05    4.9542e-08    +4.5887e-05
-</code></pre></details><h3 id=sea-level-pressure-psl-1>Sea-level Pressure (psl)<a hidden class=anchor aria-hidden=true href=#sea-level-pressure-psl-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/psl/plots/calibration_maps_ssp245_bilinear.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/psl/plots/future_trend_ssp245_bilinear.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/psl/plots/monthly_breakdown_ssp245_bilinear.png>
-<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/psl/plots/seasonal_cycle_ssp245_bilinear.png>
+</code></pre></details><h4 id=sea-level-pressure-psl-1>Sea-level Pressure (psl)<a hidden class=anchor aria-hidden=true href=#sea-level-pressure-psl-1>#</a></h4><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/psl/plots/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/psl/plots/future_trend_ssp245_bilinear.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/psl/plots/monthly_breakdown_ssp245_bilinear.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/psl/plots/seasonal_cycle_ssp245_bilinear.png>
 <em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245 Bilinear</summary><pre tabindex=0><code>################################################################################
 psl Bias Correction Statistics
 ################################################################################
@@ -1555,15 +1557,15 @@ Analysed: 2026-04-10 13:27:57
   Oct       9.8926e+04    9.9490e+04    -5.6358e+02
   Nov       9.8797e+04    9.9352e+04    -5.5523e+02
   Dec       9.8769e+04    9.9361e+04    -5.9214e+02
-</code></pre></details><h3 id=downwelling-longwave-radiation-rlds-1>Downwelling Longwave Radiation (rlds)<a hidden class=anchor aria-hidden=true href=#downwelling-longwave-radiation-rlds-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rlds/plots/calibration_maps_ssp245.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rlds/plots/calibration_maps_ssp245_bilinear.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rlds/plots/calibration_maps_ssp245_conservative.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rlds/plots/future_trend_ssp245.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rlds/plots/future_trend_ssp245_conservative.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rlds/plots/monthly_breakdown_ssp245_conservative.png>
-<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rlds/plots/seasonal_cycle_ssp245.png>
-<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rlds/plots/seasonal_cycle_ssp245_bilinear.png>
-<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rlds/plots/seasonal_cycle_ssp245_conservative.png>
+</code></pre></details><h4 id=downwelling-longwave-radiation-rlds-1>Downwelling Longwave Radiation (rlds)<a hidden class=anchor aria-hidden=true href=#downwelling-longwave-radiation-rlds-1>#</a></h4><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rlds/plots/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rlds/plots/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rlds/plots/calibration_maps_ssp245_conservative.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rlds/plots/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rlds/plots/future_trend_ssp245_conservative.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rlds/plots/monthly_breakdown_ssp245_conservative.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rlds/plots/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rlds/plots/seasonal_cycle_ssp245_bilinear.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rlds/plots/seasonal_cycle_ssp245_conservative.png>
 <em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
 rlds Bias Correction Statistics
 ################################################################################
@@ -1795,15 +1797,15 @@ Analysed: 2026-04-15 18:20:19
   Oct       3.1516e+02    3.0969e+02    +5.4722e+00
   Nov       3.0318e+02    2.9596e+02    +7.2278e+00
   Dec       2.9004e+02    2.8475e+02    +5.2900e+00
-</code></pre></details><h3 id=downwelling-shortwave-radiation-rsds-1>Downwelling Shortwave Radiation (rsds)<a hidden class=anchor aria-hidden=true href=#downwelling-shortwave-radiation-rsds-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rsds/plots/calibration_maps_ssp245.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rsds/plots/calibration_maps_ssp245_bilinear.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rsds/plots/calibration_maps_ssp245_conservative.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rsds/plots/future_trend_ssp245.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rsds/plots/future_trend_ssp245_conservative.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rsds/plots/monthly_breakdown_ssp245_conservative.png>
-<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rsds/plots/seasonal_cycle_ssp245.png>
-<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rsds/plots/seasonal_cycle_ssp245_bilinear.png>
-<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/rsds/plots/seasonal_cycle_ssp245_conservative.png>
+</code></pre></details><h4 id=downwelling-shortwave-radiation-rsds-1>Downwelling Shortwave Radiation (rsds)<a hidden class=anchor aria-hidden=true href=#downwelling-shortwave-radiation-rsds-1>#</a></h4><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rsds/plots/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rsds/plots/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rsds/plots/calibration_maps_ssp245_conservative.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rsds/plots/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rsds/plots/future_trend_ssp245_conservative.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rsds/plots/monthly_breakdown_ssp245_conservative.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rsds/plots/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rsds/plots/seasonal_cycle_ssp245_bilinear.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/rsds/plots/seasonal_cycle_ssp245_conservative.png>
 <em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
 rsds Bias Correction Statistics
 ################################################################################
@@ -2035,13 +2037,13 @@ Analysed: 2026-04-15 18:08:48
   Oct       6.4241e+01    6.3851e+01    +3.9054e-01
   Nov       2.9382e+01    3.0111e+01    -7.2924e-01
   Dec       1.9076e+01    1.8868e+01    +2.0830e-01
-</code></pre></details><h3 id=near-surface-air-temperature-tas-1>Near-surface Air Temperature (tas)<a hidden class=anchor aria-hidden=true href=#near-surface-air-temperature-tas-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/tas/plots/calibration_maps_ssp245.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/tas/plots/calibration_maps_ssp245_bilinear.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/tas/plots/future_trend_ssp245.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/tas/plots/future_trend_ssp245_bilinear.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/tas/plots/monthly_breakdown_ssp245_bilinear.png>
-<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/tas/plots/seasonal_cycle_ssp245.png>
-<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/tas/plots/seasonal_cycle_ssp245_bilinear.png>
+</code></pre></details><h4 id=near-surface-air-temperature-tas-1>Near-surface Air Temperature (tas)<a hidden class=anchor aria-hidden=true href=#near-surface-air-temperature-tas-1>#</a></h4><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/tas/plots/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/tas/plots/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/tas/plots/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/tas/plots/future_trend_ssp245_bilinear.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/tas/plots/monthly_breakdown_ssp245_bilinear.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/tas/plots/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/tas/plots/seasonal_cycle_ssp245_bilinear.png>
 <em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
 tas Bias Correction Statistics
 ################################################################################
@@ -2219,13 +2221,13 @@ Analysed: 2026-04-15 17:51:10
   Oct       1.0168e+01    8.9365e+00    +1.2312e+00
   Nov       6.8248e+00    5.4887e+00    +1.3362e+00
   Dec       4.1459e+00    3.0582e+00    +1.0877e+00
-</code></pre></details><h3 id=uas-1>UAS<a hidden class=anchor aria-hidden=true href=#uas-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/uas/plots/calibration_maps_ssp245.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/uas/plots/calibration_maps_ssp245_bilinear.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/uas/plots/future_trend_ssp245.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/uas/plots/future_trend_ssp245_bilinear.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/uas/plots/monthly_breakdown_ssp245_bilinear.png>
-<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/uas/plots/seasonal_cycle_ssp245.png>
-<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/uas/plots/seasonal_cycle_ssp245_bilinear.png>
+</code></pre></details><h4 id=eastward-wind-uas-1>Eastward Wind (uas)<a hidden class=anchor aria-hidden=true href=#eastward-wind-uas-1>#</a></h4><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/uas/plots/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/uas/plots/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/uas/plots/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/uas/plots/future_trend_ssp245_bilinear.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/uas/plots/monthly_breakdown_ssp245_bilinear.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/uas/plots/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/uas/plots/seasonal_cycle_ssp245_bilinear.png>
 <em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
 uas Bias Correction Statistics
 ################################################################################
@@ -2403,13 +2405,13 @@ Analysed: 2026-04-15 18:22:45
   Oct       1.3981e+00    9.2170e-01    +4.7636e-01
   Nov       1.5058e+00    1.2549e+00    +2.5094e-01
   Dec       2.2312e+00    1.7474e+00    +4.8379e-01
-</code></pre></details><h3 id=vas-1>VAS<a hidden class=anchor aria-hidden=true href=#vas-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/vas/plots/calibration_maps_ssp245.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/vas/plots/calibration_maps_ssp245_bilinear.png>
-<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/vas/plots/future_trend_ssp245.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/vas/plots/future_trend_ssp245_bilinear.png>
-<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/vas/plots/monthly_breakdown_ssp245_bilinear.png>
-<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/vas/plots/seasonal_cycle_ssp245.png>
-<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp245/vas/plots/seasonal_cycle_ssp245_bilinear.png>
+</code></pre></details><h4 id=northward-wind-vas-1>Northward Wind (vas)<a hidden class=anchor aria-hidden=true href=#northward-wind-vas-1>#</a></h4><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/vas/plots/calibration_maps_ssp245.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/vas/plots/calibration_maps_ssp245_bilinear.png>
+<em>Calibration maps (historical period) — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/vas/plots/future_trend_ssp245.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/vas/plots/future_trend_ssp245_bilinear.png>
+<em>Projected future trend — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/vas/plots/monthly_breakdown_ssp245_bilinear.png>
+<em>Monthly breakdown — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/vas/plots/seasonal_cycle_ssp245.png>
+<em>Seasonal cycle — SSP2-4.5 — Intermediate emissions</em></p><p><img alt="Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp245/vas/plots/seasonal_cycle_ssp245_bilinear.png>
 <em>Seasonal cycle — SSP2-4.5 — Intermediate emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp245</summary><pre tabindex=0><code>################################################################################
 vas Bias Correction Statistics
 ################################################################################
@@ -2587,10 +2589,10 @@ Analysed: 2026-04-15 18:32:35
   Oct       1.0091e+00    8.3286e-01    +1.7628e-01
   Nov       1.0110e+00    8.6521e-01    +1.4577e-01
   Dec       1.3615e+00    1.2312e+00    +1.3029e-01
-</code></pre></details><h2 id=ssp3-70--high-emissions>SSP3-7.0 — High emissions<a hidden class=anchor aria-hidden=true href=#ssp3-70--high-emissions>#</a></h2><h3 id=evspsbl-2>EVSPSBL<a hidden class=anchor aria-hidden=true href=#evspsbl-2>#</a></h3><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/evspsbl/plots/calibration_maps_ssp370_bilinear.png>
-<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/evspsbl/plots/future_trend_ssp370_bilinear.png>
-<em>Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/evspsbl/plots/monthly_breakdown_ssp370_bilinear.png>
-<em>Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/evspsbl/plots/seasonal_cycle_ssp370_bilinear.png>
+</code></pre></details><h3 id=ssp3-70--high-emissions>SSP3-7.0 — High emissions<a hidden class=anchor aria-hidden=true href=#ssp3-70--high-emissions>#</a></h3><h4 id=evaporation-evspsbl-2>Evaporation (evspsbl)<a hidden class=anchor aria-hidden=true href=#evaporation-evspsbl-2>#</a></h4><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/evspsbl/plots/calibration_maps_ssp370_bilinear.png>
+<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/evspsbl/plots/future_trend_ssp370_bilinear.png>
+<em>Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/evspsbl/plots/monthly_breakdown_ssp370_bilinear.png>
+<em>Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/evspsbl/plots/seasonal_cycle_ssp370_bilinear.png>
 <em>Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp370 Bilinear</summary><pre tabindex=0><code>################################################################################
 evspsbl Bias Correction Statistics
 ################################################################################
@@ -2683,10 +2685,10 @@ Analysed: 2026-04-30 07:23:41
   Oct       9.9554e-05    7.5940e-05    +2.3614e-05
   Nov       9.2211e-05    7.4227e-05    +1.7984e-05
   Dec       8.6988e-05    7.1482e-05    +1.5506e-05
-</code></pre></details><h3 id=nhx-1>NHX<a hidden class=anchor aria-hidden=true href=#nhx-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/nhx/plots/calibration_maps_ssp370_conservative.png>
-<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/nhx/plots/future_trend_ssp370_conservative.png>
-<em>Projected future trend — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/nhx/plots/monthly_breakdown_ssp370_conservative.png>
-<em>Monthly breakdown — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/nhx/plots/seasonal_cycle_ssp370_conservative.png>
+</code></pre></details><h4 id=nhx-1>NHX<a hidden class=anchor aria-hidden=true href=#nhx-1>#</a></h4><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/nhx/plots/calibration_maps_ssp370_conservative.png>
+<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/nhx/plots/future_trend_ssp370_conservative.png>
+<em>Projected future trend — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/nhx/plots/monthly_breakdown_ssp370_conservative.png>
+<em>Monthly breakdown — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/nhx/plots/seasonal_cycle_ssp370_conservative.png>
 <em>Seasonal cycle — SSP3-7.0 — High emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp370 Conservative</summary><pre tabindex=0><code>################################################################################
 nhx Bias Correction Statistics
 ################################################################################
@@ -2781,10 +2783,10 @@ Analysed: 2026-04-14 18:22:13
   Oct       2.8613e-08    2.1744e-08    +6.8690e-09
   Nov       2.1299e-08    1.7218e-08    +4.0812e-09
   Dec       1.4026e-08    1.1668e-08    +2.3584e-09
-</code></pre></details><h3 id=noy-1>NOY<a hidden class=anchor aria-hidden=true href=#noy-1>#</a></h3><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/noy/plots/calibration_maps_ssp370_conservative.png>
-<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/noy/plots/future_trend_ssp370_conservative.png>
-<em>Projected future trend — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/noy/plots/monthly_breakdown_ssp370_conservative.png>
-<em>Monthly breakdown — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/noy/plots/seasonal_cycle_ssp370_conservative.png>
+</code></pre></details><h4 id=noy-1>NOY<a hidden class=anchor aria-hidden=true href=#noy-1>#</a></h4><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/noy/plots/calibration_maps_ssp370_conservative.png>
+<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/noy/plots/future_trend_ssp370_conservative.png>
+<em>Projected future trend — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/noy/plots/monthly_breakdown_ssp370_conservative.png>
+<em>Monthly breakdown — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/noy/plots/seasonal_cycle_ssp370_conservative.png>
 <em>Seasonal cycle — SSP3-7.0 — High emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp370 Conservative</summary><pre tabindex=0><code>################################################################################
 noy Bias Correction Statistics
 ################################################################################
@@ -2879,10 +2881,10 @@ Analysed: 2026-04-14 18:22:27
   Oct       2.4060e-08    4.7301e-08    -2.3240e-08
   Nov       1.9098e-08    4.5893e-08    -2.6795e-08
   Dec       1.9389e-08    4.1298e-08    -2.1910e-08
-</code></pre></details><h3 id=precipitation-pr-2>Precipitation (pr)<a hidden class=anchor aria-hidden=true href=#precipitation-pr-2>#</a></h3><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/pr/plots/calibration_maps_ssp370_conservative.png>
-<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/pr/plots/future_trend_ssp370_conservative.png>
-<em>Projected future trend — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/pr/plots/monthly_breakdown_ssp370_conservative.png>
-<em>Monthly breakdown — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/pr/plots/seasonal_cycle_ssp370_conservative.png>
+</code></pre></details><h4 id=precipitation-pr-2>Precipitation (pr)<a hidden class=anchor aria-hidden=true href=#precipitation-pr-2>#</a></h4><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/pr/plots/calibration_maps_ssp370_conservative.png>
+<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/pr/plots/future_trend_ssp370_conservative.png>
+<em>Projected future trend — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/pr/plots/monthly_breakdown_ssp370_conservative.png>
+<em>Monthly breakdown — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/pr/plots/seasonal_cycle_ssp370_conservative.png>
 <em>Seasonal cycle — SSP3-7.0 — High emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp370 Conservative</summary><pre tabindex=0><code>################################################################################
 pr Bias Correction Statistics
 ################################################################################
@@ -2975,15 +2977,15 @@ Analysed: 2026-04-16 07:54:02
   Oct       4.7535e-05    4.9203e-08    +4.7486e-05
   Nov       4.5452e-05    5.0310e-08    +4.5402e-05
   Dec       4.6536e-05    4.9542e-08    +4.6486e-05
-</code></pre></details><h3 id=sea-level-pressure-psl-2>Sea-level Pressure (psl)<a hidden class=anchor aria-hidden=true href=#sea-level-pressure-psl-2>#</a></h3><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/psl/plots/calibration_maps_ssp370_bilinear.png>
-<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/psl/plots/future_trend_ssp370_bilinear.png>
-<em>Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/psl/plots/monthly_breakdown_ssp370_bilinear.png>
-<em>Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/psl/plots/seasonal_cycle_ssp370_bilinear.png>
+</code></pre></details><h4 id=sea-level-pressure-psl-2>Sea-level Pressure (psl)<a hidden class=anchor aria-hidden=true href=#sea-level-pressure-psl-2>#</a></h4><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/psl/plots/calibration_maps_ssp370_bilinear.png>
+<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/psl/plots/future_trend_ssp370_bilinear.png>
+<em>Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/psl/plots/monthly_breakdown_ssp370_bilinear.png>
+<em>Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/psl/plots/seasonal_cycle_ssp370_bilinear.png>
 <em>Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp370 Bilinear</summary><pre tabindex=0><code>################################################################################
 psl Bias Correction Statistics
 ################################################################################
   Format:     1.1
-  Created:    2026-04-16 08:28:08
+  Created:    2026-05-30 21:05:21
   Author:     
   Project:    
   Institute:  
@@ -2992,87 +2994,87 @@ psl Bias Correction Statistics
 ################################################################################
 
 ================================================================================
-Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+Calibration: 1990-01-01 – 2019-12-31  |  Model: GFDL-ESM4
 ================================================================================
-Analysed: 2026-04-16 08:28:08
+Analysed: 2026-05-30 21:05:21
 
 --- Model historical vs reference ---
-  RMSE:          3.4003e+03
-  Bias:          +1.6093e+03
-  MAE:           1.7020e+03
-  Correlation:   -0.0911
-  N points:      236,412
-  Model mean:    1.0117e+05  (model raw)
-  Ref mean:      9.9562e+04  (reference)
-  Model std:     4.4255e+02
-  Ref std:       2.9225e+03
+  RMSE:          6.3467e+02
+  Bias:          -6.9108e+01
+  MAE:           4.9139e+02
+  Correlation:   -0.0497
+  N points:      229,320
+  Model mean:    1.0115e+05  (model raw)
+  Ref mean:      1.0122e+05  (reference)
+  Model std:     4.1714e+02
+  Ref std:       4.5306e+02
 
   Error distribution (model raw − reference):
-    Min:         -7.5948e+02
-    5th pct:     -3.1484e+02
-    25th pct:    +2.7324e+00
-    Median:      +2.3964e+02
-    75th pct:    +1.9850e+03
-    95th pct:    +7.9050e+03
-    Max:         +2.6544e+04
+    Min:         -1.9163e+03
+    5th pct:     -1.1531e+03
+    25th pct:    -5.0897e+02
+    Median:      +1.8047e+01
+    75th pct:    +3.0884e+02
+    95th pct:    +9.4809e+02
+    Max:         +1.7911e+03
 
   Monthly breakdown:
   Month           RMSE           Bias           MAE    Corr
   --------------------------------------------------------
-  Jan       3.4104e+03    +1.5303e+03    1.6751e+03  -0.1431
-  Feb       3.4535e+03    +1.5394e+03    1.7509e+03  -0.2122
-  Mar       3.4869e+03    +1.6915e+03    1.7816e+03  -0.2381
-  Apr       3.4001e+03    +1.5802e+03    1.6948e+03  -0.3241
-  May       3.3282e+03    +1.5550e+03    1.6186e+03  0.1237
-  Jun       3.3972e+03    +1.7317e+03    1.7343e+03  0.1059
-  Jul       3.3318e+03    +1.6592e+03    1.6706e+03  0.0396
-  Aug       3.3574e+03    +1.6763e+03    1.6891e+03  -0.0762
-  Sep       3.3971e+03    +1.6789e+03    1.6961e+03  -0.1375
-  Oct       3.4266e+03    +1.7070e+03    1.7110e+03  -0.2385
-  Nov       3.3912e+03    +1.5027e+03    1.6671e+03  -0.2657
-  Dec       3.4204e+03    +1.4591e+03    1.7352e+03  -0.2445
+  Jan       8.4650e+02    -1.2252e+02    7.3856e+02  -0.2255
+  Feb       8.7572e+02    -8.7703e+01    7.6289e+02  -0.3484
+  Mar       6.2466e+02    +4.6054e+01    5.4854e+02  -0.6689
+  Apr       9.5061e+01    +3.9995e+01    8.1404e+01  0.8532
+  May       1.3127e+02    +5.5751e+01    1.1090e+02  0.4634
+  Jun       2.2945e+02    +1.4395e+02    1.9491e+02  0.4300
+  Jul       3.5436e+02    +2.8025e+01    3.1108e+02  -0.5005
+  Aug       5.2902e+02    -1.0911e+02    4.6357e+02  -0.7424
+  Sep       7.1786e+02    -2.0285e+02    6.3458e+02  -0.6627
+  Oct       5.7428e+02    -2.2170e+01    5.1031e+02  -0.0063
+  Nov       6.6447e+02    -2.4374e+02    5.7900e+02  0.0152
+  Dec       1.0905e+03    -3.5498e+02    9.6092e+02  -0.6031
   --------------------------------------------------------
-  All       3.4003e+03    +1.6093e+03    1.7020e+03  -0.0911
+  All       6.3467e+02    -6.9108e+01    4.9139e+02  -0.0497
 
 ================================================================================
-Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+Future: 2020-01-01 – 2099-12-31  |  Model: GFDL-ESM4 (bias-corrected)
 ================================================================================
-Analysed: 2026-04-16 08:28:08
+Analysed: 2026-05-30 21:05:21
 
 --- Corrected future (area mean) ---
-  Future mean:     9.8893e+04
-  Future std:      7.2460e+02
-  Reference mean:   9.9547e+04  (calibration period)
+  Future mean:     1.0240e+05
+  Future std:      7.6783e+02
+  Reference mean:   1.0128e+05  (calibration period)
 
   10-year period means:
   Period                Mean           Std
   ----------------------------------------
-  2020–2029        9.8847e+04    7.3093e+02
-  2030–2039        9.8889e+04    7.1820e+02
-  2040–2049        9.8895e+04    7.2514e+02
-  2050–2059        9.8920e+04    7.0496e+02
-  2060–2069        9.8906e+04    7.2183e+02
-  2070–2079        9.8924e+04    7.4001e+02
-  2080–2089        9.8900e+04    7.3063e+02
-  2090–2099        9.8868e+04    7.2138e+02
+  2020–2029        1.0239e+05    7.6429e+02
+  2030–2039        1.0239e+05    7.3872e+02
+  2040–2049        1.0237e+05    7.4878e+02
+  2050–2059        1.0240e+05    7.6285e+02
+  2060–2069        1.0236e+05    8.1655e+02
+  2070–2079        1.0244e+05    7.7390e+02
+  2080–2089        1.0240e+05    7.7110e+02
+  2090–2099        1.0242e+05    7.6068e+02
 
   Monthly climatology (area mean):
   Month      Corrected     Reference           Diff
   --------------------------------------------------
-  Jan       9.8794e+04    9.9351e+04    -5.5641e+02
-  Feb       9.8750e+04    9.9409e+04    -6.5839e+02
-  Mar       9.8745e+04    9.9494e+04    -7.4862e+02
-  Apr       9.8936e+04    9.9592e+04    -6.5586e+02
-  May       9.9121e+04    9.9790e+04    -6.6912e+02
-  Jun       9.9104e+04    9.9745e+04    -6.4126e+02
-  Jul       9.9059e+04    9.9677e+04    -6.1768e+02
-  Aug       9.8948e+04    9.9662e+04    -7.1472e+02
-  Sep       9.8941e+04    9.9645e+04    -7.0336e+02
-  Oct       9.8852e+04    9.9490e+04    -6.3819e+02
-  Nov       9.8682e+04    9.9352e+04    -6.7022e+02
-  Dec       9.8780e+04    9.9361e+04    -5.8111e+02
-</code></pre></details><h3 id=downwelling-longwave-radiation-rlds-2>Downwelling Longwave Radiation (rlds)<a hidden class=anchor aria-hidden=true href=#downwelling-longwave-radiation-rlds-2>#</a></h3><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/rlds/plots/calibration_maps_ssp370_conservative.png>
-<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/rlds/plots/seasonal_cycle_ssp370_conservative.png>
+  Jan       1.0213e+05    1.0113e+05    +1.0063e+03
+  Feb       1.0239e+05    1.0118e+05    +1.2043e+03
+  Mar       1.0235e+05    1.0125e+05    +1.0983e+03
+  Apr       1.0243e+05    1.0132e+05    +1.1042e+03
+  May       1.0255e+05    1.0150e+05    +1.0551e+03
+  Jun       1.0258e+05    1.0144e+05    +1.1476e+03
+  Jul       1.0250e+05    1.0136e+05    +1.1473e+03
+  Aug       1.0251e+05    1.0135e+05    +1.1645e+03
+  Sep       1.0251e+05    1.0135e+05    +1.1668e+03
+  Oct       1.0224e+05    1.0122e+05    +1.0271e+03
+  Nov       1.0228e+05    1.0110e+05    +1.1775e+03
+  Dec       1.0228e+05    1.0113e+05    +1.1504e+03
+</code></pre></details><h4 id=downwelling-longwave-radiation-rlds-2>Downwelling Longwave Radiation (rlds)<a hidden class=anchor aria-hidden=true href=#downwelling-longwave-radiation-rlds-2>#</a></h4><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/rlds/plots/calibration_maps_ssp370_conservative.png>
+<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/rlds/plots/seasonal_cycle_ssp370_conservative.png>
 <em>Seasonal cycle — SSP3-7.0 — High emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp370 Conservative</summary><pre tabindex=0><code>################################################################################
 rlds Bias Correction Statistics
 ################################################################################
@@ -3127,8 +3129,8 @@ Analysed: 2026-04-16 08:05:46
   Dec       3.0023e+01    +4.6163e+00    2.4794e+01  -0.0023
   --------------------------------------------------------
   All       2.7676e+01    +4.2339e+00    2.2766e+01  0.5458
-</code></pre></details><h3 id=downwelling-shortwave-radiation-rsds-2>Downwelling Shortwave Radiation (rsds)<a hidden class=anchor aria-hidden=true href=#downwelling-shortwave-radiation-rsds-2>#</a></h3><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/rsds/plots/calibration_maps_ssp370_conservative.png>
-<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/rsds/plots/seasonal_cycle_ssp370_conservative.png>
+</code></pre></details><h4 id=downwelling-shortwave-radiation-rsds-2>Downwelling Shortwave Radiation (rsds)<a hidden class=anchor aria-hidden=true href=#downwelling-shortwave-radiation-rsds-2>#</a></h4><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/rsds/plots/calibration_maps_ssp370_conservative.png>
+<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/rsds/plots/seasonal_cycle_ssp370_conservative.png>
 <em>Seasonal cycle — SSP3-7.0 — High emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp370 Conservative</summary><pre tabindex=0><code>################################################################################
 rsds Bias Correction Statistics
 ################################################################################
@@ -3183,10 +3185,10 @@ Analysed: 2026-04-16 07:59:56
   Dec       2.7029e+01    -2.0141e+00    2.2885e+01  -0.8281
   --------------------------------------------------------
   All       4.6141e+01    -6.9422e+00    3.6466e+01  0.8356
-</code></pre></details><h3 id=near-surface-air-temperature-tas-2>Near-surface Air Temperature (tas)<a hidden class=anchor aria-hidden=true href=#near-surface-air-temperature-tas-2>#</a></h3><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/tas/plots/calibration_maps_ssp370_bilinear.png>
-<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/tas/plots/future_trend_ssp370_bilinear.png>
-<em>Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/tas/plots/monthly_breakdown_ssp370_bilinear.png>
-<em>Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/tas/plots/seasonal_cycle_ssp370_bilinear.png>
+</code></pre></details><h4 id=near-surface-air-temperature-tas-2>Near-surface Air Temperature (tas)<a hidden class=anchor aria-hidden=true href=#near-surface-air-temperature-tas-2>#</a></h4><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/tas/plots/calibration_maps_ssp370_bilinear.png>
+<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/tas/plots/future_trend_ssp370_bilinear.png>
+<em>Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/tas/plots/monthly_breakdown_ssp370_bilinear.png>
+<em>Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/tas/plots/seasonal_cycle_ssp370_bilinear.png>
 <em>Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp370 Bilinear</summary><pre tabindex=0><code>################################################################################
 tas Bias Correction Statistics
 ################################################################################
@@ -3279,10 +3281,10 @@ Analysed: 2026-04-16 07:46:38
   Oct       2.8464e+02    8.9365e+00    +2.7571e+02
   Nov       2.8055e+02    5.4887e+00    +2.7506e+02
   Dec       2.7770e+02    3.0582e+00    +2.7464e+02
-</code></pre></details><h3 id=uas-2>UAS<a hidden class=anchor aria-hidden=true href=#uas-2>#</a></h3><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/uas/plots/calibration_maps_ssp370_bilinear.png>
-<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/uas/plots/future_trend_ssp370_bilinear.png>
-<em>Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/uas/plots/monthly_breakdown_ssp370_bilinear.png>
-<em>Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/uas/plots/seasonal_cycle_ssp370_bilinear.png>
+</code></pre></details><h4 id=eastward-wind-uas-2>Eastward Wind (uas)<a hidden class=anchor aria-hidden=true href=#eastward-wind-uas-2>#</a></h4><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/uas/plots/calibration_maps_ssp370_bilinear.png>
+<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/uas/plots/future_trend_ssp370_bilinear.png>
+<em>Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/uas/plots/monthly_breakdown_ssp370_bilinear.png>
+<em>Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/uas/plots/seasonal_cycle_ssp370_bilinear.png>
 <em>Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp370 Bilinear</summary><pre tabindex=0><code>################################################################################
 uas Bias Correction Statistics
 ################################################################################
@@ -3375,10 +3377,10 @@ Analysed: 2026-04-16 08:13:20
   Oct       1.5711e+00    9.2170e-01    +6.4937e-01
   Nov       1.6260e+00    1.2549e+00    +3.7114e-01
   Dec       2.2940e+00    1.7474e+00    +5.4665e-01
-</code></pre></details><h3 id=vas-2>VAS<a hidden class=anchor aria-hidden=true href=#vas-2>#</a></h3><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/vas/plots/calibration_maps_ssp370_bilinear.png>
-<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/vas/plots/future_trend_ssp370_bilinear.png>
-<em>Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/vas/plots/monthly_breakdown_ssp370_bilinear.png>
-<em>Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp370/vas/plots/seasonal_cycle_ssp370_bilinear.png>
+</code></pre></details><h4 id=northward-wind-vas-2>Northward Wind (vas)<a hidden class=anchor aria-hidden=true href=#northward-wind-vas-2>#</a></h4><p><img alt="Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/vas/plots/calibration_maps_ssp370_bilinear.png>
+<em>Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/vas/plots/future_trend_ssp370_bilinear.png>
+<em>Projected future trend — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/vas/plots/monthly_breakdown_ssp370_bilinear.png>
+<em>Monthly breakdown — SSP3-7.0 — High emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp370/vas/plots/seasonal_cycle_ssp370_bilinear.png>
 <em>Seasonal cycle — SSP3-7.0 — High emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp370 Bilinear</summary><pre tabindex=0><code>################################################################################
 vas Bias Correction Statistics
 ################################################################################
@@ -3471,10 +3473,10 @@ Analysed: 2026-04-16 08:20:11
   Oct       1.0129e+00    8.3286e-01    +1.8006e-01
   Nov       8.5631e-01    8.6521e-01    -8.8991e-03
   Dec       1.6164e+00    1.2312e+00    +3.8516e-01
-</code></pre></details><h2 id=ssp5-85--very-high-emissions>SSP5-8.5 — Very high emissions<a hidden class=anchor aria-hidden=true href=#ssp5-85--very-high-emissions>#</a></h2><h3 id=evspsbl-3>EVSPSBL<a hidden class=anchor aria-hidden=true href=#evspsbl-3>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/evspsbl/plots/calibration_maps_ssp585_bilinear.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/evspsbl/plots/future_trend_ssp585_bilinear.png>
-<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/evspsbl/plots/monthly_breakdown_ssp585_bilinear.png>
-<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/evspsbl/plots/seasonal_cycle_ssp585_bilinear.png>
+</code></pre></details><h3 id=ssp5-85--very-high-emissions>SSP5-8.5 — Very high emissions<a hidden class=anchor aria-hidden=true href=#ssp5-85--very-high-emissions>#</a></h3><h4 id=evaporation-evspsbl-3>Evaporation (evspsbl)<a hidden class=anchor aria-hidden=true href=#evaporation-evspsbl-3>#</a></h4><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/evspsbl/plots/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/evspsbl/plots/future_trend_ssp585_bilinear.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/evspsbl/plots/monthly_breakdown_ssp585_bilinear.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/evspsbl/plots/seasonal_cycle_ssp585_bilinear.png>
 <em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
 evspsbl Bias Correction Statistics
 ################################################################################
@@ -3567,10 +3569,10 @@ Analysed: 2026-04-30 07:25:12
   Oct       8.9899e-05    7.5940e-05    +1.3960e-05
   Nov       8.5634e-05    7.4227e-05    +1.1407e-05
   Dec       9.3414e-05    7.1482e-05    +2.1931e-05
-</code></pre></details><h3 id=nhx-2>NHX<a hidden class=anchor aria-hidden=true href=#nhx-2>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/nhx/plots/calibration_maps_ssp585_conservative.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/nhx/plots/future_trend_ssp585_conservative.png>
-<em>Projected future trend — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/nhx/plots/monthly_breakdown_ssp585_conservative.png>
-<em>Monthly breakdown — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/nhx/plots/seasonal_cycle_ssp585_conservative.png>
+</code></pre></details><h4 id=nhx-2>NHX<a hidden class=anchor aria-hidden=true href=#nhx-2>#</a></h4><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/nhx/plots/calibration_maps_ssp585_conservative.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/nhx/plots/future_trend_ssp585_conservative.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/nhx/plots/monthly_breakdown_ssp585_conservative.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/nhx/plots/seasonal_cycle_ssp585_conservative.png>
 <em>Seasonal cycle — SSP5-8.5 — Very high emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp585 Conservative</summary><pre tabindex=0><code>################################################################################
 nhx Bias Correction Statistics
 ################################################################################
@@ -3665,10 +3667,10 @@ Analysed: 2026-04-14 18:12:08
   Oct       1.9504e-08    2.1744e-08    -2.2405e-09
   Nov       1.2865e-08    1.7218e-08    -4.3527e-09
   Dec       1.0191e-08    1.1668e-08    -1.4763e-09
-</code></pre></details><h3 id=noy-2>NOY<a hidden class=anchor aria-hidden=true href=#noy-2>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/noy/plots/calibration_maps_ssp585_conservative.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/noy/plots/future_trend_ssp585_conservative.png>
-<em>Projected future trend — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/noy/plots/monthly_breakdown_ssp585_conservative.png>
-<em>Monthly breakdown — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/noy/plots/seasonal_cycle_ssp585_conservative.png>
+</code></pre></details><h4 id=noy-2>NOY<a hidden class=anchor aria-hidden=true href=#noy-2>#</a></h4><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/noy/plots/calibration_maps_ssp585_conservative.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/noy/plots/future_trend_ssp585_conservative.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/noy/plots/monthly_breakdown_ssp585_conservative.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/noy/plots/seasonal_cycle_ssp585_conservative.png>
 <em>Seasonal cycle — SSP5-8.5 — Very high emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp585 Conservative</summary><pre tabindex=0><code>################################################################################
 noy Bias Correction Statistics
 ################################################################################
@@ -3763,12 +3765,12 @@ Analysed: 2026-04-14 18:12:22
   Oct       3.6132e-08    4.7301e-08    -1.1169e-08
   Nov       2.9716e-08    4.5893e-08    -1.6177e-08
   Dec       3.1644e-08    4.1298e-08    -9.6545e-09
-</code></pre></details><h3 id=precipitation-pr-3>Precipitation (pr)<a hidden class=anchor aria-hidden=true href=#precipitation-pr-3>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/pr/plots/calibration_maps_ssp585_bilinear.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/pr/plots/calibration_maps_ssp585_conservative.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/pr/plots/future_trend_ssp585_conservative.png>
-<em>Projected future trend — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/pr/plots/monthly_breakdown_ssp585_conservative.png>
-<em>Monthly breakdown — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/pr/plots/seasonal_cycle_ssp585_bilinear.png>
-<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/pr/plots/seasonal_cycle_ssp585_conservative.png>
+</code></pre></details><h4 id=precipitation-pr-3>Precipitation (pr)<a hidden class=anchor aria-hidden=true href=#precipitation-pr-3>#</a></h4><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/pr/plots/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/pr/plots/calibration_maps_ssp585_conservative.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/pr/plots/future_trend_ssp585_conservative.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/pr/plots/monthly_breakdown_ssp585_conservative.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/pr/plots/seasonal_cycle_ssp585_bilinear.png>
+<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/pr/plots/seasonal_cycle_ssp585_conservative.png>
 <em>Seasonal cycle — SSP5-8.5 — Very high emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
 pr Bias Correction Statistics
 ################################################################################
@@ -3915,10 +3917,10 @@ Analysed: 2026-04-16 09:07:05
   Oct       4.4900e-05    4.9203e-08    +4.4851e-05
   Nov       4.4657e-05    5.0310e-08    +4.4606e-05
   Dec       4.7442e-05    4.9542e-08    +4.7393e-05
-</code></pre></details><h3 id=sea-level-pressure-psl-3>Sea-level Pressure (psl)<a hidden class=anchor aria-hidden=true href=#sea-level-pressure-psl-3>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/psl/plots/calibration_maps_ssp585_bilinear.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/psl/plots/future_trend_ssp585_bilinear.png>
-<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/psl/plots/monthly_breakdown_ssp585_bilinear.png>
-<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/psl/plots/seasonal_cycle_ssp585_bilinear.png>
+</code></pre></details><h4 id=sea-level-pressure-psl-3>Sea-level Pressure (psl)<a hidden class=anchor aria-hidden=true href=#sea-level-pressure-psl-3>#</a></h4><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/psl/plots/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/psl/plots/future_trend_ssp585_bilinear.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/psl/plots/monthly_breakdown_ssp585_bilinear.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/psl/plots/seasonal_cycle_ssp585_bilinear.png>
 <em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
 psl Bias Correction Statistics
 ################################################################################
@@ -3973,12 +3975,12 @@ Analysed: 2026-04-16 09:50:55
   Dec       3.4204e+03    +1.4591e+03    1.7352e+03  -0.2445
   --------------------------------------------------------
   All       3.4003e+03    +1.6093e+03    1.7020e+03  -0.0911
-</code></pre></details><h3 id=downwelling-longwave-radiation-rlds-3>Downwelling Longwave Radiation (rlds)<a hidden class=anchor aria-hidden=true href=#downwelling-longwave-radiation-rlds-3>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rlds/plots/calibration_maps_ssp585_bilinear.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rlds/plots/calibration_maps_ssp585_conservative.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rlds/plots/future_trend_ssp585_conservative.png>
-<em>Projected future trend — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rlds/plots/monthly_breakdown_ssp585_conservative.png>
-<em>Monthly breakdown — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rlds/plots/seasonal_cycle_ssp585_bilinear.png>
-<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rlds/plots/seasonal_cycle_ssp585_conservative.png>
+</code></pre></details><h4 id=downwelling-longwave-radiation-rlds-3>Downwelling Longwave Radiation (rlds)<a hidden class=anchor aria-hidden=true href=#downwelling-longwave-radiation-rlds-3>#</a></h4><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rlds/plots/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rlds/plots/calibration_maps_ssp585_conservative.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rlds/plots/future_trend_ssp585_conservative.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rlds/plots/monthly_breakdown_ssp585_conservative.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rlds/plots/seasonal_cycle_ssp585_bilinear.png>
+<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rlds/plots/seasonal_cycle_ssp585_conservative.png>
 <em>Seasonal cycle — SSP5-8.5 — Very high emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
 rlds Bias Correction Statistics
 ################################################################################
@@ -4125,12 +4127,12 @@ Analysed: 2026-04-16 09:31:53
   Oct       3.2020e+02    3.0969e+02    +1.0511e+01
   Nov       3.0609e+02    2.9596e+02    +1.0132e+01
   Dec       2.9404e+02    2.8475e+02    +9.2901e+00
-</code></pre></details><h3 id=downwelling-shortwave-radiation-rsds-3>Downwelling Shortwave Radiation (rsds)<a hidden class=anchor aria-hidden=true href=#downwelling-shortwave-radiation-rsds-3>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rsds/plots/calibration_maps_ssp585_bilinear.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rsds/plots/calibration_maps_ssp585_conservative.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rsds/plots/future_trend_ssp585_conservative.png>
-<em>Projected future trend — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rsds/plots/monthly_breakdown_ssp585_conservative.png>
-<em>Monthly breakdown — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rsds/plots/seasonal_cycle_ssp585_bilinear.png>
-<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/rsds/plots/seasonal_cycle_ssp585_conservative.png>
+</code></pre></details><h4 id=downwelling-shortwave-radiation-rsds-3>Downwelling Shortwave Radiation (rsds)<a hidden class=anchor aria-hidden=true href=#downwelling-shortwave-radiation-rsds-3>#</a></h4><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rsds/plots/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rsds/plots/calibration_maps_ssp585_conservative.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rsds/plots/future_trend_ssp585_conservative.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rsds/plots/monthly_breakdown_ssp585_conservative.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rsds/plots/seasonal_cycle_ssp585_bilinear.png>
+<em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/rsds/plots/seasonal_cycle_ssp585_conservative.png>
 <em>Seasonal cycle — SSP5-8.5 — Very high emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
 rsds Bias Correction Statistics
 ################################################################################
@@ -4277,10 +4279,10 @@ Analysed: 2026-04-16 09:20:00
   Oct       6.3350e+01    6.3851e+01    -5.0088e-01
   Nov       2.9313e+01    3.0111e+01    -7.9822e-01
   Dec       1.8735e+01    1.8868e+01    -1.3249e-01
-</code></pre></details><h3 id=near-surface-air-temperature-tas-3>Near-surface Air Temperature (tas)<a hidden class=anchor aria-hidden=true href=#near-surface-air-temperature-tas-3>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/tas/plots/calibration_maps_ssp585_bilinear.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/tas/plots/future_trend_ssp585_bilinear.png>
-<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/tas/plots/monthly_breakdown_ssp585_bilinear.png>
-<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/tas/plots/seasonal_cycle_ssp585_bilinear.png>
+</code></pre></details><h4 id=near-surface-air-temperature-tas-3>Near-surface Air Temperature (tas)<a hidden class=anchor aria-hidden=true href=#near-surface-air-temperature-tas-3>#</a></h4><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/tas/plots/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/tas/plots/future_trend_ssp585_bilinear.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/tas/plots/monthly_breakdown_ssp585_bilinear.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/tas/plots/seasonal_cycle_ssp585_bilinear.png>
 <em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
 tas Bias Correction Statistics
 ################################################################################
@@ -4373,10 +4375,10 @@ Analysed: 2026-04-16 08:46:26
   Oct       2.8489e+02    8.9365e+00    +2.7595e+02
   Nov       2.8070e+02    5.4887e+00    +2.7521e+02
   Dec       2.7764e+02    3.0582e+00    +2.7458e+02
-</code></pre></details><h3 id=uas-3>UAS<a hidden class=anchor aria-hidden=true href=#uas-3>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/uas/plots/calibration_maps_ssp585_bilinear.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/uas/plots/future_trend_ssp585_bilinear.png>
-<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/uas/plots/monthly_breakdown_ssp585_bilinear.png>
-<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/uas/plots/seasonal_cycle_ssp585_bilinear.png>
+</code></pre></details><h4 id=eastward-wind-uas-3>Eastward Wind (uas)<a hidden class=anchor aria-hidden=true href=#eastward-wind-uas-3>#</a></h4><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/uas/plots/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/uas/plots/future_trend_ssp585_bilinear.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/uas/plots/monthly_breakdown_ssp585_bilinear.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/uas/plots/seasonal_cycle_ssp585_bilinear.png>
 <em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
 uas Bias Correction Statistics
 ################################################################################
@@ -4469,10 +4471,10 @@ Analysed: 2026-04-16 09:43:33
   Oct       1.2774e+00    9.2170e-01    +3.5572e-01
   Nov       1.3364e+00    1.2549e+00    +8.1495e-02
   Dec       2.2186e+00    1.7474e+00    +4.7121e-01
-</code></pre></details><h3 id=vas-3>VAS<a hidden class=anchor aria-hidden=true href=#vas-3>#</a></h3><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/vas/plots/calibration_maps_ssp585_bilinear.png>
-<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/vas/plots/future_trend_ssp585_bilinear.png>
-<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/vas/plots/monthly_breakdown_ssp585_bilinear.png>
-<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ssp585/vas/plots/seasonal_cycle_ssp585_bilinear.png>
+</code></pre></details><h4 id=northward-wind-vas-3>Northward Wind (vas)<a hidden class=anchor aria-hidden=true href=#northward-wind-vas-3>#</a></h4><p><img alt="Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/vas/plots/calibration_maps_ssp585_bilinear.png>
+<em>Calibration maps (historical period) — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/vas/plots/future_trend_ssp585_bilinear.png>
+<em>Projected future trend — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/vas/plots/monthly_breakdown_ssp585_bilinear.png>
+<em>Monthly breakdown — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp585/vas/plots/seasonal_cycle_ssp585_bilinear.png>
 <em>Seasonal cycle — SSP5-8.5 — Very high emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp585 Bilinear</summary><pre tabindex=0><code>################################################################################
 vas Bias Correction Statistics
 ################################################################################
