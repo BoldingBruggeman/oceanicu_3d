@@ -390,6 +390,24 @@ re-emission.  For shortwave this is &lt;code&gt;ssr = ssrd − reflected SW&lt;/
 quantity for the ocean heat balance.&lt;/p&gt;</description>
     </item>
     <item>
+      <title>CMEMS / CMIP6 Variable Mapping</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/cmems-cmip6-variable-mapping/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/cmems-cmip6-variable-mapping/</guid>
+      <description>&lt;h1 id=&#34;cmems--cmip6-variable-mapping&#34;&gt;CMEMS / CMIP6 Variable Mapping&lt;/h1&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;p&gt;This guide documents how biogeochemical variables are named across three systems:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;CMEMS&lt;/strong&gt; — Copernicus Marine Service products (OBC boundary conditions)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;CMIP6 / ESGF&lt;/strong&gt; — climate model output (scenario forcing)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;FABM-ERSEM&lt;/strong&gt; — the biogeochemical model variables inside GETM/ERSEM&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;key-unit-difference&#34;&gt;Key unit difference&lt;/h3&gt;
+&lt;p&gt;CMIP6 uses &lt;strong&gt;SI units&lt;/strong&gt; (concentrations in mol m⁻³), whereas CMEMS products typically
+report in &lt;strong&gt;mmol m⁻³&lt;/strong&gt;.  A factor-of-1000 conversion is required when using CMIP6
+data as boundary conditions alongside CMEMS climatologies.&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>River Flow and Nutrient Load Projection</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/river-projection/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
