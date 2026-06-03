@@ -433,10 +433,16 @@ ERA5 P, E (reference)                            Q_future = Q_clim(month) × ΔP
 BC future P, E (CMIP6)                                       ▼
         │                                        nutrient loads = Q_future × FWMC
         └─── future P–E ──────────────────────► (numerator)
-&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;command&#34;&gt;Command&lt;/h3&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection --config config/river_projection.yaml
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection --config config/river_projection.yaml --scenario ssp585
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection --config config/river_projection.yaml --dry-run
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;commands&#34;&gt;Commands&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# Project future flows and nutrient loads&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection  --config config/river_projection.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection  --config config/river_projection.yaml --scenario ssp585
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-projection  --config config/river_projection.yaml --dry-run
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# Generate diagnostic plots and tables from projection output&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-diagnostics --config config/river_projection.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-diagnostics --config config/river_projection.yaml --scenario ssp585
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;river-diagnostics --config config/river_projection.yaml --analyses-dir ./analyses
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Config on GitHub: &lt;a href=&#34;https://github.com/bolding/stats/blob/main/config/river_projection.yaml&#34;&gt;&lt;code&gt;config/river_projection.yaml&lt;/code&gt;&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     <item>
