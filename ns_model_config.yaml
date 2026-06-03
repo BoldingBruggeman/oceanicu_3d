@@ -93,6 +93,8 @@ simulation:
   Dcrit: 0.5
   Dmin: 0.1
   ObsKd: False
+  kd_folder: Path(os.getenv("KD_FOLDER", "/data/Kd490"))
+  kd_file: Path(os.getenv("KD_FILE", "KD490_clim.nc"))
 runtime:
   timestep: 60
   split_factor: 30

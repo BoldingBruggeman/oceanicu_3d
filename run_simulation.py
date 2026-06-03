@@ -346,6 +346,8 @@ def run_one(run_cfg: dict, global_cfg: dict, source_dir: Path,
         dry_run=dry_run,
     )
     env.update(extra_env)
+    # # RJT plot domain 
+    # cmd.append('--plot_domain')
 
     if extra_env.get('PATH'):
         print(f"  PATH prefix: {extra_env['PATH'].split(':')[0]}")
