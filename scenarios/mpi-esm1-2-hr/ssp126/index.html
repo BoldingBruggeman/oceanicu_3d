@@ -1,0 +1,1513 @@
+<!doctype html><html lang=en dir=auto data-theme=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>MPI-ESM1-2-HR — SSP1-2.6 — Low emissions | Ocean Model Validation</title><meta name=keywords content><meta name=description content="Evaporation (evspsbl)
+
+Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation
+
+Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation
+
+Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation
+
+Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation"><meta name=author content="Ocean Modeling Team"><link rel=canonical href=https://bolding-bruggeman.com/oceanicu_3d/scenarios/mpi-esm1-2-hr/ssp126/><link crossorigin=anonymous href=https://bolding-bruggeman.com/oceanicu_3d/assets/css/stylesheet.b19753d5747d53ec4e37292547627f1e320ca15b667c301bc03e783e01022373.css integrity="sha256-sZdT1XR9U+xONyklR2J/HjIMoVtmfDAbwD54PgECI3M=" rel="preload stylesheet" as=style><link rel=icon href=https://bolding-bruggeman.com/oceanicu_3d/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://bolding-bruggeman.com/oceanicu_3d/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://bolding-bruggeman.com/oceanicu_3d/favicon-32x32.png><link rel=apple-touch-icon href=https://bolding-bruggeman.com/oceanicu_3d/apple-touch-icon.png><link rel=mask-icon href=https://bolding-bruggeman.com/oceanicu_3d/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate type=application/rss+xml href=https://bolding-bruggeman.com/oceanicu_3d/scenarios/mpi-esm1-2-hr/ssp126/index.xml title=rss><link rel=alternate hreflang=en href=https://bolding-bruggeman.com/oceanicu_3d/scenarios/mpi-esm1-2-hr/ssp126/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51);color-scheme:dark}.list{background:var(--theme)}.toc{background:var(--entry)}}@media(prefers-color-scheme:light){.list::-webkit-scrollbar-thumb{border-color:var(--code-bg)}}</style></noscript><script>localStorage.getItem("pref-theme")==="dark"?document.querySelector("html").dataset.theme="dark":localStorage.getItem("pref-theme")==="light"?document.querySelector("html").dataset.theme="light":window.matchMedia("(prefers-color-scheme: dark)").matches?document.querySelector("html").dataset.theme="dark":document.querySelector("html").dataset.theme="light"</script><meta property="og:url" content="https://bolding-bruggeman.com/oceanicu_3d/scenarios/mpi-esm1-2-hr/ssp126/"><meta property="og:site_name" content="Ocean Model Validation"><meta property="og:title" content="MPI-ESM1-2-HR — SSP1-2.6 — Low emissions"><meta property="og:description" content="Evaporation (evspsbl) Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation
+Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation
+Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation
+Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation"><meta property="og:locale" content="en-us"><meta property="og:type" content="website"><meta name=twitter:card content="summary"><meta name=twitter:title content="MPI-ESM1-2-HR — SSP1-2.6 — Low emissions"><meta name=twitter:description content="Ocean model validation and analysis dashboard"><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Atmospheric Forcing — Bias Correction","item":"https://bolding-bruggeman.com/oceanicu_3d/scenarios/"},{"@type":"ListItem","position":2,"name":"MPI-ESM1-2-HR","item":"https://bolding-bruggeman.com/oceanicu_3d/scenarios/mpi-esm1-2-hr/"},{"@type":"ListItem","position":3,"name":"MPI-ESM1-2-HR — SSP1-2.6 — Low emissions","item":"https://bolding-bruggeman.com/oceanicu_3d/scenarios/mpi-esm1-2-hr/ssp126/"}]}</script></head><body class=list id=top><header class=header><nav class=nav><div class=logo><a href=https://bolding-bruggeman.com/oceanicu_3d/ accesskey=h title="Ocean Model Validation (Alt + H)">Ocean Model Validation</a><div class=logo-switches><button id=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg id="moon" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg id="sun" width="24" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu><li><a href=https://bolding-bruggeman.com/oceanicu_3d/areas/ title=Areas><span>Areas</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/validations/ title=Validations><span>Validations</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/scenarios/ title=Scenarios><span>Scenarios</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/rankings/ title=Rankings><span>Rankings</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/data-sources/ title="Data Sources"><span>Data Sources</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/guides/ title=Guides><span>Guides</span></a></li><li><a href=https://bolding-bruggeman.com/oceanicu_3d/about/ title=About><span>About</span></a></li></ul></nav></header><main class=main><header class=page-header><div class=breadcrumbs><a href=https://bolding-bruggeman.com/oceanicu_3d/>Home</a>&nbsp;»&nbsp;<a href=https://bolding-bruggeman.com/oceanicu_3d/scenarios/>Atmospheric Forcing — Bias Correction</a>&nbsp;»&nbsp;<a href=https://bolding-bruggeman.com/oceanicu_3d/scenarios/mpi-esm1-2-hr/>MPI-ESM1-2-HR</a></div><h1>MPI-ESM1-2-HR — SSP1-2.6 — Low emissions</h1><div class=post-meta><span title='2026-06-03 00:00:00 +0000 UTC'>June 3, 2026</span>&nbsp;·&nbsp;<span>Ocean Modeling Team</span></div></header><div class=toc><details open><summary accesskey=c title="(Alt + C)"><span class=details>Table of Contents</span></summary><div class=inner><nav id=TableOfContents><ul><li><a href=#evaporation-evspsbl>Evaporation (evspsbl)</a></li><li><a href=#near-surface-specific-humidity-huss>Near-surface Specific Humidity (huss)</a></li><li><a href=#net-shortwave-radiation-net_sw>Net Shortwave Radiation (net_sw)</a></li><li><a href=#nhx>NHX</a></li><li><a href=#noy>NOY</a></li><li><a href=#precipitation-pr>Precipitation (pr)</a></li><li><a href=#sea-level-pressure-psl>Sea-level Pressure (psl)</a></li><li><a href=#downwelling-longwave-radiation-rlds>Downwelling Longwave Radiation (rlds)</a></li><li><a href=#downwelling-shortwave-radiation-rsds>Downwelling Shortwave Radiation (rsds)</a></li><li><a href=#near-surface-air-temperature-tas>Near-surface Air Temperature (tas)</a></li><li><a href=#eastward-wind-uas>Eastward Wind (uas)</a></li><li><a href=#northward-wind-vas>Northward Wind (vas)</a></li><li><a href=#river-flow-and-nutrient-load-projections>River Flow and Nutrient Load Projections</a></li></ul></nav></div></details></div><div class=post-content><h2 id=evaporation-evspsbl>Evaporation (evspsbl)<a hidden class=anchor aria-hidden=true href=#evaporation-evspsbl>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/evspsbl/plots/calibration_maps_ssp126_bilinear.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/evspsbl/plots/future_trend_ssp126_bilinear.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/evspsbl/plots/monthly_breakdown_ssp126_bilinear.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/evspsbl/plots/seasonal_cycle_ssp126_bilinear.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp126 Bilinear</summary><pre tabindex=0><code>################################################################################
+evspsbl Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-06-02 00:38:12
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-06-02 00:38:12
+
+--- Model historical vs reference ---
+  RMSE:          6.2195e-05
+  Bias:          -5.2539e-05
+  MAE:           5.2652e-05
+  Correlation:   0.8917
+  N points:      236,412
+  Model mean:    2.1202e-05  (model raw)
+  Ref mean:      7.3741e-05  (reference)
+  Model std:     1.4100e-05
+  Ref std:       4.5240e-05
+
+  Error distribution (model raw − reference):
+    Min:         -1.4916e-04
+    5th pct:     -1.0609e-04
+    25th pct:    -7.8744e-05
+    Median:      -5.3030e-05
+    75th pct:    -2.4038e-05
+    95th pct:    -2.1014e-06
+    Max:         +3.6551e-05
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       6.4596e-05    -4.7365e-05    4.7679e-05  0.9258
+  Feb       6.2436e-05    -4.7040e-05    4.7215e-05  0.9294
+  Mar       5.7286e-05    -4.7067e-05    4.7144e-05  0.8910
+  Apr       5.3970e-05    -4.9056e-05    4.9107e-05  0.8561
+  May       5.7294e-05    -5.3101e-05    5.3144e-05  0.8823
+  Jun       6.3034e-05    -5.8020e-05    5.8063e-05  0.9014
+  Jul       6.3209e-05    -5.6985e-05    5.7027e-05  0.8831
+  Aug       6.2549e-05    -5.8898e-05    5.8913e-05  0.7538
+  Sep       5.8289e-05    -5.4504e-05    5.4517e-05  0.7627
+  Oct       6.3756e-05    -5.4182e-05    5.4212e-05  0.8976
+  Nov       6.8456e-05    -5.2553e-05    5.2790e-05  0.9301
+  Dec       6.9575e-05    -5.1697e-05    5.2017e-05  0.9269
+  --------------------------------------------------------
+  All       6.2195e-05    -5.2539e-05    5.2652e-05  0.8917
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-06-02 00:38:12
+
+--- Corrected future (area mean) ---
+  Future mean:     9.3628e-05
+  Future std:      2.9415e-05
+  Reference mean:   7.5956e-05  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        9.8994e-05    3.0019e-05
+  2030–2039        8.9264e-05    2.8332e-05
+  2040–2049        9.4542e-05    3.4450e-05
+  2050–2059        9.0796e-05    2.6505e-05
+  2060–2069        9.5584e-05    2.9164e-05
+  2070–2079        9.2820e-05    2.7704e-05
+  2080–2089        9.3718e-05    2.6391e-05
+  2090–2099        9.3305e-05    3.0874e-05
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       7.3301e-05    6.8414e-05    +4.8865e-06
+  Feb       8.6478e-05    6.7514e-05    +1.8964e-05
+  Mar       8.9625e-05    6.7864e-05    +2.1762e-05
+  Apr       8.9988e-05    7.3194e-05    +1.6794e-05
+  May       1.0797e-04    7.9011e-05    +2.8962e-05
+  Jun       1.1240e-04    8.6151e-05    +2.6246e-05
+  Jul       1.0053e-04    8.5084e-05    +1.5447e-05
+  Aug       9.8980e-05    8.4166e-05    +1.4814e-05
+  Sep       8.8709e-05    7.8425e-05    +1.0284e-05
+  Oct       8.9069e-05    7.5940e-05    +1.3129e-05
+  Nov       8.8825e-05    7.4227e-05    +1.4598e-05
+  Dec       9.7658e-05    7.1482e-05    +2.6176e-05
+</code></pre></details><h2 id=near-surface-specific-humidity-huss>Near-surface Specific Humidity (huss)<a hidden class=anchor aria-hidden=true href=#near-surface-specific-humidity-huss>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/huss/plots/calibration_maps_ssp126_bilinear.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/huss/plots/future_trend_ssp126_bilinear.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/huss/plots/monthly_breakdown_ssp126_bilinear.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/huss/plots/seasonal_cycle_ssp126_bilinear.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp126 Bilinear</summary><pre tabindex=0><code>################################################################################
+huss Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-06-02 00:32:42
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-06-02 00:32:42
+
+--- Model historical vs reference ---
+  RMSE:          2.7723e+02
+  Bias:          -2.7717e+02
+  MAE:           2.7717e+02
+  Correlation:   0.9569
+  N points:      236,412
+  Model mean:    5.5479e-03  (model raw)
+  Ref mean:      2.7718e+02  (reference)
+  Model std:     2.0913e-03
+  Ref std:       5.9400e+00
+
+  Error distribution (model raw − reference):
+    Min:         -2.9214e+02
+    5th pct:     -2.8614e+02
+    25th pct:    -2.8172e+02
+    Median:      -2.7746e+02
+    75th pct:    -2.7315e+02
+    95th pct:    -2.6667e+02
+    Max:         -2.5681e+02
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       2.7173e+02    -2.7168e+02    2.7168e+02  0.9609
+  Feb       2.7148e+02    -2.7143e+02    2.7143e+02  0.9541
+  Mar       2.7261e+02    -2.7258e+02    2.7258e+02  0.9627
+  Apr       2.7490e+02    -2.7488e+02    2.7488e+02  0.9464
+  May       2.7821e+02    -2.7819e+02    2.7819e+02  0.9058
+  Jun       2.8150e+02    -2.8149e+02    2.8149e+02  0.9050
+  Jul       2.8410e+02    -2.8409e+02    2.8409e+02  0.9016
+  Aug       2.8407e+02    -2.8406e+02    2.8406e+02  0.9109
+  Sep       2.8164e+02    -2.8162e+02    2.8162e+02  0.9397
+  Oct       2.7823e+02    -2.7820e+02    2.7820e+02  0.9731
+  Nov       2.7511e+02    -2.7508e+02    2.7508e+02  0.9663
+  Dec       2.7279e+02    -2.7275e+02    2.7275e+02  0.9663
+  --------------------------------------------------------
+  All       2.7723e+02    -2.7717e+02    2.7717e+02  0.9569
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-06-02 00:32:42
+
+--- Corrected future (area mean) ---
+  Future mean:     6.1335e-03
+  Future std:      1.9101e-03
+  Reference mean:   2.7779e+02  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        6.2000e-03    1.9325e-03
+  2030–2039        5.9764e-03    1.9285e-03
+  2040–2049        6.1183e-03    1.8570e-03
+  2050–2059        6.1478e-03    1.8811e-03
+  2060–2069        6.1888e-03    1.9342e-03
+  2070–2079        6.1225e-03    1.9112e-03
+  2080–2089        6.1778e-03    1.8895e-03
+  2090–2099        6.1363e-03    1.9365e-03
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       4.2225e-03    2.7225e+02    -2.7224e+02
+  Feb       4.0400e-03    2.7203e+02    -2.7203e+02
+  Mar       4.2757e-03    2.7326e+02    -2.7326e+02
+  Apr       5.0106e-03    2.7556e+02    -2.7556e+02
+  May       6.2723e-03    2.7892e+02    -2.7891e+02
+  Jun       7.6433e-03    2.8216e+02    -2.8216e+02
+  Jul       9.0495e-03    2.8461e+02    -2.8460e+02
+  Aug       9.0206e-03    2.8459e+02    -2.8458e+02
+  Sep       7.7757e-03    2.8218e+02    -2.8217e+02
+  Oct       6.4275e-03    2.7886e+02    -2.7886e+02
+  Nov       5.2687e-03    2.7571e+02    -2.7571e+02
+  Dec       4.4476e-03    2.7331e+02    -2.7331e+02
+</code></pre></details><h2 id=net-shortwave-radiation-net_sw>Net Shortwave Radiation (net_sw)<a hidden class=anchor aria-hidden=true href=#net-shortwave-radiation-net_sw>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/net_sw/plots/calibration_maps_ssp126_conservative.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/net_sw/plots/seasonal_cycle_ssp126_conservative.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp126 Conservative</summary><pre tabindex=0><code>################################################################################
+net_sw Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-06-02 00:04:09
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-06-02 00:04:09
+
+--- Model historical vs reference ---
+  RMSE:          4.2970e+01
+  Bias:          -5.3910e+00
+  MAE:           3.3671e+01
+  Correlation:   0.8237
+  N points:      243,612
+  Model mean:    9.4537e+01  (model raw)
+  Ref mean:      9.9928e+01  (reference)
+  Model std:     7.0406e+01
+  Ref std:       7.2953e+01
+
+  Error distribution (model raw − reference):
+    Min:         -1.5233e+02
+    5th pct:     -7.9286e+01
+    25th pct:    -3.1786e+01
+    Median:      -5.5052e+00
+    75th pct:    +2.2109e+01
+    95th pct:    +6.5356e+01
+    Max:         +1.4417e+02
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       2.7340e+01    -8.7830e-01    2.3162e+01  -0.8611
+  Feb       3.8505e+01    -3.0658e+00    3.1996e+01  -0.8508
+  Mar       5.0216e+01    -5.5237e+00    4.1445e+01  -0.7978
+  Apr       5.1104e+01    -9.5159e+00    4.0536e+01  -0.6309
+  May       4.0201e+01    -8.7655e+00    2.9362e+01  -0.2962
+  Jun       3.6356e+01    -6.8989e+00    2.7732e+01  -0.1855
+  Jul       4.6361e+01    -1.0050e+01    3.6184e+01  -0.3256
+  Aug       5.7049e+01    -9.2709e+00    4.5799e+01  -0.7103
+  Sep       5.4443e+01    -3.8074e+00    4.4544e+01  -0.8723
+  Oct       4.4935e+01    -3.3733e+00    3.7854e+01  -0.9289
+  Nov       3.0648e+01    -2.2655e+00    2.5906e+01  -0.8911
+  Dec       2.3006e+01    -1.2775e+00    1.9525e+01  -0.8152
+  --------------------------------------------------------
+  All       4.2970e+01    -5.3910e+00    3.3671e+01  0.8237
+</code></pre></details><h2 id=nhx>NHX<a hidden class=anchor aria-hidden=true href=#nhx>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/nhx/plots/calibration_maps_ssp126_conservative.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/nhx/plots/future_trend_ssp126_conservative.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/nhx/plots/monthly_breakdown_ssp126_conservative.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/nhx/plots/seasonal_cycle_ssp126_conservative.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp126 Conservative</summary><pre tabindex=0><code>################################################################################
+nhx Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-14 18:30:50
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1992-01-01 – 2014-12-31  |  Model: unknown
+================================================================================
+Analysed: 2026-04-14 18:30:50
+
+--- Model historical vs reference ---
+  RMSE:          2.6023e-08
+  Bias:          +9.0253e-09
+  MAE:           1.4313e-08
+  Correlation:   0.6616
+  N points:      815,880
+  Model mean:    3.0068e-08  (model raw)
+  Ref mean:      2.1042e-08  (reference)
+  Model std:     3.2160e-08
+  Ref std:       2.5036e-08
+
+  Error distribution (model raw − reference):
+    Min:         -5.8038e-07
+    5th pct:     -1.7251e-08
+    25th pct:    +1.4825e-09
+    Median:      +4.5793e-09
+    75th pct:    +1.1431e-08
+    95th pct:    +5.0277e-08
+    Max:         +2.4684e-07
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       3.7793e-08    +2.3423e-08    2.3665e-08  0.8574
+  Feb       3.0587e-08    +1.9450e-08    1.9833e-08  0.8027
+  Mar       2.0767e-08    +8.4964e-09    1.2712e-08  0.7895
+  Apr       2.5607e-08    -6.7847e-09    1.2737e-08  0.7448
+  May       1.8832e-08    +4.9109e-11    8.9566e-09  0.7423
+  Jun       1.7225e-08    +2.2806e-09    8.3818e-09  0.6931
+  Jul       1.8966e-08    +2.0023e-09    9.3802e-09  0.6607
+  Aug       1.9486e-08    -5.5023e-10    9.7624e-09  0.7215
+  Sep       1.9030e-08    +5.9425e-09    1.0166e-08  0.7718
+  Oct       2.3123e-08    +1.3083e-08    1.4346e-08  0.8654
+  Nov       2.9260e-08    +1.7276e-08    1.7903e-08  0.8830
+  Dec       3.9137e-08    +2.3636e-08    2.3913e-08  0.8380
+  --------------------------------------------------------
+  All       2.6023e-08    +9.0253e-09    1.4313e-08  0.6616
+
+================================================================================
+Future: 2015-01-01 – 2100-12-31  |  Model: unknown (bias-corrected)
+================================================================================
+Analysed: 2026-04-14 18:30:50
+
+--- Corrected future (area mean) ---
+  Future mean:     1.5723e-08
+  Future std:      6.6926e-09
+  Reference mean:   2.0453e-08  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2015–2019        1.8308e-08    7.4228e-09
+  2020–2029        1.7780e-08    7.5433e-09
+  2030–2039        1.7056e-08    7.8355e-09
+  2040–2049        1.5741e-08    6.4196e-09
+  2050–2059        1.4532e-08    5.1456e-09
+  2060–2069        1.4990e-08    7.1259e-09
+  2070–2079        1.4727e-08    6.1810e-09
+  2080–2089        1.4402e-08    5.2397e-09
+  2090–2099        1.5155e-08    5.8862e-09
+  2100–2100        1.6774e-08    7.8130e-09
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       8.1041e-09    1.1848e-08    -3.7440e-09
+  Feb       1.0046e-08    1.2435e-08    -2.3892e-09
+  Mar       2.1824e-08    2.8336e-08    -6.5115e-09
+  Apr       2.4478e-08    3.6073e-08    -1.1595e-08
+  May       2.1526e-08    2.6568e-08    -5.0417e-09
+  Jun       1.3007e-08    1.7691e-08    -4.6840e-09
+  Jul       1.3558e-08    1.7414e-08    -3.8554e-09
+  Aug       1.6878e-08    2.1589e-08    -4.7110e-09
+  Sep       1.7985e-08    2.2849e-08    -4.8641e-09
+  Oct       1.8360e-08    2.1744e-08    -3.3841e-09
+  Nov       1.3174e-08    1.7218e-08    -4.0436e-09
+  Dec       9.7304e-09    1.1668e-08    -1.9374e-09
+</code></pre></details><h2 id=noy>NOY<a hidden class=anchor aria-hidden=true href=#noy>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/noy/plots/calibration_maps_ssp126_conservative.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/noy/plots/future_trend_ssp126_conservative.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/noy/plots/monthly_breakdown_ssp126_conservative.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/noy/plots/seasonal_cycle_ssp126_conservative.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp126 Conservative</summary><pre tabindex=0><code>################################################################################
+noy Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-14 18:31:04
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1992-01-01 – 2014-12-31  |  Model: unknown
+================================================================================
+Analysed: 2026-04-14 18:31:04
+
+--- Model historical vs reference ---
+  RMSE:          1.4877e-08
+  Bias:          -5.6949e-11
+  MAE:           9.5349e-09
+  Correlation:   0.8924
+  N points:      815,880
+  Model mean:    4.0791e-08  (model raw)
+  Ref mean:      4.0848e-08  (reference)
+  Model std:     3.0620e-08
+  Ref std:       3.2845e-08
+
+  Error distribution (model raw − reference):
+    Min:         -2.2388e-07
+    5th pct:     -2.5716e-08
+    25th pct:    -4.5467e-09
+    Median:      +1.0609e-09
+    75th pct:    +6.3932e-09
+    95th pct:    +2.0632e-08
+    Max:         +1.3302e-07
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       1.3930e-08    +1.2302e-10    8.8276e-09  0.9208
+  Feb       1.4406e-08    +2.0734e-09    9.2891e-09  0.8670
+  Mar       1.2314e-08    +1.6940e-09    8.4882e-09  0.9051
+  Apr       1.4222e-08    +5.6062e-11    9.5248e-09  0.8901
+  May       1.1425e-08    +1.9776e-09    7.7021e-09  0.9058
+  Jun       1.4323e-08    +1.0983e-09    9.6759e-09  0.8744
+  Jul       1.9705e-08    +1.1948e-09    1.1994e-08  0.7964
+  Aug       1.7430e-08    -8.4307e-10    1.1180e-08  0.8916
+  Sep       1.3102e-08    +8.4023e-10    8.7532e-09  0.9306
+  Oct       1.3144e-08    -2.5923e-09    8.0581e-09  0.9461
+  Nov       1.5621e-08    -5.2783e-09    9.5972e-09  0.9321
+  Dec       1.6854e-08    -1.0271e-09    1.1329e-08  0.8923
+  --------------------------------------------------------
+  All       1.4877e-08    -5.6949e-11    9.5349e-09  0.8924
+
+================================================================================
+Future: 2015-01-01 – 2100-12-31  |  Model: unknown (bias-corrected)
+================================================================================
+Analysed: 2026-04-14 18:31:04
+
+--- Corrected future (area mean) ---
+  Future mean:     9.8457e-09
+  Future std:      7.5337e-09
+  Reference mean:   3.9348e-08  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2015–2019        2.7546e-08    7.0704e-09
+  2020–2029        2.0972e-08    5.9992e-09
+  2030–2039        1.3792e-08    3.7642e-09
+  2040–2049        8.8737e-09    2.1644e-09
+  2050–2059        6.0682e-09    1.2371e-09
+  2060–2069        5.7726e-09    1.4155e-09
+  2070–2079        5.3259e-09    1.0076e-09
+  2080–2089        4.9427e-09    1.0463e-09
+  2090–2099        4.6763e-09    9.7056e-10
+  2100–2100        4.7664e-09    9.3702e-10
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       9.1113e-09    4.0871e-08    -3.1760e-08
+  Feb       9.1300e-09    3.5441e-08    -2.6311e-08
+  Mar       1.0956e-08    4.3137e-08    -3.2181e-08
+  Apr       8.5110e-09    3.9974e-08    -3.1463e-08
+  May       9.4750e-09    3.7201e-08    -2.7726e-08
+  Jun       8.5626e-09    3.1503e-08    -2.2940e-08
+  Jul       1.0155e-08    3.1954e-08    -2.1800e-08
+  Aug       9.1452e-09    3.6357e-08    -2.7212e-08
+  Sep       1.0211e-08    4.1250e-08    -3.1039e-08
+  Oct       1.2853e-08    4.7301e-08    -3.4448e-08
+  Nov       1.0353e-08    4.5893e-08    -3.5540e-08
+  Dec       9.6861e-09    4.1298e-08    -3.1612e-08
+</code></pre></details><h2 id=precipitation-pr>Precipitation (pr)<a hidden class=anchor aria-hidden=true href=#precipitation-pr>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/pr/plots/calibration_maps_ssp126_conservative.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/pr/plots/future_trend_ssp126_conservative.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/pr/plots/monthly_breakdown_ssp126_conservative.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/pr/plots/seasonal_cycle_ssp126_conservative.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp126 Conservative</summary><pre tabindex=0><code>################################################################################
+pr Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-06-01 23:47:11
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-06-01 23:47:11
+
+--- Model historical vs reference ---
+  RMSE:          3.3428e-05
+  Bias:          +3.0932e-05
+  MAE:           3.0932e-05
+  Correlation:   0.4826
+  N points:      243,612
+  Model mean:    3.0975e-05  (model raw)
+  Ref mean:      4.2902e-08  (reference)
+  Model std:     1.2684e-05
+  Ref std:       1.7878e-08
+
+  Error distribution (model raw − reference):
+    Min:         +2.1317e-06
+    5th pct:     +1.4777e-05
+    25th pct:    +2.1939e-05
+    Median:      +2.8150e-05
+    75th pct:    +3.7612e-05
+    95th pct:    +5.6484e-05
+    Max:         +1.1306e-04
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       3.9344e-05    +3.6381e-05    3.6381e-05  0.5500
+  Feb       3.7600e-05    +3.4595e-05    3.4595e-05  0.5847
+  Mar       3.1448e-05    +2.9586e-05    2.9586e-05  0.4748
+  Apr       2.7889e-05    +2.6537e-05    2.6537e-05  0.3041
+  May       2.6226e-05    +2.4916e-05    2.4916e-05  -0.1418
+  Jun       2.6977e-05    +2.5090e-05    2.5090e-05  0.1099
+  Jul       2.6248e-05    +2.4767e-05    2.4767e-05  0.2138
+  Aug       2.7816e-05    +2.6089e-05    2.6089e-05  0.1750
+  Sep       3.3043e-05    +3.1305e-05    3.1305e-05  0.2464
+  Oct       3.6659e-05    +3.4978e-05    3.4978e-05  0.4356
+  Nov       4.1306e-05    +3.9118e-05    3.9118e-05  0.5421
+  Dec       4.0753e-05    +3.7821e-05    3.7821e-05  0.5763
+  --------------------------------------------------------
+  All       3.3428e-05    +3.0932e-05    3.0932e-05  0.4826
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-06-01 23:47:11
+
+--- Corrected future (area mean) ---
+  Future mean:     3.8322e-05
+  Future std:      2.5978e-05
+  Reference mean:   4.2786e-08  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        3.8114e-05    2.5300e-05
+  2030–2039        3.7822e-05    2.6748e-05
+  2040–2049        3.8999e-05    2.7931e-05
+  2050–2059        3.7382e-05    2.4999e-05
+  2060–2069        3.8429e-05    2.6570e-05
+  2070–2079        3.7976e-05    2.4896e-05
+  2080–2089        3.9707e-05    2.5949e-05
+  2090–2099        3.8145e-05    2.5205e-05
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       4.1988e-05    4.7649e-08    +4.1940e-05
+  Feb       3.5248e-05    4.3816e-08    +3.5204e-05
+  Mar       3.2607e-05    3.8800e-08    +3.2568e-05
+  Apr       3.1280e-05    3.4895e-08    +3.1245e-05
+  May       3.3250e-05    3.4839e-08    +3.3215e-05
+  Jun       3.6242e-05    3.8063e-08    +3.6204e-05
+  Jul       3.7207e-05    3.9901e-08    +3.7167e-05
+  Aug       4.0685e-05    4.1831e-08    +4.0644e-05
+  Sep       3.9476e-05    4.4578e-08    +3.9431e-05
+  Oct       4.2137e-05    4.9203e-08    +4.2087e-05
+  Nov       4.3609e-05    5.0310e-08    +4.3559e-05
+  Dec       4.5775e-05    4.9542e-08    +4.5725e-05
+</code></pre></details><h2 id=sea-level-pressure-psl>Sea-level Pressure (psl)<a hidden class=anchor aria-hidden=true href=#sea-level-pressure-psl>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/psl/plots/calibration_maps_ssp126_bilinear.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/psl/plots/future_trend_ssp126_bilinear.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/psl/plots/monthly_breakdown_ssp126_bilinear.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/psl/plots/seasonal_cycle_ssp126_bilinear.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp126 Bilinear</summary><pre tabindex=0><code>################################################################################
+psl Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-05-30 20:00:08
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: GFDL-ESM4
+================================================================================
+Analysed: 2026-05-30 20:00:08
+
+--- Model historical vs reference ---
+  RMSE:          6.3467e+02
+  Bias:          -6.9108e+01
+  MAE:           4.9139e+02
+  Correlation:   -0.0497
+  N points:      229,320
+  Model mean:    1.0115e+05  (model raw)
+  Ref mean:      1.0122e+05  (reference)
+  Model std:     4.1714e+02
+  Ref std:       4.5306e+02
+
+  Error distribution (model raw − reference):
+    Min:         -1.9163e+03
+    5th pct:     -1.1531e+03
+    25th pct:    -5.0897e+02
+    Median:      +1.8047e+01
+    75th pct:    +3.0884e+02
+    95th pct:    +9.4809e+02
+    Max:         +1.7911e+03
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       8.4650e+02    -1.2252e+02    7.3856e+02  -0.2255
+  Feb       8.7572e+02    -8.7703e+01    7.6289e+02  -0.3484
+  Mar       6.2466e+02    +4.6054e+01    5.4854e+02  -0.6689
+  Apr       9.5061e+01    +3.9995e+01    8.1404e+01  0.8532
+  May       1.3127e+02    +5.5751e+01    1.1090e+02  0.4634
+  Jun       2.2945e+02    +1.4395e+02    1.9491e+02  0.4300
+  Jul       3.5436e+02    +2.8025e+01    3.1108e+02  -0.5005
+  Aug       5.2902e+02    -1.0911e+02    4.6357e+02  -0.7424
+  Sep       7.1786e+02    -2.0285e+02    6.3458e+02  -0.6627
+  Oct       5.7428e+02    -2.2170e+01    5.1031e+02  -0.0063
+  Nov       6.6447e+02    -2.4374e+02    5.7900e+02  0.0152
+  Dec       1.0905e+03    -3.5498e+02    9.6092e+02  -0.6031
+  --------------------------------------------------------
+  All       6.3467e+02    -6.9108e+01    4.9139e+02  -0.0497
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: GFDL-ESM4 (bias-corrected)
+================================================================================
+Analysed: 2026-05-30 20:00:08
+
+--- Corrected future (area mean) ---
+  Future mean:     1.0241e+05
+  Future std:      7.6075e+02
+  Reference mean:   1.0128e+05  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        1.0235e+05    7.5905e+02
+  2030–2039        1.0240e+05    7.1471e+02
+  2040–2049        1.0248e+05    7.7795e+02
+  2050–2059        1.0237e+05    7.5448e+02
+  2060–2069        1.0240e+05    7.6628e+02
+  2070–2079        1.0245e+05    7.6983e+02
+  2080–2089        1.0240e+05    7.6647e+02
+  2090–2099        1.0246e+05    7.6639e+02
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       1.0228e+05    1.0113e+05    +1.1497e+03
+  Feb       1.0239e+05    1.0118e+05    +1.2121e+03
+  Mar       1.0236e+05    1.0125e+05    +1.1127e+03
+  Apr       1.0248e+05    1.0132e+05    +1.1597e+03
+  May       1.0259e+05    1.0150e+05    +1.0927e+03
+  Jun       1.0262e+05    1.0144e+05    +1.1822e+03
+  Jul       1.0250e+05    1.0136e+05    +1.1395e+03
+  Aug       1.0249e+05    1.0135e+05    +1.1470e+03
+  Sep       1.0251e+05    1.0135e+05    +1.1622e+03
+  Oct       1.0229e+05    1.0122e+05    +1.0704e+03
+  Nov       1.0220e+05    1.0110e+05    +1.0991e+03
+  Dec       1.0226e+05    1.0113e+05    +1.1260e+03
+</code></pre></details><h2 id=downwelling-longwave-radiation-rlds>Downwelling Longwave Radiation (rlds)<a hidden class=anchor aria-hidden=true href=#downwelling-longwave-radiation-rlds>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/rlds/plots/calibration_maps_ssp126_conservative.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/rlds/plots/seasonal_cycle_ssp126_conservative.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp126 Conservative</summary><pre tabindex=0><code>################################################################################
+rlds Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-16 08:56:35
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-16 08:56:35
+
+--- Model historical vs reference ---
+  RMSE:          2.7676e+01
+  Bias:          +4.2339e+00
+  MAE:           2.2766e+01
+  Correlation:   0.5458
+  N points:      243,612
+  Model mean:    3.0659e+02  (model raw)
+  Ref mean:      3.0235e+02  (reference)
+  Model std:     2.8495e+01
+  Ref std:       2.8890e+01
+
+  Error distribution (model raw − reference):
+    Min:         -1.0085e+02
+    5th pct:     -4.1678e+01
+    25th pct:    -1.5669e+01
+    Median:      +5.7091e+00
+    75th pct:    +2.4380e+01
+    95th pct:    +4.7755e+01
+    Max:         +8.4718e+01
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       3.0896e+01    +9.0076e-01    2.4824e+01  0.0676
+  Feb       3.1672e+01    +5.0776e+00    2.5812e+01  0.0023
+  Mar       3.0751e+01    +6.9303e+00    2.5144e+01  -0.1092
+  Apr       2.9597e+01    +5.7984e+00    2.4763e+01  -0.4582
+  May       2.7491e+01    +6.5088e+00    2.3486e+01  -0.7480
+  Jun       2.5242e+01    +6.0327e+00    2.1334e+01  -0.7273
+  Jul       2.2522e+01    +2.5575e+00    1.8702e+01  -0.7098
+  Aug       2.2089e+01    +2.0915e+00    1.8402e+01  -0.7687
+  Sep       2.3701e+01    +2.1278e+00    1.9436e+01  -0.5604
+  Oct       2.6311e+01    +4.6655e+00    2.2024e+01  -0.3452
+  Nov       2.9475e+01    +3.4997e+00    2.4467e+01  -0.2596
+  Dec       3.0023e+01    +4.6163e+00    2.4794e+01  -0.0023
+  --------------------------------------------------------
+  All       2.7676e+01    +4.2339e+00    2.2766e+01  0.5458
+</code></pre></details><h2 id=downwelling-shortwave-radiation-rsds>Downwelling Shortwave Radiation (rsds)<a hidden class=anchor aria-hidden=true href=#downwelling-shortwave-radiation-rsds>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/rsds/plots/calibration_maps_ssp126_conservative.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, conservative</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, conservative" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/rsds/plots/seasonal_cycle_ssp126_conservative.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, conservative</em></p><details><summary>Statistics: Statistics Ssp126 Conservative</summary><pre tabindex=0><code>################################################################################
+rsds Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-04-16 08:47:56
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-04-16 08:47:56
+
+--- Model historical vs reference ---
+  RMSE:          4.6141e+01
+  Bias:          -6.9422e+00
+  MAE:           3.6466e+01
+  Correlation:   0.8356
+  N points:      243,612
+  Model mean:    1.0706e+02  (model raw)
+  Ref mean:      1.1400e+02  (reference)
+  Model std:     7.8504e+01
+  Ref std:       8.0470e+01
+
+  Error distribution (model raw − reference):
+    Min:         -1.5882e+02
+    5th pct:     -8.3431e+01
+    25th pct:    -3.6249e+01
+    Median:      -7.5912e+00
+    75th pct:    +2.3008e+01
+    95th pct:    +6.8405e+01
+    Max:         +1.4730e+02
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       3.2443e+01    -2.0045e+00    2.7385e+01  -0.8891
+  Feb       4.3261e+01    -5.7971e+00    3.5563e+01  -0.9283
+  Mar       4.8691e+01    -1.0264e+01    4.0166e+01  -0.9156
+  Apr       4.2379e+01    -1.5121e+01    3.4791e+01  -0.7605
+  May       3.5638e+01    -1.2892e+01    2.8177e+01  -0.4124
+  Jun       3.9210e+01    -6.4075e+00    3.0096e+01  -0.2622
+  Jul       5.4832e+01    -9.1232e+00    4.2475e+01  -0.3769
+  Aug       6.6417e+01    -8.8054e+00    5.3852e+01  -0.7340
+  Sep       6.1763e+01    -3.8872e+00    5.0977e+01  -0.9097
+  Oct       4.9930e+01    -4.0181e+00    4.2135e+01  -0.9381
+  Nov       3.4550e+01    -2.9728e+00    2.9092e+01  -0.9002
+  Dec       2.7029e+01    -2.0141e+00    2.2885e+01  -0.8281
+  --------------------------------------------------------
+  All       4.6141e+01    -6.9422e+00    3.6466e+01  0.8356
+</code></pre></details><h2 id=near-surface-air-temperature-tas>Near-surface Air Temperature (tas)<a hidden class=anchor aria-hidden=true href=#near-surface-air-temperature-tas>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/tas/plots/calibration_maps_ssp126_bilinear.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/tas/plots/future_trend_ssp126_bilinear.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/tas/plots/monthly_breakdown_ssp126_bilinear.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/tas/plots/seasonal_cycle_ssp126_bilinear.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp126 Bilinear</summary><pre tabindex=0><code>################################################################################
+tas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-06-01 23:33:41
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-06-01 23:33:41
+
+--- Model historical vs reference ---
+  RMSE:          1.7683e+00
+  Bias:          -1.0751e+00
+  MAE:           1.3753e+00
+  Correlation:   0.9838
+  N points:      236,412
+  Model mean:    6.4898e+00  (model raw)
+  Ref mean:      7.5649e+00  (reference)
+  Model std:     7.1603e+00
+  Ref std:       6.4766e+00
+
+  Error distribution (model raw − reference):
+    Min:         -9.2778e+00
+    5th pct:     -3.4514e+00
+    25th pct:    -1.8696e+00
+    Median:      -1.0018e+00
+    75th pct:    -1.7979e-01
+    95th pct:    +1.0067e+00
+    Max:         +7.5324e+00
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       2.2785e+00    -1.6284e+00    1.8134e+00  0.9776
+  Feb       2.2250e+00    -1.4491e+00    1.7346e+00  0.9725
+  Mar       2.1303e+00    -1.4885e+00    1.7729e+00  0.9722
+  Apr       2.0525e+00    -1.4683e+00    1.6837e+00  0.9619
+  May       1.4225e+00    -6.6842e-01    1.0989e+00  0.9495
+  Jun       1.4320e+00    -4.4604e-01    1.1073e+00  0.9463
+  Jul       1.5080e+00    -9.3869e-01    1.1768e+00  0.9621
+  Aug       1.4710e+00    -8.8055e-01    1.1615e+00  0.9586
+  Sep       1.4734e+00    -7.2030e-01    1.1245e+00  0.9629
+  Oct       1.3210e+00    -7.9224e-01    1.0311e+00  0.9736
+  Nov       1.6474e+00    -1.2140e+00    1.3225e+00  0.9830
+  Dec       1.8678e+00    -1.2066e+00    1.4766e+00  0.9804
+  --------------------------------------------------------
+  All       1.7683e+00    -1.0751e+00    1.3753e+00  0.9838
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-06-01 23:33:41
+
+--- Corrected future (area mean) ---
+  Future mean:     2.8335e+02
+  Future std:      5.8179e+00
+  Reference mean:   8.2494e+00  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        2.8342e+02    5.7940e+00
+  2030–2039        2.8276e+02    5.9693e+00
+  2040–2049        2.8353e+02    5.8901e+00
+  2050–2059        2.8352e+02    5.7711e+00
+  2060–2069        2.8352e+02    5.9113e+00
+  2070–2079        2.8323e+02    5.7331e+00
+  2080–2089        2.8352e+02    5.6163e+00
+  2090–2099        2.8327e+02    5.8073e+00
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       2.7585e+02    2.0792e+00    +2.7377e+02
+  Feb       2.7696e+02    2.1644e+00    +2.7479e+02
+  Mar       2.7855e+02    3.9452e+00    +2.7460e+02
+  Apr       2.8148e+02    6.7769e+00    +2.7470e+02
+  May       2.8620e+02    1.0113e+01    +2.7609e+02
+  Jun       2.8915e+02    1.3144e+01    +2.7601e+02
+  Jul       2.9142e+02    1.5374e+01    +2.7605e+02
+  Aug       2.9155e+02    1.5349e+01    +2.7620e+02
+  Sep       2.8791e+02    1.2564e+01    +2.7534e+02
+  Oct       2.8394e+02    8.9365e+00    +2.7500e+02
+  Nov       2.7988e+02    5.4887e+00    +2.7439e+02
+  Dec       2.7685e+02    3.0582e+00    +2.7380e+02
+</code></pre></details><h2 id=eastward-wind-uas>Eastward Wind (uas)<a hidden class=anchor aria-hidden=true href=#eastward-wind-uas>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/uas/plots/calibration_maps_ssp126_bilinear.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/uas/plots/future_trend_ssp126_bilinear.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/uas/plots/monthly_breakdown_ssp126_bilinear.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/uas/plots/seasonal_cycle_ssp126_bilinear.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp126 Bilinear</summary><pre tabindex=0><code>################################################################################
+uas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-06-02 00:13:35
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-06-02 00:13:35
+
+--- Model historical vs reference ---
+  RMSE:          7.8361e-01
+  Bias:          -9.6552e-02
+  MAE:           5.9838e-01
+  Correlation:   0.8263
+  N points:      236,412
+  Model mean:    9.4962e-01  (model raw)
+  Ref mean:      1.0462e+00  (reference)
+  Model std:     1.3728e+00
+  Ref std:       1.2181e+00
+
+  Error distribution (model raw − reference):
+    Min:         -2.8799e+00
+    5th pct:     -1.4360e+00
+    25th pct:    -5.3209e-01
+    Median:      -6.2936e-02
+    75th pct:    +3.9921e-01
+    95th pct:    +1.0670e+00
+    Max:         +3.6820e+00
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       7.8157e-01    -1.3818e-01    6.7002e-01  0.8831
+  Feb       1.0511e+00    -3.7725e-01    8.1804e-01  0.7929
+  Mar       8.7026e-01    -5.7007e-01    7.2123e-01  0.7746
+  Apr       7.2146e-01    -3.2712e-01    5.8185e-01  0.7324
+  May       5.2582e-01    -9.5895e-02    4.1003e-01  0.8504
+  Jun       4.4070e-01    -2.7148e-01    3.4748e-01  0.9244
+  Jul       4.4250e-01    +2.3079e-01    3.5670e-01  0.9542
+  Aug       5.3591e-01    +4.0771e-01    4.4852e-01  0.9608
+  Sep       6.4472e-01    +4.1035e-01    5.2574e-01  0.9047
+  Oct       4.9050e-01    +1.2296e-01    3.8046e-01  0.9135
+  Nov       8.6886e-01    -6.7368e-02    7.2696e-01  0.8804
+  Dec       1.4178e+00    -4.8305e-01    1.1935e+00  0.6926
+  --------------------------------------------------------
+  All       7.8361e-01    -9.6552e-02    5.9838e-01  0.8263
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-06-02 00:13:35
+
+--- Corrected future (area mean) ---
+  Future mean:     1.1988e+00
+  Future std:      1.9963e+00
+  Reference mean:   1.1314e+00  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        1.1259e+00    1.9695e+00
+  2030–2039        1.0889e+00    1.9441e+00
+  2040–2049        1.3426e+00    2.0496e+00
+  2050–2059        1.2632e+00    1.9783e+00
+  2060–2069        1.0634e+00    2.0110e+00
+  2070–2079        1.1776e+00    1.9281e+00
+  2080–2089        1.3563e+00    2.0430e+00
+  2090–2099        1.1723e+00    2.0215e+00
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       1.8633e+00    1.8486e+00    +1.4694e-02
+  Feb       1.3009e+00    1.6383e+00    -3.3738e-01
+  Mar       1.1373e+00    1.3379e+00    -2.0057e-01
+  Apr       4.0807e-01    5.1297e-01    -1.0491e-01
+  May       3.7470e-01    3.6275e-01    +1.1947e-02
+  Jun       1.2043e+00    8.3237e-01    +3.7193e-01
+  Jul       1.0735e+00    1.0370e+00    +3.6564e-02
+  Aug       1.1023e+00    1.0470e+00    +5.5285e-02
+  Sep       1.1856e+00    1.0354e+00    +1.5020e-01
+  Oct       1.2676e+00    9.2170e-01    +3.4587e-01
+  Nov       1.3271e+00    1.2549e+00    +7.2291e-02
+  Dec       2.1280e+00    1.7474e+00    +3.8062e-01
+</code></pre></details><h2 id=northward-wind-vas>Northward Wind (vas)<a hidden class=anchor aria-hidden=true href=#northward-wind-vas>#</a></h2><p><img alt="Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/vas/plots/calibration_maps_ssp126_bilinear.png>
+<em>Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/vas/plots/future_trend_ssp126_bilinear.png>
+<em>Projected future trend — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/vas/plots/monthly_breakdown_ssp126_bilinear.png>
+<em>Monthly breakdown — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><p><img alt="Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation" loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/meteo/vas/plots/seasonal_cycle_ssp126_bilinear.png>
+<em>Seasonal cycle — SSP1-2.6 — Low emissions, bilinear interpolation</em></p><details><summary>Statistics: Statistics Ssp126 Bilinear</summary><pre tabindex=0><code>################################################################################
+vas Bias Correction Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-06-02 00:21:45
+  Author:     
+  Project:    
+  Institute:  
+  Area:       
+  Experiment: 
+################################################################################
+
+================================================================================
+Calibration: 1990-01-01 – 2019-12-31  |  Model: MPI-ESM1-2-HR
+================================================================================
+Analysed: 2026-06-02 00:21:45
+
+--- Model historical vs reference ---
+  RMSE:          6.1018e-01
+  Bias:          -1.8359e-01
+  MAE:           4.5097e-01
+  Correlation:   0.8327
+  N points:      236,412
+  Model mean:    3.7206e-01  (model raw)
+  Ref mean:      5.5565e-01  (reference)
+  Model std:     9.7689e-01
+  Ref std:       1.0279e+00
+
+  Error distribution (model raw − reference):
+    Min:         -2.9012e+00
+    5th pct:     -1.1761e+00
+    25th pct:    -4.8737e-01
+    Median:      -1.5117e-01
+    75th pct:    +1.6216e-01
+    95th pct:    +7.1896e-01
+    Max:         +2.8829e+00
+
+  Monthly breakdown:
+  Month           RMSE           Bias           MAE    Corr
+  --------------------------------------------------------
+  Jan       1.0759e+00    -6.5657e-01    8.1879e-01  0.7484
+  Feb       6.2755e-01    -1.5049e-01    5.0722e-01  0.8637
+  Mar       4.5490e-01    -1.5072e-01    3.5753e-01  0.9031
+  Apr       4.3428e-01    -4.1048e-02    3.4543e-01  0.7848
+  May       4.2593e-01    -1.0794e-01    3.0985e-01  0.7462
+  Jun       3.9473e-01    -9.4029e-03    3.0412e-01  0.7997
+  Jul       7.0094e-01    -3.2685e-01    5.2727e-01  0.4243
+  Aug       3.3996e-01    -5.8175e-02    2.6398e-01  0.8795
+  Sep       6.4224e-01    -2.2460e-01    4.4223e-01  0.6794
+  Oct       5.9642e-01    -2.4696e-01    4.7200e-01  0.8321
+  Nov       6.2959e-01    -7.2428e-02    5.1581e-01  0.8050
+  Dec       6.4215e-01    -1.5796e-01    5.4745e-01  0.8480
+  --------------------------------------------------------
+  All       6.1018e-01    -1.8359e-01    4.5097e-01  0.8327
+
+================================================================================
+Future: 2020-01-01 – 2099-12-31  |  Model: MPI-ESM1-2-HR (bias-corrected)
+================================================================================
+Analysed: 2026-06-02 00:21:45
+
+--- Corrected future (area mean) ---
+  Future mean:     5.4170e-01
+  Future std:      2.0846e+00
+  Reference mean:   5.4743e-01  (calibration period)
+
+  10-year period means:
+  Period                Mean           Std
+  ----------------------------------------
+  2020–2029        5.6759e-01    2.0108e+00
+  2030–2039        5.7190e-01    2.0405e+00
+  2040–2049        6.1973e-01    2.1799e+00
+  2050–2059        5.3993e-01    2.0903e+00
+  2060–2069        4.4596e-01    2.0483e+00
+  2070–2079        5.0290e-01    2.1034e+00
+  2080–2089        5.9187e-01    2.1413e+00
+  2090–2099        4.9369e-01    2.0512e+00
+
+  Monthly climatology (area mean):
+  Month      Corrected     Reference           Diff
+  --------------------------------------------------
+  Jan       1.6358e+00    1.3689e+00    +2.6690e-01
+  Feb       7.9230e-01    1.0937e+00    -3.0143e-01
+  Mar       3.1575e-01    6.0684e-01    -2.9109e-01
+  Apr      -2.0886e-01    3.8190e-02    -2.4704e-01
+  May      -1.6146e-01   -1.8916e-01    +2.7702e-02
+  Jun      -1.9425e-01   -1.9057e-01    -3.6783e-03
+  Jul       1.4019e-01    5.8304e-02    +8.1882e-02
+  Aug       1.4881e-01    3.0424e-01    -1.5543e-01
+  Sep       5.6241e-01    5.4939e-01    +1.3021e-02
+  Oct       1.1094e+00    8.3286e-01    +2.7652e-01
+  Nov       9.9750e-01    8.6521e-01    +1.3229e-01
+  Dec       1.3525e+00    1.2312e+00    +1.2129e-01
+</code></pre></details><h2 id=river-flow-and-nutrient-load-projections>River Flow and Nutrient Load Projections<a hidden class=anchor aria-hidden=true href=#river-flow-and-nutrient-load-projections>#</a></h2><p><img alt=nutrient_loads_ssp126 loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/river/plots/nutrient_loads_ssp126.png></p><p><img alt=q_change_map_ssp126 loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/river/plots/q_change_map_ssp126.png></p><p><img alt=q_seasonal_ssp126 loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/river/plots/q_seasonal_ssp126.png></p><p><img alt=q_time_series_ssp126 loading=lazy src=https://bolding-bruggeman.com/oceanicu_3d/scenarios/MPI-ESM1-2-HR/ssp126/river/plots/q_time_series_ssp126.png></p><details><summary>Statistics: river_projection_statistics_ssp126</summary><pre tabindex=0><code>====================================================================================================
+  River Projection Statistics — ssp126
+====================================================================================================
+
+  Site                     Lat      Lon  Reg     Q_cal    Q_near     Q_far   Δnear%    Δfar%
+  ------------------------------------------------------------------------------------------------
+  0                     56.160   14.750    *      0.89      0.01      0.01   -99.15   -99.00
+  1                     65.320   21.410    *      5.98      0.04      0.03   -99.28   -99.47
+  2                     56.660   12.850    *     43.75      7.49      7.53   -82.87   -82.79
+  3                     55.860   14.240    *      1.54      0.01      0.01   -99.32   -99.36
+  4                     56.270   12.830    *     19.79      0.09      0.10   -99.56   -99.47
+  5                     60.370   18.270    *      0.09      0.02      0.02   -82.05   -82.04
+  6                     57.870   16.620    *      0.19      0.08      0.08   -60.58   -60.36
+  7                     57.230   12.210    *     41.89      2.03      2.05   -95.16   -95.10
+  8                     64.690   21.130    *      5.76      0.04      0.03   -99.30   -99.43
+  9                     56.921   16.439    *      0.37      0.00      0.00   -99.07   -99.11
+  10                    56.890   12.480    *     54.28     10.52     10.57   -80.62   -80.52
+  11                    55.992   12.746    *      0.06      0.01      0.01   -85.22   -85.17
+  12                    63.750   20.330    *     15.11      0.08      0.05   -99.46   -99.66
+  13                    64.210   21.110    *      0.54      0.00      0.00   -99.51   -99.69
+  14                    58.438   11.683    *     23.53      2.11      2.13   -91.02   -90.93
+  15                    62.792   18.181    *     17.67      0.05      0.04   -99.72   -99.79
+  16                    57.150   16.490    *      0.96      0.35      0.36   -63.46   -62.13
+  17                    58.730   17.120    *      0.67      0.01      0.01   -99.04   -98.91
+  18                    65.870   22.370    *      1.61      0.01      0.01   -99.66   -99.67
+  19                    65.720   21.780    *     17.85      4.84      4.85   -72.85   -72.83
+  20                    62.442   17.514    *     15.36      4.46      4.46   -70.95   -70.95
+  21                    56.550   12.950    *     78.60     19.36     19.42   -75.37   -75.29
+  22                    58.640   16.270    *      2.99      1.13      1.14   -62.09   -61.98
+  23                    65.530   21.880    *      0.16      0.00      0.00   -99.49   -99.55
+  24                    65.908   22.638    *      0.17      0.08      0.08   -52.82   -52.86
+  25                    63.340   19.210    *      1.22      0.01      0.00   -99.51   -99.72
+  26                    60.650   17.430    *     11.65      0.03      0.03   -99.76   -99.74
+  27                    58.344   11.903    *      5.23      0.28      0.29   -94.71   -94.54
+  28                    60.680   17.190    *      0.62      0.18      0.18   -71.06   -71.01
+  29                    56.470   16.140    *      0.14      0.02      0.02   -84.25   -84.27
+  30                    61.820   17.270    *      0.57      0.00      0.00   -99.60   -99.61
+  31                    63.550   19.850    *      1.18      0.00      0.00   -99.59   -99.78
+  32                    62.342   17.431    *      4.41      0.88      0.88   -79.95   -80.00
+  33                    59.089   11.229    *     14.44      1.41      1.41   -90.21   -90.22
+  34                    65.860   24.160    *     14.38      0.10      0.07   -99.33   -99.52
+  35                    57.616   18.767    *      2.54      0.10      0.26   -95.87   -89.90
+  36                    56.170   15.410    *      0.20      0.01      0.01   -95.69   -95.75
+  37                    61.192   17.181    *      7.37      0.03      0.03   -99.60   -99.61
+  38                    57.694   11.909    *    577.40     83.59     84.01   -85.52   -85.45
+  39                    63.560   19.450    *      0.64      0.00      0.00   -99.64   -99.81
+  40                    65.880   23.060    *     10.54      4.34      4.27   -58.81   -59.44
+  41                    43.475   -7.055          16.57     10.74      9.50   -35.17   -42.68
+  42                    37.136   -6.853           2.04      1.64      1.60   -19.81   -21.34
+  43                    37.208   -7.058           0.70      0.53      0.45   -24.28   -35.42
+  44                    43.671   -7.903           5.01      2.74      2.55   -45.37   -49.08
+  45                    37.136   -6.853           4.01      3.26      3.20   -18.66   -20.14
+  46                    43.740   -7.695           6.76      3.84      3.51   -43.30   -48.15
+  47                    43.438   -3.450          48.27     48.25     48.25    -0.03    -0.03
+  48                    43.328   -8.210           7.56      4.93      4.09   -34.75   -45.84
+  49                    42.346   -8.612           7.61      5.13      4.36   -32.54   -42.66
+  50                    43.326   -1.921           3.32      3.32      3.32    -0.00    -0.00
+  51                    43.326   -3.020           0.28      0.28      0.28    -0.04    -0.04
+  52                    43.326   -3.020          18.81     18.80     18.80    -0.01    -0.01
+  53                    43.381   -4.510          11.27     11.27     11.27    -0.01    -0.01
+  54                    43.514   -8.154           3.37      2.12      1.71   -37.25   -49.18
+  55                    43.435   -4.035          13.97     13.97     13.97    -0.03    -0.03
+  56                    43.551   -7.261           4.67      3.30      2.43   -29.45   -47.98
+  57                    43.133   -9.128          10.40      6.94      6.64   -33.27   -36.10
+  58                    42.650   -8.745          43.79     29.48     28.52   -32.68   -34.87
+  59                    43.291   -2.132          22.30     22.30     22.30    -0.03    -0.03
+  60                    43.503   -8.161           2.35      1.47      1.13   -37.30   -51.79
+  61                    42.497   -8.812          11.44      7.64      7.35   -33.23   -35.76
+  62                    43.677   -7.599           6.08      3.70      3.40   -39.19   -44.08
+  63                    43.364   -2.498           3.65      3.65      3.65    -0.01    -0.01
+  64                    43.349   -3.121           2.43      2.42      2.42    -0.02    -0.02
+  65                    43.326   -3.020          10.24     10.24     10.24    -0.03    -0.03
+  66                    43.380   -2.680           5.09      5.09      5.09     0.02     0.02
+  67                    36.582   -6.237          11.98     10.43     10.40   -12.88   -13.18
+  68                    43.303   -2.248           9.16      9.16      9.16    -0.01    -0.01
+  69                    43.413   -8.175          13.98      8.90      7.46   -36.30   -46.65
+  70                    43.326   -3.020           0.73      0.73      0.73    -0.00    -0.00
+  71                    43.228   -8.942          11.11      7.79      7.51   -29.90   -32.38
+  72                    37.176   -7.402          94.18     57.12     53.09   -39.35   -43.63
+  73                    43.326   -3.020          12.24     12.24     12.24     0.00     0.00
+  74                    36.796   -6.345          53.07     42.09     41.84   -20.69   -21.16
+  75                    42.816   -8.885          22.46     17.06     16.51   -24.03   -26.50
+  76                    43.595   -7.295           3.63      2.66      1.98   -26.66   -45.28
+  77                    43.325   -1.981          10.32     10.32     10.32    -0.03    -0.03
+  78                    43.004   -9.251           4.43      3.06      2.93   -30.91   -33.85
+  79                    42.425   -8.656          17.90     10.93     10.51   -38.96   -41.32
+  80                    43.467   -5.065          14.47     13.06     12.93    -9.73   -10.62
+  81                    43.325   -2.418           2.77      2.77      2.77     0.00     0.00
+  82                    43.412   -2.950           4.09      4.09      4.09    -0.01    -0.01
+  83                    42.905   -9.126          14.96     10.18      9.80   -31.95   -34.46
+  84                    43.449   -3.755           4.71      4.71      4.71    -0.03    -0.03
+  85                    43.647   -8.083           2.07      1.19      1.12   -42.84   -46.09
+  86                    43.343   -8.383           6.64      5.50      4.55   -17.13   -31.54
+  87                    41.924   -8.773         274.83    182.74    175.63   -33.51   -36.09
+  88                    43.565   -6.077          51.37     45.80     45.65   -10.85   -11.13
+  89                    43.194   -9.042           6.90      4.81      4.62   -30.20   -32.97
+  90                    43.441   -3.981          11.40     11.39     11.39    -0.02    -0.02
+  91                    63.877  -21.208    *    362.36    362.38    362.38     0.01     0.01
+  92                    63.773  -20.802    *    336.11    336.12    336.12     0.00     0.00
+  93                    65.620   25.050    *     40.46      0.19      0.14   -99.54   -99.66
+  94                    64.290   23.910    *     40.91      9.17      9.02   -77.58   -77.94
+  95                    60.213   24.985    *     16.23      2.81      2.93   -82.66   -81.92
+  96                    60.350   23.100    *      5.72      0.67      0.67   -88.28   -88.22
+  97                    64.850   24.700    *     38.26     10.80     10.03   -71.78   -73.78
+  98                    60.383   25.667    *     10.41      1.42      1.47   -86.35   -85.92
+  99                    60.442   26.847    *    288.44     78.89     78.18   -72.65   -72.89
+  100                   63.270   21.860    *     39.83      5.02      4.88   -87.40   -87.75
+  101                   62.200   21.400    *     13.58      4.82      4.81   -64.51   -64.59
+  102                   64.992   25.431    *    255.60     49.70     49.49   -80.56   -80.64
+  103                   61.220   21.620    *      8.54      0.04      0.05   -99.48   -99.46
+  104                   65.200   25.290    *     42.13      0.18      0.16   -99.58   -99.63
+  105                   60.340   25.530    *      6.65      2.51      2.53   -62.24   -61.93
+  106                   60.433   22.233    *      7.18      2.01      2.01   -71.98   -71.98
+  107                   60.550   27.850    *      7.73      1.77      1.99   -77.09   -74.26
+  108                   60.583   27.733    *      4.39      0.59      0.64   -86.57   -85.37
+  109                   64.480   24.220    *     31.78      6.07      5.95   -80.91   -81.28
+  110                   65.340   25.260    *    166.15      0.78      0.66   -99.53   -99.61
+  111                   60.417   22.660    *      8.27      2.84      2.84   -65.68   -65.67
+  112                   64.230   23.710    *     11.73      2.18      2.04   -81.42   -82.65
+  113                   62.340   21.300    *      8.90      3.39      3.38   -61.96   -62.01
+  114                   60.150   23.067    *      6.52      1.18      1.18   -81.93   -81.89
+  115                   61.550   21.630    *    215.01     21.59     22.42   -89.96   -89.57
+  116                   65.742   24.514    *    560.43      3.40      2.85   -99.39   -99.49
+  117                   63.560   22.510    *     30.28     14.32     14.30   -52.72   -52.78
+  118                   63.880   23.170    *     21.10      0.11      0.09   -99.47   -99.56
+  119                   60.093   23.560    *     18.07      5.10      5.12   -71.76   -71.67
+  120                   57.645   22.146          16.98      0.75      0.69   -95.60   -95.93
+  121                   57.248   21.413           5.87      1.38      1.36   -76.58   -76.91
+  122                   57.160   24.260          77.25     11.46     11.40   -85.17   -85.25
+  123                   57.010   23.930         107.50     14.96     14.67   -86.08   -86.35
+  124                   57.880   24.350          38.50      4.58      4.70   -88.11   -87.78
+  125                   56.413   21.049          20.15      3.68      3.69   -81.73   -81.70
+  126                   57.400   21.550          89.97      1.10      0.93   -98.78   -98.97
+  127                   57.070   24.050         607.23    155.58    152.67   -74.38   -74.86
+  128                   56.980   21.345           2.82      0.29      0.26   -89.60   -90.71
+  129                   53.209    5.439           0.81      0.01      0.00   -99.20   -99.43
+  130                   53.070    5.336         212.78      1.76      1.58   -99.17   -99.26
+  131                   52.940    5.042         284.09      3.60      3.76   -98.73   -98.68
+  132                   51.980    4.120        1308.08     16.04      7.79   -98.77   -99.40
+  133                   53.327    6.930           2.46      0.36      0.36   -85.51   -85.43
+  134                   51.840    4.017         561.87    167.35    167.44   -70.22   -70.20
+  135                   53.179    5.419           4.74      0.05      0.03   -99.05   -99.30
+  136                   53.411    6.191          42.01      0.38      0.32   -99.10   -99.24
+  137                   53.309    5.626           1.05      0.19      0.19   -81.66   -81.68
+  138                   52.470    4.600          86.63      1.20      0.80   -98.61   -99.07
+  139                   51.337    3.213           3.61      0.54      0.54   -84.96   -85.09
+  140                   51.337    3.213           0.92      0.32      0.32   -65.30   -65.39
+  141                   51.339    3.813          19.93      6.35      6.36   -68.13   -68.10
+  142                   51.238    2.922           7.27      1.12      1.12   -84.55   -84.56
+  143                   51.349    4.249         134.84     40.33     40.28   -70.09   -70.13
+  144                   51.154    2.722           8.93      0.52      0.46   -94.19   -94.86
+  145                   51.337    3.213           1.35      0.28      0.28   -79.33   -79.49
+  146                   41.148   -8.638         434.74    301.97    291.94   -30.54   -32.85
+  147                   38.934   -8.999         246.85    174.84    167.33   -29.17   -32.21
+  148                   55.730   21.090         490.25    168.09    168.71   -65.71   -65.59
+  149                   55.279   21.081           6.93      0.08      0.06   -98.87   -99.07
+  150                   52.240   -6.968          78.85      0.36      0.37   -99.55   -99.53
+  151                   52.360   -6.506          41.49      0.19      0.17   -99.54   -99.59
+  152                   51.850   -8.329          46.58      6.51      6.71   -86.03   -85.59
+  153                   52.780   -8.946          23.54      1.97      1.95   -91.64   -91.73
+  154                   52.820   -6.123          21.84      0.09      0.07   -99.59   -99.67
+  155                   54.140   -9.145          64.07      0.30      0.37   -99.53   -99.42
+  156                   53.710   -6.337          44.91      5.17      5.10   -88.48   -88.64
+  157                   52.519   -8.718          17.45      0.66      0.66   -96.21   -96.23
+  158                   53.350   -6.222          17.51      2.44      2.52   -86.08   -85.63
+  159                   53.300   -9.073         104.65      1.09      1.30   -98.96   -98.76
+  160                   52.524   -8.938           8.56      0.30      0.29   -96.55   -96.57
+  161                   52.660   -8.702         186.48      1.32      1.37   -99.29   -99.26
+  162                   52.240   -6.968          45.80      0.21      0.22   -99.53   -99.53
+  163                   52.240   -6.968          43.05      0.20      0.21   -99.54   -99.52
+  164                   51.690   -8.537          23.17      0.14      0.12   -99.41   -99.50
+  165                   51.950   -7.840          82.40      0.46      0.43   -99.45   -99.47
+  166                   54.500   -8.210         108.96      0.66      0.67   -99.40   -99.39
+  167                   54.980   -3.566         175.28      9.83      9.12   -94.39   -94.80
+  168                   55.920   -4.472         175.93      1.43      1.40   -99.19   -99.20
+  169                   52.790    0.369          53.52     14.95     14.90   -72.07   -72.17
+  170                   53.990   -2.881         124.90      0.77      0.60   -99.38   -99.52
+  171                   55.010   -1.422          48.10      9.40      9.38   -80.45   -80.50
+  172                   57.670   -3.095         170.17      0.79      0.78   -99.54   -99.54
+  173                   50.910   -1.450          13.07      3.48      3.49   -73.38   -73.28
+  174                   53.240   -3.087          58.04      7.75      7.68   -86.64   -86.77
+  175                   52.110   -4.689          90.23      0.45      0.30   -99.51   -99.67
+  176                   51.780   -4.364          74.25      0.33      0.35   -99.55   -99.52
+  177                   53.418    0.224         222.45      5.97      0.87   -97.32   -99.61
+  178                   51.450    0.402          69.86     27.12     27.04   -61.18   -61.30
+  179                   51.730    0.700           4.33      1.22      1.21   -71.96   -72.05
+  180                   55.170   -6.739         195.06      1.16      1.44   -99.40   -99.26
+  181                   50.830   -0.257          12.19      0.36      0.33   -97.05   -97.28
+  182                   50.560   -4.929           8.29      1.00      1.15   -87.92   -86.13
+  183                   54.490   -0.625           5.89      0.04      0.04   -99.29   -99.30
+  184                   51.320    1.368          16.41      6.89      6.88   -58.03   -58.10
+  185                   54.950   -3.049          80.81      4.31      4.11   -94.66   -94.92
+  186                   56.361   -3.316         253.53     34.30     34.83   -86.47   -86.26
+  187                   56.730   -5.236         197.62      1.72      1.68   -99.13   -99.15
+  188                   54.630   -5.886          18.58      0.13      0.12   -99.31   -99.37
+  189                   50.680   -1.949          37.73      9.61      9.66   -74.52   -74.39
+  190                   54.920   -1.367          16.03      2.22      2.29   -86.18   -85.69
+  191                   52.570    1.738          19.23      2.58      2.50   -86.61   -86.98
+  192                   51.710   -2.486         127.21     30.55     30.60   -75.98   -75.94
+  193                   58.110   -3.657         325.95      1.02      0.98   -99.69   -99.70
+  194                   54.650   -1.159          20.66      1.10      1.08   -94.69   -94.80
+  195                   51.220   -3.000          14.09      1.40      1.50   -90.03   -89.38
+  196                   51.540   -2.985         145.44     17.07     17.21   -88.26   -88.17
+  197                   56.064   -3.727          97.92      2.97      0.83   -96.96   -99.15
+  198                   50.610   -3.423          55.06      6.60      7.25   -88.01   -86.83
+  199                   55.770   -1.991          69.89      0.59      0.80   -99.16   -98.85
+  200                   50.350   -4.167          52.27      0.18      0.27   -99.66   -99.49
+  201                   53.336   -2.768          56.12      9.75      9.64   -82.63   -82.82
+  202                   51.060   -4.207          32.12      3.82      3.84   -88.12   -88.03
+  203                   51.620   -3.834          36.67      1.67      1.69   -95.43   -95.38
+  204                   45.044   -0.607         237.16     61.89     61.65   -73.91   -74.00
+  205                   48.506   -2.689          57.51     15.78     15.71   -72.56   -72.68
+  206                   43.529   -1.520          82.49     25.43     24.90   -69.17   -69.81
+  207                   49.301   -0.091           9.30      3.03      3.02   -67.42   -67.48
+  208                   43.529   -1.520          16.10      4.30      4.19   -73.30   -73.99
+  209                   47.500   -2.366          76.86     17.36     17.68   -77.41   -77.00
+  210                   49.907    0.930          14.78      6.01      6.01   -59.31   -59.33
+  211                   48.283   -4.263          75.47      0.35      0.14   -99.53   -99.81
+  212                   49.019   -1.506          20.62      0.43      0.42   -97.91   -97.96
+  213                   44.660   -1.043          19.10      9.43      9.36   -50.61   -50.97
+  214                   49.369    0.074          11.99      4.35      4.34   -63.71   -63.78
+  215                   45.044   -0.607          10.94      2.09      2.11   -80.84   -80.71
+  216                   50.180    1.653          37.09     15.49     15.49   -58.23   -58.24
+  217                   49.440    0.372          16.38      4.15      2.13   -74.64   -87.02
+  218                   49.292   -0.246          28.33      6.87      6.86   -75.74   -75.79
+  219                   48.634   -1.512          23.07      0.09      0.09   -99.61   -99.63
+  220                   49.480    0.486           8.25      2.68      2.62   -67.51   -68.28
+  221                   45.790   -1.124           3.72      1.68      1.67   -54.68   -54.98
+  222                   49.480    0.486         470.62    111.93    108.22   -76.22   -77.01
+  223                   48.643   -1.413          55.09      0.22      0.22   -99.60   -99.60
+  224                   49.337   -0.458           5.29      1.26      1.26   -76.14   -76.22
+  225                   45.044   -0.607          73.27     15.17     15.00   -79.30   -79.53
+  226                   45.044   -0.607         148.28     28.16     27.96   -81.01   -81.14
+  227                   47.290   -1.957         786.50    360.67    360.41   -54.14   -54.18
+  228                   49.350   -1.120          28.51      6.49      6.48   -77.23   -77.27
+  229                   43.529   -1.520          35.01     10.51     10.29   -69.97   -70.62
+  230                   47.737   -3.350          66.09      8.89      8.81   -86.54   -86.66
+  231                   45.953   -1.067          65.80     30.37     30.21   -53.84   -54.09
+  232                   47.290   -1.957          43.82     12.82     12.81   -70.73   -70.77
+  233                   45.044   -0.607         399.66    102.14    101.40   -74.44   -74.63
+  234                   50.550    1.603          52.52     12.90     12.90   -75.45   -75.44
+  235                   50.064    1.370          43.36     10.64     52.02   -75.47    19.96
+  236                   43.529   -1.520          17.39      4.05      3.92   -76.74   -77.45
+  237                   46.294   -1.268          30.96      5.45      5.37   -82.38   -82.64
+  238                   49.480    0.486          23.63      6.52      6.35   -72.43   -73.14
+  239                   46.320   -1.112          52.68     17.17     17.08   -67.39   -67.58
+  240                   45.953   -1.067          23.19      9.26      9.21   -60.05   -60.28
+  241                   43.529   -1.520         184.29     73.56     72.49   -60.09   -60.66
+  242                   58.140    7.990    *    152.55      0.83      1.09   -99.46   -99.28
+  243                   59.050   10.050    *    118.84      0.44      0.48   -99.63   -99.60
+  244                   58.729    5.517    *      5.48      0.03      0.04   -99.37   -99.33
+  245                   59.190   10.950    *    746.03    340.70    341.09   -54.33   -54.28
+  246                   59.740   10.230    *    327.84      1.57      1.82   -99.52   -99.44
+  247                   65.800   12.350    *    166.18      0.48      0.54   -99.71   -99.68
+  248                   63.310    9.831    *     62.99      0.24      0.25   -99.62   -99.61
+  249                   59.128    9.618    *    294.99      1.48      1.49   -99.50   -99.50
+  250                   60.640    5.951    *     96.58      0.75      0.71   -99.22   -99.26
+  251                   70.000   23.200    *     94.91     94.91     94.91     0.00     0.00
+  252                   59.890   30.210        2333.09     24.39     18.16   -98.95   -99.22
+  253                   59.660   28.360         106.71     18.82     19.04   -82.36   -82.16
+  254                   55.215   10.810           0.32      0.07      0.07   -79.19   -78.81
+  255                   55.163   10.135           0.36      0.09      0.09   -74.43   -74.09
+  256                   55.724   11.651           0.42      0.08      0.08   -80.27   -80.05
+  257                   55.808   12.582           0.26      0.07      0.07   -72.71   -72.50
+  258                   55.385    9.841           0.31      0.07      0.07   -77.14   -76.76
+  259                   55.468   10.441           0.90      0.21      0.21   -77.08   -76.70
+  260                   57.200   10.500           1.29      0.07      0.07   -94.93   -94.59
+  261                   56.610   10.320          36.14      2.46      2.29   -93.20   -93.68
+  262                   55.200    8.672           1.04      0.06      0.06   -94.58   -94.40
+  263                   54.987   12.353           0.10      0.00      0.00   -97.24   -96.93
+  264                   54.828   11.140           0.41      0.01      0.01   -96.88   -96.89
+  265                   55.209   11.715           1.22      0.25      0.25   -79.58   -79.36
+  266                   55.061   10.618           0.44      0.03      0.04   -92.56   -91.88
+  267                   55.389   11.220           0.84      0.11      0.11   -87.46   -87.21
+  268                   55.209   12.152           0.28      0.04      0.05   -84.36   -83.68
+  269                   55.703    9.544           2.19      0.56      0.56   -74.60   -74.28
+  270                   55.165   12.029           0.19      0.04      0.04   -81.18   -80.97
+  271                   56.370    8.116          22.45      0.24      0.23   -98.92   -98.99
+  272                   55.771   11.632           0.43      0.08      0.08   -81.54   -81.32
+  273                   55.431   12.211           0.32      0.03      0.03   -91.35   -91.23
+  274                   54.694   11.887           0.55      0.01      0.01   -98.81   -98.63
+  275                   55.453   10.498           0.90      0.21      0.21   -77.08   -76.70
+  276                   55.879   12.066           0.36      0.02      0.02   -94.51   -94.20
+  277                   55.248    9.494           1.09      0.24      0.25   -77.64   -77.36
+  278                   55.090   10.242           0.17      0.02      0.03   -85.73   -85.22
+  279                   55.297   10.750           0.86      0.20      0.21   -76.48   -76.11
+  280                   55.235   12.235           0.28      0.04      0.05   -84.36   -83.68
+  281                   55.678    9.807           0.41      0.08      0.08   -81.39   -81.00
+  282                   54.889   12.052           0.34      0.02      0.03   -93.10   -92.27
+  283                   55.703    9.544           2.19      0.56      0.56   -74.60   -74.28
+  284                   54.773   11.863           0.47      0.09      0.10   -80.12   -79.93
+  285                   55.209   12.152           0.28      0.04      0.05   -84.36   -83.68
+  286                   54.935    9.624           0.32      0.04      0.04   -86.30   -85.96
+  287                   55.190   10.107           0.36      0.00      0.00   -98.96   -98.73
+  288                   55.703    9.717           1.44      0.32      0.32   -77.80   -77.43
+  289                   55.430    8.623           5.26      0.93      0.94   -82.34   -82.14
+  290                   55.803   12.040           0.30      0.09      0.09   -69.52   -69.41
+  291                   55.459    9.797           0.45      0.08      0.09   -81.31   -80.89
+  292                   54.970    9.861           0.17      0.03      0.03   -81.17   -80.75
+  293                   55.489    9.497           2.29      0.46      0.47   -79.77   -79.45
+  294                   55.513    9.866           0.47      0.09      0.10   -80.08   -79.65
+  295                   55.339   11.207           0.12      0.01      0.01   -93.74   -92.40
+  296                   56.126   12.309           0.45      0.00      0.00   -99.47   -99.51
+  297                   56.990   10.240           0.05      0.00      0.00   -95.62   -95.40
+  298                   56.093   12.461           0.26      0.08      0.08   -68.49   -68.34
+  299                   55.172   12.053           0.19      0.04      0.04   -81.18   -80.97
+  300                   54.960    8.666           4.50      0.28      0.29   -93.80   -93.58
+  301                   56.011   10.217           0.30      0.07      0.07   -78.29   -77.85
+  302                   55.147   12.011           0.19      0.04      0.04   -81.18   -80.97
+  303                   55.847   12.573           0.26      0.07      0.07   -72.71   -72.50
+  304                   55.019    9.927           0.21      0.03      0.03   -86.15   -85.61
+  305                   55.971   12.013           0.85      0.04      0.05   -94.76   -94.45
+  306                   55.122   12.049           0.19      0.01      0.01   -95.07   -94.36
+  307                   55.860   12.064           0.36      0.10      0.10   -71.87   -71.76
+  308                   55.042   10.471           0.28      0.03      0.03   -88.64   -87.98
+  309                   55.430    9.626           0.29      0.06      0.06   -80.52   -80.12
+  310                   54.694   11.887           0.55      0.01      0.01   -98.81   -98.63
+  311                   55.023   12.427           0.27      0.02      0.02   -93.89   -93.52
+  312                   55.476   10.441           0.90      0.21      0.21   -77.08   -76.70
+  313                   55.201   11.672           1.22      0.25      0.25   -79.58   -79.36
+  314                   55.710   12.113           0.20      0.05      0.05   -75.72   -75.60
+  315                   55.649   11.930           0.31      0.07      0.07   -77.41   -77.28
+  316                   55.673   11.813           0.19      0.04      0.04   -77.68   -77.46
+  317                   55.770   10.015           0.29      0.00      0.00   -99.02   -98.86
+  318                   55.705   11.840           0.29      0.07      0.07   -75.79   -75.59
+  319                   55.311    9.618           0.45      0.06      0.06   -86.24   -85.89
+  320                   54.831   11.491           0.41      0.26      0.17   -38.11   -59.35
+  321                   55.667   12.012           0.54      0.10      0.10   -81.09   -80.95
+  322                   57.520    9.873           1.39      0.20      0.15   -85.95   -89.35
+  323                   55.358    9.876           0.51      0.01      0.01   -99.02   -98.74
+  324                   54.943    9.868           0.12      0.02      0.02   -85.37   -84.93
+  325                   55.930   12.524           0.68      0.17      0.17   -75.56   -75.40
+  326                   55.439   10.425           0.90      0.21      0.21   -77.08   -76.70
+  327                   55.426   12.220           0.32      0.03      0.03   -91.35   -91.23
+  328                   55.154   14.705           0.80      0.04      0.04   -95.50   -95.17
+  329                   56.710   10.170           2.29      0.17      0.17   -92.51   -92.38
+  330                   55.247   11.289           0.09      0.01      0.01   -92.47   -90.94
+  331                   55.882   10.111           0.84      0.19      0.19   -77.43   -77.08
+  332                   55.525    9.577           0.25      0.05      0.05   -79.17   -78.85
+  333                   55.866    9.897           1.01      0.01      0.01   -99.04   -98.88
+  334                   55.194   14.989           0.58      0.05      0.05   -91.70   -91.86
+  335                   55.854    9.863           1.01      0.20      0.20   -80.44   -80.06
+  336                   55.297   10.749           0.86      0.20      0.21   -76.48   -76.11
+  337                   55.771   11.632           0.43      0.08      0.08   -81.54   -81.32
+  338                   55.088   10.753           0.32      0.06      0.06   -81.48   -81.02
+  339                   56.990   10.240           0.05      0.00      0.00   -95.62   -95.40
+  340                   55.426   12.220           0.32      0.03      0.03   -91.35   -91.23
+  341                   55.724   11.651           0.42      0.08      0.08   -80.27   -80.05
+  342                   55.268    9.889           0.06      0.00      0.00   -98.98   -98.72
+  343                   55.070   11.813           0.40      0.04      0.04   -90.65   -90.53
+  344                   55.361    9.600           0.44      0.06      0.07   -85.25   -84.92
+  345                   55.612   12.384           0.26      0.00      0.00   -99.19   -99.03
+  346                   55.330    8.673           4.52      0.29      0.29   -93.64   -93.48
+  347                   56.099   12.160           0.28      0.04      0.04   -85.49   -85.40
+  348                   56.778   10.288           1.19      0.04      0.04   -96.88   -96.68
+  349                   55.148   10.784           0.32      0.07      0.07   -79.19   -78.81
+  350                   55.583   10.282           0.25      0.06      0.06   -77.00   -76.67
+  351                   55.595   12.367           0.26      0.04      0.04   -83.81   -83.67
+  352                   55.640   12.502           0.71      0.17      0.17   -76.41   -76.18
+  353                   55.626    9.742           0.41      0.08      0.08   -81.39   -81.00
+  354                   55.517    9.952           0.47      0.09      0.10   -80.03   -79.64
+  355                   54.846   11.804           0.47      0.09      0.10   -80.12   -79.93
+  356                   55.454   12.188           0.57      0.05      0.05   -91.17   -91.05
+  357                   55.587   10.172           0.61      0.11      0.11   -82.50   -82.11
+  358                   55.468   10.441           0.90      0.21      0.21   -77.08   -76.70
+  359                   55.440   10.471           0.90      0.21      0.21   -77.08   -76.70
+  360                   55.171   10.800           0.32      0.07      0.07   -79.19   -78.81
+  361                   55.721   12.111           0.20      0.05      0.05   -75.72   -75.60
+  362                   54.828   11.140           0.41      0.01      0.01   -96.88   -96.89
+  363                   55.426   12.220           0.32      0.03      0.03   -91.35   -91.23
+  364                   55.039   12.140           0.30      0.01      0.01   -97.44   -97.14
+  365                   55.010    9.630           0.44      0.07      0.07   -84.88   -84.45
+  366                   55.066   10.373           0.92      0.13      0.14   -85.62   -85.09
+  367                   56.990   10.240           0.05      0.00      0.00   -95.62   -95.40
+  368                   55.218   11.440           0.10      0.02      0.02   -82.99   -82.67
+  369                   55.538   11.156           1.68      0.27      0.28   -83.88   -83.65
+  370                   54.708   11.251           0.70      0.02      0.02   -96.75   -96.71
+  371                   54.910   10.819           0.31      0.03      0.03   -89.49   -88.98
+  372                   55.930   12.524           0.68      0.17      0.17   -75.56   -75.40
+  373                   55.439   10.425           0.90      0.21      0.21   -77.08   -76.70
+  374                   56.710   10.170           1.26      0.07      0.07   -94.29   -94.14
+  375                   54.999   14.996           0.66      0.02      0.02   -96.29   -96.28
+  376                   57.110   10.400           1.14      0.05      0.05   -95.71   -95.36
+  377                   55.999    8.114           4.52      0.04      0.04   -99.16   -99.07
+  378                   56.103   12.380           0.26      0.08      0.08   -68.49   -68.34
+  379                   55.626    9.742           0.41      0.08      0.08   -81.39   -81.00
+  380                   54.802   11.637           0.41      0.07      0.07   -82.54   -82.36
+  381                   55.317    9.886           0.41      0.00      0.01   -99.06   -98.75
+  382                   55.163   12.025           0.19      0.04      0.04   -81.18   -80.97
+  383                   57.500   10.490           1.05      0.07      0.07   -93.73   -93.62
+  384                   54.931   11.120           0.15      0.01      0.01   -92.32   -92.02
+  385                   56.990   10.240           0.62      0.06      0.06   -90.11   -89.88
+  386                   55.206   11.395           0.19      0.03      0.03   -84.72   -84.41
+  387                   56.153   10.213           1.79      0.43      0.43   -76.04   -75.80
+  388                   56.990   10.240           0.05      0.00      0.00   -95.62   -95.40
+  389                   56.085   10.249           0.22      0.05      0.05   -77.96   -77.53
+  390                   55.781   12.089           0.30      0.09      0.09   -69.52   -69.41
+  391                   55.209   11.715           1.22      0.25      0.25   -79.58   -79.36
+  392                   55.828   12.063           0.30      0.09      0.09   -69.52   -69.41
+  393                   55.114    9.457           0.22      0.04      0.04   -81.22   -80.91
+  394                   55.659   11.783           0.19      0.04      0.04   -77.68   -77.46
+  395                   55.999    8.114          44.47      0.39      0.43   -99.13   -99.04
+  396                   55.580    8.315           5.26      0.04      0.05   -99.23   -99.08
+  397                   55.184   11.740           1.22      0.25      0.25   -79.58   -79.36
+  398                   55.055   11.829           0.40      0.04      0.04   -90.65   -90.53
+  399                   56.990   10.240          26.47      2.38      2.44   -91.00   -90.78
+  400                   55.118   10.775           0.32      0.06      0.06   -81.48   -81.02
+  401                   55.509   12.208           0.34      0.03      0.03   -90.30   -90.19
+  402                   55.380    8.644           4.52      1.74      1.62   -61.50   -64.21
+  403                   55.215    9.976           0.23      0.00      0.00   -98.95   -98.72
+  404                   55.317    9.886           0.41      0.00      0.01   -99.06   -98.75
+  405                   55.361    9.600           0.44      0.06      0.07   -85.25   -84.92
+  406                   57.590   10.130           1.76      0.26      0.27   -84.92   -84.83
+  407                   54.960    8.666           4.50      0.28      0.29   -93.80   -93.58
+  408                   56.207   10.285           1.01      0.26      0.26   -74.37   -74.15
+  409                   59.426   24.342           2.94      0.02      0.02   -99.43   -99.25
+  410                   58.770   23.760          25.54      2.15      2.28   -91.58   -91.07
+  411                   59.571   25.797           3.27      0.43      0.45   -86.78   -86.30
+  412                   59.428   27.535           1.90      0.01      0.01   -99.35   -99.26
+  413                   58.390   24.490          50.30     15.43     15.45   -69.33   -69.28
+  414                   59.478   25.149          11.96      1.58      1.72   -86.75   -85.63
+  415                   59.470   24.818           7.79      0.87      1.17   -88.86   -84.99
+  416                   59.520   26.532           5.50      0.86      0.91   -84.39   -83.49
+  417                   59.436   26.992           6.85      2.36      2.36   -65.59   -65.56
+  418                   59.440   24.350           6.77      0.04      0.05   -99.42   -99.25
+  419                   59.549   26.406           3.91      0.59      0.62   -84.89   -84.01
+  420                   59.580   28.090         426.37      5.97      4.30   -98.60   -98.99
+  421                   59.524   25.541           1.13      0.14      0.14   -88.02   -87.43
+  422                   59.271   23.884           4.55      0.56      1.08   -87.70   -76.23
+  423                   59.583   25.706           3.97      0.58      0.61   -85.29   -84.73
+  424                   54.110   15.140          19.12      5.98      6.07   -68.70   -68.24
+  425                   53.533   14.633          14.50      5.05      5.06   -65.16   -65.10
+  426                   53.920   14.280         536.25    145.22    146.25   -72.92   -72.73
+  427                   54.350   18.950        1080.16    260.80    255.75   -75.86   -76.32
+  428                   54.583   16.850          16.78      2.86      2.83   -82.93   -83.11
+  429                   54.667   17.050           8.60      0.07      0.06   -99.23   -99.26
+  430                   54.317    8.970          29.82      5.80      5.87   -80.55   -80.32
+  431                   54.085   12.151          14.40      4.88      4.91   -66.15   -65.93
+  432                   53.320    7.254          80.98     21.48     21.60   -73.47   -73.33
+  433                   54.671   10.036           2.62      0.70      0.70   -73.29   -73.08
+  434                   54.234   11.086           0.54      0.16      0.16   -69.84   -69.79
+  435                   54.328   10.185           6.24      1.76      1.79   -71.73   -71.27
+  436                   54.439   12.965           3.56      1.02      1.04   -71.35   -70.83
+  437                   53.840    9.365         725.48    196.82    196.94   -72.87   -72.85
+  438                   54.522    9.738           0.51      0.12      0.12   -76.39   -76.13
+  439                   53.902   10.771           8.57      2.30      2.32   -73.16   -72.93
+  440                   53.859   13.813          19.25      6.79      6.83   -64.71   -64.55
+  441                   54.336   10.649           0.94      0.13      0.13   -86.59   -86.35
+  442                   53.920   10.718           1.83      0.40      0.41   -78.11   -77.87
+  443                   53.840    9.365          46.94      9.23      9.24   -80.33   -80.32
+  444                   53.907   10.967           2.91      0.88      0.89   -69.68   -69.46
+  445                   53.530    8.572         326.71    103.99    103.61   -68.17   -68.29
+
+  (* = potentially regulated / snowmelt-dominated)
+
+  Q in m³ s⁻¹.  Δ% = (future − calibration) / calibration × 100.
+
+  Calibration period Q is the mean annual Q from the EMORID record.
+  Near = 2020–2040, Far = 2071–2099.
+</code></pre></details></div></main><footer class=footer><span>&copy; 2026 <a href=https://bolding-bruggeman.com/oceanicu_3d/>Ocean Model Validation</a></span> ·
+<span>Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg viewBox="0 0 12 6" fill="currentColor"><path d="M12 6H0l6-6z"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{const e=document.querySelector("html");e.dataset.theme==="dark"?(e.dataset.theme="light",localStorage.setItem("pref-theme","light")):(e.dataset.theme="dark",localStorage.setItem("pref-theme","dark"))})</script></body></html>
