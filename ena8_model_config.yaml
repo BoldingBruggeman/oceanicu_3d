@@ -46,7 +46,9 @@ boundaries:
       tpxo_folder: "/data/TPXO9"           # env: TPXO_FOLDER
     CMEMS:
       folder: "/data/CMEMS/barotropic"     # env: BOUNDARY_FOLDER_BAROTROPIC
-      filename: "hourly_2015-01-01_to_2025-01-01.nc"
+      filename_template: "hourly_{start_date}_to_{end_date}.nc"
+      start_date: "2015-01-01"
+      end_date:   "2025-01-01"
     CMIP6:
       folder: "/data/CMIP6/barotropic"
       model: "MPI-ESM1-2-HR"
@@ -58,7 +60,9 @@ boundaries:
       folder: "/data/WOA"    # env: BOUNDARY_FOLDER_BAROCLINIC
     CMEMS:
       folder: "/data/CMEMS/baroclinic"
-      filename: "daily_2015-01-01_to_2025-01-01.nc"
+      filename_template: "daily_{start_date}_to_{end_date}.nc"
+      start_date: "2015-01-01"
+      end_date:   "2025-01-01"
     CMIP6:
       folder: "/data/CMIP6/baroclinic"
       model: "MPI-ESM1-2-HR"
