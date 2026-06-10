@@ -477,14 +477,16 @@ def main():
     simstop = cftime.datetime.strptime(
         args.stop, "%Y-%m-%d %H:%M:%S", calendar=cfg.simulation.calendar
     )
-
-    sim = create_simulation(
-        domain,
-        cfg,
-        load_restart,
-        simstart.month - 1,
-    )
-
+    try:
+        sim = create_simulation(
+            domain,
+            cfg,
+            load_restart,
+            simstart.month - 1,
+        )
+    except Exception as e:
+        domain.logger.error(f"Error during simulation creation: {e}")
+        sys.exit(1)
     if args.plot_domain:
         f = domain.plot(show_mesh=True, show_subdomains=True, tiling=sim.tiling)
         if f is not None:
