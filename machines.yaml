@@ -36,6 +36,8 @@ scylla:
     ERA5_FOLDER:                /work/shared/oceanICU/ERA5/NA
     BATHYMETRY_FOLDER:          /work/shared/oceanICU/Bathymetry/
     RIVER_FOLDER:               /work/shared/oceanICU/EMORID
-    RIVER_FILE:                 EMORID_1990_2024_concentrations.nc
+    RIVER_FILE:                 EMORID_1993_2024_conc_nemo_TALK_DIC.nc
     FABM_FOLDER:                /work/shared/oceanICU/FABM
+    KD_FOLDER:                 /work/shared/oceanICU/Kd490
+    KD_FILE:                   KD490_clim.nc
 #    METEO_FOLDER:             /work/shared/oceanICU/BiasCorrected/MPI-ESM1-2-HR
