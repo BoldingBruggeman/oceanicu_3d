@@ -48,7 +48,7 @@ DEFAULT_CONFIG = {
     # "app": {"name": "Unnamed", "version": "0.0"},
     "bathymetry": {"path": None, "name": None},
     "tides": {"folder": None},
-    "meteo": {"source": None, "folder": None, "evaporation": False},
+    "meteo": {"source": None, "evaporation": False},
     # "thresholds": {"mean_flow_min": 0.0, "map_mean_min": 0.0},
     # "tasks": [],
 }
@@ -79,21 +79,64 @@ def print_cfg(cfg):
     print(f"  gamma_surf:     {cfg.vertical_coordinates.gamma_surf}")
     print(f"Internal pressure:")
     print(f"  Type:           {cfg.internal_pressure.type}")
-    print(f"Initial conditions:")
+    print(f"Hydrography:")
     print(f"  Source:         {cfg.hydrography.source}")
-    print(f"  Folder:         {cfg.hydrography.folder}")
-    print(f"  Temperature:    {cfg.hydrography.temp}")
-    print(f"  Salinity:       {cfg.hydrography.salt}")
-    print(f"Tidal boundaries: {cfg.tides.folder}")
+    print(f"  Constant:")
+    print(f"    Temperature:  {cfg.hydrography.constant.temp}")
+    print(f"    Salinity:     {cfg.hydrography.constant.salt}")
+    print(f"  WOA:")
+    print(f"    Folder:       {cfg.hydrography.WOA.folder}")
+    print(f"  CMEMS:")
+    print(f"    Folder:       {cfg.hydrography.CMEMS.folder}")
+    print(f"Boundaries:")
+    print(f"  Barotropic:")
+    print(f"     Source:      {cfg.boundaries.barotropic.source}")
+    print(f"     TPXO:")
+    print(f"       tpxo_folder:    {cfg.boundaries.barotropic.TPXO.tpxo_folder}")
+    print(f"     CMEMS:")
+    print(f"       folder:    {cfg.boundaries.barotropic.CMEMS.folder}")
+    print(f"       filename:  {cfg.boundaries.barotropic.CMEMS.filename}")
+    print(f"     CMIP6:")
+    print(f"       folder:    {cfg.boundaries.barotropic.CMIP6.folder}")
+    print(f"       model:     {cfg.boundaries.barotropic.CMIP6.model}")
+    print(f"       scenario:  {cfg.boundaries.barotropic.CMIP6.scenario}")
+    print(f"       filename:  {cfg.boundaries.barotropic.CMIP6.filename}")
+    print(f"  Baroclinic:")
+    print(f"     Source:      {cfg.boundaries.baroclinic.source}")
+    print(f"     WOA:")
+    print(f"       folder:    {cfg.boundaries.baroclinic.WOA.folder}")
+    print(f"     CMEMS:")
+    print(f"       folder:    {cfg.boundaries.baroclinic.CMEMS.folder}")
+    print(f"       filename:  {cfg.boundaries.baroclinic.CMEMS.filename}")
+    print(f"     CMIP6:")
+    print(f"       folder:    {cfg.boundaries.baroclinic.CMIP6.folder}")
+    print(f"       model:     {cfg.boundaries.baroclinic.CMIP6.model}")
+    print(f"       scenario:  {cfg.boundaries.baroclinic.CMIP6.scenario}")
+    print(f"       filename:  {cfg.boundaries.baroclinic.CMIP6.filename}")
+
+
+
+
     print(f"Meteo:")
     print(f"  Source:         {cfg.meteo.source}")
-    print(f"  Folder:         {cfg.meteo.folder}")
+    print(f"  ERA5:")
+    print(f"    Folder:       {cfg.meteo.ERA5.folder}")
+    print(f"  CMIP6:")
+    print(f"    Folder:       {cfg.meteo.CMIP6.folder}")
+    print(f"    Model:        {cfg.meteo.CMIP6.model}")
+    print(f"    Scenario:     {cfg.meteo.CMIP6.scenario}")
     print(f"  Evaporation:    {cfg.meteo.evaporation}")
-    print(f"Rivers")
+    print(f"Rivers:")
     print(f"  Source:         {cfg.rivers.source}")
-    print(f"  Folder:         {cfg.rivers.folder}")
-    print(f"  File:           {cfg.rivers.file}")
-    print(f"  Threshold:      {cfg.rivers.threshold}")
+    print(f"  Historic:")
+    print(f"    Source:       {cfg.rivers.historic.source}")
+    print(f"    Folder:       {cfg.rivers.historic.folder}")
+    print(f"    File:         {cfg.rivers.historic.file}")
+    print(f"    Threshold:    {cfg.rivers.historic.threshold}")
+    print(f"  CMIP6:")
+    print(f"    Folder:       {cfg.rivers.CMIP6.folder}")
+    print(f"    Model:        {cfg.rivers.CMIP6.model}")
+    print(f"    Scenario:     {cfg.rivers.CMIP6.scenario}")
     print(f"FABM:")
     print(f"  File:           {cfg.fabm.file}")
     print(f"  Folder:         {cfg.fabm.folder}")
@@ -104,6 +147,12 @@ def print_cfg(cfg):
     print(f"  runtype:        {cfg.simulation.runtype}")
     print(f"  Dcrit:          {cfg.simulation.Dcrit}")
     print(f"  Dmin:           {cfg.simulation.Dmin}")
+    print(f"  ObsKd:          {cfg.simulation.ObsKd}")
+    print(f"  kd_folder:      {cfg.simulation.kd_folder}")
+    print(f"  kd_file:        {cfg.simulation.kd_file}")
+    print(f"  future:")
+    print(f"    model:        {cfg.simulation.future.model}")
+    print(f"    scenario:     {cfg.simulation.future.scenario}")
     print(f"Runtime:")
     print(f"  timestep:       {cfg.runtime.timestep}")
     print(f"  split_factor:   {cfg.runtime.split_factor}")
@@ -127,6 +176,21 @@ def print_cfg(cfg):
     print(f"  dump_on_error:  {cfg.switches.dump_on_error}")
     print(f"  check_finite:   {cfg.switches.check_finite}")
     print(f"  profile:        {cfg.switches.profile}")
+
+
+    _source = cfg.boundaries.barotropic.source
+    if _source == "TPXO":
+      print(cfg.boundaries.barotropic.TPXO.tpxo_folder)
+    else:
+      _barotropic_cfg = getattr(cfg.boundaries.barotropic, _source)
+      print(_barotropic_cfg.folder)
+      print(_barotropic_cfg.filename)
+
+    _source = cfg.boundaries.baroclinic.source
+    _baroclinic = getattr(cfg.boundaries.baroclinic, _source)
+    print(_baroclinic.folder)
+    if hasattr(_baroclinic, 'filename'):
+        print(_baroclinic.filename)
 
 
 # ----------------------------------------------------------------------

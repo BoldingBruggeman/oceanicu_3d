@@ -237,37 +237,37 @@ def parse_args():
         "--tpxo_dir",
         type=Path,
         help="Path to TPXO configuration files - v9 and v10 supported",
-        default=Path(eval(f"{cfg.boundaries.barotropic.tpxo_folder}")),
+        default=Path(os.getenv("TPXO_FOLDER", cfg.boundaries.barotropic.TPXO.tpxo_folder)),
     )
     p.add_argument(
         "--woa_dir",
         type=Path,
         help="Path to World Ocean Atlas files",
-        default=Path(eval(f"{cfg.hydrography.folder}")),
+        default=Path(os.getenv("HYDROGRAPHY_FOLDER", cfg.hydrography.WOA.folder)),
     )
     p.add_argument(
         "--meteo_dir",
         type=Path,
         help="Folder with meteo files",
-        default=eval(f"{cfg.meteo.folder}"),
+        default=Path(os.getenv("METEO_FOLDER", getattr(cfg.meteo, cfg.meteo.source).folder)),
     )
     p.add_argument(
         "--river_source",
         type=str,
         help="The river data source",
-        default={cfg.rivers.source},
+        default=cfg.rivers.source,
     )
     p.add_argument(
         "--river_dir",
         type=Path,
         help="Folder with river data file",
-        default=Path(eval(f"{cfg.rivers.folder}")),
+        default=Path(os.getenv("RIVER_FOLDER", cfg.rivers.historic.folder)),
     )
     p.add_argument(
         "--river_file",
         type=Path,
         help="Name of river data file",
-        default=eval(f"{cfg.rivers.file}"),
+        default=Path(os.getenv("RIVER_FILE", cfg.rivers.historic.file)),
     )
     p.add_argument(
         "--river_threshold",
@@ -291,7 +291,7 @@ def parse_args():
         "--fabm_dir",
         type=Path,
         help="Path to FABM specific files",
-        default=Path(eval(f"{cfg.fabm.folder}")),
+        default=Path(os.getenv("FABM_FOLDER", cfg.fabm.folder)),
     )
     p.add_argument(
         "--runtype",
@@ -372,72 +372,79 @@ def parse_args():
     if args.bathymetry_file:
         cfg.domain.path = Path(args.bathymetry_file)
     else:
-        cfg.domain.path = eval(cfg.domain.path)
+        cfg.domain.path = Path(cfg.domain.path)
     if args.bathymetry_name:
         cfg.domain.name = args.bathymetry_name
 
     if cfg.domain.boundaries:
         if cfg.boundaries.barotropic.source == "TPXO":
-            if args.tpxo_dir:
-                cfg.boundaries.barotropic.tpxo_folder = Path(args.tpxo_dir)
-            else:
-                cfg.boundaries.barotropic.tpxo_folder = eval(cfg.boundaries.barotropic.tpxo_folder)
-        if cfg.boundaries.barotropic.source == "CMEMS":
-            cfg.boundaries.barotropic.folder = eval(cfg.boundaries.barotropic.folder)
+            cfg.boundaries.barotropic.TPXO.tpxo_folder = Path(
+                args.tpxo_dir or os.getenv("TPXO_FOLDER", cfg.boundaries.barotropic.TPXO.tpxo_folder)
+            )
+        elif cfg.boundaries.barotropic.source == "CMEMS":
+            cfg.boundaries.barotropic.CMEMS.folder = Path(
+                os.getenv("BOUNDARY_FOLDER_BAROTROPIC", cfg.boundaries.barotropic.CMEMS.folder)
+            )
+        elif cfg.boundaries.barotropic.source == "CMIP6":
+            cfg.boundaries.barotropic.CMIP6.folder = Path(
+                os.getenv("BOUNDARY_FOLDER_BAROTROPIC", cfg.boundaries.barotropic.CMIP6.folder)
+            )
 
-        if cfg.boundaries.baroclinic.source == "CMEMS":
-            cfg.boundaries.baroclinic.folder = eval(cfg.boundaries.baroclinic.folder)
+        if cfg.boundaries.baroclinic.source == "WOA":
+            cfg.boundaries.baroclinic.WOA.folder = Path(
+                os.getenv("BOUNDARY_FOLDER_BAROCLINIC", cfg.boundaries.baroclinic.WOA.folder)
+            )
+        elif cfg.boundaries.baroclinic.source == "CMEMS":
+            cfg.boundaries.baroclinic.CMEMS.folder = Path(
+                os.getenv("BOUNDARY_FOLDER_BAROCLINIC", cfg.boundaries.baroclinic.CMEMS.folder)
+            )
+        elif cfg.boundaries.baroclinic.source == "CMIP6":
+            cfg.boundaries.baroclinic.CMIP6.folder = Path(
+                os.getenv("BOUNDARY_FOLDER_BAROCLINIC", cfg.boundaries.baroclinic.CMIP6.folder)
+            )
 
     if cfg.hydrography.source is not None:
-        if args.woa_dir:
-            cfg.hydrography.folder = Path(args.woa_dir)
-        else:
-            cfg.hydrography.folder = eval(cfg.hydrography.folder)
+        cfg.hydrography.WOA.folder = Path(
+            args.woa_dir or os.getenv("HYDROGRAPHY_FOLDER", cfg.hydrography.WOA.folder)
+        )
 
     if cfg.meteo.source is not None:
-        if isinstance(cfg.meteo.source, str) and '(' in cfg.meteo.source:
-            cfg.meteo.source = eval(cfg.meteo.source)
+        cfg.meteo.source = os.getenv("METEO_SOURCE", cfg.meteo.source)
         if cfg.meteo.source == "CMIP6":
             cfg.simulation.calendar = "noleap"
-        if args.meteo_dir:
-            cfg.meteo.folder = Path(args.meteo_dir)
-        else:
-            cfg.meteo.folder = eval(cfg.meteo.folder)
+        _meteo_src = getattr(cfg.meteo, cfg.meteo.source)
+        _meteo_src.folder = Path(args.meteo_dir or os.getenv("METEO_FOLDER", _meteo_src.folder))
 
     if cfg.rivers.source is not None:
-        if args.river_dir:
-            cfg.rivers.folder = Path(args.river_dir)
-        else:
-            cfg.rivers.folder = eval(cfg.rivers.folder)
-        if args.river_file:
-            cfg.rivers.file = Path(args.river_file)
-        else:
-            cfg.rivers.file = eval(cfg.rivers.file)
+        _rsrc = getattr(cfg.rivers, cfg.rivers.source)
+        if cfg.rivers.source == "historic":
+            _rsrc.folder = Path(args.river_dir or os.getenv("RIVER_FOLDER", _rsrc.folder))
+            _rsrc.file = Path(args.river_file or os.getenv("RIVER_FILE", _rsrc.file))
         if args.river_threshold:
-            cfg.rivers.threhold = args.threshold
+            _rsrc.threshold = args.river_threshold
 
     if args.gotm_yaml_file:
         cfg.simulation.gotm = Path(args.gotm_yaml_file)
     else:
-        _ = eval(cfg.simulation.gotm)
+        _ = os.getenv("GOTM_YAML_FILE", cfg.simulation.gotm)
         cfg.simulation.gotm = None if not _ else Path(_)
 
     if args.fabm_yaml_file:
         cfg.fabm.file = Path(args.fabm_yaml_file)
     else:
-        _ = eval(cfg.fabm.file)
+        _ = os.getenv("FABM_YAML_FILE", cfg.fabm.file)
         cfg.fabm.file = None if not _ else Path(_)
 
     if args.fabm_dir:
         cfg.fabm.folder = Path(args.fabm_dir)
     else:
-        cfg.fabm.folder = Path(cfg.fabm.path)
+        cfg.fabm.folder = Path(os.getenv("FABM_FOLDER", cfg.fabm.folder))
+
+    cfg.simulation.kd_folder = Path(os.getenv("KD_FOLDER", cfg.simulation.kd_folder))
+    cfg.simulation.kd_file = Path(os.getenv("KD_FILE", cfg.simulation.kd_file))
 
     if cfg.runtime.output:
-        if args.output_dir:
-            cfg.output.folder = Path(args.output_dir)
-        else:
-            cfg.output.folder = eval(cfg.output.folder)
+        cfg.output.folder = Path(args.output_dir or os.getenv("OUTPUT_FOLDER", cfg.output.folder))
 
     if args.list_output:
         print("Full output list")

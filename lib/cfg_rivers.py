@@ -2,24 +2,30 @@
 
 To simplify the run script river specifications are done here.
 
-Rivers can come from different sources - presently EMORID.
-The EMORID dataset provides river discharge and nutrient loads. The original file has been processed to include concentrations  instead of loads in mmol/m3, 
-    and to include global meadian for each variable across all rivers for each time step. 
-    The original file is saved as EMORID_1990_2024.nc, and the processed file with concentrations is saved as EMORID_1990_2024_concentrations.nc
+Rivers can come from different sources:
+  - historic: present-day data from EMORID or JRC
+  - CMIP6: projected river data (future implementation)
+
+The EMORID dataset provides river discharge and nutrient loads. The original
+file has been processed to include concentrations instead of loads in mmol/m3,
+and to include global median for each variable across all rivers for each time
+step. The original file is saved as EMORID_1990_2024.nc, and the processed
+file with concentrations is saved as EMORID_1990_2024_concentrations.nc.
 
 The configuration falls in two steps:
-1) Set name and  position of rivers in the Domain object.
+1) Set name and position of rivers in the Domain object.
 2) Attach river data to the Simulation object.
 
 """
+
+from pathlib import Path
 
 import xarray as xr
 
 import pygetm
 
 """
-A dictionary to provide a common interface to different river 
-sources.
+A dictionary to provide a common interface to different river sources.
 """
 river_config = {
     # EMORID default naming (used in most of the original files)
@@ -38,15 +44,12 @@ river_config = {
         "O3_c": "DIC", # dissolved inorganic carbon load in mol/day?
     },
     # TODO: fix the names for the JRC rivers
-    # Example configuration “adolf” – uses slightly different names
     "jrc": {
-        "lat": "Latitude",  # e.g. column called “Latitude”
-        "lon": "Longitude",  # e.g. column called “Longitude”
-        "Q": "discharge",  # discharge variable named “discharge”
-        "Qmean": "QQQQan",  # discharge (flow) variable
+        "lat": "Latitude",
+        "lon": "Longitude",
+        "Q": "discharge",
+        "Qmean": "QQQQan",
     },
-    # Add more configurations as needed …
-    # "myconfig": {"lat": "...", "lon": "...", "discharge": "..."},
 }
 
 
@@ -57,7 +60,7 @@ MOLAR_MASS = {
     "Si": 28.0855,  # reported as Si    g/mol
     "TALK": 1.0, # reported as tmol/day? - assuming 1 mol of alkalinity corresponds to 1 mol of charge, so 1 g/mol
     "DIC": 1.0, # reported as tmol/day? - assuming 1 mol of DIC corresponds to 1 mol of carbon, so 1 g/mol
-}, 
+},
 "jrc": {"NO3": 14.0067,   # reported as N g/mol
     "NH4": 14.0067,   # reported as N g/mol
     "PO4": 30.9738,   # reported as P g/mol
@@ -117,21 +120,28 @@ def _get_river_cfg(config_name: str):
     )
 
 
+def _get_active_source(cfg):
+    """Return (rcfg, source_name) for the active river source."""
+    _rcfg = getattr(cfg.rivers, cfg.rivers.source)
+    if cfg.rivers.source == "historic":
+        return _rcfg, _rcfg.source   # e.g. "emorid"
+    return _rcfg, cfg.rivers.source  # e.g. "CMIP6"
+
+
 def create(domain: pygetm.domain.Domain, cfg):
     if cfg.domain.rivers:
-        index, name, lat_name, lon_name, Q_name, Qmean_name = _get_river_cfg(
-            cfg.rivers.source
-        )
+        _rcfg, _source_name = _get_active_source(cfg)
+        index, name, lat_name, lon_name, Q_name, Qmean_name = _get_river_cfg(_source_name)
 
         time_coder = xr.coders.CFDatetimeCoder(use_cftime=True)
         ds = xr.open_dataset(
-            cfg.rivers.folder / cfg.rivers.file,
+            Path(_rcfg.folder) / _rcfg.file,
             engine="netcdf4",
             decode_times=time_coder,
         )
 
         # Limit available rivers by threshold
-        valid_river = ds[Qmean_name] > cfg.rivers.threshold
+        valid_river = ds[Qmean_name] > _rcfg.threshold
 
         # Limit available rivers by domain area
         for n in ds[index].values:
@@ -140,14 +150,11 @@ def create(domain: pygetm.domain.Domain, cfg):
             )
         print(f"Number of valid rivers: {valid_river.sum().values} out of {len(valid_river)}")
         river_list = []
-        # for n in ds["HydroID"]:
-        # Loop over all valid rivers and add them
         for n in ds[index].values:
             if valid_river[n]:
                 river_list.append(
                     domain.rivers.add_by_location(
                         f"{ds[name].values[n]}",
-                        # river_name,
                         ds[lon_name].values[n],
                         ds[lat_name].values[n],
                         coordinate_type=pygetm.CoordinateType.LONLAT,
@@ -157,23 +164,20 @@ def create(domain: pygetm.domain.Domain, cfg):
 
 def data(sim, cfg):
     if cfg.domain.rivers and cfg.rivers.source:
-        sim.logger.info(f"Attaching river data from source {cfg.rivers.source}")
-        index, name, lat_name, lon_name, Q_name, Qmean_name = _get_river_cfg(
-            cfg.rivers.source
-        )
+        _rcfg, _source_name = _get_active_source(cfg)
+        sim.logger.info(f"Attaching river data from source {cfg.rivers.source} ({_source_name})")
+        index, name, lat_name, lon_name, Q_name, Qmean_name = _get_river_cfg(_source_name)
+
         time_coder = xr.coders.CFDatetimeCoder(use_cftime=True)
         ds = xr.open_dataset(
-            cfg.rivers.folder / cfg.rivers.file,
+            Path(_rcfg.folder) / _rcfg.file,
             engine="netcdf4",
             decode_times=time_coder,
         )
-        # TODO: - use non-hardcoded names for index and name
-        # Loop over included files and attached river data
-        _source = river_config[cfg.rivers.source]
+        _source = river_config[_source_name]
 
         for river in sim.rivers.values():
             sim.logger.info(f"Processing river {river.name}")
-            # for n in ds[_source[name]].values:
             for n in ds[_source["index"]].values:
                 if river.name == ds[_source["name"]][n].values:
                     sim.logger.info(f"Added Q river data to for river {river.name}")

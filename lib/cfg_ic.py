@@ -14,14 +14,14 @@ def create(sim, cfg, imonth):
     if cfg.simulation.runtype == pygetm.RunType.BAROCLINIC:
         sim.logger.info(f"Getting initial salinity from {cfg.hydrography.source}")
         if cfg.hydrography.source == "constant":
-            sim.temp.set(cfg.hydrography.temp)
-            sim.salt.set(cfg.hydrography.salt)
+            sim.temp.set(cfg.hydrography.constant.temp)
+            sim.salt.set(cfg.hydrography.constant.salt)
 
         if cfg.hydrography.source == "WOA":
             sim.logger.info("Getting initial temperature from WOA")
             sim.salt.set(
                 pygetm.input.from_nc(
-                    cfg.hydrography.folder / "woa_s.nc",
+                    cfg.hydrography.WOA.folder / "woa_s.nc",
                     "s_an",
                 ).isel(time=imonth),
                 on_grid=False,
@@ -29,7 +29,7 @@ def create(sim, cfg, imonth):
             # sim.salt[...] = np.flip(sim.salt[...], axis=0)
             sim.temp.set(
                 pygetm.input.from_nc(
-                    cfg.hydrography.folder / "woa_t.nc",
+                    cfg.hydrography.WOA.folder / "woa_t.nc",
                     "t_an",
                 ).isel(time=imonth),
                 on_grid=False,

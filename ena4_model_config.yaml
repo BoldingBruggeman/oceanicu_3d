@@ -1,34 +1,15 @@
 # YAML formatted configuration file for the ena4-setup:
 #
-# The YAML-file is read by the runscript into a dictionary.
-# This dictionary is used for all configuration within the
-# runscript.
-# Adding additional configuration options is easy: just add
-# to this file and inquire the information in the runscript.
-# Also update the print_cfg() routine to view the full
-# configuration.
-#
-# The precedens of the configurations are as follows:
-#   1: the simple values from the YAML file
-#   2: possible overwritten by an environment variable
-#      also specified in the YAML file
-#   3: commandline options during the execution of the
-#      runscript
-#
-# This provides a very flexible - yet transparent - configuration
-# flow.
-# As an option the final configuration can be printed to the
-# terminal when all values are evaluated.
-#
-# Using command line arguments various components can be switched
-# off - e.g. --no_meteo will set airsea.source = None. This will
-# be reflected when the configuration is printed.
+# All values are plain data — no Python expressions.
+# The precedence of configuration is:
+#   1: plain default values from this file
+#   2: environment variable (noted in comments as "env: VAR")
+#   3: command-line argument passed to the run script
 #
 
 setup: "ena4"
-#setup_dir = Path.cwd()
 domain:
-  path: Path("Bathymetry") / "bathymetry_ena4.nc"
+  path: "Bathymetry/bathymetry_ena4.nc"
   name: "H"
   boundaries: True
   rivers: True
@@ -37,9 +18,6 @@ momentum:
   An: 100
   Am: 0
   cnpar: 1
-  #advection: 1 # 1-6
-  #advection_split: 1 # 1-3
-  #coriolis: 1 #
   avmol: 1.8e-6
 vertical_coordinates:
   # 1 -> SIGMA, 2 -> GVC, 3-> AVC
@@ -53,45 +31,86 @@ internal_pressure:
   # 1-> BlumbergMeller, 2 -> ShchepetkinMcwilliams
   type: 2
 hydrography:
-  # "constant", "WOA"
-  source: "WOA" # "constant", "WOA", "CMEMS - to come"
-  folder: Path(os.getenv("HYDROGRAPHY_FOLDER", "/data/WOA"))
-  temp: 15
-  salt: 34
-tides:
-  folder: Path(os.getenv("TPXO_FOLDER", "/data/TPXO9"))
+  source: "WOA"              # constant | WOA | CMEMS
+  constant:
+    temp: 15
+    salt: 34
+  WOA:
+    folder: "/data/WOA"      # env: HYDROGRAPHY_FOLDER
+  CMEMS:
+    folder: "/data/CMEMS/hydrography"
+boundaries:
+  barotropic:
+    source: "TPXO"           # TPXO | CMEMS | CMIP6
+    TPXO:
+      tpxo_folder: "/data/TPXO9"           # env: TPXO_FOLDER
+    CMEMS:
+      folder: "/data/CMEMS/barotropic"     # env: BOUNDARY_FOLDER_BAROTROPIC
+      filename: "hourly_2015-01-01_to_2025-01-01.nc"
+    CMIP6:
+      folder: "/data/CMIP6/barotropic"
+      model: "MPI-ESM1-2-HR"
+      scenario: "ssp585"
+      filename: "2015-01-01_to_2025-01-01.nc"
+  baroclinic:
+    source: "WOA"            # WOA | CMEMS | CMIP6
+    WOA:
+      folder: "/data/WOA"    # env: BOUNDARY_FOLDER_BAROCLINIC
+    CMEMS:
+      folder: "/data/CMEMS/baroclinic"
+      filename: "daily_2015-01-01_to_2025-01-01.nc"
+    CMIP6:
+      folder: "/data/CMIP6/baroclinic"
+      model: "MPI-ESM1-2-HR"
+      scenario: "ssp585"
+      filename: "2015-01-01_to_2025-01-01.nc"
 meteo:
-  source: os.getenv("METEO_SOURCE", "ERA5") # "ERA5" | "CMIP6"
-  folder: Path(os.getenv("METEO_FOLDER", "/data/ERA5/NA"))
+  source: "ERA5"             # ERA5 | CMIP6; env: METEO_SOURCE
+  ERA5:
+    folder: "/data/ERA5/NA"  # env: METEO_FOLDER
+  CMIP6:
+    folder: "/data/CMIP6/meteo"
+    model: "MPI-ESM1-2-HR"
+    scenario: "ssp585"
   evaporation: True
   # ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
   shortwave_method: -1
   longwave_method: -2
 rivers:
-  source: "emorid"
-  folder: Path(os.getenv("RIVER_FOLDER", "/data/EMORID"))
-  file: Path(os.getenv("RIVER_FILE", "EMORID_1990_2024.nc"))
-  threshold: 0
+  source: "historic"         # historic | CMIP6
+  historic:
+    source: "emorid"         # emorid | jrc
+    folder: "/data/EMORID"   # env: RIVER_FOLDER
+    file: "EMORID_1990_2024.nc"  # env: RIVER_FILE
+    threshold: 0
+  CMIP6:
+    folder: "/data/CMIP6/rivers"
+    model: "MPI-ESM1-2-HR"
+    scenario: "ssp585"
+    start_date: "2015-01-01"
+    end_date: "2100-12-31"
+    filename_template: "{model}_{scenario}_{start_date}_to_{end_date}.nc"
+    threshold: 0
 fabm:
-  file: os.getenv("FABM_YAML_FILE", None)
-  folder: Path(os.getenv("FABM_FOLDER", "/data/FABM"))
+  file: null                 # env: FABM_YAML_FILE
+  folder: "/data/FABM"       # env: FABM_FOLDER
   config: "ersem"
 simulation:
-  gotm: os.getenv("GOTM_YAML_FILE", None)
+  gotm: null                 # env: GOTM_YAML_FILE
   calendar: "standard"
   runtype: 4 # 1 -> 2D, 2 -> 3D barotropic, 4 -> 3D baroclinic
   Dcrit: 0.5
   Dmin: 0.1
   ObsKd: True
-  kd_folder: Path(os.getenv("KD_FOLDER", "/data/Kd490"))
-  kd_file: Path(os.getenv("KD_FILE", "KD490_clim.nc"))
+  kd_folder: "/data/Kd490"   # env: KD_FOLDER
+  kd_file: "KD490_clim.nc"   # env: KD_FILE
 runtime:
   timestep: 40
   split_factor: 30
   output: True
   debug_output: False
 output:
-  folder: Path(os.getenv("OUTPUT_FOLDER", "."))
+  folder: "."                # env: OUTPUT_FOLDER
   meteo: True
   tides: False
   barotropic:
