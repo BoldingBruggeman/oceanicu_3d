@@ -64,7 +64,7 @@ boundaries:
       folder: "/data/WOA"    # env: BOUNDARY_FOLDER_BAROCLINIC
     CMEMS:
       folder: "/data/CMEMS"
-      folder_template: "{setup}/boundary_data/daily"
+      folder_template: "{setup}/boundary_data"
       filename_template: "daily_{start_date}_to_{end_date}.nc"
       start_date: "2015-01-01"
       end_date:   "2025-01-01"
