@@ -41,33 +41,41 @@ hydrography:
     folder: "/data/CMEMS/hydrography"
 boundaries:
   barotropic:
-    source: "TPXO"           # TPXO | CMEMS | CMIP6
+    source: "CMEMS"           # TPXO | CMEMS | CMIP6
     TPXO:
       tpxo_folder: "/data/TPXO9"           # env: TPXO_FOLDER
     CMEMS:
-      folder: "/data/CMEMS/barotropic"     # env: BOUNDARY_FOLDER_BAROTROPIC
+      folder: "/data/CMEMS"                # env: BOUNDARY_FOLDER_BAROTROPIC
+      folder_template: "{setup}/CMEMS"
       filename_template: "hourly_{start_date}_to_{end_date}.nc"
       start_date: "2015-01-01"
       end_date:   "2025-01-01"
     CMIP6:
-      folder: "/data/CMIP6/barotropic"
+      folder: "/data/CMIP6"                # env: BOUNDARY_FOLDER_BAROTROPIC
+      folder_template: "{setup}/CMIP6/{model}/{scenario}"
+      filename_template: "{start_date}_to_{end_date}.nc"
       model: "MPI-ESM1-2-HR"
       scenario: "ssp585"
-      filename: "2015-01-01_to_2025-01-01.nc"
+      start_date: "2015-01-01"
+      end_date:   "2025-01-01"
   baroclinic:
-    source: "WOA"            # WOA | CMEMS | CMIP6
+    source: "CMEMS"            # WOA | CMEMS | CMIP6
     WOA:
       folder: "/data/WOA"    # env: BOUNDARY_FOLDER_BAROCLINIC
     CMEMS:
-      folder: "/data/CMEMS/baroclinic"
+      folder: "/data/CMEMS"
+      folder_template: "{setup}/boundary_data/daily"
       filename_template: "daily_{start_date}_to_{end_date}.nc"
       start_date: "2015-01-01"
       end_date:   "2025-01-01"
     CMIP6:
-      folder: "/data/CMIP6/baroclinic"
+      folder: "/data/CMIP6"
+      folder_template: "{setup}/CMIP6/{model}/{scenario}"
+      filename_template: "{start_date}_to_{end_date}.nc"
       model: "MPI-ESM1-2-HR"
       scenario: "ssp585"
-      filename: "2015-01-01_to_2025-01-01.nc"
+      start_date: "2015-01-01"
+      end_date:   "2025-01-01"
 meteo:
   source: "ERA5"             # ERA5 | CMIP6; env: METEO_SOURCE
   ERA5:

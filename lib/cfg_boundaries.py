@@ -22,10 +22,15 @@ bdy_type = pygetm.constants.CLAMPED
 bdy_type = pygetm.constants.FLATHER_TRANSPORT
 
 
-def _resolve_filename(src_cfg) -> str:
-    if hasattr(src_cfg, 'filename_template'):
-        return src_cfg.filename_template.format_map(vars(src_cfg))
-    return src_cfg.filename
+def _resolve_path(src_cfg, setup: str) -> Path:
+    context = vars(src_cfg).copy()
+    context['setup'] = setup
+    folder = Path(src_cfg.folder)
+    if hasattr(src_cfg, 'folder_template'):
+        folder = folder / src_cfg.folder_template.format_map(context)
+    filename = (src_cfg.filename_template.format_map(context)
+                if hasattr(src_cfg, 'filename_template') else src_cfg.filename)
+    return folder / filename
 
 
 def create(domain, cfg):
@@ -194,33 +199,21 @@ def data_2d(sim, cfg):
                 on_grid=True,
             )
 
-        #if cfg.boundaries.barotropic.source == "CMEMS":
         else:
-
-            sim.logger.info(f"Getting 2D boundary data from {cfg.boundaries.barotropic.source}")
-            #_ = cfg.setup.upper()
-            #fn = cfg.boundaries.barotropic.folder / \
-            #     f"{_}/boundary_data/hourly" / \
-            #     cfg.boundaries.barotropic.filename 
-            #bdy_lon = sim.open_boundaries.lon
-            #bdy_lat = sim.open_boundaries.lat
-
+            sim.logger.info(f"Getting 2D boundary data from {_source}")
             _cfg = getattr(cfg.boundaries.barotropic, _source)
-            if _source == "CMEMS":
-                fn = Path(_cfg.folder) / _resolve_filename(_cfg)
-            if _source == "CMIP6":
-                fn = Path(_cfg.folder) / _cfg.model / _cfg.scenario / _resolve_filename(_cfg)
+            fn = _resolve_path(_cfg, cfg.setup.upper())
 
             sim.open_boundaries.z.set(
-                pygetm.input.from_nc(fn, "zos"),
+                pygetm.input.from_nc(str(fn), "zos"),
                 on_grid=True,
             )
             sim.open_boundaries.u.set(
-                pygetm.input.from_nc(fn, "uo"),
+                pygetm.input.from_nc(str(fn), "uo"),
                 on_grid=True,
             )
             sim.open_boundaries.v.set(
-                pygetm.input.from_nc(fn, "vo"),
+                pygetm.input.from_nc(str(fn), "vo"),
                 on_grid=True,
             )
 
@@ -230,7 +223,8 @@ def data_3d(sim, cfg):
     if cfg.domain.boundaries:
         if cfg.boundaries.baroclinic.source == "WOA":
             sim.logger.info("setting up 3D WOA boundary conditions")
-            _woa_folder = cfg.boundaries.baroclinic.WOA.folder
+            #_woa_folder = cfg.boundaries.baroclinic.WOA.folder
+            _woa_folder = cfg.hydrography.WOA.folder
             sim["temp"].open_boundaries.type = pygetm.SPONGE
             sim["temp"].open_boundaries.values.set(
                 pygetm.input.from_nc(_woa_folder / "woa_t.nc", "t_an"),
@@ -246,9 +240,8 @@ def data_3d(sim, cfg):
 
         if cfg.boundaries.baroclinic.source == "CMEMS":
             sim.logger.info("setting up 3D CMEMS boundary conditions")
-            _ = cfg.setup.upper()
             _cfg = cfg.boundaries.baroclinic.CMEMS
-            fn = Path(_cfg.folder) / f"{_}/boundary_data/daily" / _resolve_filename(_cfg)
+            fn = _resolve_path(_cfg, cfg.setup.upper())
             sim["temp"].open_boundaries.type = pygetm.SPONGE
             sim["temp"].open_boundaries.values.set(
                 pygetm.input.from_nc(fn, "thetao"),
