@@ -88,20 +88,20 @@ def data(sim, cfg):
                 )
 
         if cfg.meteo.source == "CMIP6":
-            sim.airsea.u10.set(pygetm.input.from_nc(str(_folder / "uas.nc"), "uas"))
-            sim.airsea.v10.set(pygetm.input.from_nc(str(_folder / "vas.nc"), "vas"))
-            sim.airsea.t2m.set(pygetm.input.from_nc(str(_folder / "tas.nc"), "tas") - 273.15)
-            sim.airsea.qa.set(pygetm.input.from_nc(str(_folder / "huss.nc"), "huss"))
-            sim.airsea.sp.set(pygetm.input.from_nc(str(_folder / "ps.nc"), "ps"))
-            sim.airsea.tp.set(pygetm.input.from_nc(str(_folder / "pr.nc"), "pr") / 1000.0)
+            sim.airsea.u10.set(pygetm.input.from_nc(str(_folder / "uas_????.nc"), "uas"))
+            sim.airsea.v10.set(pygetm.input.from_nc(str(_folder / "vas_????.nc"), "vas"))
+            sim.airsea.t2m.set(pygetm.input.from_nc(str(_folder / "tas_????.nc"), "tas") - 273.15)
+            sim.airsea.qa.set(pygetm.input.from_nc(str(_folder / "huss_????.nc"), "huss"))
+            sim.airsea.sp.set(pygetm.input.from_nc(str(_folder / "ps_????.nc"), "ps"))
+            sim.airsea.tp.set(pygetm.input.from_nc(str(_folder / "pr_????.nc"), "pr") / 1000.0)
 
             sim.airsea.swr.set(
-                pygetm.input.from_nc(str(_folder / "rsds.nc"), "rsds")
-                - pygetm.input.from_nc(str(_folder / "rsus.nc"), "rsus")
+                pygetm.input.from_nc(str(_folder / "rsds_????.nc"), "rsds")
+                - pygetm.input.from_nc(str(_folder / "rsus_????.nc"), "rsus")
             )
             sim.airsea.ql.set(
-                pygetm.input.from_nc(str(_folder / "rlds.nc"), "rlds")
-                - pygetm.input.from_nc(str(_folder / "rlus.nc"), "rlus")
+                pygetm.input.from_nc(str(_folder / "rlds_????.nc"), "rlds")
+                - pygetm.input.from_nc(str(_folder / "rlus_????.nc"), "rlus")
             )
             # required even if not used
             sim.airsea.tcc.set(0.5)
