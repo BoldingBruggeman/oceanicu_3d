@@ -17,20 +17,15 @@ from pathlib import Path
 import cftime
 import pygetm
 
+from .cfg_utils import resolve_path as _resolve_path_base
+
 bdy_type = pygetm.constants.FLATHER_ELEV
 bdy_type = pygetm.constants.CLAMPED
 bdy_type = pygetm.constants.FLATHER_TRANSPORT
 
 
 def _resolve_path(src_cfg, setup: str) -> Path:
-    context = vars(src_cfg).copy()
-    context['setup'] = setup
-    folder = Path(src_cfg.folder)
-    if hasattr(src_cfg, 'folder_template'):
-        folder = folder / src_cfg.folder_template.format_map(context)
-    filename = (src_cfg.filename_template.format_map(context)
-                if hasattr(src_cfg, 'filename_template') else src_cfg.filename)
-    return folder / filename
+    return _resolve_path_base(src_cfg, setup=setup)
 
 
 def create(domain, cfg):
@@ -205,15 +200,15 @@ def data_2d(sim, cfg):
             fn = _resolve_path(_cfg, cfg.setup.upper())
 
             sim.open_boundaries.z.set(
-                pygetm.input.from_nc(str(fn), "zos"),
+                pygetm.input.from_nc(fn, "zos"),
                 on_grid=True,
             )
             sim.open_boundaries.u.set(
-                pygetm.input.from_nc(str(fn), "uo"),
+                pygetm.input.from_nc(fn, "uo"),
                 on_grid=True,
             )
             sim.open_boundaries.v.set(
-                pygetm.input.from_nc(str(fn), "vo"),
+                pygetm.input.from_nc(fn, "vo"),
                 on_grid=True,
             )
 

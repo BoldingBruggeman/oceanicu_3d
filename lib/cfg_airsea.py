@@ -20,6 +20,8 @@ from pathlib import Path
 
 import pygetm
 
+from .cfg_utils import resolve_folder
+
 
 def create(cfg) -> pygetm.airsea:
     # If a meteo source is not set use the simple Fluxes method
@@ -61,10 +63,7 @@ def data(sim, cfg):
 
     if isinstance(sim.airsea, pygetm.airsea.FluxesFromMeteo):
         _meteo_cfg = getattr(cfg.meteo, cfg.meteo.source)
-        if cfg.meteo.source == "CMIP6":
-            _folder = Path(_meteo_cfg.folder) / _meteo_cfg.model / _meteo_cfg.scenario
-        else:
-            _folder = Path(_meteo_cfg.folder)
+        _folder = resolve_folder(_meteo_cfg)
 
         if cfg.meteo.source == "ERA5":
             sim.airsea.u10.set(pygetm.input.from_nc(str(_folder / "era5_u10_????.nc"), "u10"))
