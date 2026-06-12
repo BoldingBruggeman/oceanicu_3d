@@ -59,12 +59,12 @@ boundaries:
       start_date: "2015-01-01"
       end_date:   "2025-01-01"
   baroclinic:
-    source: "WOA"            # WOA | CMEMS | CMIP6
+    source: "CMEMS"            # WOA | CMEMS | CMIP6
     WOA:
       folder: "/data/WOA"    # env: BOUNDARY_FOLDER_BAROCLINIC
     CMEMS:
       folder: "/data/CMEMS"
-      folder_template: "{setup}/boundary_data"
+      folder_template: "{setup}/CMEMS"
       filename_template: "daily_{start_date}_to_{end_date}.nc"
       start_date: "2015-01-01"
       end_date:   "2025-01-01"
@@ -79,9 +79,9 @@ boundaries:
 meteo:
   source: "CMIP6"             # ERA5 | CMIP6; env: METEO_SOURCE
   ERA5:
-    folder: "/data/ERA5/NA"  # env: METEO_FOLDER
+    folder: "/data/ERA5/NA"  # env: ERA5_FOLDER
   CMIP6:
-    folder: "/data/CMIP6"
+    folder: "/data/CMIP6"                # env: CMIP6_FOLDER
     folder_template: "{model}/{scenario}/meteo"
     model: "MPI-ESM1-2-HR"
     scenario: "ssp585"

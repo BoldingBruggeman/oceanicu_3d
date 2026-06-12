@@ -77,11 +77,11 @@ boundaries:
       start_date: "2015-01-01"
       end_date:   "2025-01-01"
 meteo:
-  source: "ERA5"             # ERA5 | CMIP6; env: METEO_SOURCE
+  source: "CMIP6"             # ERA5 | CMIP6; env: METEO_SOURCE
   ERA5:
-    folder: "/data/ERA5/NA"  # env: METEO_FOLDER
+    folder: "/data/ERA5/NA"  # env: ERA5_FOLDER
   CMIP6:
-    folder: "/data/CMIP6"
+    folder: "/data/CMIP6"                # env: CMIP6_FOLDER
     folder_template: "{model}/{scenario}/meteo"
     model: "MPI-ESM1-2-HR"
     scenario: "ssp585"
