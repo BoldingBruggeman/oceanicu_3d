@@ -1,0 +1,110 @@
+# =============================================================================
+# NSe – delta-change boundary conditions for future climate projections
+#
+# Method: AMM7/AMM15 historical cycling + CMIP6 monthly change signal
+#
+#   corrected(t) = AMM7/AMM15_ref(t_analog)
+#                + [CMIP6_future_clim(month) − CMIP6_hist_clim(month)]
+#
+# where t_analog cycles through the reference period (same DOY/hour,
+# year mapped modulo the reference period length).
+#
+# Usage
+# -----
+#   run-delta-boundaries --config config/nse_delta_bdy.yaml
+#   run-delta-boundaries --config config/nse_delta_bdy.yaml --variable thetao so
+#   run-delta-boundaries --config config/nse_delta_bdy.yaml --dryrun
+#   run-delta-boundaries --config config/nse_delta_bdy.yaml \
+#       --scenario ssp126 ssp245 ssp370 ssp585
+#   run-delta-boundaries --config config/nse_delta_bdy.yaml \
+#       --future-start 2070-01-01 --future-end 2099-12-31
+# =============================================================================
+
+source_type: cmip6_delta_change
+
+# ---------------------------------------------------------------------------
+# High-resolution historical reference (AMM7 / AMM15 boundary output)
+# One directory entry per variable name; 'default' is the fallback.
+# ---------------------------------------------------------------------------
+reference:
+  directories:
+    thetao:   ./boundary_data/nse/daily      # daily 3-D files (thetao variable)
+    so:       ./boundary_data/nse/daily      # daily 3-D files (so variable)
+    zos:      ./boundary_data/nse/hourly     # hourly 2-D files (zos variable)
+    uo:       ./boundary_data/nse/hourly     # hourly 2-D barotropic transport
+    vo:       ./boundary_data/nse/hourly     # hourly 2-D barotropic transport
+  period:
+    start: "1993-01-01"   # start of the historical reference to cycle
+    end:   "2022-12-31"   # end   of the historical reference to cycle
+
+# ---------------------------------------------------------------------------
+# CMIP6 change signal source
+# ---------------------------------------------------------------------------
+cmip6:
+  source_id: GFDL-ESM4
+  experiment_id: ssp126          # default scenario; override with --scenario
+  access: local                  # 'local' | 'esgf' | 'pangeo'
+  local_root: /data/CMIP6
+  table_id: Omon                 # monthly mean; override per variable below
+  variant_label: r1i1p1f1
+  grid_label: gn
+  download_if_missing: true
+  esgf_cache_dir: /data/cache/cmip6
+
+  # Period used to compute the historical climatology (CMIP6 historical run)
+  hist_period:
+    start: "1985-01-01"
+    end:   "2014-12-31"
+
+  # Period used to compute the future climatology (default; override per run)
+  # A 20–30 year window centred on the epoch of interest is recommended.
+  future_period:
+    start: "2070-01-01"
+    end:   "2099-12-31"
+
+# ---------------------------------------------------------------------------
+# Variables to process
+# ---------------------------------------------------------------------------
+variables:
+  - name: thetao
+    cmip6_var: thetao
+    table_id: Omon         # 3-D monthly temperature
+    frequency: daily
+
+  - name: so
+    cmip6_var: so
+    table_id: Omon         # 3-D monthly salinity
+    frequency: daily
+
+  # zos, uo, vo are handled by run-tidal-boundaries (TPXO9 + CMIP6 mean)
+  # - name: zos
+  #   cmip6_var: zos
+  #   table_id: Omon         # 2-D monthly sea surface height
+  #   frequency: hourly
+  #
+  # - name: uo
+  #   cmip6_var: uo
+  #   table_id: Omon         # 3-D monthly eastward velocity → depth-integrated
+  #   depth_integrate: true
+  #   frequency: hourly
+  #
+  # - name: vo
+  #   cmip6_var: vo
+  #   table_id: Omon         # 3-D monthly northward velocity → depth-integrated
+  #   depth_integrate: true
+  #   frequency: hourly
+
+# ---------------------------------------------------------------------------
+# Output time range (the projected period to produce)
+# ---------------------------------------------------------------------------
+time_range:
+  start_date: "2015-01-01"
+  end_date:   "2100-12-31"
+  calendar: standard
+
+# ---------------------------------------------------------------------------
+# Output
+# ---------------------------------------------------------------------------
+output:
+  base_directory: ./boundary_data/nse/delta_change
+  filename_template: "delta_{source_id}_{experiment_id}_{variable}_{start}_{end}.nc"
