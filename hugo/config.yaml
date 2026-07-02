@@ -2,8 +2,8 @@ baseURL: 'https://bolding-bruggeman.com/oceanicu_3d/'
 languageCode: 'en-us'
 title: 'Ocean Model Validation'
 theme: 'PaperMod'
-contentDir: '/data/kb/OceanICU/oceanicu_3d/hugo/content'
-publishDir: '/data/kb/OceanICU/oceanicu_3d/hugo/public'
+contentDir: '/data/kb/OceanICU/oceanicu_3d/content'
+publishDir: '/data/kb/OceanICU/oceanicu_3d/public'
 pagination:
   pagerSize: 50
 
