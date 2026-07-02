@@ -13,8 +13,18 @@ conditions — are produced by two specialised repositories:
 | `bathymetry` | Grid creation and GEBCO interpolation |
 | `ocean-prep` | Boundary conditions and initial conditions |
 
-Each area's configuration files are shown on the area page under
-**How Input Files Were Generated**.
+Each area's configuration files and CLI commands are shown on the area page
+under **How Input Files Were Generated**.
+
+## Modelling Areas
+
+| Area | Full name | Resolution | Domain |
+|---|---|---|---|
+| [AMM7](../areas/amm7/) | Atlantic Margin Model 7 km | ~1/12° (~7 km) | NW European shelf, 40–65°N, 20°W–13°E |
+| [ENA4](../areas/ena4/) | Extended North Atlantic 1/4° | ~1/4° (~25 km) | NE Atlantic margin, 40–70°N, 20°W–14°E |
+| [ENA8](../areas/ena8/) | Extended North Atlantic 1/8° | ~1/8° (~12 km) | NE Atlantic margin, 40–70°N, 20°W–14°E |
+| [NS](../areas/ns/) | North Sea | ~1/20° (~5 km) | North Sea shelf, 49–61°N, 5°W–13°E |
+| [NSe](../areas/nse/) | North Sea Extension | ~1/12° (~7 km) | North Sea + Kattegat, 48–62°N, 8°W–13°E |
 
 ---
 
