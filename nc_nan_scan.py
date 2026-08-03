@@ -39,11 +39,14 @@ a comma-separated list — some models use more than one code, and the codes
 aren't necessarily consistent between grids. Confirmed on a real NSe
 pygetm debug dump (getm-dump.nc, written on a NaN crash): maskt uses 2 for
 open-boundary T-points (count matched the file's bdyt dimension exactly —
-311 both), but masku/maskv use 3 and 4 instead of 2, and NOT split cleanly
-by grid (both codes appear on both masku and maskv, in different
-proportions) — likely per-boundary-segment/condition-type codes rather
-than a per-grid code. Always check the printed "values=" list per mask;
-don't assume 2 holds outside the T-grid.
+311 both), but masku/maskv use 3 and 4 instead of 2. These don't split by
+grid (both codes appear on both masku and maskv) because they encode
+boundary *orientation* (west/east- vs north/south-running boundary), not
+which C-grid the mask belongs to — some terms (e.g. the Coriolis force)
+are computed differently depending on which component is boundary-normal,
+so u/v-momentum code needs to know a boundary point's orientation, not
+just that it's a boundary. Always check the printed "values=" list per
+mask; don't assume 2 holds outside the T-grid.
 
 Usage:
     python nc_nan_scan.py getm-dump.nc
