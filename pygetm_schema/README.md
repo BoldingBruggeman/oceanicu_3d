@@ -14,12 +14,20 @@ for the general design these files are an instance of.
   at the real bathymetry file, and (see next bullet) schema-validated
   `hydrography:`/`boundaries:`/`meteo:`/`river_discharge:` sections with
   EVERY real data-source alternative present — not just the one this setup
-  actually uses — using `pygetm_schema`'s `ChoiceSpec.nested_by_label`:
-  switching e.g. `meteo.source: ERA5` to `CMIP6` for a different run-folder
-  needs no other edit, matching how `nse_model_config.yaml`'s own
-  `hydrography`/`boundaries`/`meteo`/`rivers` blocks already worked (this is
-  a close, now-validated port of those, values taken directly from that
-  file).
+  actually uses. This is `pygetm_schema`'s nested-by-label convention (now
+  the ONLY way every `ChoiceSpec` works, not an opt-in flag — see
+  pygetm-schema's `docs/overview.md`): switching e.g. `meteo.source: ERA5` to
+  `CMIP6` for a different run-folder, or `simulation.vertical_coordinates.
+  type: GVC` to `Adaptive`, needs no other edit — every alternative's fields
+  are already present, nested under its own `<label>:` sub-key, with real
+  pygetm defaults for whichever alternative isn't currently active. Matches
+  how `nse_model_config.yaml`'s own `hydrography`/`boundaries`/`meteo`/
+  `rivers` blocks already worked (this is a close, now-validated port of
+  those, values taken directly from that file); the `simulation.*` strategy
+  sections (`vertical_coordinates`/`internal_pressure`/`radiation`) got the
+  same treatment later, once it became clear switching those was just as
+  real a need — see the file's own comments on those sections for exactly
+  which values are real/tuned vs. untouched schema defaults.
 - **`nse_driver.py`** — reference driver script for the above: everything
   that's genuinely just data goes through `pygetm_schema.loader` generically;
   only the dynamic, threshold-filtered river-loading loop stays bespoke Python
