@@ -146,6 +146,16 @@ python nse_driver.py nse_from_oceanicu.yaml --start 2025-03-01T00:00:00 --stop 2
 python generated_nse.py   # no pygetm_schema import, real pygetm calls only
 ```
 
+`generated_nse.py` has its own real `argparse` CLI — `python generated_nse.py -h`
+shows it. `--start`/`--stop`/`--dry-run`/`--load-restart`/`--save-restart` are
+genuine runtime arguments of the generated script itself, defaulting to
+whatever was given to `--dump-python`, so the SAME generated file can be rerun
+with different ones (`python generated_nse.py --stop 2025-03-02T00:00:00`)
+without regenerating from the YAML. The one rule that still matters: regenerate
+whenever `nse_from_oceanicu.yaml` itself changes — don't hand-edit
+`generated_nse.py` and keep using it, or it becomes a second, drifting source
+of truth. The rivers caveat above still applies regardless.
+
 Note the `2025` start date, not the `2024-03` this setup is nominally for:
 `meteo.ERA5.folder` (`/data/ERA5/kaj`) only has 2025 data on this machine
 right now (confirmed real 2024 ERA5 data exists at `/data/ERA5/NA/` instead,
