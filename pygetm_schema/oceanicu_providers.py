@@ -224,10 +224,18 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         default="emorid",
     )
 
+    # Dict order here IS the section order everywhere downstream (TUI
+    # navigation tree, generated YAML template, ...) -- pygetm_schema.schema.
+    # build_schema() preserves registration order rather than alphabetizing
+    # it (see that module's own comment). Matches run_model.py's real
+    # create_simulation() processing order exactly: cfg_ic.create (hydrography,
+    # line 172) -> cfg_boundaries.data_2d/data_3d (boundaries, lines 174-176)
+    # -> cfg_rivers.data (river_discharge, line 178) -> cfg_airsea.data
+    # (meteo, line 180).
     return {
         "hydrography": hydrography,
         "boundaries.barotropic": boundary_barotropic,
         "boundaries.baroclinic": boundary_baroclinic,
-        "meteo": meteo,
         "river_discharge": river_discharge,
+        "meteo": meteo,
     }
