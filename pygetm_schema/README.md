@@ -131,30 +131,44 @@ breakpoint or a stray print inside the construction sequence, with no
 config as literal `pygetm`/`pygetm.domain`/`pygetm.simulation` calls (`import
 pygetm_schema` genuinely absent from the output — verified) and exits without
 building/running anything here; see pygetm-schema's `pygetm_schema/codegen.py`
-module docstring for the "regenerate, don't hand-maintain" scoping. **Caveat**:
-rivers here are added by this script's own bespoke `add_rivers()` (dynamic,
-threshold-filtered from the real EMORID file at run time), not from a static
-config `rivers:` list codegen can read from, so the generated script does NOT
-include them — add that loop by hand in the output if you need river forcing
-there too. Verified end to end against this exact config: the generated
-script's `sim.start()` reproduces the same domain-integral salt/heat as
-`nse_driver.py --dry-run` itself (34.999 g/kg, 5.06°C), confirming it's a
-faithful standalone reproduction, not just syntactically-valid output.
+module docstring for the "regenerate, don't hand-maintain" scoping. Verified
+end to end against this exact config: the generated script's `sim.start()`
+reproduces the same domain-integral salt/heat as `nse_driver.py --dry-run`
+itself (34.999 g/kg, 5.06°C), confirming it's a faithful standalone
+reproduction, not just syntactically-valid output.
+
+**Rivers are included** (`river_discharge.emorid.script`, resolved above,
+points at this file's own `add_rivers` — pygetm-schema's `codegen.py` embeds
+its real source text into the generated script, not a reference; see that
+repo's `loader.run_river_discharge_script`/`codegen._emit_river_discharge_script`
+for the mechanism, and `pygetm-schema/TODO` item 9 for the design). Verified
+with real per-river placement log lines matching `nse_driver.py`'s own real
+execution exactly, both adding the same 262 real rivers.
 
 ```bash
-python nse_driver.py nse_from_oceanicu.yaml --start 2025-03-01T00:00:00 --stop 2025-03-01T01:00:00 --dry-run --dump-python generated_nse.py
-python generated_nse.py   # no pygetm_schema import, real pygetm calls only
+python nse_driver.py nse_from_oceanicu.yaml --start 2025-03-01T00:00:00 --stop 2025-03-01T01:00:00 --dry-run --skip-unavailable-output --dump-python generated_nse.py
+python generated_nse.py --dry-run --skip-unavailable-output   # no pygetm_schema import, real pygetm calls only
 ```
 
 `generated_nse.py` has its own real `argparse` CLI — `python generated_nse.py -h`
-shows it. `--start`/`--stop`/`--dry-run`/`--load-restart`/`--save-restart` are
-genuine runtime arguments of the generated script itself, defaulting to
-whatever was given to `--dump-python`, so the SAME generated file can be rerun
-with different ones (`python generated_nse.py --stop 2025-03-02T00:00:00`)
-without regenerating from the YAML. The one rule that still matters: regenerate
-whenever `nse_from_oceanicu.yaml` itself changes — don't hand-edit
-`generated_nse.py` and keep using it, or it becomes a second, drifting source
-of truth. The rivers caveat above still applies regardless.
+shows it. `--start`/`--stop`/`--dry-run`/`--load-restart`/`--save-restart`/
+`--skip-unavailable-output` are genuine runtime arguments of the generated
+script itself, defaulting to whatever was given to `--dump-python`, so the
+SAME generated file can be rerun with different ones (`python generated_nse.py
+--stop 2025-03-02T00:00:00`) without regenerating from the YAML. The one rule
+that still matters: regenerate whenever `nse_from_oceanicu.yaml` itself
+changes — don't hand-edit `generated_nse.py` and keep using it, or it becomes
+a second, drifting source of truth.
+
+**Known remaining gap**: the bespoke `sim.sst = sim.airsea.t2m` substitution
+in `nse_driver.py`'s `main()` (needed for `BAROTROPIC_2D`/`3D`, see that
+file's own comment) is hand-written Python outside the schema/config
+entirely — codegen has no way to see it, so `generated_nse.py` still crashes
+with `sst is masked` at `sim.start()` under a non-`BAROCLINIC` runtype.
+Deliberately not folded into the rivers mechanism above (a different kind of
+hook — "run this after the simulation object exists" vs. rivers' "add these
+before it does" — would need its own design, not a scope-creep reuse of
+`river_discharge.script`).
 
 Note the `2025` start date, not the `2024-03` this setup is nominally for:
 `meteo.ERA5.folder` (`/data/ERA5/kaj`) only has 2025 data on this machine
