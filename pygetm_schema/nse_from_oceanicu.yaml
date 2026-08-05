@@ -1,0 +1,444 @@
+# Converted from oceanicu_3d/nse_model_config.yaml to pygetm-schema's format.
+# See pygetm-schema's docs/yaml_vs_python.md for the full explanation of what
+# moved here vs. what stays in nse_driver.py (this directory), and the "worked
+# example" table summarizing every field's fate.
+#
+# NOT everything from the original file is here -- river loading (dynamic,
+# threshold-filtered from an EMORID file) is NOT expressible as static YAML
+# without losing real behavior; it stays in nse_driver.py. Domain construction
+# turned out to be a special case: _create_domain_nse's bathymetry-reading looked
+# bespoke, but the ONLY thing that actually varies (verified against
+# _create_domain_amm7 too) is variable names and mask convention -- both are
+# expressible via the generic `bathymetry:` section below, so this setup no
+# longer needs any Python for domain-building at all.
+#
+# `runtime.time` is intentionally omitted here -- like OceanICU's own
+# run_model.py, start/stop are per-invocation, not per-setup:
+#   pygetm-schema run nse_from_oceanicu.yaml --start 2024-03-01T00:00:00 --stop ...
+# (--start overrides/fills in runtime.time; the file's own runtime.time, if
+# present, is otherwise required for `pygetm-schema validate` to pass standalone.)
+
+# ----------------------------------------------------------------------
+# Domain -- reading the pre-prepared bathymetry NetCDF file. Verified against
+# oceanicu's _create_domain_nse directly: separate lon/lat variables, depth
+# variable named "depth_rx0_0p20" (NOT "depth" -- the original config's
+# `domain.name: "depth"` was unused dead config there; dropped here rather
+# than perpetuated), and an explicit "ocean_mask" variable (0=land, 1=water,
+# matching this schema's mask_variable convention exactly). z0 was
+# oceanicu's domain.z0.
+#
+# Just a filename here -- the FOLDER is resolved by nse_driver.py from the
+# BATHYMETRY_FOLDER env var, exactly like OceanICU's own run_model.py already
+# resolves TPXO_FOLDER/ERA5_FOLDER/RIVER_FOLDER/HYDROGRAPHY_FOLDER/FABM_FOLDER
+# (os.getenv(VAR, <default>), verified against run_model.py directly -- see
+# machines.yaml, which already has a BATHYMETRY_FOLDER key per hostname, just
+# not consumed by run_model.py itself today; only run_simulation.py's separate
+# symlink-into-the-rundir mechanism uses it). A hardcoded absolute path here
+# would be wrong on any other machine -- this way it's portable the same way
+# every other data source in this project already is.
+#
+# NOTE, found while wiring this up: machines.yaml's BATHYMETRY_FOLDER for
+# THIS host (orca) is "/data/Bathymetry/NS", which doesn't exist on disk here
+# -- stale/wrong, not something fixed as part of this change (didn't want to
+# guess at the intended value). nse_driver.py's fallback default (used only
+# when BATHYMETRY_FOLDER isn't set in the environment) points at the real,
+# verified-working location instead.
+bathymetry:
+  path: bathymetry_nse.nc
+  depth_variable: depth_rx0_0p20
+  lon_variable: lon
+  lat_variable: lat
+  mask_variable: ocean_mask
+  z0: 0.01
+
+# ----------------------------------------------------------------------
+# Open boundaries -- moved from 9 hardcoded add_by_index() calls in
+# cfg_boundaries.py into real data. Verified against that file directly
+# (comment there: "Regenerated from NSe/nse_bdy_lonlat.txt (311 points),
+# cross-checked exact against getm-dump.nc's lon_bdy/lat_bdy from a live run").
+#
+# type_3d: 0 is preserved EXACTLY as in the original code, not "fixed" --
+# pygetm.constants has no boundary-condition-type constant equal to 0
+# (ZERO_GRADIENT=1 is the smallest). This is a genuine latent inconsistency in
+# oceanicu's cfg_boundaries.py (bdy_type is reassigned three times at module
+# level -- FLATHER_ELEV, then CLAMPED, then FLATHER_TRANSPORT -- dead-code
+# evidence of iteration; type_3d=0 may be the same kind of leftover, possibly
+# meant to be ZERO_GRADIENT=1). `pygetm-schema validate` on this file WILL
+# flag type_3d as invalid, surfacing exactly this -- a concrete example of the
+# schema/validation layer catching something the old unvalidated YAML+Python
+# pipeline let through silently. Left as-is rather than silently corrected;
+# whoever owns nse_model_config.yaml should decide the intended value.
+open_boundaries:
+  - side: WEST
+    l: 0
+    mstart: 0
+    mstop: 73
+    type_2d: FLATHER_TRANSPORT
+    type_3d: 0   # see note above -- not a valid boundary_condition_type member
+  - side: WEST
+    l: 0
+    mstart: 136
+    mstop: 169
+    type_2d: FLATHER_TRANSPORT
+    type_3d: 0
+  - side: WEST
+    l: 16
+    mstart: 201
+    mstop: 214
+    type_2d: FLATHER_TRANSPORT
+    type_3d: 0
+  - side: WEST
+    l: 36
+    mstart: 214
+    mstop: 227
+    type_2d: FLATHER_TRANSPORT
+    type_3d: 0
+  - side: NORTH
+    l: 213
+    mstart: 17
+    mstop: 36
+    type_2d: FLATHER_TRANSPORT
+    type_3d: 0
+  - side: NORTH
+    l: 226
+    mstart: 37
+    mstop: 77
+    type_2d: FLATHER_TRANSPORT
+    type_3d: 0
+  - side: NORTH
+    l: 246
+    mstart: 84
+    mstop: 154
+    type_2d: FLATHER_TRANSPORT
+    type_3d: 0
+  - side: EAST
+    l: 256
+    mstart: 120
+    mstop: 136
+    type_2d: FLATHER_TRANSPORT
+    type_3d: 0
+  - side: SOUTH
+    l: 0
+    mstart: 1
+    mstop: 35
+    type_2d: FLATHER_TRANSPORT
+    type_3d: 0
+
+# ----------------------------------------------------------------------
+# Simulation physics/numerics -- direct value mapping from the original
+# momentum/vertical_coordinates/internal_pressure/simulation sections.
+simulation:
+  runtype: BAROCLINIC        # was: 4
+  Dcrit: 0.5
+  Dmin: 0.1
+  # delay_slow_ip, advection_scheme, fabm, gotm: not in the original YAML,
+  # left at pyGETM's own defaults.
+
+  vertical_coordinates:
+    type: GVC                # was: type: 2
+    nz: 40
+    ddu: 0.75
+    ddl: 0.75
+    Dgamma: 10.0
+    gamma_surf: true
+
+  internal_pressure:
+    type: ShchepetkinMcwilliams   # was: type: 2
+
+  # Type_II, not a random pick -- run_model.py itself has
+  # `sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)` commented out
+  # (line 183), evidence this was the intended/considered water type before
+  # switching to hand-tuned constants. Type_II gives A=0.77, kc1=1.5,
+  # kc2=14.0 automatically at construction (verified: pygetm.radiation.Jerlov.
+  # Type_II.value) -- kc2 is then overridden below via data_assignments,
+  # reading the real KD490 climatology (matching run_model.py's OWN
+  # `ObsKd: True` branch, not used by nse_model_config.yaml today since its
+  # `simulation.ObsKd: False`, but real, working code for the same setup).
+  radiation:
+    type: TwoBand
+    jerlov_type: Type_II
+
+  momentum:
+    An: 25
+    Am: 0
+    cnpar: 1
+    # was `avmol: 1.8e-6` in the original -- pyGETM's actual parameter name is
+    # `avmmol` (confirmed via Momentum.__init__), not `avmol`. The old config's
+    # key doesn't match pyGETM's current API at all; this is concrete evidence
+    # pyGETM's API has moved since that config field name was chosen. Using
+    # the correct name here with the same value:
+    avmmol: 1.8e-6
+
+# ----------------------------------------------------------------------
+# Runtime -- direct mapping from runtime.{timestep,split_factor} +
+# switches.{dump_on_error,profile,check_finite}. `time` deliberately omitted,
+# see the note at the top of this file.
+runtime:
+  timestep: 20
+  split_factor: 20
+  dump_on_error: true
+  profile: null
+  check_finite: true
+
+# ----------------------------------------------------------------------
+# Data assignments -- the piece that was actually missing for sim.start() to
+# succeed at all: pygetm's FluxesFromMeteo requires t2m/d2m/u10/v10/sp/tcc to be
+# set before the simulation can run (verified: sim.start() raises an
+# AssertionError from airsea.py's require_set() without these). This ISN'T a
+# new pygetm-schema capability -- data_assignments (kind: file + pre_transform)
+# already does exactly "read this NetCDF variable and .set() it onto this
+# target"; it was just never populated for this file. The provider->
+# pygetm.input.from_nc bridge described as "future work" elsewhere in this repo
+# refers to AUTOMATING this (deriving these entries from the `providers.meteo`
+# block above); doing it by hand, once, for one provider's real files, needed
+# no new code at all.
+#
+# File paths and units verified directly against the real files in
+# providers.meteo.ERA5.folder (/data/ERA5/kaj): era5_{var}_2025.nc, hourly,
+# t2m/d2m in Kelvin (pygetm wants degrees_Celsius -- pre_transform_offset:
+# -273.15), u10/v10/sp/tcc already in pygetm's expected units (m/s, Pa,
+# dimensionless) so no transform needed.
+#
+# NOTE date mismatch, found while verifying this file actually runs: this
+# folder only has 2025 data (the whole point of this setup is a 2024-03 run --
+# see the top of this file). These entries are real and DO make sim.start()
+# succeed, but only for a 2025 date range (`pygetm-schema run ... --start
+# 2025-03-01T00:00:00 --stop ...`); a real 2024-03 run needs whichever ERA5
+# archive actually covers that period (e.g. /data/ERA5/NA/era5_t2m_2024.nc,
+# confirmed to exist, but not confirmed to be the intended spatial/QC choice for
+# this setup) -- point providers.meteo.ERA5.folder and the file paths below at
+# that instead.
+data_assignments:
+  - target: simulation.airsea.t2m
+    kind: file
+    file: /data/ERA5/kaj/era5_t2m_2025.nc
+    variable: t2m
+    pre_transform_offset: -273.15
+  - target: simulation.airsea.d2m
+    kind: file
+    file: /data/ERA5/kaj/era5_d2m_2025.nc
+    variable: d2m
+    pre_transform_offset: -273.15
+  - target: simulation.airsea.u10
+    kind: file
+    file: /data/ERA5/kaj/era5_u10_2025.nc
+    variable: u10
+  - target: simulation.airsea.v10
+    kind: file
+    file: /data/ERA5/kaj/era5_v10_2025.nc
+    variable: v10
+  - target: simulation.airsea.sp
+    kind: file
+    file: /data/ERA5/kaj/era5_sp_2025.nc
+    variable: sp
+  - target: simulation.airsea.tcc
+    kind: file
+    file: /data/ERA5/kaj/era5_tcc_2025.nc
+    variable: tcc
+
+  # Radiation -- A/kc1 come from simulation.radiation.jerlov_type: Type_II
+  # above automatically at construction; kc2 is overridden here with the real
+  # KD490 climatology (mirrors run_model.py's own ObsKd: True branch --
+  # `sim.radiation.kc2.set(pygetm.input.from_nc(attenuation_path,
+  # "KD490_filled"), climatology=True)`, no on_grid override there either, so
+  # not specified here -- lets InputManager.add regrid it generically onto
+  # the NSe domain from KD490_clim.nc's own global 960x960 lat/lon grid).
+  - target: simulation.radiation.kc2
+    kind: file
+    file: /data/Kd490/KD490_clim.nc
+    variable: KD490_filled
+    climatology: true
+
+  # Open-boundary 3D (temp/salt) values -- the NEXT thing that was missing:
+  # sim.start() succeeds without these, but sim.advance() then raises
+  # "Non-finite values found" (open_boundaries: only carries type_2d, not
+  # any actual temp/salt data at those points). Mirrors OceanICU's real
+  # cfg_boundaries.py::data_3d exactly for the CMEMS branch: forces temp/salt
+  # to SPONGE regardless of each open_boundaries: entry's own type_3d (that's
+  # only ever a fallback default, per pygetm.open_boundaries.OpenBoundary's
+  # own docstring -- verified directly against pygetm source, not assumed),
+  # then reads thetao/so with on_grid=true (data already sits at the model's
+  # boundary points, no horizontal interpolation needed) and climatology=false
+  # (a real time series, not a repeating annual cycle).
+  #
+  # File resolved by hand from providers.boundaries.baroclinic.CMEMS above
+  # (folder/nse/daily/daily_{start_date}_to_{end_date}.nc) -- confirmed to
+  # exist and to actually cover this setup's real 2024-03 target period
+  # (unlike the ERA5 meteo files above, which needed a `--start` in 2025 to
+  # match what's on disk); confirmed 311 boundary points in the file, matching
+  # this setup's real NSe boundary count exactly.
+  - target: open_boundary.temp
+    kind: boundary_type
+    boundary_condition_type: SPONGE
+  - target: open_boundary.temp.values
+    kind: file
+    file: /home/kb/source/repos/boundaries/boundary_data/nse/daily/daily_2024-03-01_to_2026-01-01.nc
+    variable: thetao
+    on_grid: true
+    climatology: false
+  - target: open_boundary.salt
+    kind: boundary_type
+    boundary_condition_type: SPONGE
+  - target: open_boundary.salt.values
+    kind: file
+    file: /home/kb/source/repos/boundaries/boundary_data/nse/daily/daily_2024-03-01_to_2026-01-01.nc
+    variable: so
+    on_grid: true
+    climatology: false
+
+# ----------------------------------------------------------------------
+# Output -- oceanicu's boolean-flag + separate output.yaml variable-list-file
+# convention collapses here into explicit files with variable lists inlined,
+# since pygetm-schema's output.files doesn't have that boolean/variable-list
+# split. Variable lists are the REAL ones from output.yaml's
+# airsea.{standard,fluxes} / barotropic.2d.{tides,standard} /
+# barotropic.3d.standard groups (meteo=True, tides=True, barotropic
+# default_2d/default_3d=True in the original; baroclinic all False, so no
+# baroclinic output file here). Intervals below are illustrative placeholders,
+# NOT verified against cfg_output.py's actual save-frequency logic -- tune to
+# match your real cadence.
+#
+# `folder` is oceanicu's original output.folder ("/data/kb"), now shared across
+# every file below -- each file's `path` is just a filename, joined to `folder`
+# since it's relative. Override --output-dir at the CLI to force all of them
+# elsewhere for one run without editing this file, or give a file an absolute
+# `path` to opt that one file out of the shared folder.
+output:
+  folder: /data/kb
+  files:
+    - type: netcdf
+      path: nse_meteo.nc
+      interval: 1
+      interval_units: HOURS
+      variable_requests:
+        - fields: [u10, v10, sp, t2m, tcc, tp, swr, shf, tausxu, tausyv]
+
+    - type: netcdf
+      path: nse_tides.nc
+      interval: 1
+      interval_units: HOURS
+      variable_requests:
+        - fields: [zt, u1, v1, maskt]
+
+    - type: netcdf
+      path: nse_barotropic_2d.nc
+      interval: 1
+      interval_units: DAYS
+      variable_requests:
+        - fields: [Ht, zt, Dt, u1, v1]
+
+    - type: netcdf
+      path: nse_barotropic_3d.nc
+      interval: 1
+      interval_units: DAYS
+      variable_requests:
+        - fields: [uk, vk, ww, SS, num]
+
+# ----------------------------------------------------------------------
+# Data provenance -- NOW schema-validated (pygetm-schema's providers.py
+# mechanism, once oceanicu_providers.py (this directory) is discovered --
+# either via a real `pygetm_schema.providers` entry point, once oceanicu_3d
+# has packaging to hang one off, or right now via the zero-packaging
+# PYGETM_SCHEMA_PROVIDERS env var; nse_driver.py sets this automatically to
+# its own sibling oceanicu_providers.py, so no manual export is needed to run
+# THIS file -- see pygetm-schema's docs/providers.md). Every real alternative
+# per role is present (not just the one active in this specific setup),
+# using pygetm_schema's `ChoiceSpec.nested_by_label` -- switching e.g.
+# `meteo.source: ERA5` to `CMIP6` needs no other edit, matching how
+# nse_model_config.yaml's OWN `hydrography`/`boundaries`/`meteo`/`rivers`
+# blocks already worked (this section is a close, now-validated port of
+# those, not a redesign -- values taken directly from that file, not
+# invented). `rivers:` stays named `river_discharge:` here (see
+# oceanicu_providers.py's own docstring for why: the core schema already has
+# a `rivers:` section for open-boundary positions) and is CMIP6-less --
+# cfg_rivers.py's real `cfg.rivers.source` is two-level (`historic` wraps its
+# own `historic.source`) plus a structurally different CMIP6 sibling, which
+# `make_provider_slot` can't represent as one flat ChoiceSpec (a real gap in
+# that mechanism itself, not fixed here -- see that file's own comment).
+# `fabm:` isn't modeled by any provider role at all (not wired up here or in
+# nse_driver.py) -- dropped rather than kept as another free-form leftover.
+#
+# NOT auto-derived into the data_assignments block above (e.g. meteo.ERA5.
+# folder here vs. the separate hardcoded ERA5 file paths there) -- that's
+# still the one piece of "future work" left in the provider mechanism (see
+# docs/yaml_vs_python.md's third-category section): this section makes the
+# CHOICE of data source schema-validated (catches typos, wrong types, missing
+# folders), it doesn't yet automatically wire that choice into a live pygetm
+# call. Keep both in sync by hand for now if you change one.
+hydrography:
+  source: CMEMS
+  CMEMS:
+    folder: /home/kb/source/repos/boundaries/init_data/nse/
+  WOA:
+    folder: /data/WOA   # env: HYDROGRAPHY_FOLDER
+  constant:
+    temp: 9
+    salt: 36
+boundaries:
+  barotropic:
+    source: TPXO
+    TPXO:
+      tpxo_folder: /data/TPXO9   # env: TPXO_FOLDER
+    CMEMS:
+      folder: /home/kb/source/repos/boundaries/boundary_data/hourly   # env: BOUNDARY_FOLDER_BAROTROPIC
+      folder_template: "{setup}/CMEMS"
+      filename_template: "hourly_{start_date}_to_{end_date}.nc"
+      start_date: "2024-03-01"
+      end_date: "2026-01-01"
+    CMIP6:
+      folder: /data/CMIP6   # env: BOUNDARY_FOLDER_BAROTROPIC
+      folder_template: "{setup}/CMIP6/{model}/{scenario}"
+      filename_template: "{start_date}_to_{end_date}.nc"
+      model: "MPI-ESM1-2-HR"
+      scenario: "ssp585"
+      start_date: "2024-03-01"
+      end_date: "2026-01-01"
+  baroclinic:
+    source: CMEMS
+    WOA:
+      folder: /data/WOA   # env: BOUNDARY_FOLDER_BAROCLINIC
+    CMEMS:
+      folder: /home/kb/source/repos/boundaries/boundary_data   # env: BOUNDARY_FOLDER_BAROTROPIC (sic -- verified directly against nse_model_config.yaml, not a typo introduced here)
+      folder_template: "nse/daily"
+      filename_template: "daily_{start_date}_to_{end_date}.nc"
+      start_date: "2024-03-01"
+      end_date: "2026-01-01"
+    CMIP6:
+      folder: /data/CMIP6
+      folder_template: "{setup}/CMIP6/{model}/{scenario}"
+      filename_template: "{start_date}_to_{end_date}.nc"
+      model: "MPI-ESM1-2-HR"
+      scenario: "ssp585"
+      start_date: "2015-01-01"
+      end_date: "2025-01-01"
+# evaporation/shortwave_method/longwave_method genuinely repeat identically
+# under BOTH ERA5: and CMIP6: below (not a copy-paste mistake) -- each
+# source's own ObjectSpec declares its own copy of these fields
+# (oceanicu_providers.py's _meteo_shared, attached individually to both
+# choices), since make_provider_slot has no "shared across every choice in
+# this role" concept the way `folder`/`folder_template`/etc. are shared
+# across ALL roles. Putting them as siblings of `source:` instead (matching
+# nse_model_config.yaml's own layout, which predates schema validation) is a
+# real mistake this schema now catches: `_validate_choice` flags a stray
+# field placed there as "unknown field" rather than silently dropping it.
+meteo:
+  source: ERA5
+  ERA5:
+    folder: /data/ERA5/kaj   # env: ERA5_FOLDER -- see data_assignments note above re: this only having 2025 data
+    evaporation: true
+    shortwave_method: 1   # ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
+    longwave_method: 1
+  CMIP6:
+    folder: /data/CMIP6   # env: CMIP6_FOLDER
+    folder_template: "{model}/{scenario}/meteo"
+    model: "MPI-ESM1-2-HR"
+    scenario: "ssp585"
+    evaporation: true
+    shortwave_method: 1
+    longwave_method: 1
+river_discharge:
+  source: emorid
+  emorid:
+    folder: /data/EMORID   # env: RIVER_FOLDER
+    file: EMORID_1990_2024.nc   # env: RIVER_FILE
+    threshold: 0
