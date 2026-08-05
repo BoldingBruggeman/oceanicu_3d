@@ -134,16 +134,65 @@ simulation:
   # delay_slow_ip, advection_scheme, fabm, gotm: not in the original YAML,
   # left at pyGETM's own defaults.
 
+  # Every alternative's fields present, nested under its own label (nested-
+  # by-label -- see pygetm-schema's docs/overview.md, "Every ChoiceSpec keeps
+  # every alternative present"): switching the active strategy is a one-line
+  # `type:` change, nothing else to retype. GVC is what nse_model_config.yaml
+  # actually used (`type: 2`) with its real tuned values; Sigma/Adaptive get
+  # the schema's own real pygetm defaults (untuned for this setup -- if you
+  # switch to one of them, review the values before running for real). `nz`
+  # is shared physically (grid layer count) across all three schemes, so it's
+  # set to the same real 40 everywhere rather than each alternative's
+  # independent placeholder.
   vertical_coordinates:
     type: GVC                # was: type: 2
-    nz: 40
-    ddu: 0.75
-    ddl: 0.75
-    Dgamma: 10.0
-    gamma_surf: true
+    Sigma:
+      nz: 40
+      ddl: 0.0
+      ddu: 0.0
+    GVC:
+      nz: 40
+      ddu: 0.75
+      ddl: 0.75
+      Dgamma: 10.0
+      gamma_surf: true
+    Adaptive:
+      nz: 40
+      ddu: 0.0
+      ddl: 0.0
+      gamma_surf: true
+      Dgamma: 0.0
+      csigma: 0.0
+      cgvc: 1.0
+      chsurf: 0.0
+      hsurf: 0.5
+      chmidd: 0.0
+      hmidd: -4.0
+      chbott: 0.0
+      hbott: -0.25
+      decay: 0.6666666666666666
+      hpow: 3
+      cneigh: 0.0
+      rneigh: 0.25
+      cNN: 0.0
+      drho: 0.3
+      cSS: 0.0
+      dvel: 0.1
+      chmin: 0.0
+      hmin: 0.3
+      nvfilter: 1
+      vfilter: 0.3
+      nhfilter: 1
+      hfilter: 0.4
+      timescale: 14400.0
 
   internal_pressure:
     type: ShchepetkinMcwilliams   # was: type: 2
+    Prescribed:
+      idpdx: 0.0
+      idpdy: 0.0
+    BlumbergMellor: {}
+    ShchepetkinMcwilliams: {}
 
   # Type_II, not a random pick -- run_model.py itself has
   # `sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)` commented out
@@ -156,7 +205,10 @@ simulation:
   # `simulation.ObsKd: False`, but real, working code for the same setup).
   radiation:
     type: TwoBand
-    jerlov_type: Type_II
+    Radiation: {}
+    TwoBand:
+      jerlov_type: Type_II
+      reflect_at_bottom: false
 
   momentum:
     An: 25
