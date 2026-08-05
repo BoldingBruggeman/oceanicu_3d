@@ -233,12 +233,18 @@ def main(argv=None) -> int:
     domain = loader.build_domain(config, schema)
     print(f"domain built: {domain.nx} x {domain.ny}", file=sys.stderr)
 
+    # From here on, entirely generic -- driven by the schema/config like any
+    # other pyGETM setup, regardless of how `domain` was actually built above.
+    # Order matters and matches run_model.py's own create_domain() exactly:
+    # open boundaries -> domain.cfl_check() -> rivers (an earlier version of
+    # this script added rivers BEFORE open boundaries, the reverse of both
+    # run_model.py and loader.build_and_configure's own order).
+    loader.add_open_boundaries(domain, config, schema)
+    loader.check_domain_cfl(domain)
+
     n_rivers = add_rivers(domain, config)
     print(f"{n_rivers} river(s) added from {config['river_discharge']['file']}", file=sys.stderr)
 
-    # From here on, entirely generic -- driven by the schema/config like any
-    # other pyGETM setup, regardless of how `domain` was actually built above.
-    loader.add_open_boundaries(domain, config, schema)
     sim = loader.build_simulation(domain, config, schema)
     loader.apply_data_assignments(sim, domain, config, schema)
     loader.configure_output(sim, config, schema)
