@@ -141,6 +141,8 @@ def main(argv=None) -> int:
         "Honors --dry-run for whether the script includes a run loop. Defaults to "
         "generated_nse.py, or pass a path.",
     )
+    parser.add_argument("--load-restart", default=None, metavar="PATH", help="resume from a restart file; overrides runtime.time with the restart's own time")
+    parser.add_argument("--save-restart", default=None, metavar="PATH", help="write a restart file for this run")
     parser.add_argument(
         "--log-level",
         default="INFO",
@@ -226,7 +228,9 @@ def main(argv=None) -> int:
     if args.dump_python:
         from pygetm_schema import codegen
 
-        script = codegen.generate_script(config, schema, stop=args.stop, dry_run=args.dry_run)
+        script = codegen.generate_script(
+            config, schema, stop=args.stop, dry_run=args.dry_run, load_restart=args.load_restart, save_restart=args.save_restart
+        )
         out_path = args.dump_python if isinstance(args.dump_python, str) else "generated_nse.py"
         with open(out_path, "w") as f:
             f.write(script)
@@ -269,7 +273,21 @@ def main(argv=None) -> int:
         sim.sst = sim.airsea.t2m
 
     loader.configure_output(sim, config, schema, skip_unavailable_fields=args.skip_unavailable_output)
-    loader.start_simulation(sim, config, schema)
+
+    # Mirrors cli.py's own --load-restart/--save-restart handling exactly
+    # (loader.start_simulation has no restart support of its own -- this
+    # replicates its two lines by hand, using loader.build_start_kwargs,
+    # which exists specifically for this override case; see its own
+    # docstring). add_restart() must be registered before sim.start(), same
+    # as any other output file; load_restart()'s own return value overrides
+    # runtime.time -- resuming from a restart always uses the restart's own
+    # saved time, not whatever runtime.time/--start the config/CLI gave.
+    if args.save_restart:
+        sim.output_manager.add_restart(args.save_restart)
+    start_kwargs = loader.build_start_kwargs(config, schema)
+    if args.load_restart:
+        start_kwargs["time"] = sim.load_restart(args.load_restart)
+    sim.start(**start_kwargs)
 
     if args.dry_run:
         print(f"dry run: built and started, time={sim.time}", file=sys.stderr)
