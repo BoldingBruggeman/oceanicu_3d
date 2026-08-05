@@ -111,6 +111,13 @@ def main(argv=None) -> int:
     parser.add_argument("--stop", required=True, help="ISO 8601 stop time")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument(
+        "--skip-unavailable-output",
+        action="store_true",
+        help="drop individual requested output fields that don't exist for the chosen "
+        "runtype (e.g. baroclinic fields under BAROTROPIC_2D) with a warning, instead of "
+        "failing -- default is to fail loudly. Matches pygetm-schema run's own flag.",
+    )
+    parser.add_argument(
         "--print-config",
         action="store_true",
         help="print the fully validated/merged config as YAML and exit -- use this to check "
@@ -247,7 +254,21 @@ def main(argv=None) -> int:
 
     sim = loader.build_simulation(domain, config, schema)
     loader.apply_data_assignments(sim, domain, config, schema)
-    loader.configure_output(sim, config, schema)
+
+    # Bespoke, OceanICU-specific substitution -- NOT a generic pygetm-schema
+    # concept, so it stays here rather than in loader.py (same reasoning as
+    # add_rivers staying bespoke; see docs/yaml_vs_python.md). Verified
+    # directly against cfg_airsea.py: "if not a baroclinic run use the t2m
+    # temperatures as proxy for SST" (`sim.sst = sim.airsea.t2m`) -- without
+    # it, pygetm's FluxesFromMeteo airsea implementation requires sst to be
+    # set even for non-baroclinic runtypes and sim.start() crashes with
+    # `AssertionError: sst is masked`.
+    import pygetm
+
+    if sim.runtype < pygetm.RunType.BAROCLINIC:
+        sim.sst = sim.airsea.t2m
+
+    loader.configure_output(sim, config, schema, skip_unavailable_fields=args.skip_unavailable_output)
     loader.start_simulation(sim, config, schema)
 
     if args.dry_run:

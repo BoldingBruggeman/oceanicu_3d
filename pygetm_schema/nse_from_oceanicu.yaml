@@ -128,7 +128,8 @@ open_boundaries:
 # Simulation physics/numerics -- direct value mapping from the original
 # momentum/vertical_coordinates/internal_pressure/simulation sections.
 simulation:
-  runtype: BAROCLINIC        # was: 4
+  #runtype: BAROCLINIC        # was: 4
+  runtype: BAROTROPIC_2D        # was: 4
   Dcrit: 0.5
   Dmin: 0.1
   # delay_slow_ip, advection_scheme, fabm, gotm: not in the original YAML,
@@ -145,7 +146,7 @@ simulation:
   # set to the same real 40 everywhere rather than each alternative's
   # independent placeholder.
   vertical_coordinates:
-    type: ADAPTIVE                # was: type: 2
+    type: GVC                # was: type: 2
     Sigma:
       nz: 40
       ddl: 0.0

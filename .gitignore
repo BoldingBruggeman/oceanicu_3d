@@ -3,8 +3,14 @@
 *.prof
 *.prof.stats
 __pycache__
+reorganise_meteo.sh
 
 # Generated validation outputs — sync via rsync/manage-analyses, not git
 # analyses/ itself is NOT ignored — it contains hand-authored markdown.
 # analyses/.gitignore handles selective ignoring of generated subdirs.
 /validation-data/
+
+# pygetm_schema/nse_driver.py --dump-python's default output filename -- a
+# one-off standalone debugging script (see pygetm_schema.codegen's own
+# docstring), regenerated on demand, not meant to be committed.
+pygetm_schema/generated*.py
