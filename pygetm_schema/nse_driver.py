@@ -133,13 +133,14 @@ def main(argv=None) -> int:
         help="write a self-contained, standalone Python script (no pygetm_schema import "
         "needed to run it) implementing this config as literal native pyGETM calls, then "
         "exit without building/running anything here -- see pygetm_schema.codegen's module "
-        "docstring for the 'one-off debugging tool, regenerate don't hand-maintain' scoping. "
-        "CAVEAT: rivers here come from this script's OWN bespoke add_rivers() (dynamic, "
-        "threshold-filtered from the real EMORID file at run time), not from a static "
-        "config `rivers:` list codegen can read -- the generated script will NOT include "
-        "them; add that loop by hand in the output if you need river forcing there too. "
-        "Honors --dry-run for whether the script includes a run loop. Defaults to "
-        "generated_nse.py, or pass a path.",
+        "docstring for the 'regenerate when the config changes, don't hand-maintain' scoping. "
+        "Rivers are included: river_discharge.emorid.script (resolved above) points back at "
+        "this file's own add_rivers(), whose real source gets embedded in the generated "
+        "script (see pygetm_schema.loader.run_river_discharge_script's docstring). The "
+        "generated script has its own real argparse CLI (-h shows it) -- --start/--stop/"
+        "--dry-run/--load-restart/--save-restart/--skip-unavailable-output are genuine "
+        "runtime arguments of THAT script, defaulting to whatever was given here, not fixed "
+        "at generation time. Defaults to generated_nse.py, or pass a path.",
     )
     parser.add_argument("--load-restart", default=None, metavar="PATH", help="resume from a restart file; overrides runtime.time with the restart's own time")
     parser.add_argument("--save-restart", default=None, metavar="PATH", help="write a restart file for this run")
@@ -196,6 +197,23 @@ def main(argv=None) -> int:
         if entry.get("kind") == "tpxo":
             entry["tpxo_folder"] = os.getenv("TPXO_FOLDER", _DEFAULT_TPXO_FOLDER)
 
+    # river_discharge.emorid.script's own schema default (see
+    # oceanicu_providers.py, computed from THAT file's own __file__) isn't
+    # auto-injected by validate_config -- it only ever keeps fields
+    # EXPLICITLY present in the raw YAML, never fills in unset ones (a
+    # schema `default` is template/TUI-display-only). Set it here explicitly
+    # if the YAML doesn't override it, so nse_from_oceanicu.yaml itself
+    # doesn't need a machine-specific absolute path baked in -- same
+    # "resolve portably at run time" reasoning as BATHYMETRY_FOLDER/
+    # TPXO_FOLDER above. Only "emorid" today (the one real registered
+    # source, see oceanicu_providers.py's own river_discharge role).
+    river_discharge = raw.get("river_discharge") or {}
+    emorid_cfg = river_discharge.get("emorid") or {}
+    if river_discharge.get("source") == "emorid" and not emorid_cfg.get("script"):
+        emorid_cfg["script"] = f"{Path(__file__).parent / 'nse_driver.py'}:add_rivers"
+        river_discharge["emorid"] = emorid_cfg
+        raw["river_discharge"] = river_discharge
+
     # Known issue in the source config -- see module docstring. Corrected here
     # with a loud warning, not silently.
     for b in raw.get("open_boundaries", []):
@@ -229,16 +247,18 @@ def main(argv=None) -> int:
         from pygetm_schema import codegen
 
         script = codegen.generate_script(
-            config, schema, stop=args.stop, dry_run=args.dry_run, load_restart=args.load_restart, save_restart=args.save_restart
+            config,
+            schema,
+            stop=args.stop,
+            dry_run=args.dry_run,
+            load_restart=args.load_restart,
+            save_restart=args.save_restart,
+            skip_unavailable_output=args.skip_unavailable_output,
         )
         out_path = args.dump_python if isinstance(args.dump_python, str) else "generated_nse.py"
         with open(out_path, "w") as f:
             f.write(script)
-        print(
-            f"wrote {out_path} -- NOTE: rivers are added dynamically by this script's own "
-            "add_rivers(), not present in the generated output (see --help)",
-            file=sys.stderr,
-        )
+        print(f"wrote {out_path}", file=sys.stderr)
         return 0
 
     domain = loader.build_domain(config, schema)
@@ -253,7 +273,15 @@ def main(argv=None) -> int:
     loader.add_open_boundaries(domain, config, schema)
     loader.check_domain_cfl(domain)
 
-    n_rivers = add_rivers(domain, config)
+    # Goes through the SAME generic mechanism --dump-python's generated
+    # scripts use (river_discharge.script, see pygetm_schema.loader.
+    # run_river_discharge_script) rather than calling add_rivers() directly,
+    # so real execution here and the generated standalone script are
+    # provably consistent, not two separately-maintained paths to the same
+    # rivers. add_rivers() itself is unchanged and still lives in this file
+    # -- river_discharge.emorid.script (resolved above) just points back at
+    # it by path.
+    n_rivers = loader.run_river_discharge_script(domain, config)
     print(f"{n_rivers} river(s) added from {config['river_discharge']['file']}", file=sys.stderr)
 
     sim = loader.build_simulation(domain, config, schema)

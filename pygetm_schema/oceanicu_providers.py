@@ -44,8 +44,18 @@ and `build_schema()` caught it immediately.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from pygetm_schema.model import ChoiceSpec, Importance, ParameterSpec, TypeRef
 from pygetm_schema.providers import make_provider_slot
+
+# Absolute, not "nse_driver.py" -- pygetm_schema.providers.load_dotted_target
+# (used by both loader.run_river_discharge_script and codegen.py's
+# _emit_river_discharge_script) resolves a "*.py:name" target as a filesystem
+# path relative to the CURRENT WORKING DIRECTORY at run time, not relative to
+# this file or the YAML config -- same reasoning as PYGETM_SCHEMA_PROVIDERS'
+# own absolute-path construction in nse_driver.py's main().
+_NSE_DRIVER_PATH = Path(__file__).parent / "nse_driver.py"
 
 # Shared across every CMIP6-sourced role (boundaries.{barotropic,baroclinic},
 # meteo) -- CMIP6 folder_templates all use {model}/{scenario} placeholders
@@ -217,6 +227,22 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                     type=TypeRef(kind="scalar", scalar_type="float"),
                     default=0.0,
                     help="minimum mean discharge (m3/s) for a river to be included",
+                    importance=Importance.BASIC,
+                ),
+                ParameterSpec(
+                    name="script",
+                    type=TypeRef(kind="scalar", scalar_type="str"),
+                    default=f"{_NSE_DRIVER_PATH}:add_rivers",
+                    help=(
+                        "path/to/file.py:function_name implementing this source's real "
+                        "river loading (position AND data together -- see pygetm_schema."
+                        "loader.run_river_discharge_script's own docstring for why these "
+                        "aren't independently swappable across sources). Same convention "
+                        "as PYGETM_SCHEMA_PROVIDERS. A future 'cmip6_bias_corrected' "
+                        "source would need its own, different function here -- a real "
+                        "scenario-discharge dataset has its own station/grid-cell "
+                        "inventory, not EMORID's real-world coordinates."
+                    ),
                     importance=Importance.BASIC,
                 ),
             ),
