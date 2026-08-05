@@ -145,7 +145,7 @@ simulation:
   # set to the same real 40 everywhere rather than each alternative's
   # independent placeholder.
   vertical_coordinates:
-    type: GVC                # was: type: 2
+    type: ADAPTIVE                # was: type: 2
     Sigma:
       nz: 40
       ddl: 0.0
@@ -300,6 +300,43 @@ data_assignments:
     file: /data/Kd490/KD490_clim.nc
     variable: KD490_filled
     climatology: true
+
+  # Open-boundary 2D (barotropic tidal elevation/transport) values -- found
+  # while investigating what was STILL missing after the temp/salt fix below:
+  # boundaries.barotropic.source: TPXO further down in this file was, until
+  # now, purely descriptive provider metadata, never wired into an actual
+  # data_assignments entry. sim.open_boundaries.z/u/v (unlike meteo/radiation)
+  # have no require_set() check in pygetm, so sim.start() succeeded silently
+  # with them left at zero the whole time this conversion has existed -- a
+  # real, previously-unflagged gap, and a strong candidate for (at least a
+  # contributing cause of) the "Non-finite values found" instability near a
+  # boundary at timestep 9 (real baroclinic forcing driving flow against a
+  # tidally-unforced barotropic boundary is exactly the kind of thing that
+  # destabilizes). Uses pygetm-schema's new `kind: tpxo` (a harmonic-
+  # constituent lookup via pygetm.input.tpxo.get, keyed by the open
+  # boundary's own lon/lat -- NOT a plain NetCDF file+variable read like
+  # kind: file), mirroring OceanICU's real cfg_boundaries.py::data_2d TPXO
+  # branch exactly: sim.open_boundaries.z.set(tpxo.get(bdy_lon, bdy_lat,
+  # root=tpxo_folder), on_grid=True), same for u/v. tpxo_folder here is a
+  # placeholder -- nse_driver.py overrides it from the TPXO_FOLDER env var
+  # (same convention as BATHYMETRY_FOLDER), falling back to this host's
+  # real, verified path (/server/data/TPXO9 -- confirmed to contain real
+  # TPXO9 atlas data, unlike BATHYMETRY_FOLDER's stale machines.yaml entry).
+  - target: open_boundaries.z
+    kind: tpxo
+    tpxo_folder: /server/data/TPXO9   # overridden by nse_driver.py from TPXO_FOLDER
+    tpxo_variable: h
+    on_grid: true
+  - target: open_boundaries.u
+    kind: tpxo
+    tpxo_folder: /server/data/TPXO9
+    tpxo_variable: u
+    on_grid: true
+  - target: open_boundaries.v
+    kind: tpxo
+    tpxo_folder: /server/data/TPXO9
+    tpxo_variable: v
+    on_grid: true
 
   # Open-boundary 3D (temp/salt) values -- the NEXT thing that was missing:
   # sim.start() succeeds without these, but sim.advance() then raises

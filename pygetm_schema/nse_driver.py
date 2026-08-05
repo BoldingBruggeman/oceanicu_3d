@@ -56,6 +56,11 @@ from pygetm_schema.yaml_parse import validate_config
 # on the env var alone.
 _DEFAULT_BATHYMETRY_FOLDER = "/home/kb/source/repos/OceanICU/oceanicu_3d/Bathymetry"
 
+# Same convention, and (unlike BATHYMETRY_FOLDER) machines.yaml's own
+# TPXO_FOLDER for this host (orca: /server/data/TPXO9) is verified correct --
+# real TPXO9 atlas data confirmed present there, not stale.
+_DEFAULT_TPXO_FOLDER = "/server/data/TPXO9"
+
 
 def add_rivers(domain, config: dict):
     """Mirrors cfg_rivers.py's create() -- dynamic, threshold-filtered, read from
@@ -174,6 +179,13 @@ def main(argv=None) -> int:
     if bathy and bathy.get("path") and not os.path.isabs(bathy["path"]):
         folder = os.getenv("BATHYMETRY_FOLDER", _DEFAULT_BATHYMETRY_FOLDER)
         bathy["path"] = str(Path(folder) / bathy["path"])
+
+    # Same TPXO_FOLDER env var run_model.py itself resolves (see machines.yaml)
+    # -- overrides every kind='tpxo' data_assignments entry's tpxo_folder, same
+    # override-with-real-default pattern as bathymetry above.
+    for entry in raw.get("data_assignments", []):
+        if entry.get("kind") == "tpxo":
+            entry["tpxo_folder"] = os.getenv("TPXO_FOLDER", _DEFAULT_TPXO_FOLDER)
 
     # Known issue in the source config -- see module docstring. Corrected here
     # with a loud warning, not silently.
