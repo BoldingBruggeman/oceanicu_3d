@@ -104,6 +104,26 @@ def add_rivers(domain, config: dict):
     return n_added
 
 
+def set_sst_proxy(sim, domain, config: dict) -> None:
+    """Verified directly against cfg_airsea.py's own data() function: "if not
+    a baroclinic run use the t2m temperatures as proxy for SST"
+    (`sim.sst = sim.airsea.t2m`) -- without it, pygetm's FluxesFromMeteo
+    airsea implementation requires sst to be set even for non-baroclinic
+    runtypes and sim.start() crashes with `AssertionError: sst is masked`.
+
+    Must run AFTER data_assignments (needs sim.airsea.t2m to already hold a
+    real value, not just exist -- cfg_airsea.py's own version of this line
+    lives right after its own t2m/d2m/u10/... assignments, not before them)
+    -- registered via post_data_script (see pygetm_schema.loader.
+    run_post_data_script), not river_discharge.script (that hook runs
+    before the simulation object even exists, too early for this).
+    """
+    import pygetm
+
+    if sim.runtype < pygetm.RunType.BAROCLINIC:
+        sim.sst = sim.airsea.t2m
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("config")
@@ -239,6 +259,17 @@ def main(argv=None) -> int:
         print(e, file=sys.stderr)
         return 1
 
+    # post_data_script isn't part of pygetm-schema's OWN schema at all (no
+    # natural home for a single bare string -- see loader.run_post_data_script's
+    # own docstring), unlike river_discharge.script (which piggybacks on the
+    # ALREADY-schema-registered river_discharge role). Injected directly onto
+    # the validated config dict here, not into `raw` before validate_config --
+    # validate_config only ever keeps fields matching a real schema section,
+    # so injecting into `raw` would just get it silently dropped. Placed
+    # before the --print-config check below so it's visible there too, same
+    # as river_discharge.script.
+    config.setdefault("post_data_script", f"{Path(__file__).parent / 'nse_driver.py'}:set_sst_proxy")
+
     if args.print_config:
         print(yaml.safe_dump(config, sort_keys=False))
         return 0
@@ -287,18 +318,14 @@ def main(argv=None) -> int:
     sim = loader.build_simulation(domain, config, schema)
     loader.apply_data_assignments(sim, domain, config, schema)
 
-    # Bespoke, OceanICU-specific substitution -- NOT a generic pygetm-schema
-    # concept, so it stays here rather than in loader.py (same reasoning as
-    # add_rivers staying bespoke; see docs/yaml_vs_python.md). Verified
-    # directly against cfg_airsea.py: "if not a baroclinic run use the t2m
-    # temperatures as proxy for SST" (`sim.sst = sim.airsea.t2m`) -- without
-    # it, pygetm's FluxesFromMeteo airsea implementation requires sst to be
-    # set even for non-baroclinic runtypes and sim.start() crashes with
-    # `AssertionError: sst is masked`.
-    import pygetm
-
-    if sim.runtype < pygetm.RunType.BAROCLINIC:
-        sim.sst = sim.airsea.t2m
+    # Goes through the SAME generic mechanism --dump-python's generated
+    # scripts use (post_data_script, see pygetm_schema.loader.
+    # run_post_data_script), same reasoning as run_river_discharge_script
+    # above -- real execution and the generated script are provably
+    # consistent, not two separately-maintained paths. set_sst_proxy() itself
+    # is unchanged and still lives in this file -- post_data_script (resolved
+    # above) just points back at it by path.
+    loader.run_post_data_script(sim, domain, config)
 
     loader.configure_output(sim, config, schema, skip_unavailable_fields=args.skip_unavailable_output)
 

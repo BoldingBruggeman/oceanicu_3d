@@ -128,8 +128,8 @@ open_boundaries:
 # Simulation physics/numerics -- direct value mapping from the original
 # momentum/vertical_coordinates/internal_pressure/simulation sections.
 simulation:
-  #runtype: BAROCLINIC        # was: 4
-  runtype: BAROTROPIC_2D        # was: 4
+  runtype: BAROCLINIC        # was: 4
+  #runtype: BAROTROPIC_2D        # was: 4
   Dcrit: 0.5
   Dmin: 0.1
   # delay_slow_ip, advection_scheme, fabm, gotm: not in the original YAML,
