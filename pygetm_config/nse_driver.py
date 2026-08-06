@@ -370,14 +370,17 @@ def main(argv=None) -> int:
     with open(args.config) as f:
         raw = yaml.safe_load(f)
 
-    # Resolve bathymetry.path's folder from BATHYMETRY_FOLDER, exactly like
+    # Resolve domain.path's folder from BATHYMETRY_FOLDER, exactly like
     # run_model.py resolves TPXO_FOLDER/ERA5_FOLDER/etc. (os.getenv(VAR,
     # default) -- see module-level comment on _DEFAULT_BATHYMETRY_FOLDER for
     # why the default, not the env var, is what actually works today).
-    bathy = raw.get("bathymetry")
-    if bathy and bathy.get("path") and not os.path.isabs(bathy["path"]):
+    # `bathymetry:` used to be its own top-level section (domain/bathymetry
+    # unification, pygetm-config) -- now it's domain: {method: BathymetryFile,
+    # path: ..., ...}, same field, different location.
+    domain_cfg = raw.get("domain")
+    if domain_cfg and domain_cfg.get("method") == "BathymetryFile" and domain_cfg.get("path") and not os.path.isabs(domain_cfg["path"]):
         folder = os.getenv("BATHYMETRY_FOLDER", _DEFAULT_BATHYMETRY_FOLDER)
-        bathy["path"] = str(Path(folder) / bathy["path"])
+        domain_cfg["path"] = str(Path(folder) / domain_cfg["path"])
 
     # Same TPXO_FOLDER env var run_model.py itself resolves (see machines.yaml)
     # -- overrides every kind='tpxo' data_assignments entry's tpxo_folder, same

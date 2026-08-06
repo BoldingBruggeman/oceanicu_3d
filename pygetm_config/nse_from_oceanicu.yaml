@@ -9,8 +9,8 @@
 # turned out to be a special case: _create_domain_nse's bathymetry-reading looked
 # bespoke, but the ONLY thing that actually varies (verified against
 # _create_domain_amm7 too) is variable names and mask convention -- both are
-# expressible via the generic `bathymetry:` section below, so this setup no
-# longer needs any Python for domain-building at all.
+# expressible via `domain:`'s own generic BathymetryFile choice below, so this
+# setup no longer needs any Python for domain-building at all.
 #
 # `runtime.time` is intentionally omitted here -- like OceanICU's own
 # run_model.py, start/stop are per-invocation, not per-setup:
@@ -43,7 +43,16 @@
 # guess at the intended value). nse_driver.py's fallback default (used only
 # when BATHYMETRY_FOLDER isn't set in the environment) points at the real,
 # verified-working location instead.
-bathymetry:
+#
+# UPDATE (pygetm-config, domain/bathymetry unification): `bathymetry:` used
+# to be its own top-level section (a separate, later section from `domain:`,
+# even though only one of them is ever really used per setup) -- unified
+# into one of domain:'s own choices instead, `method: BathymetryFile`, same
+# shape as every other "pick one of these" choice in this schema (e.g.
+# meteo.source). Nothing about the real values below changed, just where
+# they live.
+domain:
+  method: BathymetryFile
   path: bathymetry_nse.nc
   depth_variable: depth_rx0_0p20
   lon_variable: lon
