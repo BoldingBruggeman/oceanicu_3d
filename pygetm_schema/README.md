@@ -160,15 +160,19 @@ that still matters: regenerate whenever `nse_from_oceanicu.yaml` itself
 changes — don't hand-edit `generated_nse.py` and keep using it, or it becomes
 a second, drifting source of truth.
 
-**Known remaining gap**: the bespoke `sim.sst = sim.airsea.t2m` substitution
-in `nse_driver.py`'s `main()` (needed for `BAROTROPIC_2D`/`3D`, see that
-file's own comment) is hand-written Python outside the schema/config
-entirely — codegen has no way to see it, so `generated_nse.py` still crashes
-with `sst is masked` at `sim.start()` under a non-`BAROCLINIC` runtype.
-Deliberately not folded into the rivers mechanism above (a different kind of
-hook — "run this after the simulation object exists" vs. rivers' "add these
-before it does" — would need its own design, not a scope-creep reuse of
-`river_discharge.script`).
+**The `sst = airsea.t2m` gap is closed too**: `set_sst_proxy` (this file,
+needed for `BAROTROPIC_2D`/`3D` — pygetm's `FluxesFromMeteo` requires `sst`
+set but there's no baroclinic temperature to derive it from) is now
+registered via `post_data_script`, a second, distinct hook from
+`river_discharge.script` — this one runs *after* `data_assignments`, since
+the real fix needs `sim.airsea.t2m` to already hold a real value (verified
+directly against `cfg_airsea.py`: that line lives inside its own `data()`
+function, right after the meteo assignments, not in `run_model.py`'s
+top-level sequence at all). Generated against a `BAROTROPIC_2D` copy of this
+exact config and run standalone: `sim.start()` now succeeds completely, real
+domain integrals reported, no traceback — `generated_nse.py` is a genuinely
+complete, working, standalone replacement for `nse_driver.py`'s own real
+execution.
 
 Note the `2025` start date, not the `2024-03` this setup is nominally for:
 `meteo.ERA5.folder` (`/data/ERA5/kaj`) only has 2025 data on this machine
