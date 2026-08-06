@@ -54,8 +54,14 @@ from pygetm_config.providers import make_provider_slot
 # _emit_river_discharge_script) resolves a "*.py:name" target as a filesystem
 # path relative to the CURRENT WORKING DIRECTORY at run time, not relative to
 # this file or the YAML config -- same reasoning as PYGETM_CONFIG_PROVIDERS'
-# own absolute-path construction in nse_driver.py's main().
-_NSE_DRIVER_PATH = Path(__file__).parent / "nse_driver.py"
+# own absolute-path construction in nse_driver.py's main(). One file per
+# provider role under scripts/ (not one big driver-adjacent file) -- each
+# data_script/script/post_data_script function is fully self-contained (own
+# local imports, no shared module-level state), so splitting cost nothing.
+_SCRIPTS_DIR = Path(__file__).parent / "scripts"
+_RIVERS_SCRIPT_PATH = _SCRIPTS_DIR / "rivers.py"
+_METEO_SCRIPT_PATH = _SCRIPTS_DIR / "meteo.py"
+_HYDROGRAPHY_SCRIPT_PATH = _SCRIPTS_DIR / "hydrography.py"
 
 # Shared across every CMIP6-sourced role (boundaries.{barotropic,baroclinic},
 # meteo) -- CMIP6 folder_templates all use {model}/{scenario} placeholders
@@ -84,7 +90,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         ParameterSpec(
             name="data_script",
             type=TypeRef(kind="scalar", scalar_type="str"),
-            default=f"{_NSE_DRIVER_PATH}:set_hydrography_ic",
+            default=f"{_HYDROGRAPHY_SCRIPT_PATH}:set_hydrography_ic",
             help=(
                 "path/to/file.py:function_name implementing this source's real "
                 "initial-condition attachment (mirrors cfg_ic.py's own create() -- "
@@ -207,7 +213,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         ParameterSpec(
             name="data_script",
             type=TypeRef(kind="scalar", scalar_type="str"),
-            default=f"{_NSE_DRIVER_PATH}:set_meteo_data",
+            default=f"{_METEO_SCRIPT_PATH}:set_meteo_data",
             help=(
                 "path/to/file.py:function_name for the ONE piece of meteo data "
                 "attachment that genuinely can't be a static data_assignments "
@@ -282,7 +288,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                 ParameterSpec(
                     name="script",
                     type=TypeRef(kind="scalar", scalar_type="str"),
-                    default=f"{_NSE_DRIVER_PATH}:add_rivers",
+                    default=f"{_RIVERS_SCRIPT_PATH}:add_rivers",
                     help=(
                         "path/to/file.py:function_name implementing this source's real "
                         "river POSITIONING (name + location) -- see pygetm_config.loader."
@@ -297,7 +303,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                 ParameterSpec(
                     name="data_script",
                     type=TypeRef(kind="scalar", scalar_type="str"),
-                    default=f"{_NSE_DRIVER_PATH}:set_river_data",
+                    default=f"{_RIVERS_SCRIPT_PATH}:set_river_data",
                     help=(
                         "path/to/file.py:function_name implementing this source's real "
                         "river DISCHARGE DATA (mirrors cfg_rivers.py's own two-step split: "
@@ -307,8 +313,8 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                         "SEPARATE hook, timed like post_data_script (after data_assignments) "
                         "-- see pygetm_config.loader.run_river_discharge_data_script's own "
                         "docstring. Same file as `script` above is fine (this role's function "
-                        "for position and data live together in nse_driver.py), but they are "
-                        "two distinct functions, not one combined one -- a future source with "
+                        "for position and data live together in scripts/rivers.py), but they "
+                        "are two distinct functions, not one combined one -- a future source with "
                         "its own inventory needs its own pair, not a single function doing "
                         "both."
                     ),

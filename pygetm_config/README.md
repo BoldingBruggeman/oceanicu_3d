@@ -36,6 +36,14 @@ for the general design these files are an instance of.
   Automatically registers `oceanicu_providers.py` (below) via
   `PYGETM_CONFIG_PROVIDERS` before calling `build_schema()` — no manual export
   needed to run this file.
+- **`scripts/`** — the real `<role>.data_script`/`script`/`post_data_script`
+  target functions (`rivers.py`: `add_rivers`/`set_river_data`, `meteo.py`:
+  `set_meteo_data`/`set_sst_proxy`, `hydrography.py`: `set_hydrography_ic`),
+  one file per provider role rather than bundled into `nse_driver.py` itself
+  — each is fully self-contained (own local imports, no shared state) and
+  loaded the same way regardless (`pygetm_config.providers.
+  load_dotted_target`, `"path/to/file.py:name"`, resolved by
+  `oceanicu_providers.py`'s schema defaults / `nse_driver.py`'s fallbacks).
 - **`oceanicu_providers.py`** — a populated `pygetm_config.providers` registry
   for OceanICU's data-provenance vocabulary, using the same `source:`
   discriminator convention OceanICU's own config already uses. Every real

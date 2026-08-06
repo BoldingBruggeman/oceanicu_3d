@@ -62,209 +62,16 @@ _DEFAULT_BATHYMETRY_FOLDER = "/home/kb/source/repos/OceanICU/oceanicu_3d/Bathyme
 _DEFAULT_TPXO_FOLDER = "/server/data/TPXO9"
 
 
-def add_rivers(domain, config: dict):
-    """Mirrors cfg_rivers.py's create() -- dynamic, threshold-filtered, read from
-    an EMORID/JRC discharge file at run time. The *set* of rivers depends on the
-    threshold and the domain's exact footprint, so (per pygetm-config's
-    docs/yaml_vs_python.md) this cannot become a static YAML list without losing
-    that behavior; it has to stay a loop over real data, same as in OceanICU
-    today.
-
-    Reads the validated `river_discharge:` section (a `nested_by_label`
-    ChoiceSpec -- see oceanicu_providers.py), not a free-form dict: whichever
-    source is active (only "emorid" is registered today) has its fields
-    flattened onto `config["river_discharge"]` directly by validate_config,
-    regardless of whether the YAML wrote them nested under `emorid:` or flat.
-    """
-    import xarray as xr
-    import pygetm
-
-    rcfg = config["river_discharge"]
-    path = Path(rcfg["folder"]) / rcfg["file"]
-    threshold = rcfg.get("threshold", 0)
-
-    with xr.open_dataset(path) as ds:
-        # "qmean" heuristic normalizes away underscores/case -- the real EMORID
-        # file (verified against /data/EMORID/EMORID_1990_2024.nc) names this
-        # "Q_mean", not "qmean".
-        qmean_name = next(v for v in ds.data_vars if "qmean" in v.lower().replace("_", ""))
-        valid = ds[qmean_name] > threshold
-        lons = ds["lon"].values[valid.values]
-        lats = ds["lat"].values[valid.values]
-        # Real file uses "site_name", not "name" -- check both rather than
-        # silently falling back to anonymous numeric indices.
-        name_var = next((v for v in ("site_name", "name") if v in ds), None)
-        names = ds[name_var].values[valid.values] if name_var else range(len(lons))
-        n_added = 0
-        for name, lon, lat in zip(names, lons, lats):
-            if not domain.contains(lon, lat):
-                continue
-            domain.rivers.add_by_location(str(name), lon, lat, coordinate_type=pygetm.CoordinateType.LONLAT)
-            n_added += 1
-    return n_added
-
-
-def set_river_data(sim, domain, config: dict) -> int:
-    """Mirrors cfg_rivers.py's own data() -- the second half of
-    river_discharge's job (user request): add_rivers (above) only sets
-    POSITION; this attaches the REAL, time-varying discharge to each river
-    actually present in this subdomain (sim.rivers -- a pygetm.rivers.
-    LocalRiverCollection, keyed by name, only rivers that fall within THIS
-    subdomain -- not necessarily every one add_rivers positioned on the
-    global domain). Needs a live sim.rivers (only exists once the
-    Simulation object is built), so this runs via
-    river_discharge.data_script (see pygetm_config.loader.
-    run_river_discharge_data_script), a separate hook from
-    river_discharge.script's own add_rivers (which runs before sim exists).
-
-    Salt is set to 0.0 (matching cfg_rivers.py's own
-    river["salt"].set(0.0) -- river water is fresh). FABM biogeochemistry
-    (NO3/NH4/PO4/Si/TALK/DIC, present in the real EMORID file) is NOT wired
-    up here -- this repo has no FABM model configured yet; cfg_rivers.py's
-    own data() only does this when sim.fabm is truthy, so it's a real,
-    deliberate scope limit, not an oversight.
-    """
-    import xarray as xr
-
-    rcfg = config["river_discharge"]
-    path = Path(rcfg["folder"]) / rcfg["file"]
-    # CFDatetimeCoder(use_cftime=True), matching cfg_rivers.py's own real
-    # data() exactly -- needed for Q's time dimension, unlike add_rivers
-    # above (which never reads a time-varying variable at all).
-    time_coder = xr.coders.CFDatetimeCoder(use_cftime=True)
-    n_set = 0
-    with xr.open_dataset(path, engine="netcdf4", decode_times=time_coder) as ds:
-        # Same "site_name" vs "name" fallback as add_rivers above -- both
-        # read the same file, so if one needs it the other might too.
-        name_var = next((v for v in ("site_name", "name") if v in ds), None)
-        site_names = ds[name_var].values if name_var else range(ds.sizes["site"])
-        name_to_index = {str(n): i for i, n in enumerate(site_names)}
-        for name, river in sim.rivers.items():
-            idx = name_to_index.get(name)
-            if idx is None:
-                continue
-            river.flow.set(ds["Q"].isel(site=idx))
-            river["salt"].set(0.0)
-            n_set += 1
-    return n_set
-
-
-def set_meteo_data(sim, domain, config: dict) -> None:
-    """Mirrors cfg_airsea.py's own data() -- the piece that would need real
-    Python (not a static data_assignments entry): CMIP6's net shortwave/
-    longwave, `swr = rsds - rsus`/`ql = rlds - rlus`, a subtraction of TWO
-    separate files (pre_transform only supports a scale/offset on ONE
-    file's value; pre_transform_expression is deliberately refused for
-    security reasons).
-
-    CURRENTLY A NO-OP (user-confirmed real data gap, 2026-08-06): the
-    actual bias-corrected CMIP6 dataset this project uses
-    (/data/BiasCorrected/CMIP6/<model>/<scenario>/meteo/, re-interpolated
-    onto ERA5's own grid/calendar/hourly convention -- verified directly
-    against a real sample file: latitude/longitude coords, calendar
-    proleptic_gregorian, matching ERA5 exactly) provides evspsbl/huss/pr/
-    psl/tas/uas/vas -- NO rsds/rsus/rlds/rlus (shortwave/longwave) and NO
-    cloud cover at all. "Not been finally fixed yet" (user's own words) on
-    the data-provider side -- not fabricated here. sim.airsea.swr/.ql are
-    left to pygetm's own FluxesFromMeteo auto-compute (ROSATI_MIYAKODA/
-    CLARK, the schema's own default shortwave_method/longwave_method),
-    same as ERA5's own default path already does when it isn't given an
-    explicit NET_FLUX/DOWNWARD_FLUX file either.
-
-    Registered via meteo.data_script (see pygetm_config.loader.
-    run_meteo_data_script) so the wiring is ready the moment real
-    radiation/cloud-cover data exists -- until then this intentionally
-    does nothing.
-    """
-    return
-
-
-def set_sst_proxy(sim, domain, config: dict) -> None:
-    """Barotropic runtypes (BAROTROPIC_2D/BAROTROPIC_3D) have no computed sea
-    surface temperature to give pygetm's FluxesFromMeteo airsea
-    implementation (which requires sst to be set regardless of runtype), so
-    they use t2m (2m air temperature) as a stand-in. BAROCLINIC runs have a
-    real, model-calculated SST and don't need this substitution at all.
-    Verified directly against cfg_airsea.py's own data() function -- its
-    comment there: "if not a baroclinic run use the t2m temperatures as
-    proxy for SST" (`sim.sst = sim.airsea.t2m`). Without this, sim.start()
-    crashes under a non-baroclinic runtype with `AssertionError: sst is
-    masked`.
-
-    Must run AFTER data_assignments (needs sim.airsea.t2m to already hold a
-    real value, not just exist -- cfg_airsea.py's own version of this line
-    lives right after its own t2m/d2m/u10/... assignments, not before them)
-    -- registered via post_data_script (see pygetm_config.loader.
-    run_post_data_script), not river_discharge.script (that hook runs
-    before the simulation object even exists, too early for this).
-    """
-    import pygetm
-
-    if sim.runtype < pygetm.RunType.BAROCLINIC:
-        sim.sst = sim.airsea.t2m
-
-
-def set_hydrography_ic(sim, domain, config: dict) -> None:
-    """Mirrors cfg_ic.py's own create() -- WOA/CMEMS branches specifically
-    ("constant" hydrography is plain data_assignments, no Python needed).
-    Real Python needed for: (1) `.isel(time=imonth)` -- a monthly
-    CLIMATOLOGY index PICK for the initial, one-time value (imonth derived
-    from config['runtime']['time'], matching run_model.py's own real
-    `simstart.month - 1`) -- NOT pygetm-config's own `climatology: True`
-    data_assignments flag, which means something different (keep cycling
-    the whole 12-month pattern for the entire run, wrong for an initial
-    condition). (2) sim.density.convert_ts(sim.salt, sim.temp) -- pyGETM's
-    internal state is conservative temperature/absolute salinity, WOA/CMEMS
-    provide in-situ/practical values (user request, TODO item 21) --
-    called for BOTH WOA and CMEMS, matching cfg_ic.py's own real code
-    exactly (present in both real-data branches, absent from "constant").
-
-    Masks out land points afterward (sim.temp/sim.salt set to
-    pygetm.constants.FILL_VALUE where sim.T.mask == 0), matching cfg_ic.py's
-    own real code -- both WOA/CMEMS climatology files are GLOBAL, so
-    horizontal interpolation can leave real (non-fill) values sitting at
-    domain points outside the real ocean mask.
-
-    Registered via hydrography.data_script (see pygetm_config.loader.
-    run_hydrography_data_script) -- only called when NOT loading from a
-    restart (checked there, not here). Checks runtype == BAROCLINIC itself
-    (matching cfg_ic.py's own identical gate) since the core loader
-    function doesn't special-case runtype for any of its three data_script
-    hooks.
-    """
-    import datetime
-
-    import pygetm
-    import pygetm.constants
-    import pygetm.input
-
-    if sim.runtype != pygetm.RunType.BAROCLINIC:
-        return
-
-    hydro = config["hydrography"]
-    source = hydro.get("source")
-    if source not in ("WOA", "CMEMS"):
-        return
-
-    time = config["runtime"]["time"]
-    if isinstance(time, str):
-        time = datetime.datetime.fromisoformat(time)
-    imonth = time.month - 1
-
-    folder = Path(hydro["folder"])
-    if source == "WOA":
-        salt_file, salt_var = folder / "woa_s.nc", "s_an"
-        temp_file, temp_var = folder / "woa_t.nc", "t_an"
-    else:  # CMEMS
-        salt_file, salt_var = folder / "so_2025_monthly_ic.nc", "so_ff"
-        temp_file, temp_var = folder / "thetao_2025_monthly_ic.nc", "thetao_ff"
-
-    sim.salt.set(pygetm.input.from_nc(salt_file, salt_var).isel(time=imonth), on_grid=False)
-    sim.temp.set(pygetm.input.from_nc(temp_file, temp_var).isel(time=imonth), on_grid=False)
-    sim.density.convert_ts(sim.salt, sim.temp)
-
-    sim.temp[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
-    sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
+# The five data_script/script/post_data_script target functions that used to
+# live in this file directly (add_rivers/set_river_data/set_meteo_data/
+# set_sst_proxy/set_hydrography_ic) now live in scripts/ -- one file per
+# provider role, grouped by role rather than fully atomized (river position +
+# data stay together, see oceanicu_providers.py's own comment on why), since
+# nse_driver.py itself was becoming a grab-bag of unrelated per-role logic.
+# Nothing about HOW they're loaded changed: still load_dotted_target'd via
+# "path/to/file.py:name" (see scripts/rivers.py, scripts/meteo.py,
+# scripts/hydrography.py), never imported directly here -- see those files'
+# own module docstrings.
 
 
 def main(argv=None) -> int:
@@ -297,8 +104,8 @@ def main(argv=None) -> int:
         "needed to run it) implementing this config as literal native pyGETM calls, then "
         "exit without building/running anything here -- see pygetm_config.codegen's module "
         "docstring for the 'regenerate when the config changes, don't hand-maintain' scoping. "
-        "Rivers are included: river_discharge.emorid.script (resolved above) points back at "
-        "this file's own add_rivers(), whose real source gets embedded in the generated "
+        "Rivers are included: river_discharge.emorid.script (resolved above) points at "
+        "scripts/rivers.py's add_rivers(), whose real source gets embedded in the generated "
         "script (see pygetm_config.loader.run_river_discharge_script's docstring). The "
         "generated script has its own real argparse CLI (-h shows it) -- --start/--stop/"
         "--dry-run/--load-restart/--save-restart/--skip-unavailable-output are genuine "
@@ -330,8 +137,8 @@ def main(argv=None) -> int:
         "docstring's 'Debugging' note -- every domain/simulation/strategy construction, "
         ".set() call, add_by_index/add_by_location, output file, sim.start()/advance()/"
         "finish() is logged with the actual resolved arguments). DEBUG also shows one line "
-        "per open_boundaries entry (rivers stay at DEBUG regardless since this script's own "
-        "add_rivers, not loader.add_rivers, is what actually adds them here -- see that "
+        "per open_boundaries entry (rivers stay at DEBUG regardless since scripts/rivers.py's "
+        "own add_rivers, not loader.add_rivers, is what actually adds them here -- see that "
         "function for its own per-river logging via pygetm's domain.rivers). Default INFO.",
     )
     args = parser.parse_args(argv)
@@ -403,13 +210,13 @@ def main(argv=None) -> int:
     emorid_cfg = river_discharge.get("emorid") or {}
     if river_discharge.get("source") == "emorid":
         if not emorid_cfg.get("script"):
-            emorid_cfg["script"] = f"{Path(__file__).parent / 'nse_driver.py'}:add_rivers"
+            emorid_cfg["script"] = f"{Path(__file__).parent / 'scripts' / 'rivers.py'}:add_rivers"
         # data_script (user request): the second half of river_discharge's
         # job -- real discharge data, mirroring cfg_rivers.py's own
         # create()/data() split. Same resolve-portably-at-run-time reasoning
         # as `script` above.
         if not emorid_cfg.get("data_script"):
-            emorid_cfg["data_script"] = f"{Path(__file__).parent / 'nse_driver.py'}:set_river_data"
+            emorid_cfg["data_script"] = f"{Path(__file__).parent / 'scripts' / 'rivers.py'}:set_river_data"
         river_discharge["emorid"] = emorid_cfg
         raw["river_discharge"] = river_discharge
 
@@ -424,7 +231,7 @@ def main(argv=None) -> int:
     if hydrography_source in ("WOA", "CMEMS"):
         hydro_cfg = hydrography.get(hydrography_source) or {}
         if not hydro_cfg.get("data_script"):
-            hydro_cfg["data_script"] = f"{Path(__file__).parent / 'nse_driver.py'}:set_hydrography_ic"
+            hydro_cfg["data_script"] = f"{Path(__file__).parent / 'scripts' / 'hydrography.py'}:set_hydrography_ic"
         hydrography[hydrography_source] = hydro_cfg
         raw["hydrography"] = hydrography
 
@@ -446,7 +253,7 @@ def main(argv=None) -> int:
     meteo_cfg = (meteo.get(meteo_source) or {}) if meteo_source in ("ERA5", "CMIP6") else {}
     if meteo_source in ("ERA5", "CMIP6"):
         if not meteo_cfg.get("data_script"):
-            meteo_cfg["data_script"] = f"{Path(__file__).parent / 'nse_driver.py'}:set_meteo_data"
+            meteo_cfg["data_script"] = f"{Path(__file__).parent / 'scripts' / 'meteo.py'}:set_meteo_data"
         meteo[meteo_source] = meteo_cfg
         raw["meteo"] = meteo
 
@@ -549,7 +356,7 @@ def main(argv=None) -> int:
     # so injecting into `raw` would just get it silently dropped. Placed
     # before the --print-config check below so it's visible there too, same
     # as river_discharge.script.
-    config.setdefault("post_data_script", f"{Path(__file__).parent / 'nse_driver.py'}:set_sst_proxy")
+    config.setdefault("post_data_script", f"{Path(__file__).parent / 'scripts' / 'meteo.py'}:set_sst_proxy")
 
     if args.print_config:
         print(yaml.safe_dump(config, sort_keys=False))
@@ -593,9 +400,9 @@ def main(argv=None) -> int:
     # run_river_discharge_script) rather than calling add_rivers() directly,
     # so real execution here and the generated standalone script are
     # provably consistent, not two separately-maintained paths to the same
-    # rivers. add_rivers() itself is unchanged and still lives in this file
-    # -- river_discharge.emorid.script (resolved above) just points back at
-    # it by path.
+    # rivers. add_rivers() itself is unchanged and lives in scripts/rivers.py
+    # -- river_discharge.emorid.script (resolved above) just points at it
+    # by path.
     n_rivers = loader.run_river_discharge_script(domain, config)
     print(f"{n_rivers} river(s) added from {config['river_discharge']['file']}", file=sys.stderr)
 
@@ -613,8 +420,8 @@ def main(argv=None) -> int:
     # discharge data, mirroring cfg_rivers.py's own create()/data() split.
     # Needs the LIVE sim.rivers collection, so this runs after
     # apply_data_assignments, same generic mechanism as the other two hooks
-    # below -- river_discharge.emorid.data_script (resolved above) points
-    # back at set_river_data() in this same file.
+    # below -- river_discharge.emorid.data_script (resolved above) points at
+    # set_river_data(), also in scripts/rivers.py.
     n_river_data = loader.run_river_discharge_data_script(sim, domain, config)
     print(f"{n_river_data} river(s) given real discharge data", file=sys.stderr)
 
@@ -623,8 +430,8 @@ def main(argv=None) -> int:
     # run_post_data_script), same reasoning as run_river_discharge_script
     # above -- real execution and the generated script are provably
     # consistent, not two separately-maintained paths. set_sst_proxy() itself
-    # is unchanged and still lives in this file -- post_data_script (resolved
-    # above) just points back at it by path.
+    # is unchanged and lives in scripts/meteo.py -- post_data_script (resolved
+    # above) just points at it by path.
     loader.run_post_data_script(sim, domain, config)
 
     loader.configure_output(sim, config, schema, skip_unavailable_fields=args.skip_unavailable_output)
