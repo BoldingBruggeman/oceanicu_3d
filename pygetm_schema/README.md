@@ -137,13 +137,17 @@ reproduces the same domain-integral salt/heat as `nse_driver.py --dry-run`
 itself (34.999 g/kg, 5.06°C), confirming it's a faithful standalone
 reproduction, not just syntactically-valid output.
 
-**Rivers are included** (`river_discharge.emorid.script`, resolved above,
-points at this file's own `add_rivers` — pygetm-schema's `codegen.py` embeds
-its real source text into the generated script, not a reference; see that
-repo's `loader.run_river_discharge_script`/`codegen._emit_river_discharge_script`
-for the mechanism, and `pygetm-schema/TODO` item 9 for the design). Verified
-with real per-river placement log lines matching `nse_driver.py`'s own real
-execution exactly, both adding the same 262 real rivers.
+**Rivers are included, with real discharge data** (`river_discharge.emorid.script`,
+resolved above, points at this file's own `add_rivers` for POSITION;
+`river_discharge.emorid.data_script` points at this file's own `set_river_data`
+for the actual discharge time series — two distinct functions on the same role,
+mirroring OceanICU's own `cfg_rivers.py`'s real create()/data() split. pygetm-schema's
+`codegen.py` embeds both functions' real source text into the generated script, not a
+reference; see that repo's `loader.run_river_discharge_script`/`run_river_discharge_data_script`
+and `codegen._emit_river_discharge_script`/`_emit_river_discharge_data_script` for the
+mechanism, and `pygetm-schema/TODO` item 9 for the design). Verified with real
+per-river placement log lines matching `nse_driver.py`'s own real execution exactly
+(262 real rivers, all given a real `TemporalInterpolation(Q from EMORID_1990_2024.nc)`).
 
 ```bash
 python nse_driver.py nse_from_oceanicu.yaml --start 2025-03-01T00:00:00 --stop 2025-03-01T01:00:00 --dry-run --skip-unavailable-output --dump-python generated_nse.py
