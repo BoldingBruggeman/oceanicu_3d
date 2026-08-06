@@ -104,6 +104,51 @@ def add_rivers(domain, config: dict):
     return n_added
 
 
+def set_river_data(sim, domain, config: dict) -> int:
+    """Mirrors cfg_rivers.py's own data() -- the second half of
+    river_discharge's job (user request): add_rivers (above) only sets
+    POSITION; this attaches the REAL, time-varying discharge to each river
+    actually present in this subdomain (sim.rivers -- a pygetm.rivers.
+    LocalRiverCollection, keyed by name, only rivers that fall within THIS
+    subdomain -- not necessarily every one add_rivers positioned on the
+    global domain). Needs a live sim.rivers (only exists once the
+    Simulation object is built), so this runs via
+    river_discharge.data_script (see pygetm_schema.loader.
+    run_river_discharge_data_script), a separate hook from
+    river_discharge.script's own add_rivers (which runs before sim exists).
+
+    Salt is set to 0.0 (matching cfg_rivers.py's own
+    river["salt"].set(0.0) -- river water is fresh). FABM biogeochemistry
+    (NO3/NH4/PO4/Si/TALK/DIC, present in the real EMORID file) is NOT wired
+    up here -- this repo has no FABM model configured yet; cfg_rivers.py's
+    own data() only does this when sim.fabm is truthy, so it's a real,
+    deliberate scope limit, not an oversight.
+    """
+    import xarray as xr
+
+    rcfg = config["river_discharge"]
+    path = Path(rcfg["folder"]) / rcfg["file"]
+    # CFDatetimeCoder(use_cftime=True), matching cfg_rivers.py's own real
+    # data() exactly -- needed for Q's time dimension, unlike add_rivers
+    # above (which never reads a time-varying variable at all).
+    time_coder = xr.coders.CFDatetimeCoder(use_cftime=True)
+    n_set = 0
+    with xr.open_dataset(path, engine="netcdf4", decode_times=time_coder) as ds:
+        # Same "site_name" vs "name" fallback as add_rivers above -- both
+        # read the same file, so if one needs it the other might too.
+        name_var = next((v for v in ("site_name", "name") if v in ds), None)
+        site_names = ds[name_var].values if name_var else range(ds.sizes["site"])
+        name_to_index = {str(n): i for i, n in enumerate(site_names)}
+        for name, river in sim.rivers.items():
+            idx = name_to_index.get(name)
+            if idx is None:
+                continue
+            river.flow.set(ds["Q"].isel(site=idx))
+            river["salt"].set(0.0)
+            n_set += 1
+    return n_set
+
+
 def set_sst_proxy(sim, domain, config: dict) -> None:
     """Barotropic runtypes (BAROTROPIC_2D/BAROTROPIC_3D) have no computed sea
     surface temperature to give pygetm's FluxesFromMeteo airsea
@@ -260,8 +305,15 @@ def main(argv=None) -> int:
     # source, see oceanicu_providers.py's own river_discharge role).
     river_discharge = raw.get("river_discharge") or {}
     emorid_cfg = river_discharge.get("emorid") or {}
-    if river_discharge.get("source") == "emorid" and not emorid_cfg.get("script"):
-        emorid_cfg["script"] = f"{Path(__file__).parent / 'nse_driver.py'}:add_rivers"
+    if river_discharge.get("source") == "emorid":
+        if not emorid_cfg.get("script"):
+            emorid_cfg["script"] = f"{Path(__file__).parent / 'nse_driver.py'}:add_rivers"
+        # data_script (user request): the second half of river_discharge's
+        # job -- real discharge data, mirroring cfg_rivers.py's own
+        # create()/data() split. Same resolve-portably-at-run-time reasoning
+        # as `script` above.
+        if not emorid_cfg.get("data_script"):
+            emorid_cfg["data_script"] = f"{Path(__file__).parent / 'nse_driver.py'}:set_river_data"
         river_discharge["emorid"] = emorid_cfg
         raw["river_discharge"] = river_discharge
 
@@ -351,6 +403,15 @@ def main(argv=None) -> int:
 
     sim = loader.build_simulation(domain, config, schema)
     loader.apply_data_assignments(sim, domain, config, schema)
+
+    # The second half of river_discharge's job (user request) -- real
+    # discharge data, mirroring cfg_rivers.py's own create()/data() split.
+    # Needs the LIVE sim.rivers collection, so this runs after
+    # apply_data_assignments, same generic mechanism as the other two hooks
+    # below -- river_discharge.emorid.data_script (resolved above) points
+    # back at set_river_data() in this same file.
+    n_river_data = loader.run_river_discharge_data_script(sim, domain, config)
+    print(f"{n_river_data} river(s) given real discharge data", file=sys.stderr)
 
     # Goes through the SAME generic mechanism --dump-python's generated
     # scripts use (post_data_script, see pygetm_schema.loader.

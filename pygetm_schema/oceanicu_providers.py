@@ -235,13 +235,32 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                     default=f"{_NSE_DRIVER_PATH}:add_rivers",
                     help=(
                         "path/to/file.py:function_name implementing this source's real "
-                        "river loading (position AND data together -- see pygetm_schema."
-                        "loader.run_river_discharge_script's own docstring for why these "
-                        "aren't independently swappable across sources). Same convention "
-                        "as PYGETM_SCHEMA_PROVIDERS. A future 'cmip6_bias_corrected' "
-                        "source would need its own, different function here -- a real "
+                        "river POSITIONING (name + location) -- see pygetm_schema.loader."
+                        "run_river_discharge_script's own docstring. Same convention as "
+                        "PYGETM_SCHEMA_PROVIDERS. A future 'cmip6_bias_corrected' source "
+                        "would need its own, different function here -- a real "
                         "scenario-discharge dataset has its own station/grid-cell "
                         "inventory, not EMORID's real-world coordinates."
+                    ),
+                    importance=Importance.BASIC,
+                ),
+                ParameterSpec(
+                    name="data_script",
+                    type=TypeRef(kind="scalar", scalar_type="str"),
+                    default=f"{_NSE_DRIVER_PATH}:set_river_data",
+                    help=(
+                        "path/to/file.py:function_name implementing this source's real "
+                        "river DISCHARGE DATA (mirrors cfg_rivers.py's own two-step split: "
+                        "'1) Set name and position of rivers... 2) Attach river data to the "
+                        "Simulation object' -- position (`script`, above) runs before `sim` "
+                        "exists, data needs the live sim.rivers collection, so this is a "
+                        "SEPARATE hook, timed like post_data_script (after data_assignments) "
+                        "-- see pygetm_schema.loader.run_river_discharge_data_script's own "
+                        "docstring. Same file as `script` above is fine (this role's function "
+                        "for position and data live together in nse_driver.py), but they are "
+                        "two distinct functions, not one combined one -- a future source with "
+                        "its own inventory needs its own pair, not a single function doing "
+                        "both."
                     ),
                     importance=Importance.BASIC,
                 ),
