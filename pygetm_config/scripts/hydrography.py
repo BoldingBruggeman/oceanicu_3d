@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pygetm_config.loader import resolve_data_path
+
 
 def set_hydrography_ic(sim, domain, config: dict) -> None:
     """Mirrors cfg_ic.py's own create() -- WOA/CMEMS branches specifically
@@ -40,6 +42,13 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
     (matching cfg_ic.py's own identical gate) since the core loader
     function doesn't special-case runtype for any of its three data_script
     hooks.
+
+    `folder` may be a "${VAR}"/"$VAR" reference (pygetm-config's own TODO
+    item 15 lazy-resolution mechanism) -- resolve_data_path expands it here,
+    at actual use time. See scripts/rivers.py's own docstring for why this
+    function has to opt into that explicitly (a project-specific script
+    hook, not core pygetm-config code going through loader._coerce_value's
+    generic "path" TypeKind handling).
     """
     import datetime
 
@@ -60,7 +69,7 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
         time = datetime.datetime.fromisoformat(time)
     imonth = time.month - 1
 
-    folder = Path(hydro["folder"])
+    folder = Path(resolve_data_path(hydro["folder"]))
     if source == "WOA":
         salt_file, salt_var = folder / "woa_s.nc", "s_an"
         temp_file, temp_var = folder / "woa_t.nc", "t_an"

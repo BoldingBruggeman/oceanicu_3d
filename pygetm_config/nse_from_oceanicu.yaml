@@ -27,22 +27,15 @@
 # matching this schema's mask_variable convention exactly). z0 was
 # oceanicu's domain.z0.
 #
-# Just a filename here -- the FOLDER is resolved by nse_driver.py from the
-# BATHYMETRY_FOLDER env var, exactly like OceanICU's own run_model.py already
-# resolves TPXO_FOLDER/ERA5_FOLDER/RIVER_FOLDER/HYDROGRAPHY_FOLDER/FABM_FOLDER
-# (os.getenv(VAR, <default>), verified against run_model.py directly -- see
-# machines.yaml, which already has a BATHYMETRY_FOLDER key per hostname, just
-# not consumed by run_model.py itself today; only run_simulation.py's separate
-# symlink-into-the-rundir mechanism uses it). A hardcoded absolute path here
-# would be wrong on any other machine -- this way it's portable the same way
-# every other data source in this project already is.
-#
-# NOTE, found while wiring this up: machines.yaml's BATHYMETRY_FOLDER for
-# THIS host (orca) is "/data/Bathymetry/NS", which doesn't exist on disk here
-# -- stale/wrong, not something fixed as part of this change (didn't want to
-# guess at the intended value). nse_driver.py's fallback default (used only
-# when BATHYMETRY_FOLDER isn't set in the environment) points at the real,
-# verified-working location instead.
+# "${BATHYMETRY_FOLDER}" is pygetm-config's own ${VAR}/$VAR lazy data-path
+# resolution (TODO item 15, resolved only at the point of actual file access
+# -- never at config-validate or generation time, see loader.resolve_data_path's
+# own docstring) -- each machine exports BATHYMETRY_FOLDER itself (directly,
+# via --data-root BATHYMETRY_FOLDER=..., or in a --data-roots-file), no
+# hardcoded absolute path or bespoke machines.yaml-style lookup needed here at
+# all. Machines.yaml already has a (currently stale, unrelated) BATHYMETRY_
+# FOLDER key per hostname -- not consumed here, this is pygetm-config's own,
+# separate mechanism.
 #
 # UPDATE (pygetm-config, domain/bathymetry unification): `bathymetry:` used
 # to be its own top-level section (a separate, later section from `domain:`,
@@ -53,7 +46,7 @@
 # they live.
 domain:
   method: BathymetryFile
-  path: bathymetry_nse.nc
+  path: ${BATHYMETRY_FOLDER}/bathymetry_nse.nc
   depth_variable: depth_rx0_0p20
   lon_variable: lon
   lat_variable: lat
@@ -262,7 +255,7 @@ data_assignments:
   # the NSe domain from KD490_clim.nc's own global 960x960 lat/lon grid).
   - target: simulation.radiation.kc2
     kind: file
-    file: /data/Kd490/KD490_clim.nc
+    file: ${KD490_FOLDER}/KD490_clim.nc
     variable: KD490_filled
     climatology: true
 
@@ -282,24 +275,23 @@ data_assignments:
   # boundary's own lon/lat -- NOT a plain NetCDF file+variable read like
   # kind: file), mirroring OceanICU's real cfg_boundaries.py::data_2d TPXO
   # branch exactly: sim.open_boundaries.z.set(tpxo.get(bdy_lon, bdy_lat,
-  # root=tpxo_folder), on_grid=True), same for u/v. tpxo_folder here is a
-  # placeholder -- nse_driver.py overrides it from the TPXO_FOLDER env var
-  # (same convention as BATHYMETRY_FOLDER), falling back to this host's
-  # real, verified path (/server/data/TPXO9 -- confirmed to contain real
-  # TPXO9 atlas data, unlike BATHYMETRY_FOLDER's stale machines.yaml entry).
+  # root=tpxo_folder), on_grid=True), same for u/v. tpxo_folder is
+  # kind="path"-typed, so ${TPXO_FOLDER} resolves lazily at actual use time
+  # (loader._coerce_value's own "path" TypeKind handling, same mechanism as
+  # domain.path above -- no bespoke per-field code needed for this one).
   - target: open_boundaries.z
     kind: tpxo
-    tpxo_folder: /server/data/TPXO9   # overridden by nse_driver.py from TPXO_FOLDER
+    tpxo_folder: ${TPXO_FOLDER}
     tpxo_variable: h
     on_grid: true
   - target: open_boundaries.u
     kind: tpxo
-    tpxo_folder: /server/data/TPXO9
+    tpxo_folder: ${TPXO_FOLDER}
     tpxo_variable: u
     on_grid: true
   - target: open_boundaries.v
     kind: tpxo
-    tpxo_folder: /server/data/TPXO9
+    tpxo_folder: ${TPXO_FOLDER}
     tpxo_variable: v
     on_grid: true
 
@@ -316,17 +308,21 @@ data_assignments:
   # (a real time series, not a repeating annual cycle).
   #
   # File resolved by hand from providers.boundaries.baroclinic.CMEMS above
-  # (folder/nse/daily/daily_{start_date}_to_{end_date}.nc) -- confirmed to
-  # exist and to actually cover this setup's real 2024-03 target period
-  # (unlike the ERA5 meteo files above, which needed a `--start` in 2025 to
-  # match what's on disk); confirmed 311 boundary points in the file, matching
-  # this setup's real NSe boundary count exactly.
+  # (folder/nse/daily/daily_{start_date}_to_{end_date}.nc, ${BOUNDARY_FOLDER_
+  # BAROTROPIC} -- sic, see that section's own comment on why baroclinic data
+  # uses the "barotropic"-named var, faithfully preserved from
+  # nse_model_config.yaml/machines.yaml) -- confirmed to exist and to
+  # actually cover this setup's real 2024-03 target period (unlike the ERA5
+  # meteo files above, which needed a `--start` in 2025 to match what's on
+  # disk); confirmed 311 boundary points in the file, matching this setup's
+  # real NSe boundary count exactly. `file` is kind="path"-typed (same
+  # ${VAR} lazy-resolution mechanism as domain.path/tpxo_folder above).
   - target: open_boundary.temp
     kind: boundary_type
     boundary_condition_type: SPONGE
   - target: open_boundary.temp.values
     kind: file
-    file: /home/kb/source/repos/boundaries/boundary_data/nse/daily/daily_2024-03-01_to_2026-01-01.nc
+    file: ${BOUNDARY_FOLDER_BAROTROPIC}/nse/daily/daily_2024-03-01_to_2026-01-01.nc
     variable: thetao
     on_grid: true
     climatology: false
@@ -335,7 +331,7 @@ data_assignments:
     boundary_condition_type: SPONGE
   - target: open_boundary.salt.values
     kind: file
-    file: /home/kb/source/repos/boundaries/boundary_data/nse/daily/daily_2024-03-01_to_2026-01-01.nc
+    file: ${BOUNDARY_FOLDER_BAROTROPIC}/nse/daily/daily_2024-03-01_to_2026-01-01.nc
     variable: so
     on_grid: true
     climatology: false
@@ -352,13 +348,15 @@ data_assignments:
 # NOT verified against cfg_output.py's actual save-frequency logic -- tune to
 # match your real cadence.
 #
-# `folder` is oceanicu's original output.folder ("/data/kb"), now shared across
-# every file below -- each file's `path` is just a filename, joined to `folder`
-# since it's relative. Override --output-dir at the CLI to force all of them
-# elsewhere for one run without editing this file, or give a file an absolute
-# `path` to opt that one file out of the shared folder.
+# `folder` is oceanicu's original output.folder, now shared across every file
+# below (kind="path"-typed, same ${VAR} lazy-resolution as domain.path/
+# tpxo_folder above) -- each file's `path` is just a filename, joined to
+# `folder` since it's relative. `pygetm-config run --output-dir` (core CLI
+# only, nse_driver.py doesn't have its own equivalent flag) overrides this
+# for one run without editing the file; give a file an absolute `path` to
+# opt that one file out of the shared folder.
 output:
-  folder: /data/kb
+  folder: ${OUTPUT_FOLDER}
   files:
     - type: netcdf
       path: nse_meteo.nc
@@ -419,12 +417,28 @@ output:
 # CHOICE of data source schema-validated (catches typos, wrong types, missing
 # folders), it doesn't yet automatically wire that choice into a live pygetm
 # call. Keep both in sync by hand for now if you change one.
+# Every `folder`/`tpxo_folder` below is kind="path"-typed and uses ${VAR}
+# syntax (pygetm-config's own TODO item 15 lazy-resolution mechanism, see
+# domain.path's own comment above for the full explanation) -- resolved only
+# at actual use time, never at validate/generation time, so this file has no
+# machine-specific absolute paths baked in anywhere. hydrography.CMEMS/
+# river_discharge.emorid.folder are consumed directly by scripts/hydrography.py/
+# scripts/rivers.py (project-specific script hooks, not core pygetm-config
+# code), which call loader.resolve_data_path themselves -- see those files'
+# own docstrings. meteo.<source>.folder feeds nse_driver.py's dynamically-
+# built data_assignments entries, which DO go through the core mechanism
+# automatically (kind="file" -> loader._coerce_value's "path" handling), no
+# extra code needed there. boundaries.* below are currently NOT auto-wired
+# into any real pygetm call at all (see this section's own module-level
+# comment) -- ${VAR}-ified anyway for when that changes, and so a stray
+# absolute path doesn't quietly reappear here even though nothing reads it
+# today.
 hydrography:
   source: CMEMS
   CMEMS:
-    folder: /home/kb/source/repos/boundaries/init_data/nse/
+    folder: ${HYDROGRAPHY_FOLDER_CMEMS}/init_data/nse/
   WOA:
-    folder: /data/WOA   # env: HYDROGRAPHY_FOLDER
+    folder: ${HYDROGRAPHY_FOLDER}
   constant:
     temp: 9
     salt: 36
@@ -432,15 +446,15 @@ boundaries:
   barotropic:
     source: TPXO
     TPXO:
-      tpxo_folder: /data/TPXO9   # env: TPXO_FOLDER
+      tpxo_folder: ${TPXO_FOLDER}
     CMEMS:
-      folder: /home/kb/source/repos/boundaries/boundary_data/hourly   # env: BOUNDARY_FOLDER_BAROTROPIC
+      folder: ${BOUNDARY_FOLDER_BAROTROPIC}/hourly
       folder_template: "{setup}/CMEMS"
       filename_template: "hourly_{start_date}_to_{end_date}.nc"
       start_date: "2024-03-01"
       end_date: "2026-01-01"
     CMIP6:
-      folder: /data/CMIP6   # env: BOUNDARY_FOLDER_BAROTROPIC
+      folder: ${CMIP6_BOUNDARY_FOLDER}
       folder_template: "{setup}/CMIP6/{model}/{scenario}"
       filename_template: "{start_date}_to_{end_date}.nc"
       model: "MPI-ESM1-2-HR"
@@ -450,15 +464,20 @@ boundaries:
   baroclinic:
     source: CMEMS
     WOA:
-      folder: /data/WOA   # env: BOUNDARY_FOLDER_BAROCLINIC
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC}
     CMEMS:
-      folder: /home/kb/source/repos/boundaries/boundary_data   # env: BOUNDARY_FOLDER_BAROTROPIC (sic -- verified directly against nse_model_config.yaml, not a typo introduced here)
+      # ${BOUNDARY_FOLDER_BAROTROPIC} (sic) -- verified directly against
+      # nse_model_config.yaml/machines.yaml: the ORIGINAL oceanicu convention
+      # really does read this baroclinic folder from the "barotropic"-named
+      # env var, a genuine upstream naming inconsistency, faithfully
+      # preserved (not a typo introduced here) rather than silently renamed.
+      folder: ${BOUNDARY_FOLDER_BAROTROPIC}
       folder_template: "nse/daily"
       filename_template: "daily_{start_date}_to_{end_date}.nc"
       start_date: "2024-03-01"
       end_date: "2026-01-01"
     CMIP6:
-      folder: /data/CMIP6
+      folder: ${CMIP6_BOUNDARY_FOLDER}
       folder_template: "{setup}/CMIP6/{model}/{scenario}"
       filename_template: "{start_date}_to_{end_date}.nc"
       model: "MPI-ESM1-2-HR"
@@ -478,7 +497,8 @@ boundaries:
 meteo:
   source: ERA5
   ERA5:
-    folder: /data/ERA5/kaj   # env: ERA5_FOLDER -- see data_assignments note above re: this only having 2025 data
+    # See data_assignments note above re: this only having 2025 data on disk.
+    folder: ${ERA5_FOLDER}
     evaporation: true
     shortwave_method: 1   # ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
     longwave_method: 1
@@ -493,7 +513,7 @@ meteo:
     # comment (right before validate_config) for the real file naming
     # convention and which fields aren't available yet (radiation, cloud
     # cover -- "not been finally fixed yet" on the data-provider side).
-    folder: /data/BiasCorrected   # env: CMIP6_FOLDER
+    folder: ${CMIP6_FOLDER}
     folder_template: "CMIP6/{model}/{scenario}/meteo"
     model: "GFDL-ESM4"
     scenario: "ssp126"
@@ -503,6 +523,9 @@ meteo:
 river_discharge:
   source: emorid
   emorid:
-    folder: /data/EMORID   # env: RIVER_FOLDER
-    file: EMORID_1990_2024.nc   # env: RIVER_FILE
+    folder: ${RIVER_FOLDER}
+    # A bare filename, not a full path -- no ${VAR} needed (`file` is a plain
+    # scalar str, not kind="path", since it's just joined onto `folder` by
+    # scripts/rivers.py itself; already portable as-is).
+    file: EMORID_1990_2024.nc
     threshold: 0

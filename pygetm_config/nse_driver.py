@@ -40,20 +40,6 @@ from pygetm_config.errors import SchemaValidationError
 from pygetm_config.schema import build_schema
 from pygetm_config.yaml_parse import validate_config
 
-# Real, working location on this machine (orca) as of 2026-08 -- used only when
-# BATHYMETRY_FOLDER isn't set in the environment. machines.yaml already has a
-# BATHYMETRY_FOLDER entry per hostname (same convention as TPXO_FOLDER/
-# ERA5_FOLDER/etc.), but orca's current value ("/data/Bathymetry/NS") doesn't
-# exist on disk -- stale, not fixed here since the intended correction isn't
-# obvious (moved? renamed? never valid?). Whoever owns machines.yaml should
-# either fix that entry or export BATHYMETRY_FOLDER correctly before relying
-# on the env var alone.
-_DEFAULT_BATHYMETRY_FOLDER = "/home/kb/source/repos/OceanICU/oceanicu_3d/Bathymetry"
-
-# Same convention, and (unlike BATHYMETRY_FOLDER) machines.yaml's own
-# TPXO_FOLDER for this host (orca: /server/data/TPXO9) is verified correct --
-# real TPXO9 atlas data confirmed present there, not stale.
-_DEFAULT_TPXO_FOLDER = "/server/data/TPXO9"
 
 
 # The five data_script/script/post_data_script target functions that used to
@@ -147,13 +133,13 @@ def main(argv=None) -> int:
 
     # Before any real file access (TODO item 15, pygetm-config) -- populates
     # os.environ for whatever ${VAR}/$VAR data-path references a config uses
-    # (see loader.resolve_data_path). NSe's own bathymetry.path/tpxo_folder
-    # resolution below (BATHYMETRY_FOLDER/TPXO_FOLDER) is a separate, older,
-    # bespoke mechanism -- NOT yet migrated to use ${VAR} syntax directly in
-    # nse_from_oceanicu.yaml, so this call doesn't change ITS behavior today;
-    # it's here so --data-root/--data-roots-file are available for any OTHER
-    # data_assignments/array_like file field that already does (or later
-    # adopts) ${VAR} syntax.
+    # (see loader.resolve_data_path). nse_from_oceanicu.yaml's own domain.path/
+    # tpxo_folder/hydrography.folder/river_discharge.folder/meteo.folder all
+    # use ${VAR} syntax directly now (migrated from the bespoke BATHYMETRY_
+    # FOLDER/TPXO_FOLDER os.getenv-with-hardcoded-default pre-processing this
+    # function used to do itself, which bypassed pygetm-config's own lazy
+    # resolution and baked in a machine-specific absolute path at generation
+    # time -- see git history if you need that version as reference).
     loader.apply_data_roots(args.data_root, args.data_roots_file)
 
     # Auto-register oceanicu_providers.py (this directory) via the zero-
@@ -171,35 +157,17 @@ def main(argv=None) -> int:
     with open(args.config) as f:
         raw = yaml.safe_load(f)
 
-    # Resolve domain.path's folder from BATHYMETRY_FOLDER, exactly like
-    # run_model.py resolves TPXO_FOLDER/ERA5_FOLDER/etc. (os.getenv(VAR,
-    # default) -- see module-level comment on _DEFAULT_BATHYMETRY_FOLDER for
-    # why the default, not the env var, is what actually works today).
-    # `bathymetry:` used to be its own top-level section (domain/bathymetry
-    # unification, pygetm-config) -- now it's domain: {method: BathymetryFile,
-    # path: ..., ...}, same field, different location.
-    domain_cfg = raw.get("domain")
-    if domain_cfg and domain_cfg.get("method") == "BathymetryFile" and domain_cfg.get("path") and not os.path.isabs(domain_cfg["path"]):
-        folder = os.getenv("BATHYMETRY_FOLDER", _DEFAULT_BATHYMETRY_FOLDER)
-        domain_cfg["path"] = str(Path(folder) / domain_cfg["path"])
-
-    # Same TPXO_FOLDER env var run_model.py itself resolves (see machines.yaml)
-    # -- overrides every kind='tpxo' data_assignments entry's tpxo_folder, same
-    # override-with-real-default pattern as bathymetry above.
-    for entry in raw.get("data_assignments", []):
-        if entry.get("kind") == "tpxo":
-            entry["tpxo_folder"] = os.getenv("TPXO_FOLDER", _DEFAULT_TPXO_FOLDER)
-
     # river_discharge.emorid.script's own schema default (see
     # oceanicu_providers.py, computed from THAT file's own __file__) isn't
     # auto-injected by validate_config -- it only ever keeps fields
     # EXPLICITLY present in the raw YAML, never fills in unset ones (a
     # schema `default` is template/TUI-display-only). Set it here explicitly
     # if the YAML doesn't override it, so nse_from_oceanicu.yaml itself
-    # doesn't need a machine-specific absolute path baked in -- same
-    # "resolve portably at run time" reasoning as BATHYMETRY_FOLDER/
-    # TPXO_FOLDER above. Only "emorid" today (the one real registered
-    # source, see oceanicu_providers.py's own river_discharge role).
+    # doesn't need a machine-specific absolute path baked in -- these
+    # `scripts/*.py:function` paths are already portable via Path(__file__)
+    # (resolve correctly wherever this repo is checked out), not a ${VAR}
+    # case. Only "emorid" today (the one real registered source, see
+    # oceanicu_providers.py's own river_discharge role).
     river_discharge = raw.get("river_discharge") or {}
     emorid_cfg = river_discharge.get("emorid") or {}
     if river_discharge.get("source") == "emorid":

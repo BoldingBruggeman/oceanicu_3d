@@ -15,6 +15,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from pygetm_config.loader import resolve_data_path
+
 
 def add_rivers(domain, config: dict):
     """Mirrors cfg_rivers.py's create() -- dynamic, threshold-filtered, read from
@@ -29,12 +31,21 @@ def add_rivers(domain, config: dict):
     source is active (only "emorid" is registered today) has its fields
     flattened onto `config["river_discharge"]` directly by validate_config,
     regardless of whether the YAML wrote them nested under `emorid:` or flat.
+
+    `folder` may be a "${VAR}"/"$VAR" reference (pygetm-config's own TODO
+    item 15 lazy-resolution mechanism) -- resolve_data_path expands it here,
+    at actual use time, exactly like pygetm-config's own generic kind="path"/
+    kind="file" handling does for core schema fields. This function isn't
+    core pygetm-config code (it's a project-specific script hook, loaded via
+    load_dotted_target), so it has to opt into that resolution explicitly --
+    unlike domain.path/tpxo_folder/data_assignments file, which get it for
+    free via loader._coerce_value's own "path" TypeKind branch.
     """
     import xarray as xr
     import pygetm
 
     rcfg = config["river_discharge"]
-    path = Path(rcfg["folder"]) / rcfg["file"]
+    path = Path(resolve_data_path(rcfg["folder"])) / rcfg["file"]
     threshold = rcfg.get("threshold", 0)
 
     with xr.open_dataset(path) as ds:
@@ -81,7 +92,7 @@ def set_river_data(sim, domain, config: dict) -> int:
     import xarray as xr
 
     rcfg = config["river_discharge"]
-    path = Path(rcfg["folder"]) / rcfg["file"]
+    path = Path(resolve_data_path(rcfg["folder"])) / rcfg["file"]
     # CFDatetimeCoder(use_cftime=True), matching cfg_rivers.py's own real
     # data() exactly -- needed for Q's time dimension, unlike add_rivers
     # above (which never reads a time-varying variable at all).
