@@ -10,8 +10,9 @@ for the general design these files are an instance of.
 - **`nse_from_oceanicu.yaml`** — `oceanicu_3d/nse_model_config.yaml` converted
   to pygetm-config's schema-validated format. Includes a real
   `data_assignments:` block feeding meteo/radiation/boundary forcing into the
-  simulation (verified working, see below), a `bathymetry:` section pointing
-  at the real bathymetry file, and (see next bullet) schema-validated
+  simulation (verified working, see below), a `domain:` section (`method:
+  BathymetryFile`) pointing at the real bathymetry file, and (see next bullet)
+  schema-validated
   `hydrography:`/`boundaries:`/`meteo:`/`river_discharge:` sections with
   EVERY real data-source alternative present — not just the one this setup
   actually uses. This is `pygetm_config`'s nested-by-label convention (now
@@ -32,8 +33,8 @@ for the general design these files are an instance of.
   that's genuinely just data goes through `pygetm_config.loader` generically;
   only the dynamic, threshold-filtered river-loading loop stays bespoke Python
   (domain-building used to be bespoke too, until pygetm-config grew a generic
-  `bathymetry:` schema section covering this exact NetCDF-reading convention).
-  Automatically registers `oceanicu_providers.py` (below) via
+  `domain:` `BathymetryFile` choice covering this exact NetCDF-reading
+  convention). Automatically registers `oceanicu_providers.py` (below) via
   `PYGETM_CONFIG_PROVIDERS` before calling `build_schema()` — no manual export
   needed to run this file.
 - **`scripts/`** — the real `<role>.data_script`/`script`/`post_data_script`
@@ -71,32 +72,70 @@ for the general design these files are an instance of.
   See the module's own docstring for details, and pygetm-config's
   `docs/providers.md`.
 
-**Path convention**: a hardcoded absolute path (tried first) is wrong the
-moment this runs on another machine, and a path relative to the current
-directory or the config file's own location breaks once `nse_driver.py`/the
-config live in a separate run-folder per run, at a location that's the
-user's choice, unrelated to where the shared data actually lives. So
-`bathymetry.path` in `nse_from_oceanicu.yaml` is just a filename
-(`bathymetry_nse.nc`); `nse_driver.py` resolves its folder from the
-`BATHYMETRY_FOLDER` environment variable, exactly like OceanICU's own
-`run_model.py` already resolves `TPXO_FOLDER`/`ERA5_FOLDER`/`RIVER_FOLDER`/
-`HYDROGRAPHY_FOLDER`/`FABM_FOLDER` (`os.getenv(VAR, <default>)`, see
-`run_model.py:263-469`) — `machines.yaml` already has a `BATHYMETRY_FOLDER`
-key per hostname for exactly this, just not consumed by `run_model.py`
-itself (only `run_simulation.py`'s separate symlink-into-the-rundir step uses
-it). **Found while wiring this up**: `machines.yaml`'s `BATHYMETRY_FOLDER`
-for `orca` is `/data/Bathymetry/NS`, which doesn't exist on this machine —
-stale. `nse_driver.py`'s fallback default (used only when the env var isn't
-set) points at the real, verified location instead
-(`oceanicu_3d/Bathymetry/`); fix `machines.yaml`'s entry (or export
-`BATHYMETRY_FOLDER` correctly) to rely on the env var alone. ERA5/EMORID
-paths still don't follow this convention yet (see the date-mismatch note
-below) — a natural next step, not done here.
+**Editing this file in the TUI** (`pygetm-config edit`, runs pygetm-free —
+see pygetm-config's own `README.md`'s "Two environments" section) needs a
+schema *snapshot* (`build_schema()` itself requires a live pygetm import, so
+the pygetm-free TUI can't call it directly): `dist/schema.json` in this
+directory. It's a build artifact (gitignored, regenerate on demand, don't
+commit) and must be dumped WITH `oceanicu_providers.py` registered, or
+`hydrography:`/`boundaries:`/`river_discharge:`/`meteo:` validate silently as
+unknown-but-ignored top-level keys instead of real, checked fields (`pygetm-config
+dump`'s plain core schema has no providers at all — confirmed directly:
+16 sections vs. 21 with providers registered, and a different `schema_fingerprint`
+than what `nse_driver.py` itself actually builds and validates against):
+
+```bash
+conda activate pygetm
+PYGETM_CONFIG_PROVIDERS="$(pwd)/oceanicu_providers.py:register_oceanicu_providers" \
+  pygetm-config dump -o dist/schema.json
+
+conda activate .venv-tui  # or: source <pygetm-config repo>/.venv-tui/bin/activate
+pygetm-config edit --schema dist/schema.json nse_from_oceanicu.yaml
+```
+
+`build_schema()` itself logs its own provenance at `INFO` (pygetm-config's
+own `schema.py`) — real question this answers: "how was this schema
+obtained?" It never reads a `schema.json` in any of `nse_driver.py`'s own
+code paths (`build_schema()` runs live every time); only `pygetm-config edit`
+loads a pre-dumped one, since it's the one command that has to run pygetm-free.
+
+**Path convention**: `nse_from_oceanicu.yaml` has NO hardcoded absolute paths
+anywhere — every `domain.path`/`tpxo_folder`/provider `folder`/`data_assignments`
+`file` is a `"${VAR}"` reference, resolved lazily by pygetm-config's own
+`loader.resolve_data_path` (TODO item 15, pygetm-config repo) only at the
+point of actual file access — never at `validate`/generation time, so
+`--dump-python`/`--print-config`/`pygetm-config edit` all work fine even with
+none of these exported (a config with an unresolved `${VAR}` still validates
+and generates cleanly; only actually *opening* the file, in real execution or
+when the generated script itself runs, needs the var set). Export each one
+directly, pass `--data-root NAME=VALUE` (repeatable), or list them in a
+`--data-roots-file` (a flat `NAME: value` YAML, gap-fill only — see
+`nse_driver.py -h`). Currently referenced:
+
+| Variable | Used for |
+|---|---|
+| `BATHYMETRY_FOLDER` | `domain.path` |
+| `TPXO_FOLDER` | tidal harmonics (`data_assignments` `kind: tpxo`, `boundaries.barotropic.TPXO`) |
+| `HYDROGRAPHY_FOLDER_CMEMS` / `HYDROGRAPHY_FOLDER` | `hydrography.CMEMS`/`.WOA` initial-condition folders |
+| `BOUNDARY_FOLDER_BAROTROPIC` | barotropic CMEMS folder, **and** baroclinic CMEMS folder (sic — verified directly against `nse_model_config.yaml`/`machines.yaml`: the original oceanicu convention really does read the baroclinic folder from the "barotropic"-named var) |
+| `BOUNDARY_FOLDER_BAROCLINIC` | `boundaries.baroclinic.WOA` |
+| `CMIP6_BOUNDARY_FOLDER` | `boundaries.{barotropic,baroclinic}.CMIP6` |
+| `ERA5_FOLDER` | `meteo.ERA5` (only has 2025 data on disk today — see the date-mismatch note below) |
+| `CMIP6_FOLDER` | `meteo.CMIP6` (the bias-corrected dataset) |
+| `RIVER_FOLDER` | `river_discharge.emorid` |
+| `KD490_FOLDER` | radiation `kc2` climatology file |
+| `OUTPUT_FOLDER` | `output.folder` |
+
+`machines.yaml` already has some of these per hostname (e.g. `BATHYMETRY_FOLDER`,
+verified stale for `orca` — `/data/Bathymetry/NS` doesn't exist there) — not
+consumed here at all; export the correct value directly instead of relying on
+that file.
 
 To run (verified working from an arbitrary directory, not just this one):
 
 ```bash
 conda activate pygetm  # needs pygetm AND pygetm-config (pip install -e ".[introspect]" from the pygetm-config repo)
+export BATHYMETRY_FOLDER=... TPXO_FOLDER=... # ...and the rest of the table above
 python nse_driver.py nse_from_oceanicu.yaml --start 2025-03-01T00:00:00 --stop 2025-03-02T00:00:00 --dry-run
 ```
 
