@@ -160,6 +160,17 @@ that still matters: regenerate whenever `nse_from_oceanicu.yaml` itself
 changes — don't hand-edit `generated_nse.py` and keep using it, or it becomes
 a second, drifting source of truth.
 
+`generated_nse.py` is structured into real functions — `create_domain()`,
+`create_simulation(domain)`, `configure_output(sim)`, `run(sim)` — mirroring
+this project's own `run_model.py`, not one long flat sequence of statements.
+`--dump-python generated_nse.py` also writes `generated_nse_config.yaml`
+alongside it: the full validated config, readable/diffable on its own instead
+of embedded as one giant inline `repr()`'d dict literal. `generated_nse.py`
+reads it back via `Path(__file__).parent`, not the current working directory,
+so the pair — copy both files together — stays runnable regardless of where
+or on which machine you invoke it from (verified: run standalone from a
+scratch directory unrelated to this repo, `EXIT: 0`).
+
 **The `sst = airsea.t2m` gap is closed too**: `set_sst_proxy` (this file,
 needed for `BAROTROPIC_2D`/`3D` — pygetm's `FluxesFromMeteo` requires `sst`
 set but there's no baroclinic temperature to derive it from) is now

@@ -12,5 +12,7 @@ reorganise_meteo.sh
 
 # pygetm_schema/nse_driver.py --dump-python's default output filename -- a
 # one-off standalone debugging script (see pygetm_schema.codegen's own
-# docstring), regenerated on demand, not meant to be committed.
+# docstring), regenerated on demand, not meant to be committed. Includes its
+# companion config YAML (TODO item 10 -- config_yaml_path).
 pygetm_schema/generated*.py
+pygetm_schema/generated*_config.yaml

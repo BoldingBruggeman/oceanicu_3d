@@ -277,6 +277,8 @@ def main(argv=None) -> int:
     if args.dump_python:
         from pygetm_schema import codegen
 
+        out_path = args.dump_python if isinstance(args.dump_python, str) else "generated_nse.py"
+        config_yaml_path = str(Path(out_path).with_name(Path(out_path).stem + "_config.yaml"))
         script = codegen.generate_script(
             config,
             schema,
@@ -285,11 +287,12 @@ def main(argv=None) -> int:
             load_restart=args.load_restart,
             save_restart=args.save_restart,
             skip_unavailable_output=args.skip_unavailable_output,
+            config_yaml_path=config_yaml_path,
         )
-        out_path = args.dump_python if isinstance(args.dump_python, str) else "generated_nse.py"
         with open(out_path, "w") as f:
             f.write(script)
         print(f"wrote {out_path}", file=sys.stderr)
+        print(f"wrote {config_yaml_path}", file=sys.stderr)
         return 0
 
     domain = loader.build_domain(config, schema)
