@@ -105,11 +105,16 @@ def add_rivers(domain, config: dict):
 
 
 def set_sst_proxy(sim, domain, config: dict) -> None:
-    """Verified directly against cfg_airsea.py's own data() function: "if not
-    a baroclinic run use the t2m temperatures as proxy for SST"
-    (`sim.sst = sim.airsea.t2m`) -- without it, pygetm's FluxesFromMeteo
-    airsea implementation requires sst to be set even for non-baroclinic
-    runtypes and sim.start() crashes with `AssertionError: sst is masked`.
+    """Barotropic runtypes (BAROTROPIC_2D/BAROTROPIC_3D) have no computed sea
+    surface temperature to give pygetm's FluxesFromMeteo airsea
+    implementation (which requires sst to be set regardless of runtype), so
+    they use t2m (2m air temperature) as a stand-in. BAROCLINIC runs have a
+    real, model-calculated SST and don't need this substitution at all.
+    Verified directly against cfg_airsea.py's own data() function -- its
+    comment there: "if not a baroclinic run use the t2m temperatures as
+    proxy for SST" (`sim.sst = sim.airsea.t2m`). Without this, sim.start()
+    crashes under a non-baroclinic runtype with `AssertionError: sst is
+    masked`.
 
     Must run AFTER data_assignments (needs sim.airsea.t2m to already hold a
     real value, not just exist -- cfg_airsea.py's own version of this line
