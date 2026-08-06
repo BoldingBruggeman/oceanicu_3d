@@ -181,6 +181,33 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
             help="longwave radiation method selector (see pygetm.airsea.FluxesFromMeteo)",
             importance=Importance.ADVANCED,
         ),
+        ParameterSpec(
+            name="data_script",
+            type=TypeRef(kind="scalar", scalar_type="str"),
+            default=f"{_NSE_DRIVER_PATH}:set_meteo_data",
+            help=(
+                "path/to/file.py:function_name for the ONE piece of meteo data "
+                "attachment that genuinely can't be a static data_assignments "
+                "entry: CMIP6's net shortwave/longwave (swr = rsds - rsus, "
+                "ql = rlds - rlus, mirroring cfg_airsea.py's own data()) is a "
+                "subtraction of TWO files, and pre_transform only supports a "
+                "scale/offset on ONE file's value -- see pygetm_schema.loader."
+                "run_meteo_data_script's own docstring. Every other field "
+                "(u10/v10/t2m/qa-or-d2m/sp/tp/tcc) IS a genuine 1:1 file read "
+                "(or, for tcc, a required-even-if-unused constant) and is a "
+                "real data_assignments entry instead -- pygetm.input.from_nc "
+                "already handles a glob pattern (ERA5's annual files) or a "
+                "single filename (CMIP6) identically, no branch needed for "
+                "those. A no-op for ERA5 (which doesn't need this at all with "
+                "the default shortwave/longwave method) -- ONE function covers "
+                "every source (branches internally, matching cfg_airsea.py's "
+                "own single data(sim, cfg) doing the same), so the SAME "
+                "default is shared by every alternative below rather than "
+                "each having its own. Same convention as river_discharge."
+                "data_script/PYGETM_SCHEMA_PROVIDERS."
+            ),
+            importance=Importance.BASIC,
+        ),
     )
 
     meteo = make_provider_slot(

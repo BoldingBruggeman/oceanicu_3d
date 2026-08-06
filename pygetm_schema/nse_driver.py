@@ -149,6 +149,36 @@ def set_river_data(sim, domain, config: dict) -> int:
     return n_set
 
 
+def set_meteo_data(sim, domain, config: dict) -> None:
+    """Mirrors cfg_airsea.py's own data() -- the piece that would need real
+    Python (not a static data_assignments entry): CMIP6's net shortwave/
+    longwave, `swr = rsds - rsus`/`ql = rlds - rlus`, a subtraction of TWO
+    separate files (pre_transform only supports a scale/offset on ONE
+    file's value; pre_transform_expression is deliberately refused for
+    security reasons).
+
+    CURRENTLY A NO-OP (user-confirmed real data gap, 2026-08-06): the
+    actual bias-corrected CMIP6 dataset this project uses
+    (/data/BiasCorrected/CMIP6/<model>/<scenario>/meteo/, re-interpolated
+    onto ERA5's own grid/calendar/hourly convention -- verified directly
+    against a real sample file: latitude/longitude coords, calendar
+    proleptic_gregorian, matching ERA5 exactly) provides evspsbl/huss/pr/
+    psl/tas/uas/vas -- NO rsds/rsus/rlds/rlus (shortwave/longwave) and NO
+    cloud cover at all. "Not been finally fixed yet" (user's own words) on
+    the data-provider side -- not fabricated here. sim.airsea.swr/.ql are
+    left to pygetm's own FluxesFromMeteo auto-compute (ROSATI_MIYAKODA/
+    CLARK, the schema's own default shortwave_method/longwave_method),
+    same as ERA5's own default path already does when it isn't given an
+    explicit NET_FLUX/DOWNWARD_FLUX file either.
+
+    Registered via meteo.data_script (see pygetm_schema.loader.
+    run_meteo_data_script) so the wiring is ready the moment real
+    radiation/cloud-cover data exists -- until then this intentionally
+    does nothing.
+    """
+    return
+
+
 def set_sst_proxy(sim, domain, config: dict) -> None:
     """Barotropic runtypes (BAROTROPIC_2D/BAROTROPIC_3D) have no computed sea
     surface temperature to give pygetm's FluxesFromMeteo airsea
@@ -316,6 +346,93 @@ def main(argv=None) -> int:
             emorid_cfg["data_script"] = f"{Path(__file__).parent / 'nse_driver.py'}:set_river_data"
         river_discharge["emorid"] = emorid_cfg
         raw["river_discharge"] = river_discharge
+
+    # meteo.<source>.data_script's own schema default (see
+    # oceanicu_providers.py) isn't auto-injected either (same reasoning as
+    # river_discharge.script/data_script above). Unlike bathymetry/tpxo,
+    # meteo's straightforward 1:1 file-read fields (u10/v10/t2m/qa-or-d2m/
+    # sp/tp/tcc) genuinely differ by SOURCE, not just by file path -- CMIP6
+    # uses `qa`/SPECIFIC_HUMIDITY, ERA5 uses `d2m`/DEW_POINT_TEMPERATURE,
+    # real distinct TARGET fields, not just different data -- so a single
+    # static data_assignments list in the YAML can't represent "pick one of
+    # these two sets" the way a single scalar override can. Computed here
+    # instead, mirroring cfg_airsea.py's own data() exactly (see
+    # set_meteo_data's own docstring for the swr/ql CMIP6-only derived-flux
+    # piece this does NOT cover -- ERA5's own swr/ql, when actually needed,
+    # are each a single file read, real data_assignments entries below).
+    meteo = raw.get("meteo") or {}
+    meteo_source = meteo.get("source")
+    meteo_cfg = (meteo.get(meteo_source) or {}) if meteo_source in ("ERA5", "CMIP6") else {}
+    if meteo_source in ("ERA5", "CMIP6"):
+        if not meteo_cfg.get("data_script"):
+            meteo_cfg["data_script"] = f"{Path(__file__).parent / 'nse_driver.py'}:set_meteo_data"
+        meteo[meteo_source] = meteo_cfg
+        raw["meteo"] = meteo
+
+        _folder = Path(meteo_cfg["folder"])
+        if meteo_cfg.get("folder_template"):
+            _folder = _folder / meteo_cfg["folder_template"].format(
+                model=meteo_cfg.get("model", ""), scenario=meteo_cfg.get("scenario", "")
+            )
+
+        if meteo_source == "ERA5":
+            _meteo_assignments = [
+                {"target": "simulation.airsea.t2m", "kind": "file", "file": str(_folder / "era5_t2m_????.nc"), "variable": "t2m", "pre_transform_offset": -273.15},
+                {"target": "simulation.airsea.d2m", "kind": "file", "file": str(_folder / "era5_d2m_????.nc"), "variable": "d2m", "pre_transform_offset": -273.15},
+                {"target": "simulation.airsea.u10", "kind": "file", "file": str(_folder / "era5_u10_????.nc"), "variable": "u10"},
+                {"target": "simulation.airsea.v10", "kind": "file", "file": str(_folder / "era5_v10_????.nc"), "variable": "v10"},
+                {"target": "simulation.airsea.sp", "kind": "file", "file": str(_folder / "era5_sp_????.nc"), "variable": "sp"},
+                {"target": "simulation.airsea.tp", "kind": "file", "file": str(_folder / "era5_tp_????.nc"), "variable": "tp", "pre_transform_scale": 1 / 3600.0},
+                {"target": "simulation.airsea.tcc", "kind": "file", "file": str(_folder / "era5_tcc_????.nc"), "variable": "tcc"},
+            ]
+        else:  # CMIP6
+            # Real, verified data (2026-08-06): the actual bias-corrected
+            # dataset (/data/BiasCorrected/CMIP6/<model>/<scenario>/meteo/,
+            # re-interpolated onto ERA5's own grid/calendar/hourly
+            # convention -- confirmed directly against a real sample file:
+            # latitude/longitude coords matching ERA5 exactly, calendar
+            # proleptic_gregorian -- NOT raw CMIP6's own noleap calendar/
+            # native grid/coarser variable set) -- filenames are
+            # "{var}_bc_bilinear__disagg_{year}.nc" (the "_disagg" variant
+            # specifically -- ERA5-diurnal-cycle-disaggregated, confirmed
+            # the one to use, not the coarser non-disagg file also present
+            # per-variable). psl (sea-level pressure, not sp/surface
+            # pressure) is used as an approximation for sp -- a real,
+            # unresolved physical simplification for this shelf/coastal
+            # domain, not something to silently treat as exact. evspsbl
+            # (evaporation) exists in this dataset but is NOT wired in --
+            # calculate_evaporation stays True (pygetm computes it
+            # internally, same as the other sources) rather than assuming
+            # evspsbl is a drop-in replacement without checking. tcc (cloud
+            # cover) does NOT exist in this dataset at all -- constant
+            # placeholder, same "required even if not used" reasoning as
+            # ERA5/pygetm's own require_set() check, see set_meteo_data's
+            # own docstring for why swr/ql are also left unset here (no
+            # radiation data available yet either).
+            _meteo_assignments = [
+                {"target": "simulation.airsea.t2m", "kind": "file", "file": str(_folder / "tas_bc_bilinear__disagg_????.nc"), "variable": "tas", "pre_transform_offset": -273.15},
+                {"target": "simulation.airsea.qa", "kind": "file", "file": str(_folder / "huss_bc_bilinear__disagg_????.nc"), "variable": "huss"},
+                {"target": "simulation.airsea.u10", "kind": "file", "file": str(_folder / "uas_bc_bilinear__disagg_????.nc"), "variable": "uas"},
+                {"target": "simulation.airsea.v10", "kind": "file", "file": str(_folder / "vas_bc_bilinear__disagg_????.nc"), "variable": "vas"},
+                {"target": "simulation.airsea.sp", "kind": "file", "file": str(_folder / "psl_bc_bilinear__disagg_????.nc"), "variable": "psl"},
+                {"target": "simulation.airsea.tp", "kind": "file", "file": str(_folder / "pr_bc_bilinear__disagg_????.nc"), "variable": "pr", "pre_transform_scale": 1 / 1000.0},
+                {"target": "simulation.airsea.tcc", "kind": "constant", "constant_value": 0.5},
+            ]
+            # humidity_measure differs by source too (a real airsea
+            # constructor param, not a data_assignments target -- see
+            # oceanicu_providers.py's own comment on why it isn't modeled
+            # as a schema field). Only set if not already overridden. `type`
+            # must be set alongside it (airsea is a discriminated ChoiceSpec
+            # -- FluxesFromMeteo | Fluxes -- humidity_measure alone is not a
+            # valid config on its own) -- defaults to FluxesFromMeteo,
+            # matching this schema's own default choice.
+            _airsea_cfg = raw.setdefault("simulation", {}).setdefault("airsea", {})
+            _airsea_cfg.setdefault("type", "FluxesFromMeteo")
+            _airsea_cfg.setdefault("humidity_measure", "SPECIFIC_HUMIDITY")
+
+        raw["data_assignments"] = _meteo_assignments + [
+            a for a in raw.get("data_assignments", []) if not str(a.get("target", "")).startswith("simulation.airsea.")
+        ]
 
     # Known issue in the source config -- see module docstring. Corrected here
     # with a loud warning, not silently.

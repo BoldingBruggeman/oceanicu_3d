@@ -237,58 +237,19 @@ runtime:
 # Data assignments -- the piece that was actually missing for sim.start() to
 # succeed at all: pygetm's FluxesFromMeteo requires t2m/d2m/u10/v10/sp/tcc to be
 # set before the simulation can run (verified: sim.start() raises an
-# AssertionError from airsea.py's require_set() without these). This ISN'T a
-# new pygetm-schema capability -- data_assignments (kind: file + pre_transform)
-# already does exactly "read this NetCDF variable and .set() it onto this
-# target"; it was just never populated for this file. The provider->
-# pygetm.input.from_nc bridge described as "future work" elsewhere in this repo
-# refers to AUTOMATING this (deriving these entries from the `providers.meteo`
-# block above); doing it by hand, once, for one provider's real files, needed
-# no new code at all.
+# AssertionError from airsea.py's require_set() without these).
 #
-# File paths and units verified directly against the real files in
-# providers.meteo.ERA5.folder (/data/ERA5/kaj): era5_{var}_2025.nc, hourly,
-# t2m/d2m in Kelvin (pygetm wants degrees_Celsius -- pre_transform_offset:
-# -273.15), u10/v10/sp/tcc already in pygetm's expected units (m/s, Pa,
-# dimensionless) so no transform needed.
-#
-# NOTE date mismatch, found while verifying this file actually runs: this
-# folder only has 2025 data (the whole point of this setup is a 2024-03 run --
-# see the top of this file). These entries are real and DO make sim.start()
-# succeed, but only for a 2025 date range (`pygetm-schema run ... --start
-# 2025-03-01T00:00:00 --stop ...`); a real 2024-03 run needs whichever ERA5
-# archive actually covers that period (e.g. /data/ERA5/NA/era5_t2m_2024.nc,
-# confirmed to exist, but not confirmed to be the intended spatial/QC choice for
-# this setup) -- point providers.meteo.ERA5.folder and the file paths below at
-# that instead.
+# UPDATE (TODO item 11): these entries used to be hardcoded here, ERA5-only,
+# with no way to switch to meteo.source: CMIP6 without hand-editing this
+# file too (CMIP6 uses different TARGET fields entirely -- qa/
+# SPECIFIC_HUMIDITY, not d2m/DEW_POINT_TEMPERATURE -- not just different
+# file paths). nse_driver.py now computes the right entries dynamically
+# from whichever meteo.source is active, mirroring cfg_airsea.py's own
+# real data() exactly (including tp, previously missing here) -- see that
+# file's own comment on this, right before validate_config runs. Nothing
+# to configure here anymore; switching providers.meteo.source above is
+# enough on its own, matching every other provider role's own convention.
 data_assignments:
-  - target: simulation.airsea.t2m
-    kind: file
-    file: /data/ERA5/kaj/era5_t2m_2025.nc
-    variable: t2m
-    pre_transform_offset: -273.15
-  - target: simulation.airsea.d2m
-    kind: file
-    file: /data/ERA5/kaj/era5_d2m_2025.nc
-    variable: d2m
-    pre_transform_offset: -273.15
-  - target: simulation.airsea.u10
-    kind: file
-    file: /data/ERA5/kaj/era5_u10_2025.nc
-    variable: u10
-  - target: simulation.airsea.v10
-    kind: file
-    file: /data/ERA5/kaj/era5_v10_2025.nc
-    variable: v10
-  - target: simulation.airsea.sp
-    kind: file
-    file: /data/ERA5/kaj/era5_sp_2025.nc
-    variable: sp
-  - target: simulation.airsea.tcc
-    kind: file
-    file: /data/ERA5/kaj/era5_tcc_2025.nc
-    variable: tcc
-
   # Radiation -- A/kc1 come from simulation.radiation.jerlov_type: Type_II
   # above automatically at construction; kc2 is overridden here with the real
   # KD490 climatology (mirrors run_model.py's own ObsKd: True branch --
@@ -519,10 +480,20 @@ meteo:
     shortwave_method: 1   # ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
     longwave_method: 1
   CMIP6:
-    folder: /data/CMIP6   # env: CMIP6_FOLDER
-    folder_template: "{model}/{scenario}/meteo"
-    model: "MPI-ESM1-2-HR"
-    scenario: "ssp585"
+    # Real, verified values (2026-08-06) -- the bias-corrected dataset this
+    # project actually uses (re-interpolated onto ERA5's own grid/calendar/
+    # hourly convention, NOT raw CMIP6's native grid/noleap calendar --
+    # confirmed against a real sample file). data_assignments entries for
+    # this source are computed dynamically by nse_driver.py from these
+    # values (folder/model/scenario), same as ERA5 above -- nothing else to
+    # edit here to switch source: ERA5 -> CMIP6. See nse_driver.py's own
+    # comment (right before validate_config) for the real file naming
+    # convention and which fields aren't available yet (radiation, cloud
+    # cover -- "not been finally fixed yet" on the data-provider side).
+    folder: /data/BiasCorrected   # env: CMIP6_FOLDER
+    folder_template: "CMIP6/{model}/{scenario}/meteo"
+    model: "GFDL-ESM4"
+    scenario: "ssp126"
     evaporation: true
     shortwave_method: 1
     longwave_method: 1
