@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Reference driver for nse_from_oceanicu.yaml (this directory), demonstrating the
-composable pattern from pygetm-schema's docs/yaml_vs_python.md: the Domain itself
-is now built generically by pygetm_schema.loader from the config's `bathymetry:`
+composable pattern from pygetm-config's docs/yaml_vs_python.md: the Domain itself
+is now built generically by pygetm_config.loader from the config's `bathymetry:`
 section (schema-validated -- see schema._build_bathymetry_section), since reading
 a pre-prepared bathymetry file turned out to need only variable names and a mask
 convention, not bespoke code. Rivers, by contrast, genuinely stay bespoke,
@@ -14,10 +14,10 @@ This is a REFERENCE / illustrative script -- it needs a real bathymetry NetCDF
 river-discharge NetCDF to actually run (paths taken from the config's
 `river_discharge:` section, which IS schema-validated -- see
 oceanicu_providers.py, registered automatically below via
-PYGETM_SCHEMA_PROVIDERS). Run in a pygetm-capable environment with
-pygetm-schema installed there too (`pip install -e ".[introspect]"` from the
-pygetm-schema repo) -- no sys.path hacks, this script has no dependency on
-being located near the pygetm-schema repo, only on pygetm_schema being
+PYGETM_CONFIG_PROVIDERS). Run in a pygetm-capable environment with
+pygetm-config installed there too (`pip install -e ".[introspect]"` from the
+pygetm-config repo) -- no sys.path hacks, this script has no dependency on
+being located near the pygetm-config repo, only on pygetm_config being
 importable:
 
     python nse_driver.py nse_from_oceanicu.yaml --start 2024-03-01T00:00:00 --stop 2024-03-02T00:00:00
@@ -41,10 +41,10 @@ from pathlib import Path
 
 import yaml
 
-from pygetm_schema import loader
-from pygetm_schema.errors import SchemaValidationError
-from pygetm_schema.schema import build_schema
-from pygetm_schema.yaml_parse import validate_config
+from pygetm_config import loader
+from pygetm_config.errors import SchemaValidationError
+from pygetm_config.schema import build_schema
+from pygetm_config.yaml_parse import validate_config
 
 # Real, working location on this machine (orca) as of 2026-08 -- used only when
 # BATHYMETRY_FOLDER isn't set in the environment. machines.yaml already has a
@@ -65,7 +65,7 @@ _DEFAULT_TPXO_FOLDER = "/server/data/TPXO9"
 def add_rivers(domain, config: dict):
     """Mirrors cfg_rivers.py's create() -- dynamic, threshold-filtered, read from
     an EMORID/JRC discharge file at run time. The *set* of rivers depends on the
-    threshold and the domain's exact footprint, so (per pygetm-schema's
+    threshold and the domain's exact footprint, so (per pygetm-config's
     docs/yaml_vs_python.md) this cannot become a static YAML list without losing
     that behavior; it has to stay a loop over real data, same as in OceanICU
     today.
@@ -113,7 +113,7 @@ def set_river_data(sim, domain, config: dict) -> int:
     subdomain -- not necessarily every one add_rivers positioned on the
     global domain). Needs a live sim.rivers (only exists once the
     Simulation object is built), so this runs via
-    river_discharge.data_script (see pygetm_schema.loader.
+    river_discharge.data_script (see pygetm_config.loader.
     run_river_discharge_data_script), a separate hook from
     river_discharge.script's own add_rivers (which runs before sim exists).
 
@@ -171,7 +171,7 @@ def set_meteo_data(sim, domain, config: dict) -> None:
     same as ERA5's own default path already does when it isn't given an
     explicit NET_FLUX/DOWNWARD_FLUX file either.
 
-    Registered via meteo.data_script (see pygetm_schema.loader.
+    Registered via meteo.data_script (see pygetm_config.loader.
     run_meteo_data_script) so the wiring is ready the moment real
     radiation/cloud-cover data exists -- until then this intentionally
     does nothing.
@@ -194,7 +194,7 @@ def set_sst_proxy(sim, domain, config: dict) -> None:
     Must run AFTER data_assignments (needs sim.airsea.t2m to already hold a
     real value, not just exist -- cfg_airsea.py's own version of this line
     lives right after its own t2m/d2m/u10/... assignments, not before them)
-    -- registered via post_data_script (see pygetm_schema.loader.
+    -- registered via post_data_script (see pygetm_config.loader.
     run_post_data_script), not river_discharge.script (that hook runs
     before the simulation object even exists, too early for this).
     """
@@ -210,7 +210,7 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
     Real Python needed for: (1) `.isel(time=imonth)` -- a monthly
     CLIMATOLOGY index PICK for the initial, one-time value (imonth derived
     from config['runtime']['time'], matching run_model.py's own real
-    `simstart.month - 1`) -- NOT pygetm-schema's own `climatology: True`
+    `simstart.month - 1`) -- NOT pygetm-config's own `climatology: True`
     data_assignments flag, which means something different (keep cycling
     the whole 12-month pattern for the entire run, wrong for an initial
     condition). (2) sim.density.convert_ts(sim.salt, sim.temp) -- pyGETM's
@@ -225,7 +225,7 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
     horizontal interpolation can leave real (non-fill) values sitting at
     domain points outside the real ocean mask.
 
-    Registered via hydrography.data_script (see pygetm_schema.loader.
+    Registered via hydrography.data_script (see pygetm_config.loader.
     run_hydrography_data_script) -- only called when NOT loading from a
     restart (checked there, not here). Checks runtype == BAROCLINIC itself
     (matching cfg_ic.py's own identical gate) since the core loader
@@ -278,7 +278,7 @@ def main(argv=None) -> int:
         action="store_true",
         help="drop individual requested output fields that don't exist for the chosen "
         "runtype (e.g. baroclinic fields under BAROTROPIC_2D) with a warning, instead of "
-        "failing -- default is to fail loudly. Matches pygetm-schema run's own flag.",
+        "failing -- default is to fail loudly. Matches pygetm-config run's own flag.",
     )
     parser.add_argument(
         "--print-config",
@@ -293,13 +293,13 @@ def main(argv=None) -> int:
         const=True,
         default=False,
         metavar="PATH",
-        help="write a self-contained, standalone Python script (no pygetm_schema import "
+        help="write a self-contained, standalone Python script (no pygetm_config import "
         "needed to run it) implementing this config as literal native pyGETM calls, then "
-        "exit without building/running anything here -- see pygetm_schema.codegen's module "
+        "exit without building/running anything here -- see pygetm_config.codegen's module "
         "docstring for the 'regenerate when the config changes, don't hand-maintain' scoping. "
         "Rivers are included: river_discharge.emorid.script (resolved above) points back at "
         "this file's own add_rivers(), whose real source gets embedded in the generated "
-        "script (see pygetm_schema.loader.run_river_discharge_script's docstring). The "
+        "script (see pygetm_config.loader.run_river_discharge_script's docstring). The "
         "generated script has its own real argparse CLI (-h shows it) -- --start/--stop/"
         "--dry-run/--load-restart/--save-restart/--skip-unavailable-output are genuine "
         "runtime arguments of THAT script, defaulting to whatever was given here, not fixed "
@@ -312,21 +312,21 @@ def main(argv=None) -> int:
         action="append",
         metavar="NAME=VALUE",
         help="override a data-path environment variable used by ${VAR}/$VAR references in "
-        "file/folder config fields; repeatable, always wins. Matches pygetm-schema run's own "
-        "flag (see pygetm_schema.loader.apply_data_roots).",
+        "file/folder config fields; repeatable, always wins. Matches pygetm-config run's own "
+        "flag (see pygetm_config.loader.apply_data_roots).",
     )
     parser.add_argument(
         "--data-roots-file",
         default=None,
         metavar="PATH",
         help="YAML file of NAME: value data-path env vars; only fills gaps not already "
-        "exported in the environment. Matches pygetm-schema run's own flag.",
+        "exported in the environment. Matches pygetm-config run's own flag.",
     )
     parser.add_argument(
         "--log-level",
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
-        help="verbosity for pygetm_schema.loader's native pyGETM call logging (see its module "
+        help="verbosity for pygetm_config.loader's native pyGETM call logging (see its module "
         "docstring's 'Debugging' note -- every domain/simulation/strategy construction, "
         ".set() call, add_by_index/add_by_location, output file, sim.start()/advance()/"
         "finish() is logged with the actual resolved arguments). DEBUG also shows one line "
@@ -337,14 +337,14 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
 
     # Must happen before build_schema()/anything pygetm-related -- see
-    # pygetm_schema.loader's module docstring "Debugging" note: pyGETM's own
+    # pygetm_config.loader's module docstring "Debugging" note: pyGETM's own
     # first domain-construction call has a side effect of configuring the root
     # logger itself, and a log call made before that point is silently dropped
     # (Python's "handler of last resort" only shows WARNING+ with no handler
     # configured yet) -- relying on that side effect's timing isn't safe.
     logging.basicConfig(level=getattr(logging, args.log_level), format="%(levelname)s:%(name)s:%(message)s")
 
-    # Before any real file access (TODO item 15, pygetm-schema) -- populates
+    # Before any real file access (TODO item 15, pygetm-config) -- populates
     # os.environ for whatever ${VAR}/$VAR data-path references a config uses
     # (see loader.resolve_data_path). NSe's own bathymetry.path/tpxo_folder
     # resolution below (BATHYMETRY_FOLDER/TPXO_FOLDER) is a separate, older,
@@ -356,13 +356,13 @@ def main(argv=None) -> int:
     loader.apply_data_roots(args.data_root, args.data_roots_file)
 
     # Auto-register oceanicu_providers.py (this directory) via the zero-
-    # packaging PYGETM_SCHEMA_PROVIDERS env var (see pygetm-schema's
+    # packaging PYGETM_CONFIG_PROVIDERS env var (see pygetm-config's
     # docs/providers.md) -- setdefault, not a hard override, so a caller can
     # still point at a different registry explicitly if they want. Must
     # happen BEFORE build_schema(), which is what actually reads this env var
     # (via providers.discover_provider_sections()).
     os.environ.setdefault(
-        "PYGETM_SCHEMA_PROVIDERS",
+        "PYGETM_CONFIG_PROVIDERS",
         f"{Path(__file__).parent / 'oceanicu_providers.py'}:register_oceanicu_providers",
     )
     schema = build_schema()
@@ -537,7 +537,7 @@ def main(argv=None) -> int:
         print(e, file=sys.stderr)
         return 1
 
-    # post_data_script isn't part of pygetm-schema's OWN schema at all (no
+    # post_data_script isn't part of pygetm-config's OWN schema at all (no
     # natural home for a single bare string -- see loader.run_post_data_script's
     # own docstring), unlike river_discharge.script (which piggybacks on the
     # ALREADY-schema-registered river_discharge role). Injected directly onto
@@ -553,7 +553,7 @@ def main(argv=None) -> int:
         return 0
 
     if args.dump_python:
-        from pygetm_schema import codegen
+        from pygetm_config import codegen
 
         out_path = args.dump_python if isinstance(args.dump_python, str) else "generated_nse.py"
         config_yaml_path = str(Path(out_path).with_name(Path(out_path).stem + "_config.yaml"))
@@ -586,7 +586,7 @@ def main(argv=None) -> int:
     loader.check_domain_cfl(domain)
 
     # Goes through the SAME generic mechanism --dump-python's generated
-    # scripts use (river_discharge.script, see pygetm_schema.loader.
+    # scripts use (river_discharge.script, see pygetm_config.loader.
     # run_river_discharge_script) rather than calling add_rivers() directly,
     # so real execution here and the generated standalone script are
     # provably consistent, not two separately-maintained paths to the same
@@ -616,7 +616,7 @@ def main(argv=None) -> int:
     print(f"{n_river_data} river(s) given real discharge data", file=sys.stderr)
 
     # Goes through the SAME generic mechanism --dump-python's generated
-    # scripts use (post_data_script, see pygetm_schema.loader.
+    # scripts use (post_data_script, see pygetm_config.loader.
     # run_post_data_script), same reasoning as run_river_discharge_script
     # above -- real execution and the generated script are provably
     # consistent, not two separately-maintained paths. set_sst_proxy() itself

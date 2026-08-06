@@ -1,22 +1,22 @@
-# pygetm-schema integration for OceanICU
+# pygetm-config integration for OceanICU
 
-Files here demonstrate/use [`pygetm-schema`](https://github.com/BoldingBruggeman/pygetm-schema)
-(a separate, independent repo at `~/source/repos/pygetm-schema`) against a real
+Files here demonstrate/use [`pygetm-config`](https://github.com/BoldingBruggeman/pygetm-config)
+(a separate, independent repo at `~/source/repos/pygetm-config`) against a real
 OceanICU setup. Moved here from that repo's own `examples/` directory since
-they're genuinely OceanICU-specific, not generic pygetm-schema material — see
+they're genuinely OceanICU-specific, not generic pygetm-config material — see
 that repo's `docs/yaml_vs_python.md`, `docs/providers.md`, and `docs/overview.md`
 for the general design these files are an instance of.
 
 - **`nse_from_oceanicu.yaml`** — `oceanicu_3d/nse_model_config.yaml` converted
-  to pygetm-schema's schema-validated format. Includes a real
+  to pygetm-config's schema-validated format. Includes a real
   `data_assignments:` block feeding meteo/radiation/boundary forcing into the
   simulation (verified working, see below), a `bathymetry:` section pointing
   at the real bathymetry file, and (see next bullet) schema-validated
   `hydrography:`/`boundaries:`/`meteo:`/`river_discharge:` sections with
   EVERY real data-source alternative present — not just the one this setup
-  actually uses. This is `pygetm_schema`'s nested-by-label convention (now
+  actually uses. This is `pygetm_config`'s nested-by-label convention (now
   the ONLY way every `ChoiceSpec` works, not an opt-in flag — see
-  pygetm-schema's `docs/overview.md`): switching e.g. `meteo.source: ERA5` to
+  pygetm-config's `docs/overview.md`): switching e.g. `meteo.source: ERA5` to
   `CMIP6` for a different run-folder, or `simulation.vertical_coordinates.
   type: GVC` to `Adaptive`, needs no other edit — every alternative's fields
   are already present, nested under its own `<label>:` sub-key, with real
@@ -29,14 +29,14 @@ for the general design these files are an instance of.
   real a need — see the file's own comments on those sections for exactly
   which values are real/tuned vs. untouched schema defaults.
 - **`nse_driver.py`** — reference driver script for the above: everything
-  that's genuinely just data goes through `pygetm_schema.loader` generically;
+  that's genuinely just data goes through `pygetm_config.loader` generically;
   only the dynamic, threshold-filtered river-loading loop stays bespoke Python
-  (domain-building used to be bespoke too, until pygetm-schema grew a generic
+  (domain-building used to be bespoke too, until pygetm-config grew a generic
   `bathymetry:` schema section covering this exact NetCDF-reading convention).
   Automatically registers `oceanicu_providers.py` (below) via
-  `PYGETM_SCHEMA_PROVIDERS` before calling `build_schema()` — no manual export
+  `PYGETM_CONFIG_PROVIDERS` before calling `build_schema()` — no manual export
   needed to run this file.
-- **`oceanicu_providers.py`** — a populated `pygetm_schema.providers` registry
+- **`oceanicu_providers.py`** — a populated `pygetm_config.providers` registry
   for OceanICU's data-provenance vocabulary, using the same `source:`
   discriminator convention OceanICU's own config already uses. Every real
   alternative per role is registered, verified directly against
@@ -49,18 +49,18 @@ for the general design these files are an instance of.
   still only `emorid`, since the real `cfg.rivers.source` is a two-level
   choice (`historic` wrapping its own `historic.source` sub-choice, plus a
   sibling `CMIP6` with a completely different per-source variable-naming
-  scheme) that `pygetm_schema.providers.make_provider_slot` can't represent
+  scheme) that `pygetm_config.providers.make_provider_slot` can't represent
   as a single flat `ChoiceSpec` — a real gap in that mechanism, not something
   fixed by adding more registry entries here (see the module's own comment on
   `river_discharge`). Not wired up as a real installed entry point yet
   (`oceanicu_3d` has no `pyproject.toml` to hang one off), but works today
-  anyway via `PYGETM_SCHEMA_PROVIDERS` (`nse_driver.py` sets this
+  anyway via `PYGETM_CONFIG_PROVIDERS` (`nse_driver.py` sets this
   automatically; only needed manually for other tools, e.g.
-  `pygetm-schema template`/`validate` run directly):
+  `pygetm-config template`/`validate` run directly):
   ```bash
-  export PYGETM_SCHEMA_PROVIDERS="$(pwd)/oceanicu_providers.py:register_oceanicu_providers"
+  export PYGETM_CONFIG_PROVIDERS="$(pwd)/oceanicu_providers.py:register_oceanicu_providers"
   ```
-  See the module's own docstring for details, and pygetm-schema's
+  See the module's own docstring for details, and pygetm-config's
   `docs/providers.md`.
 
 **Path convention**: a hardcoded absolute path (tried first) is wrong the
@@ -88,7 +88,7 @@ below) — a natural next step, not done here.
 To run (verified working from an arbitrary directory, not just this one):
 
 ```bash
-conda activate pygetm  # needs pygetm AND pygetm-schema (pip install -e ".[introspect]" from the pygetm-schema repo)
+conda activate pygetm  # needs pygetm AND pygetm-config (pip install -e ".[introspect]" from the pygetm-config repo)
 python nse_driver.py nse_from_oceanicu.yaml --start 2025-03-01T00:00:00 --stop 2025-03-02T00:00:00 --dry-run
 ```
 
@@ -115,7 +115,7 @@ itself, every `data_assignments` `.set()`/`.type=`/`pygetm.input.from_nc(...)`
 call with the actual file+variable, every output file + its requested fields,
 `sim.start()`/`finish()`. Large arrays are shown as shape/dtype only, never
 dumped. `DEBUG` additionally shows one line per `open_boundaries` entry (this
-script's own `add_rivers`, not `pygetm_schema.loader`'s, is what actually adds
+script's own `add_rivers`, not `pygetm_config.loader`'s, is what actually adds
 rivers here, so they're not part of this — see that function's own per-river
 logging via pygetm's `domain.rivers` logger instead, already visible by
 default).
@@ -126,11 +126,11 @@ python nse_driver.py nse_from_oceanicu.yaml --start 2025-03-01T00:00:00 --stop 2
 
 Sometimes even the logged native calls aren't enough — you actually want a real
 breakpoint or a stray print inside the construction sequence, with no
-`pygetm_schema`/`nse_driver.py` abstraction in the way at all. `--dump-python
+`pygetm_config`/`nse_driver.py` abstraction in the way at all. `--dump-python
 [PATH]` writes a self-contained, standalone script implementing this exact
 config as literal `pygetm`/`pygetm.domain`/`pygetm.simulation` calls (`import
-pygetm_schema` genuinely absent from the output — verified) and exits without
-building/running anything here; see pygetm-schema's `pygetm_schema/codegen.py`
+pygetm_config` genuinely absent from the output — verified) and exits without
+building/running anything here; see pygetm-config's `pygetm_config/codegen.py`
 module docstring for the "regenerate, don't hand-maintain" scoping. Verified
 end to end against this exact config: the generated script's `sim.start()`
 reproduces the same domain-integral salt/heat as `nse_driver.py --dry-run`
@@ -141,17 +141,17 @@ reproduction, not just syntactically-valid output.
 resolved above, points at this file's own `add_rivers` for POSITION;
 `river_discharge.emorid.data_script` points at this file's own `set_river_data`
 for the actual discharge time series — two distinct functions on the same role,
-mirroring OceanICU's own `cfg_rivers.py`'s real create()/data() split. pygetm-schema's
+mirroring OceanICU's own `cfg_rivers.py`'s real create()/data() split. pygetm-config's
 `codegen.py` embeds both functions' real source text into the generated script, not a
 reference; see that repo's `loader.run_river_discharge_script`/`run_river_discharge_data_script`
 and `codegen._emit_river_discharge_script`/`_emit_river_discharge_data_script` for the
-mechanism, and `pygetm-schema/TODO` item 9 for the design). Verified with real
+mechanism, and `pygetm-config/TODO` item 9 for the design). Verified with real
 per-river placement log lines matching `nse_driver.py`'s own real execution exactly
 (262 real rivers, all given a real `TemporalInterpolation(Q from EMORID_1990_2024.nc)`).
 
 ```bash
 python nse_driver.py nse_from_oceanicu.yaml --start 2025-03-01T00:00:00 --stop 2025-03-01T01:00:00 --dry-run --skip-unavailable-output --dump-python generated_nse.py
-python generated_nse.py --dry-run --skip-unavailable-output   # no pygetm_schema import, real pygetm calls only
+python generated_nse.py --dry-run --skip-unavailable-output   # no pygetm_config import, real pygetm calls only
 ```
 
 `generated_nse.py` has its own real `argparse` CLI — `python generated_nse.py -h`
@@ -211,14 +211,14 @@ temp/salt (real CMEMS data,
 `/home/kb/source/repos/boundaries/boundary_data/nse/daily/daily_2024-03-01_to_2026-01-01.nc`
 — 311 boundary points, matching this setup's real boundary count exactly;
 `thetao`/`so`, `on_grid: true`, boundary type forced to `SPONGE` via
-pygetm-schema's new `data_assignments` `kind: boundary_type`, mirroring
+pygetm-config's new `data_assignments` `kind: boundary_type`, mirroring
 `cfg_boundaries.py::data_3d`'s real CMEMS branch) all verified working end to
 end. Real signal this is actually taking effect, not just running: the
 domain-integral salt/heat after `sim.start()` are no longer exactly
 35.000/5.000 (the pre-boundary-data constants) — 34.999 g/kg /
 5.06°C once real CMEMS values are read at the boundaries.
 
-Actually advancing (`pygetm-schema run ... --stop ...`, no `--dry-run`) gets
+Actually advancing (`pygetm-config run ... --stop ...`, no `--dry-run`) gets
 9 timesteps in (`istep=9`, `2025-03-01 00:03:00`) before a NEW, different
 kind of problem: `Exception: Non-finite values found`, localized to momentum
 advection (`advU`/`advV`/`ru`/`rv`, ~31 cells out of ~29000 unmasked — a

@@ -1,5 +1,5 @@
-# Converted from oceanicu_3d/nse_model_config.yaml to pygetm-schema's format.
-# See pygetm-schema's docs/yaml_vs_python.md for the full explanation of what
+# Converted from oceanicu_3d/nse_model_config.yaml to pygetm-config's format.
+# See pygetm-config's docs/yaml_vs_python.md for the full explanation of what
 # moved here vs. what stays in nse_driver.py (this directory), and the "worked
 # example" table summarizing every field's fate.
 #
@@ -14,9 +14,9 @@
 #
 # `runtime.time` is intentionally omitted here -- like OceanICU's own
 # run_model.py, start/stop are per-invocation, not per-setup:
-#   pygetm-schema run nse_from_oceanicu.yaml --start 2024-03-01T00:00:00 --stop ...
+#   pygetm-config run nse_from_oceanicu.yaml --start 2024-03-01T00:00:00 --stop ...
 # (--start overrides/fills in runtime.time; the file's own runtime.time, if
-# present, is otherwise required for `pygetm-schema validate` to pass standalone.)
+# present, is otherwise required for `pygetm-config validate` to pass standalone.)
 
 # ----------------------------------------------------------------------
 # Domain -- reading the pre-prepared bathymetry NetCDF file. Verified against
@@ -63,7 +63,7 @@ bathymetry:
 # oceanicu's cfg_boundaries.py (bdy_type is reassigned three times at module
 # level -- FLATHER_ELEV, then CLAMPED, then FLATHER_TRANSPORT -- dead-code
 # evidence of iteration; type_3d=0 may be the same kind of leftover, possibly
-# meant to be ZERO_GRADIENT=1). `pygetm-schema validate` on this file WILL
+# meant to be ZERO_GRADIENT=1). `pygetm-config validate` on this file WILL
 # flag type_3d as invalid, surfacing exactly this -- a concrete example of the
 # schema/validation layer catching something the old unvalidated YAML+Python
 # pipeline let through silently. Left as-is rather than silently corrected;
@@ -136,7 +136,7 @@ simulation:
   # left at pyGETM's own defaults.
 
   # Every alternative's fields present, nested under its own label (nested-
-  # by-label -- see pygetm-schema's docs/overview.md, "Every ChoiceSpec keeps
+  # by-label -- see pygetm-config's docs/overview.md, "Every ChoiceSpec keeps
   # every alternative present"): switching the active strategy is a one-line
   # `type:` change, nothing else to retype. GVC is what nse_model_config.yaml
   # actually used (`type: 2`) with its real tuned values; Sigma/Adaptive get
@@ -274,7 +274,7 @@ data_assignments:
   # contributing cause of) the "Non-finite values found" instability near a
   # boundary at timestep 9 (real baroclinic forcing driving flow against a
   # tidally-unforced barotropic boundary is exactly the kind of thing that
-  # destabilizes). Uses pygetm-schema's new `kind: tpxo` (a harmonic-
+  # destabilizes). Uses pygetm-config's new `kind: tpxo` (a harmonic-
   # constituent lookup via pygetm.input.tpxo.get, keyed by the open
   # boundary's own lon/lat -- NOT a plain NetCDF file+variable read like
   # kind: file), mirroring OceanICU's real cfg_boundaries.py::data_2d TPXO
@@ -340,7 +340,7 @@ data_assignments:
 # ----------------------------------------------------------------------
 # Output -- oceanicu's boolean-flag + separate output.yaml variable-list-file
 # convention collapses here into explicit files with variable lists inlined,
-# since pygetm-schema's output.files doesn't have that boolean/variable-list
+# since pygetm-config's output.files doesn't have that boolean/variable-list
 # split. Variable lists are the REAL ones from output.yaml's
 # airsea.{standard,fluxes} / barotropic.2d.{tides,standard} /
 # barotropic.3d.standard groups (meteo=True, tides=True, barotropic
@@ -386,15 +386,15 @@ output:
         - fields: [uk, vk, ww, SS, num]
 
 # ----------------------------------------------------------------------
-# Data provenance -- NOW schema-validated (pygetm-schema's providers.py
+# Data provenance -- NOW schema-validated (pygetm-config's providers.py
 # mechanism, once oceanicu_providers.py (this directory) is discovered --
-# either via a real `pygetm_schema.providers` entry point, once oceanicu_3d
+# either via a real `pygetm_config.providers` entry point, once oceanicu_3d
 # has packaging to hang one off, or right now via the zero-packaging
-# PYGETM_SCHEMA_PROVIDERS env var; nse_driver.py sets this automatically to
+# PYGETM_CONFIG_PROVIDERS env var; nse_driver.py sets this automatically to
 # its own sibling oceanicu_providers.py, so no manual export is needed to run
-# THIS file -- see pygetm-schema's docs/providers.md). Every real alternative
+# THIS file -- see pygetm-config's docs/providers.md). Every real alternative
 # per role is present (not just the one active in this specific setup),
-# using pygetm_schema's `ChoiceSpec.nested_by_label` -- switching e.g.
+# using pygetm_config's `ChoiceSpec.nested_by_label` -- switching e.g.
 # `meteo.source: ERA5` to `CMIP6` needs no other edit, matching how
 # nse_model_config.yaml's OWN `hydrography`/`boundaries`/`meteo`/`rivers`
 # blocks already worked (this section is a close, now-validated port of

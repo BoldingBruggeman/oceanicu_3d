@@ -1,4 +1,4 @@
-"""A REAL, populated `pygetm_schema.providers` registry for OceanICU. Provider
+"""A REAL, populated `pygetm_config.providers` registry for OceanICU. Provider
 names/extra params below are taken directly from OceanICU's actual code --
 `lib/cfg_airsea.py` (meteo: ERA5/CMIP6), `lib/cfg_boundaries.py` (barotropic:
 TPXO/CMEMS/CMIP6, baroclinic: CMEMS/WOA), `lib/cfg_ic.py` (hydrography:
@@ -19,12 +19,12 @@ package), so there's nothing for an `[project.entry-points]` table to attach
 to yet. If/when this directory (or a subset of it) gets real packaging, the
 entry point would be:
 
-    [project.entry-points."pygetm_schema.providers"]
-    oceanicu = "pygetm_schema.oceanicu_providers:register_oceanicu_providers"
+    [project.entry-points."pygetm_config.providers"]
+    oceanicu = "pygetm_config.oceanicu_providers:register_oceanicu_providers"
 
 (adjust the dotted module path to wherever this file actually lives once
-packaged). Until then, `pygetm_schema.schema.build_schema()` in a plain
-`pygetm`+`pygetm-schema` environment will NOT pick this up automatically --
+packaged). Until then, `pygetm_config.schema.build_schema()` in a plain
+`pygetm`+`pygetm-config` environment will NOT pick this up automatically --
 call `register_oceanicu_providers()` directly and merge the result into a
 schema's sections by hand if you want to use it before that packaging exists.
 
@@ -33,9 +33,9 @@ as one role) because they draw from genuinely different provider vocabularies
 in OceanICU (TPXO makes sense only for barotropic tides; CMEMS only for
 baroclinic fields) -- one combined role would need every provider to handle
 both, which none of them do. Deliberately NOT `rivers` -- that key already
-names pygetm-schema's core `rivers:` section (open-boundary river *positions*,
+names pygetm-config's core `rivers:` section (open-boundary river *positions*,
 from GlobalRiverCollection.add_by_location); this is where the river
-*discharge data* comes from, a different concept. pygetm-schema's
+*discharge data* comes from, a different concept. pygetm-config's
 `build_schema()` raises loudly on this exact kind of key collision rather than
 silently shadowing one section with the other -- this naming choice was
 actually settled that way: `rivers` collided on an early draft of this module
@@ -46,14 +46,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pygetm_schema.model import ChoiceSpec, Importance, ParameterSpec, TypeRef
-from pygetm_schema.providers import make_provider_slot
+from pygetm_config.model import ChoiceSpec, Importance, ParameterSpec, TypeRef
+from pygetm_config.providers import make_provider_slot
 
-# Absolute, not "nse_driver.py" -- pygetm_schema.providers.load_dotted_target
+# Absolute, not "nse_driver.py" -- pygetm_config.providers.load_dotted_target
 # (used by both loader.run_river_discharge_script and codegen.py's
 # _emit_river_discharge_script) resolves a "*.py:name" target as a filesystem
 # path relative to the CURRENT WORKING DIRECTORY at run time, not relative to
-# this file or the YAML config -- same reasoning as PYGETM_SCHEMA_PROVIDERS'
+# this file or the YAML config -- same reasoning as PYGETM_CONFIG_PROVIDERS'
 # own absolute-path construction in nse_driver.py's main().
 _NSE_DRIVER_PATH = Path(__file__).parent / "nse_driver.py"
 
@@ -91,10 +91,10 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                 "a monthly-climatology-index pick, `.isel(time=imonth)`, not "
                 "expressible as a data_assignments entry, plus a conditional "
                 "density conversion, sim.density.convert_ts -- see "
-                "pygetm_schema.loader.run_hydrography_data_script's own "
+                "pygetm_config.loader.run_hydrography_data_script's own "
                 "docstring). Only runs when NOT loading from a restart. Same "
                 "convention as river_discharge.data_script/meteo.data_script/"
-                "PYGETM_SCHEMA_PROVIDERS. 'constant' hydrography doesn't need "
+                "PYGETM_CONFIG_PROVIDERS. 'constant' hydrography doesn't need "
                 "this -- it's plain data_assignments (simulation.temp/"
                 "simulation.salt, kind=constant), no Python at all."
             ),
@@ -214,7 +214,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                 "entry: CMIP6's net shortwave/longwave (swr = rsds - rsus, "
                 "ql = rlds - rlus, mirroring cfg_airsea.py's own data()) is a "
                 "subtraction of TWO files, and pre_transform only supports a "
-                "scale/offset on ONE file's value -- see pygetm_schema.loader."
+                "scale/offset on ONE file's value -- see pygetm_config.loader."
                 "run_meteo_data_script's own docstring. Every other field "
                 "(u10/v10/t2m/qa-or-d2m/sp/tp/tcc) IS a genuine 1:1 file read "
                 "(or, for tcc, a required-even-if-unused constant) and is a "
@@ -227,7 +227,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                 "own single data(sim, cfg) doing the same), so the SAME "
                 "default is shared by every alternative below rather than "
                 "each having its own. Same convention as river_discharge."
-                "data_script/PYGETM_SCHEMA_PROVIDERS."
+                "data_script/PYGETM_CONFIG_PROVIDERS."
             ),
             importance=Importance.BASIC,
         ),
@@ -285,9 +285,9 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                     default=f"{_NSE_DRIVER_PATH}:add_rivers",
                     help=(
                         "path/to/file.py:function_name implementing this source's real "
-                        "river POSITIONING (name + location) -- see pygetm_schema.loader."
+                        "river POSITIONING (name + location) -- see pygetm_config.loader."
                         "run_river_discharge_script's own docstring. Same convention as "
-                        "PYGETM_SCHEMA_PROVIDERS. A future 'cmip6_bias_corrected' source "
+                        "PYGETM_CONFIG_PROVIDERS. A future 'cmip6_bias_corrected' source "
                         "would need its own, different function here -- a real "
                         "scenario-discharge dataset has its own station/grid-cell "
                         "inventory, not EMORID's real-world coordinates."
@@ -305,7 +305,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                         "Simulation object' -- position (`script`, above) runs before `sim` "
                         "exists, data needs the live sim.rivers collection, so this is a "
                         "SEPARATE hook, timed like post_data_script (after data_assignments) "
-                        "-- see pygetm_schema.loader.run_river_discharge_data_script's own "
+                        "-- see pygetm_config.loader.run_river_discharge_data_script's own "
                         "docstring. Same file as `script` above is fine (this role's function "
                         "for position and data live together in nse_driver.py), but they are "
                         "two distinct functions, not one combined one -- a future source with "
@@ -320,7 +320,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
     )
 
     # Dict order here IS the section order everywhere downstream (TUI
-    # navigation tree, generated YAML template, ...) -- pygetm_schema.schema.
+    # navigation tree, generated YAML template, ...) -- pygetm_config.schema.
     # build_schema() preserves registration order rather than alphabetizing
     # it (see that module's own comment). Matches run_model.py's real
     # create_simulation() processing order exactly: cfg_ic.create (hydrography,
