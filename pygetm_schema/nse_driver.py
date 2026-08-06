@@ -204,6 +204,69 @@ def set_sst_proxy(sim, domain, config: dict) -> None:
         sim.sst = sim.airsea.t2m
 
 
+def set_hydrography_ic(sim, domain, config: dict) -> None:
+    """Mirrors cfg_ic.py's own create() -- WOA/CMEMS branches specifically
+    ("constant" hydrography is plain data_assignments, no Python needed).
+    Real Python needed for: (1) `.isel(time=imonth)` -- a monthly
+    CLIMATOLOGY index PICK for the initial, one-time value (imonth derived
+    from config['runtime']['time'], matching run_model.py's own real
+    `simstart.month - 1`) -- NOT pygetm-schema's own `climatology: True`
+    data_assignments flag, which means something different (keep cycling
+    the whole 12-month pattern for the entire run, wrong for an initial
+    condition). (2) sim.density.convert_ts(sim.salt, sim.temp) -- pyGETM's
+    internal state is conservative temperature/absolute salinity, WOA/CMEMS
+    provide in-situ/practical values (user request, TODO item 21) --
+    called for BOTH WOA and CMEMS, matching cfg_ic.py's own real code
+    exactly (present in both real-data branches, absent from "constant").
+
+    Masks out land points afterward (sim.temp/sim.salt set to
+    pygetm.constants.FILL_VALUE where sim.T.mask == 0), matching cfg_ic.py's
+    own real code -- both WOA/CMEMS climatology files are GLOBAL, so
+    horizontal interpolation can leave real (non-fill) values sitting at
+    domain points outside the real ocean mask.
+
+    Registered via hydrography.data_script (see pygetm_schema.loader.
+    run_hydrography_data_script) -- only called when NOT loading from a
+    restart (checked there, not here). Checks runtype == BAROCLINIC itself
+    (matching cfg_ic.py's own identical gate) since the core loader
+    function doesn't special-case runtype for any of its three data_script
+    hooks.
+    """
+    import datetime
+
+    import pygetm
+    import pygetm.constants
+    import pygetm.input
+
+    if sim.runtype != pygetm.RunType.BAROCLINIC:
+        return
+
+    hydro = config["hydrography"]
+    source = hydro.get("source")
+    if source not in ("WOA", "CMEMS"):
+        return
+
+    time = config["runtime"]["time"]
+    if isinstance(time, str):
+        time = datetime.datetime.fromisoformat(time)
+    imonth = time.month - 1
+
+    folder = Path(hydro["folder"])
+    if source == "WOA":
+        salt_file, salt_var = folder / "woa_s.nc", "s_an"
+        temp_file, temp_var = folder / "woa_t.nc", "t_an"
+    else:  # CMEMS
+        salt_file, salt_var = folder / "so_2025_monthly_ic.nc", "so_ff"
+        temp_file, temp_var = folder / "thetao_2025_monthly_ic.nc", "thetao_ff"
+
+    sim.salt.set(pygetm.input.from_nc(salt_file, salt_var).isel(time=imonth), on_grid=False)
+    sim.temp.set(pygetm.input.from_nc(temp_file, temp_var).isel(time=imonth), on_grid=False)
+    sim.density.convert_ts(sim.salt, sim.temp)
+
+    sim.temp[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
+    sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("config")
@@ -346,6 +409,21 @@ def main(argv=None) -> int:
             emorid_cfg["data_script"] = f"{Path(__file__).parent / 'nse_driver.py'}:set_river_data"
         river_discharge["emorid"] = emorid_cfg
         raw["river_discharge"] = river_discharge
+
+    # hydrography.<source>.data_script's own schema default (see
+    # oceanicu_providers.py) isn't auto-injected either (same reasoning as
+    # river_discharge.script/data_script above). "constant" hydrography
+    # doesn't get one at all -- it's fully expressible as plain
+    # data_assignments, no Python needed (see set_hydrography_ic's own
+    # docstring).
+    hydrography = raw.get("hydrography") or {}
+    hydrography_source = hydrography.get("source")
+    if hydrography_source in ("WOA", "CMEMS"):
+        hydro_cfg = hydrography.get(hydrography_source) or {}
+        if not hydro_cfg.get("data_script"):
+            hydro_cfg["data_script"] = f"{Path(__file__).parent / 'nse_driver.py'}:set_hydrography_ic"
+        hydrography[hydrography_source] = hydro_cfg
+        raw["hydrography"] = hydrography
 
     # meteo.<source>.data_script's own schema default (see
     # oceanicu_providers.py) isn't auto-injected either (same reasoning as
@@ -519,6 +597,13 @@ def main(argv=None) -> int:
     print(f"{n_rivers} river(s) added from {config['river_discharge']['file']}", file=sys.stderr)
 
     sim = loader.build_simulation(domain, config, schema)
+
+    # Before apply_data_assignments, matching cfg_ic.py's own real placement
+    # (before cfg_boundaries.data_2d/data_3d) in run_model.py's create_
+    # simulation() exactly. load_restart= (user request, TODO item 21):
+    # "shall only be done if not a restart".
+    loader.run_hydrography_data_script(sim, domain, config, load_restart=args.load_restart)
+
     loader.apply_data_assignments(sim, domain, config, schema)
 
     # The second half of river_discharge's job (user request) -- real

@@ -80,14 +80,37 @@ _CMIP6_SHARED = (
 
 
 def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
+    _hydrography_data_script = (
+        ParameterSpec(
+            name="data_script",
+            type=TypeRef(kind="scalar", scalar_type="str"),
+            default=f"{_NSE_DRIVER_PATH}:set_hydrography_ic",
+            help=(
+                "path/to/file.py:function_name implementing this source's real "
+                "initial-condition attachment (mirrors cfg_ic.py's own create() -- "
+                "a monthly-climatology-index pick, `.isel(time=imonth)`, not "
+                "expressible as a data_assignments entry, plus a conditional "
+                "density conversion, sim.density.convert_ts -- see "
+                "pygetm_schema.loader.run_hydrography_data_script's own "
+                "docstring). Only runs when NOT loading from a restart. Same "
+                "convention as river_discharge.data_script/meteo.data_script/"
+                "PYGETM_SCHEMA_PROVIDERS. 'constant' hydrography doesn't need "
+                "this -- it's plain data_assignments (simulation.temp/"
+                "simulation.salt, kind=constant), no Python at all."
+            ),
+            importance=Importance.BASIC,
+        ),
+    )
+
     hydrography = make_provider_slot(
         "hydrography",
         {
             # CMEMS/WOA: cfg_ic.py just does pygetm.input.from_nc(cfg.hydrography.
             # {CMEMS,WOA}.folder / "<fixed filename>", ...) -- no extra params
-            # beyond the shared folder.
-            "CMEMS": (),
-            "WOA": (),
+            # beyond the shared folder, PLUS data_script for the real
+            # .isel(time=imonth)/convert_ts logic (TODO item 21).
+            "CMEMS": _hydrography_data_script,
+            "WOA": _hydrography_data_script,
             # constant: a fundamentally different shape -- cfg_ic.py's
             # `cfg.hydrography.source == "constant"` branch does
             # sim.temp.set(cfg.hydrography.constant.temp) directly, no file/folder
