@@ -66,72 +66,66 @@ domain:
 # (comment there: "Regenerated from NSe/nse_bdy_lonlat.txt (311 points),
 # cross-checked exact against getm-dump.nc's lon_bdy/lat_bdy from a live run").
 #
-# type_3d: 0 is preserved EXACTLY as in the original code, not "fixed" --
-# pygetm.constants has no boundary-condition-type constant equal to 0
-# (ZERO_GRADIENT=1 is the smallest). This is a genuine latent inconsistency in
-# oceanicu's cfg_boundaries.py (bdy_type is reassigned three times at module
-# level -- FLATHER_ELEV, then CLAMPED, then FLATHER_TRANSPORT -- dead-code
-# evidence of iteration; type_3d=0 may be the same kind of leftover, possibly
-# meant to be ZERO_GRADIENT=1). `pygetm-config validate` on this file WILL
-# flag type_3d as invalid, surfacing exactly this -- a concrete example of the
-# schema/validation layer catching something the old unvalidated YAML+Python
-# pipeline let through silently. Left as-is rather than silently corrected;
-# whoever owns nse_model_config.yaml should decide the intended value.
+# type_3d omitted deliberately, not just left unset by oversight -- the
+# original oceanicu code had `type_3d: 0` here, which pygetm-config's own
+# `pygetm-config validate` correctly flagged as invalid (pygetm.constants has
+# no boundary-condition-type constant equal to 0; ZERO_GRADIENT=1 is the
+# smallest -- a genuine latent inconsistency in oceanicu's cfg_boundaries.py,
+# whose bdy_type is reassigned three times at module level, dead-code
+# evidence of iteration, of which 0 may be the same kind of leftover). Since
+# type_3d is genuinely just a *default* (see pygetm-config's own
+# schema._default_open_boundary_type_3d) that gets overwritten anyway for
+# these CMEMS/WOA-sourced temp/salt boundaries (see the
+# kind="boundary_type" data_assignment below), omitting it falls through to
+# pygetm-config's own ZERO_GRADIENT schema default -- the exact value
+# nse_driver.py's own runtime correction used to substitute for the invalid
+# 0, now validated cleanly instead of needing a special-cased correction.
 open_boundaries:
   - side: WEST
     l: 0
     mstart: 0
     mstop: 73
     type_2d: FLATHER_TRANSPORT
-    type_3d: 0   # see note above -- not a valid boundary_condition_type member
   - side: WEST
     l: 0
     mstart: 136
     mstop: 169
     type_2d: FLATHER_TRANSPORT
-    type_3d: 0
   - side: WEST
     l: 16
     mstart: 201
     mstop: 214
     type_2d: FLATHER_TRANSPORT
-    type_3d: 0
   - side: WEST
     l: 36
     mstart: 214
     mstop: 227
     type_2d: FLATHER_TRANSPORT
-    type_3d: 0
   - side: NORTH
     l: 213
     mstart: 17
     mstop: 36
     type_2d: FLATHER_TRANSPORT
-    type_3d: 0
   - side: NORTH
     l: 226
     mstart: 37
     mstop: 77
     type_2d: FLATHER_TRANSPORT
-    type_3d: 0
   - side: NORTH
     l: 246
     mstart: 84
     mstop: 154
     type_2d: FLATHER_TRANSPORT
-    type_3d: 0
   - side: EAST
     l: 256
     mstart: 120
     mstop: 136
     type_2d: FLATHER_TRANSPORT
-    type_3d: 0
   - side: SOUTH
     l: 0
     mstart: 1
     mstop: 35
     type_2d: FLATHER_TRANSPORT
-    type_3d: 0
 
 # ----------------------------------------------------------------------
 # Simulation physics/numerics -- direct value mapping from the original

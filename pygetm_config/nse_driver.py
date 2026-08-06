@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 """Reference driver for nse_from_oceanicu.yaml (this directory), demonstrating the
 composable pattern from pygetm-config's docs/yaml_vs_python.md: the Domain itself
-is now built generically by pygetm_config.loader from the config's `bathymetry:`
-section (schema-validated -- see schema._build_bathymetry_section), since reading
-a pre-prepared bathymetry file turned out to need only variable names and a mask
-convention, not bespoke code. Rivers, by contrast, genuinely stay bespoke,
-project-specific Python here (mirroring OceanICU's real cfg_rivers.py, verified
-against that source): they're dynamic and threshold-filtered from an EMORID file
-at run time, not a static list.
+is now built generically by pygetm_config.loader from the config's `domain:`
+section (schema-validated, one choice among several -- see
+schema._build_bathymetry_file_choice), since reading a pre-prepared bathymetry
+file turned out to need only variable names and a mask convention, not bespoke
+code. Rivers, by contrast, genuinely stay bespoke, project-specific Python here
+(mirroring OceanICU's real cfg_rivers.py, verified against that source): they're
+dynamic and threshold-filtered from an EMORID file at run time, not a static
+list.
 
 This is a REFERENCE / illustrative script -- it needs a real bathymetry NetCDF
-(referenced by the config's own `bathymetry:` section) and a real EMORID
+(referenced by the config's own `domain:` section) and a real EMORID
 river-discharge NetCDF to actually run (paths taken from the config's
 `river_discharge:` section, which IS schema-validated -- see
 oceanicu_providers.py, registered automatically below via
@@ -21,13 +22,6 @@ being located near the pygetm-config repo, only on pygetm_config being
 importable:
 
     python nse_driver.py nse_from_oceanicu.yaml --start 2024-03-01T00:00:00 --stop 2024-03-02T00:00:00
-
-Known issue in the source config, deliberately not silently fixed here either
-(see the YAML's own comments): open_boundaries[*].type_3d is 0, which is not a
-valid pygetm boundary-condition-type constant. This script corrects it to
-ZERO_GRADIENT with a loud warning rather than either failing outright or hiding
-the correction -- whoever owns the setup should confirm that's actually the
-intended value and fix it upstream in the YAML.
 """
 
 from __future__ import annotations
@@ -321,18 +315,6 @@ def main(argv=None) -> int:
         raw["data_assignments"] = _meteo_assignments + [
             a for a in raw.get("data_assignments", []) if not str(a.get("target", "")).startswith("simulation.airsea.")
         ]
-
-    # Known issue in the source config -- see module docstring. Corrected here
-    # with a loud warning, not silently.
-    for b in raw.get("open_boundaries", []):
-        if b.get("type_3d") == 0:
-            print(
-                "WARNING: open_boundaries[...].type_3d=0 is not a valid "
-                "boundary_condition_type -- correcting to ZERO_GRADIENT (1). "
-                "Confirm this is actually intended and fix it in the YAML.",
-                file=sys.stderr,
-            )
-            b["type_3d"] = "ZERO_GRADIENT"
 
     raw.setdefault("runtime", {})["time"] = args.start
 
