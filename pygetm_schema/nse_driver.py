@@ -165,6 +165,21 @@ def main(argv=None) -> int:
     parser.add_argument("--load-restart", default=None, metavar="PATH", help="resume from a restart file; overrides runtime.time with the restart's own time")
     parser.add_argument("--save-restart", default=None, metavar="PATH", help="write a restart file for this run")
     parser.add_argument(
+        "--data-root",
+        action="append",
+        metavar="NAME=VALUE",
+        help="override a data-path environment variable used by ${VAR}/$VAR references in "
+        "file/folder config fields; repeatable, always wins. Matches pygetm-schema run's own "
+        "flag (see pygetm_schema.loader.apply_data_roots).",
+    )
+    parser.add_argument(
+        "--data-roots-file",
+        default=None,
+        metavar="PATH",
+        help="YAML file of NAME: value data-path env vars; only fills gaps not already "
+        "exported in the environment. Matches pygetm-schema run's own flag.",
+    )
+    parser.add_argument(
         "--log-level",
         default="INFO",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
@@ -185,6 +200,17 @@ def main(argv=None) -> int:
     # (Python's "handler of last resort" only shows WARNING+ with no handler
     # configured yet) -- relying on that side effect's timing isn't safe.
     logging.basicConfig(level=getattr(logging, args.log_level), format="%(levelname)s:%(name)s:%(message)s")
+
+    # Before any real file access (TODO item 15, pygetm-schema) -- populates
+    # os.environ for whatever ${VAR}/$VAR data-path references a config uses
+    # (see loader.resolve_data_path). NSe's own bathymetry.path/tpxo_folder
+    # resolution below (BATHYMETRY_FOLDER/TPXO_FOLDER) is a separate, older,
+    # bespoke mechanism -- NOT yet migrated to use ${VAR} syntax directly in
+    # nse_from_oceanicu.yaml, so this call doesn't change ITS behavior today;
+    # it's here so --data-root/--data-roots-file are available for any OTHER
+    # data_assignments/array_like file field that already does (or later
+    # adopts) ${VAR} syntax.
+    loader.apply_data_roots(args.data_root, args.data_roots_file)
 
     # Auto-register oceanicu_providers.py (this directory) via the zero-
     # packaging PYGETM_SCHEMA_PROVIDERS env var (see pygetm-schema's
