@@ -61,6 +61,21 @@ def main(argv=None) -> int:
     parser.add_argument("--stop", required=True, help="ISO 8601 stop time")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument(
+        "--plot-domain",
+        nargs="?",
+        const=True,
+        default=False,
+        metavar="PREFIX",
+        help="build the domain and Simulation, plot the domain (mesh+subdomains+tiling, and "
+        "mask), save the two PNGs, then exit -- before any hydrography/data-assignment/river-"
+        "data loading. Mirrors run_model.py's own --plot_domain exactly (both figures, same "
+        "show_mesh/show_subdomains/tiling and show_mask calls to domain.plot(), same early-"
+        "exit-before-data placement), richer than pygetm-config run's plain --plot-domain "
+        "(which only calls domain.plot() with no args and doesn't need a built Simulation). "
+        "Saves {PREFIX}_mesh.png and {PREFIX}_mask.png; PREFIX defaults to "
+        "domain_<config file's stem>, or pass one to override.",
+    )
+    parser.add_argument(
         "--skip-unavailable-output",
         action="store_true",
         help="drop individual requested output fields that don't exist for the chosen "
@@ -439,6 +454,18 @@ def main(argv=None) -> int:
     print(f"{n_rivers} river(s) added from {config['river_discharge']['file']}", file=sys.stderr)
 
     sim = loader.build_simulation(domain, config, schema)
+
+    if args.plot_domain:
+        prefix = args.plot_domain if isinstance(args.plot_domain, str) else f"domain_{Path(args.config).stem}"
+        fig = domain.plot(show_mesh=True, show_subdomains=True, tiling=sim.tiling)
+        if fig is not None:
+            fig.savefig(f"{prefix}_mesh.png")
+            print(f"wrote {prefix}_mesh.png", file=sys.stderr)
+        fig = domain.plot(show_mesh=False, show_mask=True)
+        if fig is not None:
+            fig.savefig(f"{prefix}_mask.png")
+            print(f"wrote {prefix}_mask.png", file=sys.stderr)
+        return 0
 
     # Before apply_data_assignments, matching cfg_ic.py's own real placement
     # (before cfg_boundaries.data_2d/data_3d) in run_model.py's create_
