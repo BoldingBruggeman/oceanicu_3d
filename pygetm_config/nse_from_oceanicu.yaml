@@ -234,6 +234,27 @@ simulation:
     # pyGETM's API has moved since that config field name was chosen. Using
     # the correct name here with the same value:
     avmmol: 1.8e-6
+    # User request: checked directly against pygetm.momentum.Momentum's real
+    # source -- advection_scheme CAN genuinely be set independently for
+    # momentum (2D+3D velocities) vs. tracers (3D scalars): Momentum.
+    # initialize() only falls back to simulation.advection_scheme (above)
+    # if this is left null ("if self.advection_scheme is None: self.
+    # advection_scheme = default_advection_scheme") -- tracers have no such
+    # independent override at all (Simulation() constructs TracerCollection
+    # directly, always forced to simulation.advection_scheme, no pass-
+    # through parameter the way momentum has; no per-tracer override
+    # either). Left null here (not e.g. SUPERBEE) so momentum genuinely
+    # falls back to simulation.advection_scheme above, matching run_model.py
+    # exactly (momentum is never explicitly constructed there either, so
+    # there's no old-system value to replicate for these three).
+    advection_scheme: null
+    # The one genuinely 2D-specific advection knob: a directional-splitting
+    # STRATEGY (not a scheme choice) -- applies only to the 2D U/V
+    # transports, not 3D velocities. FULL is pyGETM's own real default.
+    advection_split_2d: FULL
+    # Interpolation method for reconstructing velocities in the Coriolis
+    # terms. DEFAULT is pyGETM's own real default.
+    coriolis_scheme: DEFAULT
 
 # ----------------------------------------------------------------------
 # Runtime -- direct mapping from runtime.{timestep,split_factor} +
