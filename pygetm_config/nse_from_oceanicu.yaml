@@ -348,12 +348,12 @@ output:
   # from each file's variable_requests via `groups:` instead of retyping/
   # duplicating the list.
   variable_groups:
-    airsea_standard: [u10, v10, sp, t2m, tcc, tp]
-    airsea_fluxes: [swr, shf, tausxu, tausyv]
-    tidal: [zt, u1, v1]
-    barotropic_2d: [Ht, zt, Dt, u1, v1]
-    barotropic_3d: [uk, vk, ww, SS, num]
-    baroclinic_3d: [temp, salt, rho, nuh]
+    airsea_standard: {u10: true, v10: true, sp: true, t2m: true, tcc: true, tp: true}
+    airsea_fluxes: {swr: true, shf: true, tausxu: true, tausyv: true}
+    tidal: {zt: true, u1: true, v1: true}
+    barotropic_2d: {Ht: true, zt: true, Dt: true, u1: true, v1: true}
+    barotropic_3d: {uk: true, vk: true, ww: true, SS: true, num: true}
+    baroclinic_3d: {temp: true, salt: true, rho: true, nuh: true}
     # Everything below is CATALOGED (matches dictionary.py's full set) but
     # not yet referenced by any file below -- kept available for later use
     # rather than left out, same as dictionary.py itself lists every group
@@ -361,35 +361,42 @@ output:
     # - the three debug groups are cfg_output.py's real cfg.runtime.
     #   debug_output-gated fields (off by default there too) -- 18+6+5 extra
     #   fields nobody asked to turn on, so cataloged but not attached.
-    barotropic_2d_debug: [maskt, masku, maskv, dxt, dyt, Hu, Hv, U, V, Du, Dv, dpdx, dpdy, z0bu, z0bv, z0bt, ru, rv]
-    barotropic_3d_debug: [rru, rrv, advpk, advqk, diffpk, diffqk]
-    baroclinic_3d_debug: [rad, sst, hnt, idpdx, idpdy]
+    barotropic_2d_debug: {maskt: true, masku: true, maskv: true, dxt: true, dyt: true, Hu: true, Hv: true, U: true, V: true, Du: true, Dv: true, dpdx: true, dpdy: true, z0bu: true, z0bv: true, z0bt: true, ru: true, rv: true}
+    barotropic_3d_debug: {rru: true, rrv: true, advpk: true, advqk: true, diffpk: true, diffqk: true}
+    baroclinic_3d_debug: {rad: true, sst: true, hnt: true, idpdx: true, idpdy: true}
     # surface/bottom single-level slices of the same baroclinic_3d tracers --
     # cfg_output.py's real usage pairs these with a per-field `z=`/`isel`
     # single-level extraction (pygetm's own File.request has a native `z=`
     # kwarg for this, see output.variable_request's own params) rather than
     # requesting the full 3D field; not wired to a file here since that's a
     # new daily-output-cadence decision, not just a field-list one.
-    surface_variables_3d: [temp, salt]
-    bottom_variables_3d: [temp, salt]
+    surface_variables_3d: {temp: true, salt: true}
+    bottom_variables_3d: {temp: true, salt: true}
     # FABM isn't configured in this file at all (`fabm:` isn't modeled by any
     # provider here, see the "Data provenance" section's own note below) --
     # cataloged for when it is, NOT attached to any file: requesting these
     # against a sim with no FABM model configured would fail with "Unknown
     # field", the same real error output.files[*] already fails loudly on
     # for any genuinely unavailable field (see loader.configure_output).
-    fabm_ersem:
-      [
-        P1_c, P2_c, P3_c, P4_c, O2_o, N3_n, N4_n, N1_p, N5_s, Q6_c, Y2_c,
-        Y3_c, O3_c, O3_fair, Q7_c, Q6_pen_depth_c, ben_col_D1m, ben_col_D2m,
-        N5_s_bdy, N5_s_sms, N5_s_sfl, N5_s_bfl, N5_s_sfl_tot_calculator_result,
-        N5_s_bfl_tot_calculator_result, N5_s_sms_tot_calculator_result,
-      ]
+    fabm_ersem: {P1_c: true, P2_c: true, P3_c: true, P4_c: true, O2_o: true, N3_n: true, N4_n: true, N1_p: true, N5_s: true, Q6_c: true, Y2_c: true, Y3_c: true, O3_c: true, O3_fair: true, Q7_c: true, Q6_pen_depth_c: true, ben_col_D1m: true, ben_col_D2m: true, N5_s_bdy: true, N5_s_sms: true, N5_s_sfl: true, N5_s_bfl: true, N5_s_sfl_tot_calculator_result: true, N5_s_bfl_tot_calculator_result: true, N5_s_sms_tot_calculator_result: true}
+  # sync_interval/default_dtype/save_initial below are set explicitly on
+  # every file, matching lib/cfg_output.py's real create()'s own values
+  # exactly (re-checked directly against that file, not assumed): every
+  # file there passes default_dtype=np.float32 (pygetm's own real default,
+  # left unset, is None -- native/full precision) and save_initial=
+  # save_initial (create()'s own parameter default is False -- pygetm's own
+  # real default, left unset, is True); sync_interval is None for
+  # meteo/surface/bottom/monthly-cadence files and 1 for tides/2d/3d there
+  # (pygetm's own real default, if left unset, is already 1 -- so only
+  # nse_meteo.nc's value actually differs from leaving it unset).
   files:
     - type: netcdf
       path: nse_meteo.nc
       interval: 1
       interval_units: HOURS
+      sync_interval: null
+      default_dtype: float32
+      save_initial: false
       variable_requests:
         - groups: [airsea_standard, airsea_fluxes]
 
@@ -397,6 +404,9 @@ output:
       path: nse_tides.nc
       interval: 1
       interval_units: HOURS
+      sync_interval: 1
+      default_dtype: float32
+      save_initial: false
       variable_requests:
         # maskt isn't part of dictionary.py's tidal_output tuple (it's one of
         # barotropic_2d_debug_output's debug fields instead) -- kept as a
@@ -408,6 +418,9 @@ output:
       path: nse_barotropic_2d.nc
       interval: 1
       interval_units: DAYS
+      sync_interval: 1
+      default_dtype: float32
+      save_initial: false
       variable_requests:
         - groups: [barotropic_2d]
 
@@ -415,6 +428,9 @@ output:
       path: nse_barotropic_3d.nc
       interval: 1
       interval_units: DAYS
+      sync_interval: 1
+      default_dtype: float32
+      save_initial: false
       variable_requests:
         # cfg_output.py's real monthly file combines barotropic_3d_output +
         # baroclinic_3d_output into ONE file, not two -- matched here (same
