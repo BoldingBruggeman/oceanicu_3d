@@ -23,14 +23,17 @@
 BATHYMETRY_FOLDER: /home/kb/source/repos/OceanICU/oceanicu_3d/Bathymetry
 HYDROGRAPHY_FOLDER_CMEMS: /home/kb/source/repos/boundaries
 BOUNDARY_FOLDER_BAROTROPIC: /home/kb/source/repos/boundaries/boundary_data
+BOUNDARY_FOLDER_BAROCLINIC_CMEMS: /home/kb/source/repos/boundaries/boundary_data
 
 # --- Possibly shared storage (/data, /server/data) -- check whether the
 # --- target machine has these mounted/reachable at the same paths before
 # --- assuming they're correct unedited.
 TPXO_FOLDER: /server/data/TPXO9
+# HYDROGRAPHY_FOLDER is also boundaries.baroclinic's real WOA boundary-data
+# folder (deliberately reused, not a separate var -- see README.md).
 HYDROGRAPHY_FOLDER: /data/WOA
-BOUNDARY_FOLDER_BAROCLINIC: /data/WOA
-CMIP6_BOUNDARY_FOLDER: /data/CMIP6
+BOUNDARY_FOLDER_BAROTROPIC_CMIP6: /data/CMIP6
+BOUNDARY_FOLDER_BAROCLINIC_CMIP6: /data/CMIP6
 ERA5_FOLDER: /data/ERA5/kaj
 CMIP6_FOLDER: /data/BiasCorrected
 RIVER_FOLDER: /data/EMORID

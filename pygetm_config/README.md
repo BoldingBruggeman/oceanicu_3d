@@ -115,11 +115,12 @@ directly, pass `--data-root NAME=VALUE` (repeatable), or list them in a
 | Variable | Used for |
 |---|---|
 | `BATHYMETRY_FOLDER` | `domain.path` |
-| `TPXO_FOLDER` | tidal harmonics (`data_assignments` `kind: tpxo`, `boundaries.barotropic.TPXO`) |
-| `HYDROGRAPHY_FOLDER_CMEMS` / `HYDROGRAPHY_FOLDER` | `hydrography.CMEMS`/`.WOA` initial-condition folders |
-| `BOUNDARY_FOLDER_BAROTROPIC` | barotropic CMEMS folder, **and** baroclinic CMEMS folder (sic — verified directly against `nse_model_config.yaml`/`machines.yaml`: the original oceanicu convention really does read the baroclinic folder from the "barotropic"-named var) |
-| `BOUNDARY_FOLDER_BAROCLINIC` | `boundaries.baroclinic.WOA` |
-| `CMIP6_BOUNDARY_FOLDER` | `boundaries.{barotropic,baroclinic}.CMIP6` |
+| `TPXO_FOLDER` | tidal harmonics — genuinely the same TPXO9 atlas regardless of role, so NOT role-suffixed (`data_assignments` `kind: tpxo`, `boundaries.barotropic.TPXO`) |
+| `HYDROGRAPHY_FOLDER_CMEMS` / `HYDROGRAPHY_FOLDER` | `hydrography.CMEMS`/`.WOA` initial-condition folders — **also** the real source of boundaries.baroclinic's own WOA 3D boundary data (`boundaries.baroclinic.WOA` has no `folder` of its own at all — verified directly against `cfg_boundaries.py::data_3d`: its WOA branch reads `cfg.hydrography.WOA.folder`, not its own role's folder, deliberately reusing the same `woa_t.nc`/`woa_s.nc` climatology) |
+| `BOUNDARY_FOLDER_BAROTROPIC` | `boundaries.barotropic.CMEMS` only (used to be shared with baroclinic's own CMEMS folder too — a real naming bug, fixed: each (role, source) pair now gets its own var) |
+| `BOUNDARY_FOLDER_BAROTROPIC_CMIP6` | `boundaries.barotropic.CMIP6` |
+| `BOUNDARY_FOLDER_BAROCLINIC_CMEMS` | `boundaries.baroclinic.CMEMS` |
+| `BOUNDARY_FOLDER_BAROCLINIC_CMIP6` | `boundaries.baroclinic.CMIP6` |
 | `ERA5_FOLDER` | `meteo.ERA5` (only has 2025 data on disk today — see the date-mismatch note below) |
 | `CMIP6_FOLDER` | `meteo.CMIP6` (the bias-corrected dataset) |
 | `RIVER_FOLDER` | `river_discharge.emorid` |

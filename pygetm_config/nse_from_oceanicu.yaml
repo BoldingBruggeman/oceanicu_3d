@@ -295,46 +295,27 @@ data_assignments:
     tpxo_variable: v
     on_grid: true
 
-  # Open-boundary 3D (temp/salt) values -- the NEXT thing that was missing:
+  # Open-boundary 3D (temp/salt) TYPE -- the NEXT thing that was missing:
   # sim.start() succeeds without these, but sim.advance() then raises
   # "Non-finite values found" (open_boundaries: only carries type_2d, not
   # any actual temp/salt data at those points). Mirrors OceanICU's real
-  # cfg_boundaries.py::data_3d exactly for the CMEMS branch: forces temp/salt
-  # to SPONGE regardless of each open_boundaries: entry's own type_3d (that's
-  # only ever a fallback default, per pygetm.open_boundaries.OpenBoundary's
-  # own docstring -- verified directly against pygetm source, not assumed),
-  # then reads thetao/so with on_grid=true (data already sits at the model's
-  # boundary points, no horizontal interpolation needed) and climatology=false
-  # (a real time series, not a repeating annual cycle).
-  #
-  # File resolved by hand from providers.boundaries.baroclinic.CMEMS above
-  # (folder/nse/daily/daily_{start_date}_to_{end_date}.nc, ${BOUNDARY_FOLDER_
-  # BAROTROPIC} -- sic, see that section's own comment on why baroclinic data
-  # uses the "barotropic"-named var, faithfully preserved from
-  # nse_model_config.yaml/machines.yaml) -- confirmed to exist and to
-  # actually cover this setup's real 2024-03 target period (unlike the ERA5
-  # meteo files above, which needed a `--start` in 2025 to match what's on
-  # disk); confirmed 311 boundary points in the file, matching this setup's
-  # real NSe boundary count exactly. `file` is kind="path"-typed (same
-  # ${VAR} lazy-resolution mechanism as domain.path/tpxo_folder above).
+  # cfg_boundaries.py::data_3d exactly: forces temp/salt to SPONGE
+  # regardless of each open_boundaries: entry's own type_3d (that's only
+  # ever a fallback default, per pygetm.open_boundaries.OpenBoundary's own
+  # docstring -- verified directly against pygetm source, not assumed) --
+  # true for BOTH its WOA and CMEMS branches, so these two entries are
+  # unconditional, real data-source-independent config, unlike the actual
+  # VALUES (thetao/so or woa_t/woa_s), which genuinely differ by
+  # boundaries.baroclinic.source and are NOT expressible as a single static
+  # data_assignments entry (see nse_driver.py's own dynamic construction,
+  # mirroring meteo.source's identical need, item 11) -- deliberately not
+  # duplicated here as a stale hardcoded CMEMS-only entry.
   - target: open_boundary.temp
     kind: boundary_type
     boundary_condition_type: SPONGE
-  - target: open_boundary.temp.values
-    kind: file
-    file: ${BOUNDARY_FOLDER_BAROTROPIC}/nse/daily/daily_2024-03-01_to_2026-01-01.nc
-    variable: thetao
-    on_grid: true
-    climatology: false
   - target: open_boundary.salt
     kind: boundary_type
     boundary_condition_type: SPONGE
-  - target: open_boundary.salt.values
-    kind: file
-    file: ${BOUNDARY_FOLDER_BAROTROPIC}/nse/daily/daily_2024-03-01_to_2026-01-01.nc
-    variable: so
-    on_grid: true
-    climatology: false
 
 # ----------------------------------------------------------------------
 # Output -- oceanicu's boolean-flag + separate output.yaml variable-list-file
@@ -434,7 +415,7 @@ output:
 # absolute path doesn't quietly reappear here even though nothing reads it
 # today.
 hydrography:
-  source: CMEMS
+  source: WOA
   CMEMS:
     folder: ${HYDROGRAPHY_FOLDER_CMEMS}/init_data/nse/
   WOA:
@@ -454,7 +435,7 @@ boundaries:
       start_date: "2024-03-01"
       end_date: "2026-01-01"
     CMIP6:
-      folder: ${CMIP6_BOUNDARY_FOLDER}
+      folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}
       folder_template: "{setup}/CMIP6/{model}/{scenario}"
       filename_template: "{start_date}_to_{end_date}.nc"
       model: "MPI-ESM1-2-HR"
@@ -462,22 +443,26 @@ boundaries:
       start_date: "2024-03-01"
       end_date: "2026-01-01"
   baroclinic:
-    source: CMEMS
-    WOA:
-      folder: ${BOUNDARY_FOLDER_BAROCLINIC}
+    source: WOA
+    # `folder` deliberately OMITTED here -- verified directly against the
+    # real cfg_boundaries.py::data_3d: its WOA branch reads
+    # `cfg.hydrography.WOA.folder` (a commented-out line right above it,
+    # `#_woa_folder = cfg.boundaries.baroclinic.WOA.folder`, shows this was a
+    # deliberate choice, not an oversight -- WOA boundary data is the SAME
+    # woa_t.nc/woa_s.nc climatology already used for hydrography's own
+    # initial condition, so it reuses that folder rather than needing its
+    # own). Giving this field its own value would be misleading -- nothing
+    # in the real dynamic wiring (nse_driver.py's main(), see below) reads
+    # it.
+    WOA: {}
     CMEMS:
-      # ${BOUNDARY_FOLDER_BAROTROPIC} (sic) -- verified directly against
-      # nse_model_config.yaml/machines.yaml: the ORIGINAL oceanicu convention
-      # really does read this baroclinic folder from the "barotropic"-named
-      # env var, a genuine upstream naming inconsistency, faithfully
-      # preserved (not a typo introduced here) rather than silently renamed.
-      folder: ${BOUNDARY_FOLDER_BAROTROPIC}
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMEMS}
       folder_template: "nse/daily"
       filename_template: "daily_{start_date}_to_{end_date}.nc"
       start_date: "2024-03-01"
       end_date: "2026-01-01"
     CMIP6:
-      folder: ${CMIP6_BOUNDARY_FOLDER}
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}
       folder_template: "{setup}/CMIP6/{model}/{scenario}"
       filename_template: "{start_date}_to_{end_date}.nc"
       model: "MPI-ESM1-2-HR"

@@ -197,6 +197,68 @@ def main(argv=None) -> int:
         hydrography[hydrography_source] = hydro_cfg
         raw["hydrography"] = hydrography
 
+    # boundaries.baroclinic's real 3D temp/salt boundary VALUES genuinely
+    # differ by source -- WOA: a global climatology (on_grid=False,
+    # climatology=True, cycling the same 12-month pattern all run) vs CMEMS:
+    # a real time series already sitting at the boundary points
+    # (on_grid=True, climatology=False) -- so, same reasoning as meteo
+    # below, this can't be one static data_assignments entry. Mirrors the
+    # real cfg_boundaries.py::data_3d exactly (both branches verified
+    # directly against that source, including real filenames/variable
+    # names). The boundary_type (SPONGE) entries ARE source-independent
+    # (true for both real branches) and stay static, in the YAML's own
+    # data_assignments block.
+    #
+    # WOA folder is deliberately `hydrography.WOA.folder`, NOT boundaries.
+    # baroclinic.WOA's own folder -- verified directly against cfg_
+    # boundaries.py::data_3d, whose WOA branch has a commented-out line
+    # (`#_woa_folder = cfg.boundaries.baroclinic.WOA.folder`) right above
+    # the real one it actually uses (`cfg.hydrography.WOA.folder`) -- the
+    # SAME woa_t.nc/woa_s.nc climatology already used for hydrography's own
+    # initial condition, deliberately reused rather than duplicated.
+    boundaries_cfg = raw.get("boundaries") or {}
+    baroclinic = boundaries_cfg.get("baroclinic") or {}
+    baroclinic_source = baroclinic.get("source")
+    _boundary_3d_assignments: list = []
+    if baroclinic_source == "WOA":
+        _woa_folder = Path((hydrography.get("WOA") or {}).get("folder", ""))
+        _boundary_3d_assignments = [
+            {"target": "open_boundary.temp.values", "kind": "file", "file": str(_woa_folder / "woa_t.nc"), "variable": "t_an", "on_grid": False, "climatology": True},
+            {"target": "open_boundary.salt.values", "kind": "file", "file": str(_woa_folder / "woa_s.nc"), "variable": "s_an", "on_grid": False, "climatology": True},
+        ]
+    elif baroclinic_source == "CMEMS":
+        cmems_cfg = baroclinic.get("CMEMS") or {}
+        _cmems_folder = Path(cmems_cfg["folder"])
+        if cmems_cfg.get("folder_template"):
+            _cmems_folder = _cmems_folder / cmems_cfg["folder_template"]
+        _cmems_file = _cmems_folder / cmems_cfg["filename_template"].format(
+            start_date=cmems_cfg.get("start_date", ""), end_date=cmems_cfg.get("end_date", "")
+        )
+        _boundary_3d_assignments = [
+            {"target": "open_boundary.temp.values", "kind": "file", "file": str(_cmems_file), "variable": "thetao", "on_grid": True, "climatology": False},
+            {"target": "open_boundary.salt.values", "kind": "file", "file": str(_cmems_file), "variable": "so", "on_grid": True, "climatology": False},
+        ]
+    elif baroclinic_source == "CMIP6":
+        # NOT implemented -- cfg_boundaries.py's own data_3d has no CMIP6
+        # branch either (only WOA/CMEMS, verified directly against that
+        # source) -- a real, not-yet-existing upstream feature, not
+        # something to fabricate here. Warn loudly rather than silently
+        # producing a domain with no 3D boundary values at all.
+        print(
+            "WARNING: boundaries.baroclinic.source=CMIP6 has no real 3D boundary data wiring yet "
+            "(cfg_boundaries.py's own data_3d doesn't implement this branch either) -- "
+            "open_boundary.temp/salt.values will be missing; sim.advance() will likely raise "
+            "'Non-finite values found'.",
+            file=sys.stderr,
+        )
+
+    if _boundary_3d_assignments:
+        raw["data_assignments"] = _boundary_3d_assignments + [
+            a
+            for a in raw.get("data_assignments", [])
+            if str(a.get("target", "")) not in ("open_boundary.temp.values", "open_boundary.salt.values")
+        ]
+
     # meteo.<source>.data_script's own schema default (see
     # oceanicu_providers.py) isn't auto-injected either (same reasoning as
     # river_discharge.script/data_script above). Unlike bathymetry/tpxo,
