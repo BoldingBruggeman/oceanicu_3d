@@ -416,21 +416,14 @@ output:
       interval: 1
       interval_units: DAYS
       variable_requests:
-        - groups: [barotropic_3d]
-
-    - type: netcdf
-      path: nse_baroclinic_3d.nc
-      interval: 1
-      interval_units: DAYS
-      variable_requests:
-        # A real, previously-missing gap: this is a BAROCLINIC run
-        # (simulation.runtype: BAROCLINIC above) but no file captured
-        # temp/salt/rho/nuh anywhere before this. dictionary.py's own real
-        # cfg_output.py combines barotropic_3d_output+baroclinic_3d_output
-        # into ONE shared monthly file -- kept as its own file here instead,
-        # matching this config's existing one-group-per-file convention
-        # (nse_barotropic_3d.nc stays barotropic-only).
-        - groups: [baroclinic_3d]
+        # cfg_output.py's real monthly file combines barotropic_3d_output +
+        # baroclinic_3d_output into ONE file, not two -- matched here (same
+        # file, both groups in one variable_requests entry -> one .request()
+        # call) rather than a separate nse_baroclinic_3d.nc. A real,
+        # previously-missing gap either way: this is a BAROCLINIC run
+        # (simulation.runtype above) but no file captured temp/salt/rho/nuh
+        # anywhere before this.
+        - groups: [barotropic_3d, baroclinic_3d]
 
 # ----------------------------------------------------------------------
 # Data provenance -- NOW schema-validated (pygetm-config's providers.py
