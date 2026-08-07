@@ -1,0 +1,38 @@
+# Template for --data-roots-file (loader.apply_data_roots) -- a flat YAML
+# mapping of NAME: value, no hostname-keying (deliberately, see that
+# function's own docstring: "each machine only ever reads its OWN file",
+# avoiding machines.yaml's confirmed-stale-entry bug class). Copy this file
+# to the TARGET machine, rename it (data_roots.yaml, or anything you like),
+# edit the values for THAT machine's real data layout, then pass it to the
+# generated script:
+#
+#   python generated_nse.py --data-roots-file data_roots.yaml --start ... --stop ...
+#
+# (or to nse_driver.py itself, same flag, if running from source instead of
+# a --dump-python'd script). --data-root NAME=VALUE on the command line
+# always wins over this file if you need a one-off override without editing
+# it; an already-exported real env var always wins over this file too (only
+# fills gaps, never clobbers a deliberate export).
+#
+# Values below are THIS machine's (the one this file was generated on) --
+# a starting point, not necessarily correct for the target machine. Sorted
+# into two groups:
+
+# --- Likely personal/this-machine-only paths -- almost certainly need
+# --- editing on the target machine unless it shares this exact home dir.
+BATHYMETRY_FOLDER: /home/kb/source/repos/OceanICU/oceanicu_3d/Bathymetry
+HYDROGRAPHY_FOLDER_CMEMS: /home/kb/source/repos/boundaries
+BOUNDARY_FOLDER_BAROTROPIC: /home/kb/source/repos/boundaries/boundary_data
+
+# --- Possibly shared storage (/data, /server/data) -- check whether the
+# --- target machine has these mounted/reachable at the same paths before
+# --- assuming they're correct unedited.
+TPXO_FOLDER: /server/data/TPXO9
+HYDROGRAPHY_FOLDER: /data/WOA
+BOUNDARY_FOLDER_BAROCLINIC: /data/WOA
+CMIP6_BOUNDARY_FOLDER: /data/CMIP6
+ERA5_FOLDER: /data/ERA5/kaj
+CMIP6_FOLDER: /data/BiasCorrected
+RIVER_FOLDER: /data/EMORID
+KD490_FOLDER: /data/Kd490
+OUTPUT_FOLDER: /data/kb
