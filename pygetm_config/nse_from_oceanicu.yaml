@@ -228,6 +228,15 @@ runtime:
   dump_on_error: true
   profile: null
   check_finite: true
+  # Matches run_model.py's own real report=datetime.timedelta(days=1),
+  # report_totals=datetime.timedelta(days=7) exactly. {days: N} is real
+  # datetime.timedelta constructor kwargs (pygetm-config's new kind=
+  # "timedelta" support), not a plain number -- deliberately, since report/
+  # report_totals's own real Union[int, datetime.timedelta] type means a
+  # bare int is "N timesteps", not "N seconds"; the mapping keeps the two
+  # unambiguous.
+  report: {days: 1}
+  report_totals: {days: 7}
   # SCHEMA-ONLY (pygetm-config), not a real pygetm parameter -- matches
   # cfg_output.py's own real cfg.runtime.debug_output convention exactly.
   # nse_driver.py reads this BEFORE validation and, when true, appends the
