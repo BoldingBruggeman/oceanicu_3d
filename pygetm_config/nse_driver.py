@@ -383,6 +383,30 @@ def main(argv=None) -> int:
 
     raw.setdefault("runtime", {})["time"] = args.start
 
+    # runtime.debug_output (SCHEMA-ONLY flag, see pygetm-config's own
+    # _build_runtime_section -- not a real pygetm parameter): matches
+    # cfg_output.py's real cfg.runtime.debug_output gating exactly, but
+    # expressed as a per-run toggle here rather than a static YAML choice.
+    # cfg_output.py ADDS the debug fields to the SAME output file that
+    # already carries the matching non-debug group (never its own separate
+    # file) -- so this walks output.files, and for any file whose
+    # variable_requests already reference a *_debug-having group (barotropic_
+    # 2d/barotropic_3d/baroclinic_3d), appends a new variable_requests entry
+    # for that group's *_debug counterpart. Driven entirely by which groups a
+    # file already references, not by hardcoded filenames -- stays correct
+    # if nse_from_oceanicu.yaml's own file layout changes.
+    if bool(raw.get("runtime", {}).get("debug_output", False)):
+        _debug_group_for = {
+            "barotropic_2d": "barotropic_2d_debug",
+            "barotropic_3d": "barotropic_3d_debug",
+            "baroclinic_3d": "baroclinic_3d_debug",
+        }
+        for file_entry in raw.get("output", {}).get("files", []):
+            _referenced = {g for req in file_entry.get("variable_requests", []) for g in (req.get("groups") or [])}
+            _debug_groups = [_debug_group_for[g] for g in _referenced if g in _debug_group_for]
+            if _debug_groups:
+                file_entry.setdefault("variable_requests", []).append({"groups": _debug_groups})
+
     try:
         config, errors = validate_config(raw, schema)
         if errors:
