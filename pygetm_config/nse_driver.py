@@ -272,6 +272,26 @@ def main(argv=None) -> int:
     # set_meteo_data's own docstring for the swr/ql CMIP6-only derived-flux
     # piece this does NOT cover -- ERA5's own swr/ql, when actually needed,
     # are each a single file read, real data_assignments entries below).
+    # Restricts each ERA5/CMIP6 per-year filename pattern below (literal
+    # "????" where the year goes) to the exact years this run's own --start/
+    # --stop actually span, instead of matching every year in the folder --
+    # user's real finding: a folder with 1990-2025 present, a run only
+    # needing one or two of those years. Leverages pygetm-config's own
+    # data_assignments file: now accepting a list of exact paths, not just a
+    # single path/glob string (matches pygetm.input.from_nc's real signature
+    # exactly -- see that repo's schema.py/loader.py/codegen.py, same
+    # session). A single-year run gets one exact filename (no wildcard at
+    # all); a multi-year run gets a list of exact filenames, one per year --
+    # never a broader glob than what's actually needed.
+    _meteo_start_year = datetime.datetime.fromisoformat(args.start).year
+    _meteo_stop_year = datetime.datetime.fromisoformat(args.stop).year
+    _meteo_years = list(range(_meteo_start_year, _meteo_stop_year + 1))
+
+    def _restrict_to_years(pattern_with_wildcard_year: str) -> "str | list[str]":
+        if len(_meteo_years) == 1:
+            return pattern_with_wildcard_year.replace("????", str(_meteo_years[0]))
+        return [pattern_with_wildcard_year.replace("????", str(y)) for y in _meteo_years]
+
     meteo = raw.get("meteo") or {}
     meteo_source = meteo.get("source")
     meteo_cfg = (meteo.get(meteo_source) or {}) if meteo_source in ("ERA5", "CMIP6") else {}
@@ -289,13 +309,13 @@ def main(argv=None) -> int:
 
         if meteo_source == "ERA5":
             _meteo_assignments = [
-                {"target": "simulation.airsea.t2m", "kind": "file", "file": str(_folder / "era5_t2m_????.nc"), "variable": "t2m", "pre_transform_offset": -273.15},
-                {"target": "simulation.airsea.d2m", "kind": "file", "file": str(_folder / "era5_d2m_????.nc"), "variable": "d2m", "pre_transform_offset": -273.15},
-                {"target": "simulation.airsea.u10", "kind": "file", "file": str(_folder / "era5_u10_????.nc"), "variable": "u10"},
-                {"target": "simulation.airsea.v10", "kind": "file", "file": str(_folder / "era5_v10_????.nc"), "variable": "v10"},
-                {"target": "simulation.airsea.sp", "kind": "file", "file": str(_folder / "era5_sp_????.nc"), "variable": "sp"},
-                {"target": "simulation.airsea.tp", "kind": "file", "file": str(_folder / "era5_tp_????.nc"), "variable": "tp", "pre_transform_scale": 1 / 3600.0},
-                {"target": "simulation.airsea.tcc", "kind": "file", "file": str(_folder / "era5_tcc_????.nc"), "variable": "tcc"},
+                {"target": "simulation.airsea.t2m", "kind": "file", "file": _restrict_to_years(str(_folder / "era5_t2m_????.nc")), "variable": "t2m", "pre_transform_offset": -273.15},
+                {"target": "simulation.airsea.d2m", "kind": "file", "file": _restrict_to_years(str(_folder / "era5_d2m_????.nc")), "variable": "d2m", "pre_transform_offset": -273.15},
+                {"target": "simulation.airsea.u10", "kind": "file", "file": _restrict_to_years(str(_folder / "era5_u10_????.nc")), "variable": "u10"},
+                {"target": "simulation.airsea.v10", "kind": "file", "file": _restrict_to_years(str(_folder / "era5_v10_????.nc")), "variable": "v10"},
+                {"target": "simulation.airsea.sp", "kind": "file", "file": _restrict_to_years(str(_folder / "era5_sp_????.nc")), "variable": "sp"},
+                {"target": "simulation.airsea.tp", "kind": "file", "file": _restrict_to_years(str(_folder / "era5_tp_????.nc")), "variable": "tp", "pre_transform_scale": 1 / 3600.0},
+                {"target": "simulation.airsea.tcc", "kind": "file", "file": _restrict_to_years(str(_folder / "era5_tcc_????.nc")), "variable": "tcc"},
             ]
         else:  # CMIP6
             # Real, verified data (2026-08-06): the actual bias-corrected
@@ -322,12 +342,12 @@ def main(argv=None) -> int:
             # own docstring for why swr/ql are also left unset here (no
             # radiation data available yet either).
             _meteo_assignments = [
-                {"target": "simulation.airsea.t2m", "kind": "file", "file": str(_folder / "tas_bc_bilinear__disagg_????.nc"), "variable": "tas", "pre_transform_offset": -273.15},
-                {"target": "simulation.airsea.qa", "kind": "file", "file": str(_folder / "huss_bc_bilinear__disagg_????.nc"), "variable": "huss"},
-                {"target": "simulation.airsea.u10", "kind": "file", "file": str(_folder / "uas_bc_bilinear__disagg_????.nc"), "variable": "uas"},
-                {"target": "simulation.airsea.v10", "kind": "file", "file": str(_folder / "vas_bc_bilinear__disagg_????.nc"), "variable": "vas"},
-                {"target": "simulation.airsea.sp", "kind": "file", "file": str(_folder / "psl_bc_bilinear__disagg_????.nc"), "variable": "psl"},
-                {"target": "simulation.airsea.tp", "kind": "file", "file": str(_folder / "pr_bc_bilinear__disagg_????.nc"), "variable": "pr", "pre_transform_scale": 1 / 1000.0},
+                {"target": "simulation.airsea.t2m", "kind": "file", "file": _restrict_to_years(str(_folder / "tas_bc_bilinear__disagg_????.nc")), "variable": "tas", "pre_transform_offset": -273.15},
+                {"target": "simulation.airsea.qa", "kind": "file", "file": _restrict_to_years(str(_folder / "huss_bc_bilinear__disagg_????.nc")), "variable": "huss"},
+                {"target": "simulation.airsea.u10", "kind": "file", "file": _restrict_to_years(str(_folder / "uas_bc_bilinear__disagg_????.nc")), "variable": "uas"},
+                {"target": "simulation.airsea.v10", "kind": "file", "file": _restrict_to_years(str(_folder / "vas_bc_bilinear__disagg_????.nc")), "variable": "vas"},
+                {"target": "simulation.airsea.sp", "kind": "file", "file": _restrict_to_years(str(_folder / "psl_bc_bilinear__disagg_????.nc")), "variable": "psl"},
+                {"target": "simulation.airsea.tp", "kind": "file", "file": _restrict_to_years(str(_folder / "pr_bc_bilinear__disagg_????.nc")), "variable": "pr", "pre_transform_scale": 1 / 1000.0},
                 {"target": "simulation.airsea.tcc", "kind": "constant", "constant_value": 0.5},
             ]
             # humidity_measure differs by source too (a real airsea
