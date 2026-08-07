@@ -1,49 +1,18 @@
-# Converted from oceanicu_3d/nse_model_config.yaml to pygetm-config's format.
-# See pygetm-config's docs/yaml_vs_python.md for the full explanation of what
-# moved here vs. what stays in nse_driver.py (this directory), and the "worked
-# example" table summarizing every field's fate.
+# NSe pygetm-config setup. runtime.time is intentionally omitted -- start/stop
+# are per-invocation, not per-setup:
+#   python nse_driver.py nse_from_oceanicu.yaml --start 2024-03-01T00:00:00 --stop ...
 #
-# NOT everything from the original file is here -- river loading (dynamic,
-# threshold-filtered from an EMORID file) is NOT expressible as static YAML
-# without losing real behavior; it stays in nse_driver.py. Domain construction
-# turned out to be a special case: _create_domain_nse's bathymetry-reading looked
-# bespoke, but the ONLY thing that actually varies (verified against
-# _create_domain_amm7 too) is variable names and mask convention -- both are
-# expressible via `domain:`'s own generic BathymetryFile choice below, so this
-# setup no longer needs any Python for domain-building at all.
-#
-# `runtime.time` is intentionally omitted here -- like OceanICU's own
-# run_model.py, start/stop are per-invocation, not per-setup:
-#   pygetm-config run nse_from_oceanicu.yaml --start 2024-03-01T00:00:00 --stop ...
-# (--start overrides/fills in runtime.time; the file's own runtime.time, if
-# present, is otherwise required for `pygetm-config validate` to pass standalone.)
+# A fuller, heavily-commented version of this same file (explaining how each
+# field was derived from the original oceanicu config, with verification
+# notes) lives in the pygetm-config repo's examples/nse_from_oceanicu.yaml --
+# useful background if something here looks surprising, not needed for
+# day-to-day use. See also pygetm-config's docs/yaml_vs_python.md and
+# docs/overview.md for how this all fits together, and this directory's own
+# nse_driver.py for what's NOT expressible as static YAML (river loading is
+# the main one -- dynamic, threshold-filtered from a real file at run time).
 
 # ----------------------------------------------------------------------
-# Domain -- reading the pre-prepared bathymetry NetCDF file. Verified against
-# oceanicu's _create_domain_nse directly: separate lon/lat variables, depth
-# variable named "depth_rx0_0p20" (NOT "depth" -- the original config's
-# `domain.name: "depth"` was unused dead config there; dropped here rather
-# than perpetuated), and an explicit "ocean_mask" variable (0=land, 1=water,
-# matching this schema's mask_variable convention exactly). z0 was
-# oceanicu's domain.z0.
-#
-# "${BATHYMETRY_FOLDER}" is pygetm-config's own ${VAR}/$VAR lazy data-path
-# resolution (TODO item 15, resolved only at the point of actual file access
-# -- never at config-validate or generation time, see loader.resolve_data_path's
-# own docstring) -- each machine exports BATHYMETRY_FOLDER itself (directly,
-# via --data-root BATHYMETRY_FOLDER=..., or in a --data-roots-file), no
-# hardcoded absolute path or bespoke machines.yaml-style lookup needed here at
-# all. Machines.yaml already has a (currently stale, unrelated) BATHYMETRY_
-# FOLDER key per hostname -- not consumed here, this is pygetm-config's own,
-# separate mechanism.
-#
-# UPDATE (pygetm-config, domain/bathymetry unification): `bathymetry:` used
-# to be its own top-level section (a separate, later section from `domain:`,
-# even though only one of them is ever really used per setup) -- unified
-# into one of domain:'s own choices instead, `method: BathymetryFile`, same
-# shape as every other "pick one of these" choice in this schema (e.g.
-# meteo.source). Nothing about the real values below changed, just where
-# they live.
+# Domain -- reads the pre-prepared bathymetry NetCDF file.
 domain:
   method: BathymetryFile
   path: ${BATHYMETRY_FOLDER}/bathymetry_nse.nc
@@ -54,25 +23,10 @@ domain:
   z0: 0.01
 
 # ----------------------------------------------------------------------
-# Open boundaries -- moved from 9 hardcoded add_by_index() calls in
-# cfg_boundaries.py into real data. Verified against that file directly
-# (comment there: "Regenerated from NSe/nse_bdy_lonlat.txt (311 points),
-# cross-checked exact against getm-dump.nc's lon_bdy/lat_bdy from a live run").
-#
-# type_3d omitted deliberately, not just left unset by oversight -- the
-# original oceanicu code had `type_3d: 0` here, which pygetm-config's own
-# `pygetm-config validate` correctly flagged as invalid (pygetm.constants has
-# no boundary-condition-type constant equal to 0; ZERO_GRADIENT=1 is the
-# smallest -- a genuine latent inconsistency in oceanicu's cfg_boundaries.py,
-# whose bdy_type is reassigned three times at module level, dead-code
-# evidence of iteration, of which 0 may be the same kind of leftover). Since
-# type_3d is genuinely just a *default* (see pygetm-config's own
-# schema._default_open_boundary_type_3d) that gets overwritten anyway for
-# these CMEMS/WOA-sourced temp/salt boundaries (see the
-# kind="boundary_type" data_assignment below), omitting it falls through to
-# pygetm-config's own ZERO_GRADIENT schema default -- the exact value
-# nse_driver.py's own runtime correction used to substitute for the invalid
-# 0, now validated cleanly instead of needing a special-cased correction.
+# Open boundaries -- 311 points total, regenerated from NSe/nse_bdy_lonlat.txt.
+# type_3d intentionally omitted: temp/salt boundary type is forced to SPONGE
+# unconditionally via data_assignments below, so a per-segment default here
+# would never actually apply.
 open_boundaries:
   - side: WEST
     l: 0
@@ -121,41 +75,22 @@ open_boundaries:
     type_2d: FLATHER_TRANSPORT
 
 # ----------------------------------------------------------------------
-# Simulation physics/numerics -- direct value mapping from the original
-# momentum/vertical_coordinates/internal_pressure/simulation sections.
 simulation:
-  runtype: BAROCLINIC        # was: 4
-  #runtype: BAROTROPIC_2D        # was: 4
+  runtype: BAROCLINIC
+  #runtype: BAROTROPIC_2D
   Dcrit: 0.5
   Dmin: 0.1
-  # run_model.py passes this explicitly to Simulation() (pygetm.
-  # AdvectionScheme.SUPERBEE) -- made explicit here too, not left to
-  # silently rely on pyGETM's own default (which currently IS SUPERBEE, so
-  # this happens to be a no-op today, but a future pyGETM version changing
-  # its own default would otherwise silently change this setup's numerics
-  # with no visible config change). A real, already-introspected schema
-  # field (see pygetm_config.schema's own simulation section) -- this was
-  # a config gap, not a code one.
+  # Matches run_model.py's own explicit choice.
   advection_scheme: SUPERBEE
-  # delay_slow_ip/fabm: not in the original YAML, left at pyGETM's own
-  # defaults (delay_slow_ip's real default, False, already matches run_
-  # model.py's own explicit choice; fabm isn't modeled by any provider role
-  # here at all, see the "Data provenance" section's own note). gotm is set
-  # dynamically by nse_driver.py itself now (a fixed repo asset, not a
-  # per-setup YAML value) -- see that file's own comment.
+  # delay_slow_ip/fabm: left at pyGETM's own defaults (fabm isn't modeled by
+  # any provider role here at all). gotm is set dynamically by nse_driver.py
+  # itself (a fixed repo asset), not a per-setup YAML value.
 
-  # Every alternative's fields present, nested under its own label (nested-
-  # by-label -- see pygetm-config's docs/overview.md, "Every ChoiceSpec keeps
-  # every alternative present"): switching the active strategy is a one-line
-  # `type:` change, nothing else to retype. GVC is what nse_model_config.yaml
-  # actually used (`type: 2`) with its real tuned values; Sigma/Adaptive get
-  # the schema's own real pygetm defaults (untuned for this setup -- if you
-  # switch to one of them, review the values before running for real). `nz`
-  # is shared physically (grid layer count) across all three schemes, so it's
-  # set to the same real 40 everywhere rather than each alternative's
-  # independent placeholder.
+  # GVC is the active choice, with its real tuned values below. Sigma/
+  # Adaptive are present with pyGETM's own untuned defaults -- switch via
+  # `type:`, review their values before using either for real.
   vertical_coordinates:
-    type: GVC                # was: type: 2
+    type: GVC
     Sigma:
       nz: 40
       ddl: 0.0
@@ -197,27 +132,17 @@ simulation:
       timescale: 14400.0
 
   internal_pressure:
-    type: ShchepetkinMcwilliams   # was: type: 2
+    type: ShchepetkinMcwilliams
     Prescribed:
       idpdx: 0.0
       idpdy: 0.0
     BlumbergMellor: {}
     ShchepetkinMcwilliams: {}
 
-  # UPDATE: re-verified directly against run_model.py's ACTUAL current code
-  # (not the commented-out `set_jerlov_type(Type_II)` line, which is dead --
-  # the real, live code path is different). run_model.py's own final_kwargs
-  # passed to Simulation() has NO `radiation=` at all -- pygetm's own
-  # Simulation.__init__ then does `if radiation is None and runtype ==
-  # BAROCLINIC: radiation = pygetm.radiation.TwoBand()`, i.e. TwoBand with
-  # jerlov_type=None (NOT Type_II), leaving A/kc1/kc2 unset until run_model.
-  # py's OWN explicit `sim.radiation.A.set(0.7)` / `kc1.set(0.54)` / `kc2.
-  # set(3.23)` (real hardcoded constants, verified directly against that
-  # file -- not Type_II's own values, which would be A=0.77/kc1=1.5/
-  # kc2=14.0). jerlov_type left OMITTED here (nullable, default None) to
-  # match exactly -- the three real values are set via data_assignments
-  # below (kind: constant) instead of at construction, mirroring run_model.
-  # py's own post-construction .set() calls.
+  # Matches run_model.py's own real, live code: TwoBand with no jerlov_type
+  # (NOT Type_II -- that line is dead/commented-out in run_model.py itself).
+  # A/kc1/kc2 are set via data_assignments below instead, mirroring
+  # run_model.py's own post-construction .set() calls.
   radiation:
     type: TwoBand
     Radiation: {}
@@ -228,84 +153,43 @@ simulation:
     An: 25
     Am: 0
     cnpar: 1
-    # was `avmol: 1.8e-6` in the original -- pyGETM's actual parameter name is
-    # `avmmol` (confirmed via Momentum.__init__), not `avmol`. The old config's
-    # key doesn't match pyGETM's current API at all; this is concrete evidence
-    # pyGETM's API has moved since that config field name was chosen. Using
-    # the correct name here with the same value:
+    # pyGETM's real parameter name is `avmmol`, not `avmol` (the original
+    # config's own key).
     avmmol: 1.8e-6
-    # User request: checked directly against pygetm.momentum.Momentum's real
-    # source -- advection_scheme CAN genuinely be set independently for
-    # momentum (2D+3D velocities) vs. tracers (3D scalars): Momentum.
-    # initialize() only falls back to simulation.advection_scheme (above)
-    # if this is left null ("if self.advection_scheme is None: self.
-    # advection_scheme = default_advection_scheme") -- tracers have no such
-    # independent override at all (Simulation() constructs TracerCollection
-    # directly, always forced to simulation.advection_scheme, no pass-
-    # through parameter the way momentum has; no per-tracer override
-    # either). Left null here (not e.g. SUPERBEE) so momentum genuinely
-    # falls back to simulation.advection_scheme above, matching run_model.py
-    # exactly (momentum is never explicitly constructed there either, so
-    # there's no old-system value to replicate for these three).
+    # null so momentum genuinely falls back to simulation.advection_scheme
+    # above -- momentum's own advection_scheme (if set) would otherwise take
+    # priority over it. Tracers have no independent override at all.
     advection_scheme: null
-    # The one genuinely 2D-specific advection knob: a directional-splitting
-    # STRATEGY (not a scheme choice) -- applies only to the 2D U/V
-    # transports, not 3D velocities. FULL is pyGETM's own real default.
+    # Directional-splitting strategy for the 2D U/V transports specifically
+    # (not a scheme choice). FULL is pyGETM's own real default.
     advection_split_2d: FULL
-    # Interpolation method for reconstructing velocities in the Coriolis
-    # terms. DEFAULT is pyGETM's own real default.
+    # Interpolation method for Coriolis terms. DEFAULT is pyGETM's own real
+    # default.
     coriolis_scheme: DEFAULT
 
 # ----------------------------------------------------------------------
-# Runtime -- direct mapping from runtime.{timestep,split_factor} +
-# switches.{dump_on_error,profile,check_finite}. `time` deliberately omitted,
-# see the note at the top of this file.
 runtime:
   timestep: 20
   split_factor: 20
   dump_on_error: true
   profile: null
   check_finite: true
-  # Matches run_model.py's own real report=datetime.timedelta(days=1),
-  # report_totals=datetime.timedelta(days=7) exactly. {days: N} is real
-  # datetime.timedelta constructor kwargs (pygetm-config's new kind=
-  # "timedelta" support), not a plain number -- deliberately, since report/
-  # report_totals's own real Union[int, datetime.timedelta] type means a
-  # bare int is "N timesteps", not "N seconds"; the mapping keeps the two
-  # unambiguous.
+  # {days: N} is real datetime.timedelta constructor kwargs, not a plain
+  # number -- report/report_totals's real type is Union[int, timedelta], so
+  # a bare int would mean "N timesteps", not "N seconds". Matches
+  # run_model.py's own real report=timedelta(days=1)/report_totals=
+  # timedelta(days=7).
   report: {days: 1}
   report_totals: {days: 7}
-  # SCHEMA-ONLY (pygetm-config), not a real pygetm parameter -- matches
-  # cfg_output.py's own real cfg.runtime.debug_output convention exactly.
-  # nse_driver.py reads this BEFORE validation and, when true, appends the
-  # matching *_debug variable_groups entry (see output.variable_groups
-  # above) to whichever output.files already reference the non-debug group
-  # -- same file, not a separate one, mirroring cfg_output.py's own
-  # `if cfg.runtime.debug_output: output.request(...)` placement.
+  # SCHEMA-ONLY (pygetm-config), not a real pygetm parameter. When true,
+  # nse_driver.py appends the matching *_debug variable_groups entry to
+  # whichever output.files already reference the non-debug group.
   debug_output: false
 
 # ----------------------------------------------------------------------
-# Data assignments -- the piece that was actually missing for sim.start() to
-# succeed at all: pygetm's FluxesFromMeteo requires t2m/d2m/u10/v10/sp/tcc to be
-# set before the simulation can run (verified: sim.start() raises an
-# AssertionError from airsea.py's require_set() without these).
-#
-# UPDATE (TODO item 11): these entries used to be hardcoded here, ERA5-only,
-# with no way to switch to meteo.source: CMIP6 without hand-editing this
-# file too (CMIP6 uses different TARGET fields entirely -- qa/
-# SPECIFIC_HUMIDITY, not d2m/DEW_POINT_TEMPERATURE -- not just different
-# file paths). nse_driver.py now computes the right entries dynamically
-# from whichever meteo.source is active, mirroring cfg_airsea.py's own
-# real data() exactly (including tp, previously missing here) -- see that
-# file's own comment on this, right before validate_config runs. Nothing
-# to configure here anymore; switching providers.meteo.source above is
-# enough on its own, matching every other provider role's own convention.
 data_assignments:
-  # Radiation -- matches run_model.py's own real, live code exactly: A/kc1/
-  # kc2 are set via three plain .set() calls (sim.radiation.A.set(0.7), .kc1.
-  # set(0.54), .kc2.set(3.23)) on a TwoBand constructed with jerlov_type=None
-  # (see simulation.radiation's own comment above for the full trace -- this
-  # is NOT the commented-out Type_II line, which is dead code there).
+  # Matches run_model.py's own real, live code exactly (fixed constants, not
+  # Jerlov Type_II's own values).
   - target: simulation.radiation.A
     kind: constant
     constant_value: 0.7
@@ -317,40 +201,18 @@ data_assignments:
     constant_value: 3.23
   # ALTERNATIVE (not active): a real, space-varying KD490 climatology for
   # kc2 instead of the fixed constant above -- mirrors run_model.py's own
-  # `ObsKd: True` branch (`sim.radiation.kc2.set(pygetm.input.from_nc(
-  # attenuation_path, "KD490_filled"), climatology=True)`, not used by
-  # nse_model_config.yaml today since its own `simulation.ObsKd: False`, but
-  # real, working code for the same setup) -- kept here as a documented,
-  # ready-to-swap-in option: delete the kind: constant kc2 entry above and
-  # uncomment this one to switch. Requires simulation.radiation.jerlov_type:
-  # Type_II above too (or another real value for A/kc1) if you do, since
-  # this only ever overrides kc2, not A/kc1.
+  # ObsKd: True branch. To switch: delete the kind: constant kc2 entry
+  # above, uncomment this one, and give simulation.radiation.jerlov_type a
+  # real value (this only ever overrides kc2, not A/kc1).
   # - target: simulation.radiation.kc2
   #   kind: file
   #   file: ${KD490_FOLDER}/KD490_clim.nc
   #   variable: KD490_filled
   #   climatology: true
 
-  # Open-boundary 2D (barotropic tidal elevation/transport) values -- found
-  # while investigating what was STILL missing after the temp/salt fix below:
-  # boundaries.barotropic.source: TPXO further down in this file was, until
-  # now, purely descriptive provider metadata, never wired into an actual
-  # data_assignments entry. sim.open_boundaries.z/u/v (unlike meteo/radiation)
-  # have no require_set() check in pygetm, so sim.start() succeeded silently
-  # with them left at zero the whole time this conversion has existed -- a
-  # real, previously-unflagged gap, and a strong candidate for (at least a
-  # contributing cause of) the "Non-finite values found" instability near a
-  # boundary at timestep 9 (real baroclinic forcing driving flow against a
-  # tidally-unforced barotropic boundary is exactly the kind of thing that
-  # destabilizes). Uses pygetm-config's new `kind: tpxo` (a harmonic-
-  # constituent lookup via pygetm.input.tpxo.get, keyed by the open
-  # boundary's own lon/lat -- NOT a plain NetCDF file+variable read like
-  # kind: file), mirroring OceanICU's real cfg_boundaries.py::data_2d TPXO
-  # branch exactly: sim.open_boundaries.z.set(tpxo.get(bdy_lon, bdy_lat,
-  # root=tpxo_folder), on_grid=True), same for u/v. tpxo_folder is
-  # kind="path"-typed, so ${TPXO_FOLDER} resolves lazily at actual use time
-  # (loader._coerce_value's own "path" TypeKind handling, same mechanism as
-  # domain.path above -- no bespoke per-field code needed for this one).
+  # Open-boundary 2D (barotropic tidal elevation/transport) values -- a
+  # harmonic-constituent lookup via TPXO, keyed by each open boundary's own
+  # lon/lat. Mirrors cfg_boundaries.py's real data_2d TPXO branch.
   - target: open_boundaries.z
     kind: tpxo
     tpxo_folder: ${TPXO_FOLDER}
@@ -367,21 +229,11 @@ data_assignments:
     tpxo_variable: v
     on_grid: true
 
-  # Open-boundary 3D (temp/salt) TYPE -- the NEXT thing that was missing:
-  # sim.start() succeeds without these, but sim.advance() then raises
-  # "Non-finite values found" (open_boundaries: only carries type_2d, not
-  # any actual temp/salt data at those points). Mirrors OceanICU's real
-  # cfg_boundaries.py::data_3d exactly: forces temp/salt to SPONGE
-  # regardless of each open_boundaries: entry's own type_3d (that's only
-  # ever a fallback default, per pygetm.open_boundaries.OpenBoundary's own
-  # docstring -- verified directly against pygetm source, not assumed) --
-  # true for BOTH its WOA and CMEMS branches, so these two entries are
-  # unconditional, real data-source-independent config, unlike the actual
-  # VALUES (thetao/so or woa_t/woa_s), which genuinely differ by
-  # boundaries.baroclinic.source and are NOT expressible as a single static
-  # data_assignments entry (see nse_driver.py's own dynamic construction,
-  # mirroring meteo.source's identical need, item 11) -- deliberately not
-  # duplicated here as a stale hardcoded CMEMS-only entry.
+  # Open-boundary 3D (temp/salt) TYPE -- forced to SPONGE unconditionally
+  # (mirrors cfg_boundaries.py's real data_3d exactly), regardless of each
+  # open_boundaries: entry's own type_3d default above. The actual VALUES
+  # (thetao/so or woa_t/woa_s) genuinely differ by boundaries.baroclinic.
+  # source and are computed dynamically by nse_driver.py, not set here.
   - target: open_boundary.temp
     kind: boundary_type
     boundary_condition_type: SPONGE
@@ -390,35 +242,16 @@ data_assignments:
     boundary_condition_type: SPONGE
 
 # ----------------------------------------------------------------------
-# Output -- oceanicu's boolean-flag + separate output.yaml variable-list-file
-# convention collapses here into explicit files with variable lists inlined,
-# since pygetm-config's output.files doesn't have that boolean/variable-list
-# split. Variable lists are the REAL ones from output.yaml's
-# airsea.{standard,fluxes} / barotropic.2d.{tides,standard} /
-# barotropic.3d.standard groups (meteo=True, tides=True, barotropic
-# default_2d/default_3d=True in the original; baroclinic all False, so no
-# baroclinic output file here). Intervals below are illustrative placeholders,
-# NOT verified against cfg_output.py's actual save-frequency logic -- tune to
-# match your real cadence.
-#
-# `folder` is oceanicu's original output.folder, now shared across every file
-# below (kind="path"-typed, same ${VAR} lazy-resolution as domain.path/
-# tpxo_folder above) -- each file's `path` is just a filename, joined to
-# `folder` since it's relative. `pygetm-config run --output-dir` (core CLI
-# only, nse_driver.py doesn't have its own equivalent flag) overrides this
-# for one run without editing the file; give a file an absolute `path` to
-# opt that one file out of the shared folder.
+# Output. Intervals below are illustrative -- tune to your real cadence.
+# `folder` is shared across every file below; each file's own `path` is
+# joined onto it unless already absolute.
 output:
   folder: ${OUTPUT_FOLDER}
-  # Named field-name groups (TODO item 29, pygetm-config) -- names and
-  # contents taken directly from lib/dictionary.py's own flat named tuples
-  # (airsea_standard_output, airsea_fluxes_output, tidal_output,
-  # barotropic_2d_output, barotropic_3d_output; "_output" suffix dropped as
-  # redundant here), confirmed to match this file's own pre-existing literal
-  # field lists below EXACTLY -- this config's output section was clearly
-  # hand-derived from that catalog in the first place. Referenced by name
-  # from each file's variable_requests via `groups:` instead of retyping/
-  # duplicating the list.
+  # Named, reusable field-name groups, referenced by name from each file's
+  # variable_requests via `groups:` instead of retyping a long field list.
+  # Groups below the active ones are cataloged for later use (debug output,
+  # FABM once configured, surface/bottom single-level slices) even though no
+  # file references them yet.
   variable_groups:
     airsea_standard: [u10, v10, sp, t2m, tcc, tp]
     airsea_fluxes: [swr, shf, tausxu, tausyv]
@@ -426,41 +259,12 @@ output:
     barotropic_2d: [Ht, zt, Dt, u1, v1]
     barotropic_3d: [uk, vk, ww, SS, num]
     baroclinic_3d: [temp, salt, rho, nuh]
-    # Everything below is CATALOGED (matches dictionary.py's full set) but
-    # not yet referenced by any file below -- kept available for later use
-    # rather than left out, same as dictionary.py itself lists every group
-    # whether or not the current run needs it:
-    # - the three debug groups are cfg_output.py's real cfg.runtime.
-    #   debug_output-gated fields (off by default there too) -- 18+6+5 extra
-    #   fields nobody asked to turn on, so cataloged but not attached.
     barotropic_2d_debug: [maskt, masku, maskv, dxt, dyt, Hu, Hv, U, V, Du, Dv, dpdx, dpdy, z0bu, z0bv, z0bt, ru, rv]
     barotropic_3d_debug: [rru, rrv, advpk, advqk, diffpk, diffqk]
     baroclinic_3d_debug: [rad, sst, hnt, idpdx, idpdy]
-    # surface/bottom single-level slices of the same baroclinic_3d tracers --
-    # cfg_output.py's real usage pairs these with a per-field `z=`/`isel`
-    # single-level extraction (pygetm's own File.request has a native `z=`
-    # kwarg for this, see output.variable_request's own params) rather than
-    # requesting the full 3D field; not wired to a file here since that's a
-    # new daily-output-cadence decision, not just a field-list one.
     surface_variables_3d: [temp, salt]
     bottom_variables_3d: [temp, salt]
-    # FABM isn't configured in this file at all (`fabm:` isn't modeled by any
-    # provider here, see the "Data provenance" section's own note below) --
-    # cataloged for when it is, NOT attached to any file: requesting these
-    # against a sim with no FABM model configured would fail with "Unknown
-    # field", the same real error output.files[*] already fails loudly on
-    # for any genuinely unavailable field (see loader.configure_output).
     fabm_ersem: [P1_c, P2_c, P3_c, P4_c, O2_o, N3_n, N4_n, N1_p, N5_s, Q6_c, Y2_c, Y3_c, O3_c, O3_fair, Q7_c, Q6_pen_depth_c, ben_col_D1m, ben_col_D2m, N5_s_bdy, N5_s_sms, N5_s_sfl, N5_s_bfl, N5_s_sfl_tot_calculator_result, N5_s_bfl_tot_calculator_result, N5_s_sms_tot_calculator_result]
-  # sync_interval/default_dtype/save_initial below are set explicitly on
-  # every file, matching lib/cfg_output.py's real create()'s own values
-  # exactly (re-checked directly against that file, not assumed): every
-  # file there passes default_dtype=np.float32 (pygetm's own real default,
-  # left unset, is None -- native/full precision) and save_initial=
-  # save_initial (create()'s own parameter default is False -- pygetm's own
-  # real default, left unset, is True); sync_interval is None for
-  # meteo/surface/bottom/monthly-cadence files and 1 for tides/2d/3d there
-  # (pygetm's own real default, if left unset, is already 1 -- so only
-  # nse_meteo.nc's value actually differs from leaving it unset).
   files:
     - type: netcdf
       path: nse_meteo.nc
@@ -480,9 +284,8 @@ output:
       default_dtype: float32
       save_initial: false
       variable_requests:
-        # maskt isn't part of dictionary.py's tidal_output tuple (it's one of
-        # barotropic_2d_debug_output's debug fields instead) -- kept as a
-        # literal alongside the group, demonstrating fields+groups combine.
+        # maskt isn't part of the tidal group -- combined here with fields:
+        # to show groups and literal fields can mix in one request.
         - groups: [tidal]
           fields: [maskt]
 
@@ -504,62 +307,16 @@ output:
       default_dtype: float32
       save_initial: false
       variable_requests:
-        # cfg_output.py's real monthly file combines barotropic_3d_output +
-        # baroclinic_3d_output into ONE file, not two -- matched here (same
-        # file, both groups in one variable_requests entry -> one .request()
-        # call) rather than a separate nse_baroclinic_3d.nc. A real,
-        # previously-missing gap either way: this is a BAROCLINIC run
-        # (simulation.runtype above) but no file captured temp/salt/rho/nuh
-        # anywhere before this.
+        # Combines barotropic + baroclinic 3D fields in one file (matches
+        # cfg_output.py's own real monthly-file convention).
         - groups: [barotropic_3d, baroclinic_3d]
 
 # ----------------------------------------------------------------------
-# Data provenance -- NOW schema-validated (pygetm-config's providers.py
-# mechanism, once oceanicu_providers.py (this directory) is discovered --
-# either via a real `pygetm_config.providers` entry point, once oceanicu_3d
-# has packaging to hang one off, or right now via the zero-packaging
-# PYGETM_CONFIG_PROVIDERS env var; nse_driver.py sets this automatically to
-# its own sibling oceanicu_providers.py, so no manual export is needed to run
-# THIS file -- see pygetm-config's docs/providers.md). Every real alternative
-# per role is present (not just the one active in this specific setup),
-# using pygetm_config's `ChoiceSpec.nested_by_label` -- switching e.g.
-# `meteo.source: ERA5` to `CMIP6` needs no other edit, matching how
-# nse_model_config.yaml's OWN `hydrography`/`boundaries`/`meteo`/`rivers`
-# blocks already worked (this section is a close, now-validated port of
-# those, not a redesign -- values taken directly from that file, not
-# invented). `rivers:` stays named `river_discharge:` here (see
-# oceanicu_providers.py's own docstring for why: the core schema already has
-# a `rivers:` section for open-boundary positions) and is CMIP6-less --
-# cfg_rivers.py's real `cfg.rivers.source` is two-level (`historic` wraps its
-# own `historic.source`) plus a structurally different CMIP6 sibling, which
-# `make_provider_slot` can't represent as one flat ChoiceSpec (a real gap in
-# that mechanism itself, not fixed here -- see that file's own comment).
-# `fabm:` isn't modeled by any provider role at all (not wired up here or in
-# nse_driver.py) -- dropped rather than kept as another free-form leftover.
-#
-# NOT auto-derived into the data_assignments block above (e.g. meteo.ERA5.
-# folder here vs. the separate hardcoded ERA5 file paths there) -- that's
-# still the one piece of "future work" left in the provider mechanism (see
-# docs/yaml_vs_python.md's third-category section): this section makes the
-# CHOICE of data source schema-validated (catches typos, wrong types, missing
-# folders), it doesn't yet automatically wire that choice into a live pygetm
-# call. Keep both in sync by hand for now if you change one.
-# Every `folder`/`tpxo_folder` below is kind="path"-typed and uses ${VAR}
-# syntax (pygetm-config's own TODO item 15 lazy-resolution mechanism, see
-# domain.path's own comment above for the full explanation) -- resolved only
-# at actual use time, never at validate/generation time, so this file has no
-# machine-specific absolute paths baked in anywhere. hydrography.CMEMS/
-# river_discharge.emorid.folder are consumed directly by scripts/hydrography.py/
-# scripts/rivers.py (project-specific script hooks, not core pygetm-config
-# code), which call loader.resolve_data_path themselves -- see those files'
-# own docstrings. meteo.<source>.folder feeds nse_driver.py's dynamically-
-# built data_assignments entries, which DO go through the core mechanism
-# automatically (kind="file" -> loader._coerce_value's "path" handling), no
-# extra code needed there. boundaries.* below are currently NOT auto-wired
-# into any real pygetm call at all (see this section's own module-level
-# comment) -- ${VAR}-ified anyway for when that changes, and so a stray
-# absolute path doesn't quietly reappear here even though nothing reads it
-# today.
+# Data provenance -- which real data source each role uses. Every real
+# alternative per role stays present (not just the active one) so switching
+# e.g. meteo.source: ERA5 -> CMIP6 needs no other edit. See pygetm-config's
+# docs/providers.md for the mechanism, oceanicu_providers.py (this
+# directory) for the real registration.
 hydrography:
   source: WOA
   CMEMS:
@@ -590,16 +347,8 @@ boundaries:
       end_date: "2026-01-01"
   baroclinic:
     source: WOA
-    # `folder` deliberately OMITTED here -- verified directly against the
-    # real cfg_boundaries.py::data_3d: its WOA branch reads
-    # `cfg.hydrography.WOA.folder` (a commented-out line right above it,
-    # `#_woa_folder = cfg.boundaries.baroclinic.WOA.folder`, shows this was a
-    # deliberate choice, not an oversight -- WOA boundary data is the SAME
-    # woa_t.nc/woa_s.nc climatology already used for hydrography's own
-    # initial condition, so it reuses that folder rather than needing its
-    # own). Giving this field its own value would be misleading -- nothing
-    # in the real dynamic wiring (nse_driver.py's main(), see below) reads
-    # it.
+    # `folder` deliberately omitted -- WOA boundary data reuses hydrography.
+    # WOA.folder above (the same woa_t.nc/woa_s.nc climatology), not its own.
     WOA: {}
     CMEMS:
       folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMEMS}
@@ -615,35 +364,19 @@ boundaries:
       scenario: "ssp585"
       start_date: "2015-01-01"
       end_date: "2025-01-01"
-# evaporation/shortwave_method/longwave_method genuinely repeat identically
-# under BOTH ERA5: and CMIP6: below (not a copy-paste mistake) -- each
-# source's own ObjectSpec declares its own copy of these fields
-# (oceanicu_providers.py's _meteo_shared, attached individually to both
-# choices), since make_provider_slot has no "shared across every choice in
-# this role" concept the way `folder`/`folder_template`/etc. are shared
-# across ALL roles. Putting them as siblings of `source:` instead (matching
-# nse_model_config.yaml's own layout, which predates schema validation) is a
-# real mistake this schema now catches: `_validate_choice` flags a stray
-# field placed there as "unknown field" rather than silently dropping it.
 meteo:
   source: ERA5
   ERA5:
-    # See data_assignments note above re: this only having 2025 data on disk.
     folder: ${ERA5_FOLDER}
     evaporation: true
     shortwave_method: 1   # ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
     longwave_method: 1
   CMIP6:
-    # Real, verified values (2026-08-06) -- the bias-corrected dataset this
-    # project actually uses (re-interpolated onto ERA5's own grid/calendar/
-    # hourly convention, NOT raw CMIP6's native grid/noleap calendar --
-    # confirmed against a real sample file). data_assignments entries for
-    # this source are computed dynamically by nse_driver.py from these
-    # values (folder/model/scenario), same as ERA5 above -- nothing else to
-    # edit here to switch source: ERA5 -> CMIP6. See nse_driver.py's own
-    # comment (right before validate_config) for the real file naming
-    # convention and which fields aren't available yet (radiation, cloud
-    # cover -- "not been finally fixed yet" on the data-provider side).
+    # The bias-corrected dataset (re-interpolated onto ERA5's own grid/
+    # calendar/hourly convention, not raw CMIP6's native grid/noleap
+    # calendar). nse_driver.py computes data_assignments entries for this
+    # source dynamically from these values -- nothing else to edit here to
+    # switch source: ERA5 -> CMIP6.
     folder: ${CMIP6_FOLDER}
     folder_template: "CMIP6/{model}/{scenario}/meteo"
     model: "GFDL-ESM4"
@@ -655,8 +388,5 @@ river_discharge:
   source: emorid
   emorid:
     folder: ${RIVER_FOLDER}
-    # A bare filename, not a full path -- no ${VAR} needed (`file` is a plain
-    # scalar str, not kind="path", since it's just joined onto `folder` by
-    # scripts/rivers.py itself; already portable as-is).
     file: EMORID_1990_2024.nc
     threshold: 0
