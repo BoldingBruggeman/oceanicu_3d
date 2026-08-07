@@ -197,6 +197,20 @@ def main(argv=None) -> int:
         river_discharge["emorid"] = emorid_cfg
         raw["river_discharge"] = river_discharge
 
+    # simulation.gotm (real user request): run_model.py always passes
+    # gotm=Path("gotm.yaml") to Simulation() -- a real, non-trivial GOTM
+    # turbulence-closure config (turb_method/tke_method/len_scale_method/
+    # stab_method/turb_param -- read directly, not assumed) that the
+    # pygetm-config conversion had dropped entirely, silently falling back
+    # to pyGETM's own internal k-epsilon defaults instead. gotm.yaml is a
+    # fixed project asset (lives at the oceanicu_3d repo root, one level up
+    # from this file), not per-machine data, so it's set the SAME
+    # Path(__file__)-relative way as river_discharge.emorid.script above --
+    # portable regardless of where the repo is checked out -- rather than a
+    # ${VAR} data-root (nothing machine-specific to configure here).
+    if not (raw.get("simulation") or {}).get("gotm"):
+        raw.setdefault("simulation", {})["gotm"] = str(Path(__file__).parent.parent / "gotm.yaml")
+
     # hydrography.<source>.data_script's own schema default (see
     # oceanicu_providers.py) isn't auto-injected either (same reasoning as
     # river_discharge.script/data_script above). "constant" hydrography

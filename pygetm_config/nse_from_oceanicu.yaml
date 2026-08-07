@@ -191,20 +191,24 @@ simulation:
     BlumbergMellor: {}
     ShchepetkinMcwilliams: {}
 
-  # Type_II, not a random pick -- run_model.py itself has
-  # `sim.radiation.set_jerlov_type(pygetm.Jerlov.Type_II)` commented out
-  # (line 183), evidence this was the intended/considered water type before
-  # switching to hand-tuned constants. Type_II gives A=0.77, kc1=1.5,
-  # kc2=14.0 automatically at construction (verified: pygetm.radiation.Jerlov.
-  # Type_II.value) -- kc2 is then overridden below via data_assignments,
-  # reading the real KD490 climatology (matching run_model.py's OWN
-  # `ObsKd: True` branch, not used by nse_model_config.yaml today since its
-  # `simulation.ObsKd: False`, but real, working code for the same setup).
+  # UPDATE: re-verified directly against run_model.py's ACTUAL current code
+  # (not the commented-out `set_jerlov_type(Type_II)` line, which is dead --
+  # the real, live code path is different). run_model.py's own final_kwargs
+  # passed to Simulation() has NO `radiation=` at all -- pygetm's own
+  # Simulation.__init__ then does `if radiation is None and runtype ==
+  # BAROCLINIC: radiation = pygetm.radiation.TwoBand()`, i.e. TwoBand with
+  # jerlov_type=None (NOT Type_II), leaving A/kc1/kc2 unset until run_model.
+  # py's OWN explicit `sim.radiation.A.set(0.7)` / `kc1.set(0.54)` / `kc2.
+  # set(3.23)` (real hardcoded constants, verified directly against that
+  # file -- not Type_II's own values, which would be A=0.77/kc1=1.5/
+  # kc2=14.0). jerlov_type left OMITTED here (nullable, default None) to
+  # match exactly -- the three real values are set via data_assignments
+  # below (kind: constant) instead of at construction, mirroring run_model.
+  # py's own post-construction .set() calls.
   radiation:
     type: TwoBand
     Radiation: {}
     TwoBand:
-      jerlov_type: Type_II
       reflect_at_bottom: false
 
   momentum:
@@ -263,18 +267,35 @@ runtime:
 # to configure here anymore; switching providers.meteo.source above is
 # enough on its own, matching every other provider role's own convention.
 data_assignments:
-  # Radiation -- A/kc1 come from simulation.radiation.jerlov_type: Type_II
-  # above automatically at construction; kc2 is overridden here with the real
-  # KD490 climatology (mirrors run_model.py's own ObsKd: True branch --
-  # `sim.radiation.kc2.set(pygetm.input.from_nc(attenuation_path,
-  # "KD490_filled"), climatology=True)`, no on_grid override there either, so
-  # not specified here -- lets InputManager.add regrid it generically onto
-  # the NSe domain from KD490_clim.nc's own global 960x960 lat/lon grid).
+  # Radiation -- matches run_model.py's own real, live code exactly: A/kc1/
+  # kc2 are set via three plain .set() calls (sim.radiation.A.set(0.7), .kc1.
+  # set(0.54), .kc2.set(3.23)) on a TwoBand constructed with jerlov_type=None
+  # (see simulation.radiation's own comment above for the full trace -- this
+  # is NOT the commented-out Type_II line, which is dead code there).
+  - target: simulation.radiation.A
+    kind: constant
+    constant_value: 0.7
+  - target: simulation.radiation.kc1
+    kind: constant
+    constant_value: 0.54
   - target: simulation.radiation.kc2
-    kind: file
-    file: ${KD490_FOLDER}/KD490_clim.nc
-    variable: KD490_filled
-    climatology: true
+    kind: constant
+    constant_value: 3.23
+  # ALTERNATIVE (not active): a real, space-varying KD490 climatology for
+  # kc2 instead of the fixed constant above -- mirrors run_model.py's own
+  # `ObsKd: True` branch (`sim.radiation.kc2.set(pygetm.input.from_nc(
+  # attenuation_path, "KD490_filled"), climatology=True)`, not used by
+  # nse_model_config.yaml today since its own `simulation.ObsKd: False`, but
+  # real, working code for the same setup) -- kept here as a documented,
+  # ready-to-swap-in option: delete the kind: constant kc2 entry above and
+  # uncomment this one to switch. Requires simulation.radiation.jerlov_type:
+  # Type_II above too (or another real value for A/kc1) if you do, since
+  # this only ever overrides kc2, not A/kc1.
+  # - target: simulation.radiation.kc2
+  #   kind: file
+  #   file: ${KD490_FOLDER}/KD490_clim.nc
+  #   variable: KD490_filled
+  #   climatology: true
 
   # Open-boundary 2D (barotropic tidal elevation/transport) values -- found
   # while investigating what was STILL missing after the temp/salt fix below:
