@@ -303,6 +303,27 @@ def main(argv=None) -> int:
     _meteo_years = list(range(_meteo_start_year, _meteo_stop_year + 1))
 
     def _restrict_to_years(pattern_with_wildcard_year: str) -> "str | list[str]":
+        # Real bug, found from a real failure: --dump-python's own docstring
+        # promises --start/--stop are "genuine runtime arguments of THAT
+        # script... not fixed at generation time" -- but restricting to
+        # _meteo_years here bakes THIS invocation's --start/--stop into a
+        # literal exact filename/file list in the generated script's source,
+        # which stays wrong forever after if the generated script is later
+        # run with different --start/--stop (e.g. generated with a 2025
+        # placeholder date, then actually run for 2015 -- "No files found
+        # matching '.../era5_t2m_2025.nc'", the exact real crash this fixes).
+        # For --dump-python specifically, skip the restriction entirely and
+        # keep the full "????" glob -- pygetm.input.from_nc matches every
+        # year present in the folder regardless of the file list order, and
+        # the generated script's OWN --start/--stop still correctly controls
+        # runtime.time/the actual simulated period; only the "avoid reading
+        # years we don't need" I/O optimization is lost for generated
+        # scripts specifically, which is the right tradeoff for a script
+        # meant to be portable/rerunnable for an arbitrary future date range.
+        # Real, direct (non---dump-python) execution keeps the restriction --
+        # args.start/args.stop there ARE this run's actual real values.
+        if args.dump_python:
+            return pattern_with_wildcard_year
         if len(_meteo_years) == 1:
             return pattern_with_wildcard_year.replace("????", str(_meteo_years[0]))
         return [pattern_with_wildcard_year.replace("????", str(y)) for y in _meteo_years]
