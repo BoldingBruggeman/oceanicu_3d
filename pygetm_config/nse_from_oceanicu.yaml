@@ -338,34 +338,53 @@ data_assignments:
 # opt that one file out of the shared folder.
 output:
   folder: ${OUTPUT_FOLDER}
+  # Named field-name groups (TODO item 29, pygetm-config) -- names and
+  # contents taken directly from lib/dictionary.py's own flat named tuples
+  # (airsea_standard_output, airsea_fluxes_output, tidal_output,
+  # barotropic_2d_output, barotropic_3d_output; "_output" suffix dropped as
+  # redundant here), confirmed to match this file's own pre-existing literal
+  # field lists below EXACTLY -- this config's output section was clearly
+  # hand-derived from that catalog in the first place. Referenced by name
+  # from each file's variable_requests via `groups:` instead of retyping/
+  # duplicating the list.
+  variable_groups:
+    airsea_standard: [u10, v10, sp, t2m, tcc, tp]
+    airsea_fluxes: [swr, shf, tausxu, tausyv]
+    tidal: [zt, u1, v1]
+    barotropic_2d: [Ht, zt, Dt, u1, v1]
+    barotropic_3d: [uk, vk, ww, SS, num]
   files:
     - type: netcdf
       path: nse_meteo.nc
       interval: 1
       interval_units: HOURS
       variable_requests:
-        - fields: [u10, v10, sp, t2m, tcc, tp, swr, shf, tausxu, tausyv]
+        - groups: [airsea_standard, airsea_fluxes]
 
     - type: netcdf
       path: nse_tides.nc
       interval: 1
       interval_units: HOURS
       variable_requests:
-        - fields: [zt, u1, v1, maskt]
+        # maskt isn't part of dictionary.py's tidal_output tuple (it's one of
+        # barotropic_2d_debug_output's debug fields instead) -- kept as a
+        # literal alongside the group, demonstrating fields+groups combine.
+        - groups: [tidal]
+          fields: [maskt]
 
     - type: netcdf
       path: nse_barotropic_2d.nc
       interval: 1
       interval_units: DAYS
       variable_requests:
-        - fields: [Ht, zt, Dt, u1, v1]
+        - groups: [barotropic_2d]
 
     - type: netcdf
       path: nse_barotropic_3d.nc
       interval: 1
       interval_units: DAYS
       variable_requests:
-        - fields: [uk, vk, ww, SS, num]
+        - groups: [barotropic_3d]
 
 # ----------------------------------------------------------------------
 # Data provenance -- NOW schema-validated (pygetm-config's providers.py
