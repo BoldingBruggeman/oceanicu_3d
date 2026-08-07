@@ -353,6 +353,38 @@ output:
     tidal: [zt, u1, v1]
     barotropic_2d: [Ht, zt, Dt, u1, v1]
     barotropic_3d: [uk, vk, ww, SS, num]
+    baroclinic_3d: [temp, salt, rho, nuh]
+    # Everything below is CATALOGED (matches dictionary.py's full set) but
+    # not yet referenced by any file below -- kept available for later use
+    # rather than left out, same as dictionary.py itself lists every group
+    # whether or not the current run needs it:
+    # - the three debug groups are cfg_output.py's real cfg.runtime.
+    #   debug_output-gated fields (off by default there too) -- 18+6+5 extra
+    #   fields nobody asked to turn on, so cataloged but not attached.
+    barotropic_2d_debug: [maskt, masku, maskv, dxt, dyt, Hu, Hv, U, V, Du, Dv, dpdx, dpdy, z0bu, z0bv, z0bt, ru, rv]
+    barotropic_3d_debug: [rru, rrv, advpk, advqk, diffpk, diffqk]
+    baroclinic_3d_debug: [rad, sst, hnt, idpdx, idpdy]
+    # surface/bottom single-level slices of the same baroclinic_3d tracers --
+    # cfg_output.py's real usage pairs these with a per-field `z=`/`isel`
+    # single-level extraction (pygetm's own File.request has a native `z=`
+    # kwarg for this, see output.variable_request's own params) rather than
+    # requesting the full 3D field; not wired to a file here since that's a
+    # new daily-output-cadence decision, not just a field-list one.
+    surface_variables_3d: [temp, salt]
+    bottom_variables_3d: [temp, salt]
+    # FABM isn't configured in this file at all (`fabm:` isn't modeled by any
+    # provider here, see the "Data provenance" section's own note below) --
+    # cataloged for when it is, NOT attached to any file: requesting these
+    # against a sim with no FABM model configured would fail with "Unknown
+    # field", the same real error output.files[*] already fails loudly on
+    # for any genuinely unavailable field (see loader.configure_output).
+    fabm_ersem:
+      [
+        P1_c, P2_c, P3_c, P4_c, O2_o, N3_n, N4_n, N1_p, N5_s, Q6_c, Y2_c,
+        Y3_c, O3_c, O3_fair, Q7_c, Q6_pen_depth_c, ben_col_D1m, ben_col_D2m,
+        N5_s_bdy, N5_s_sms, N5_s_sfl, N5_s_bfl, N5_s_sfl_tot_calculator_result,
+        N5_s_bfl_tot_calculator_result, N5_s_sms_tot_calculator_result,
+      ]
   files:
     - type: netcdf
       path: nse_meteo.nc
@@ -385,6 +417,20 @@ output:
       interval_units: DAYS
       variable_requests:
         - groups: [barotropic_3d]
+
+    - type: netcdf
+      path: nse_baroclinic_3d.nc
+      interval: 1
+      interval_units: DAYS
+      variable_requests:
+        # A real, previously-missing gap: this is a BAROCLINIC run
+        # (simulation.runtype: BAROCLINIC above) but no file captured
+        # temp/salt/rho/nuh anywhere before this. dictionary.py's own real
+        # cfg_output.py combines barotropic_3d_output+baroclinic_3d_output
+        # into ONE shared monthly file -- kept as its own file here instead,
+        # matching this config's existing one-group-per-file convention
+        # (nse_barotropic_3d.nc stays barotropic-only).
+        - groups: [baroclinic_3d]
 
 # ----------------------------------------------------------------------
 # Data provenance -- NOW schema-validated (pygetm-config's providers.py
