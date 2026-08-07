@@ -128,8 +128,21 @@ simulation:
   #runtype: BAROTROPIC_2D        # was: 4
   Dcrit: 0.5
   Dmin: 0.1
-  # delay_slow_ip, advection_scheme, fabm, gotm: not in the original YAML,
-  # left at pyGETM's own defaults.
+  # run_model.py passes this explicitly to Simulation() (pygetm.
+  # AdvectionScheme.SUPERBEE) -- made explicit here too, not left to
+  # silently rely on pyGETM's own default (which currently IS SUPERBEE, so
+  # this happens to be a no-op today, but a future pyGETM version changing
+  # its own default would otherwise silently change this setup's numerics
+  # with no visible config change). A real, already-introspected schema
+  # field (see pygetm_config.schema's own simulation section) -- this was
+  # a config gap, not a code one.
+  advection_scheme: SUPERBEE
+  # delay_slow_ip/fabm: not in the original YAML, left at pyGETM's own
+  # defaults (delay_slow_ip's real default, False, already matches run_
+  # model.py's own explicit choice; fabm isn't modeled by any provider role
+  # here at all, see the "Data provenance" section's own note). gotm is set
+  # dynamically by nse_driver.py itself now (a fixed repo asset, not a
+  # per-setup YAML value) -- see that file's own comment.
 
   # Every alternative's fields present, nested under its own label (nested-
   # by-label -- see pygetm-config's docs/overview.md, "Every ChoiceSpec keeps
