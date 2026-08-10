@@ -56,6 +56,7 @@ Usage:
     python nc_nan_scan.py getm-dump.nc --all            # list every index
     python nc_nan_scan.py getm-dump.nc --vars temp,salt # scan only these variables
                                                          # (indices always listed in full)
+    python nc_nan_scan.py getm-dump.nc --only-nan       # summary: only variables with NaNs
     python nc_nan_scan.py getm-dump.nc --exclude-boundary-vars advU,advV
                                                          # NaN at open-boundary points is
                                                          # expected for these vars only
@@ -290,6 +291,9 @@ def main():
                    help="max NaN indices to list per variable (default: 50)")
     p.add_argument("--all", action="store_true",
                    help="list every NaN index (overrides --max-list)")
+    p.add_argument("--only-nan", action="store_true",
+                   help="only print summary rows for variables that actually have NaNs "
+                        "inside the computational domain, instead of every scanned variable")
     p.add_argument("--block-elems", type=float, default=1e7,
                    help="approx elements read per block (default: 1e7)")
     args = p.parse_args()
@@ -389,9 +393,10 @@ def main():
         total_nans += count
         total = int(np.prod(da.shape)) if da.shape else 1
         pct = (100.0 * count / total) if total else 0.0
-        print(SUMMARY_FMT.format(
-            name[:24], str(da.dtype), str(tuple(da.shape))[:22],
-            (mname or "—")[:10], count, f"{pct:.2f}%"), flush=True)
+        if count or not args.only_nan:
+            print(SUMMARY_FMT.format(
+                name[:24], str(da.dtype), str(tuple(da.shape))[:22],
+                (mname or "—")[:10], count, f"{pct:.2f}%"), flush=True)
         if count:
             details[name] = (da.dims, idx)
 
