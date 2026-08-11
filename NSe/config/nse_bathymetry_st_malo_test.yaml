@@ -1,0 +1,193 @@
+name: nse
+
+# WORKED EXAMPLE of ocean-prep's native `raw_patches:` feature -- a real, validated
+# variant of nse_bathymetry.yaml (identical except the raw_patches: block below and
+# output.file/report_dir redirected to scratch paths). NOT the production config --
+# bathymetry_nse.nc itself is still built from nse_bathymetry.yaml alone, unpatched.
+# Whether to fold raw_patches: into the real production config is a separate, later
+# decision (see ocean-prep TODO / commit history for "raw_patches" for the full
+# rationale: splicing a small region's raw depth in and letting the WHOLE domain's
+# own fixes/masking/analysis/smoothing process it, rather than processing the region
+# in isolation and splicing final output, since rx0 smoothing and basin connectivity
+# are neighbor-/whole-domain-aware).
+#
+# Load pre-existing coarse-resolution North Sea / NW European Shelf bathymetry.
+# The conservative regridding step is skipped — this file IS the coarse grid.
+# Optionally add  source: gebco  to read fine GEBCO data for comparison,
+# phantom-island detection and thalweg analysis.
+coarse_bathymetry:
+  # Freshly re-extracted (ncks) from the pristine GETM source /data/kb/BLUE2/nwes/topo.nc
+  # rather than from the tool's own prior output — bathymetry_nse.nc's depth_orig had
+  # accumulated mask drift across earlier coarse_bathymetry chaining runs (land cells
+  # reopened because depth_orig preserves depth values under masked-out cells; only
+  # ocean_mask was authoritative, and that too could have absorbed the drift once a
+  # reopened cell merged into the main connected basin). Starting over from topo.nc
+  # avoids inheriting any of that.
+  file: /home/kb/source/repos/OceanICU/oceanicu_3d/Bathymetry/topo_nse_orig.nc
+  depth_var: bathymetry        # positive = ocean depth (m); -10 (missing_value) = land
+  fill_from_source: false       # open coarse land cells using fine GEBCO where wet_fraction >= threshold
+  fill_min_wet_fraction: 0.5   # minimum fine-source wet fraction to open a coarse cell
+
+source: gebco           # uncomment to enable fine-source comparison
+
+raw_patches:
+  - name: st_malo
+    file: /home/kb/source/repos/OceanICU/oceanicu_3d/Bathymetry/bathymetry_st_malo.nc
+
+interpolation:
+  cache_dir: /data/cache/regridding
+  min_depth: 2.0
+
+analysis:
+  nkeep_basins: 1
+
+fixes:
+  - lon: 4.82
+    lat: 60.8
+    action: set_depth
+    value: 110.0
+  - lon: 4.90
+    lat: 60.75
+    action: set_depth
+    value: 108.0
+  - lon: 4.90
+    lat: 60.7
+    action: set_depth
+    value: 130.0
+  - lon: 4.82
+    lat: 60.65
+    action: set_depth
+    value: 150.0
+
+# Mask regions: force cells to land regardless of source depth.
+# Types: rectangle (lon/lat bounds), polygon (vertex list),
+#        point (single lon/lat), ij_rectangle / ij_point (grid-index variants).
+mask_regions:
+ - type: rectangle
+   name: Northern Strip
+   lon: [ -7.5,  6.0]
+   lat: [ 60.85, 61.0]   # was 60.8 — that's the open-boundary row itself (NORTH segment,
+                          # j=246); after the mask_regions rectangle-snap fix (2026-08-03)
+                          # 60.8 would close that whole row instead of just abutting it
+
+ - type: rectangle
+   name: Norwegian coast
+   lon: [  4.82,  4.90]
+   lat: [ 60.70, 60.80]
+
+ - type: rectangle
+   name: North Western Boundary
+   lon: [ -7.50, -6.30]
+   lat: [ 58.50, 61.0]
+
+ - type: rectangle
+   name: North Eastern Boundary
+   lon: [  4.98,  5.3]
+   lat: [ 60.75, 60.8]
+
+ - type: rectangle
+   name: West of the Shetlands
+   lon: [-7.50,  -1.34]
+   lat: [59.85,  61.00]   # was 59.80 — that's the open-boundary row itself (NORTH segment,
+                           # j=226); see Northern Strip comment above for why
+
+ - type: rectangle
+   name: West of Orkney
+   lon: [-6.22, -4.70]   # was -4.62 — that's the open-boundary column itself (WEST segment,
+                          # i=36); see Northern Strip comment above for why
+   lat: [59.2, 59.85]
+
+ - type: rectangle
+   name: West of Hebrides
+   lon: [-7.5, -6.3]
+   lat: [58.4, 58.5]
+
+ - type: point
+   name: Lerwick
+   lonlat: [-1.1, 60.45]
+
+ - type: point
+   name: Between Hebrides
+   lonlat: [-7.1, 57.75]
+
+ - type: polygon
+   name: South Hebrides
+   vertices:
+     - [-7.42, 57.05]
+     - [-7.34, 57.1]
+
+ - type: point
+   name: River Dee
+   lonlat: [-3.18, 53.35]
+
+ - type: rectangle
+   name: Humber
+   lon: [-0.14,  0.02]
+   lat: [53.65, 53.65]
+
+ - type: rectangle
+   name: Limfjorden
+   lon: [ 8.18,  8.26]
+   lat: [56.65, 56.75]
+
+ - type: point
+   name: Limfjorden
+   lonlat: [8.26, 56.8]
+
+thalweg:
+  # auto_corridors finds articulation points in the *wet* coarse graph — it only
+  # works for passages that are open in the coarse grid.  Passages that are land
+  # in the coarse grid (e.g. Little Belt) need explicit waypoints below.
+  auto_corridors: true
+  waypoints:
+    - name: "Little Belt"
+      begin: [9.75, 55.58]   # northern entrance, well inside the belt
+      end:   [9.9, 55.1]     # south end
+      via:
+        - [9.768, 55.233]    # narrowest section
+      bbox: [9.3, 10.2, 55.0, 55.7]
+      bbox_depth_percentile: 75
+    - name: "Great Belt"
+      begin: [11.0, 55.8]    # Kattegat, north of Funen
+      end:   [11.0, 54.7]    # Baltic approach, south of Langeland
+      bbox:  [10.5, 12.0, 54.5, 56.0]
+      bbox_depth_percentile: 55
+    - name: "Öresund"
+      begin: [12.6, 56.1]    # Kattegat north of strait
+      end:   [12.8, 55.65]   # Baltic south of Malmö
+      via:
+        - [12.65, 56.04]     # Helsingborg/Helsingør narrows
+      bbox: [12.4, 13.0, 55.5, 56.2]
+      bbox_depth_percentile: 75
+    - name: "Irish Sea"
+      begin: [-4.9, 51.4]    # St George's Channel / Celtic Sea entrance
+      end:   [-5.7, 55.2]    # North Channel exit towards North Atlantic
+      bbox:  [-7.0, -3.0, 51.0, 55.5]
+
+smooth:
+  local_filters:
+    - name: "Northern boundary deep water"
+      bbox: [-7.5, 6.0, 59.5, 61.0]
+      filter: gaussian
+      sigma: 3.0
+      taper_width: 20
+      taper_edge: north
+      taper_shape: cosine
+  rx0: 0.20
+  local_rx0:
+    - name: "Northern boundary tighter"
+      bbox: [2.5, 6.0, 59.5, 61.0]
+      rx0: 0.10
+
+output:
+  report_dir: ./report/nse_st_malo_native_test/
+  file: /home/kb/source/repos/OceanICU/oceanicu_3d/Bathymetry/bathymetry_nse_st_malo_native_test.nc
+  coastline_scale: "10m"
+  log_depth_scale: true   # use log10 colour scale on depth plots
+  # Inward scan depth (cells) per side — bridges thin forced-land strips.
+  boundary_scan_depth:
+    west: 17
+    north: 10
+    east: 5
+    south: 5
+  boundary_min_segment_cells: 3
