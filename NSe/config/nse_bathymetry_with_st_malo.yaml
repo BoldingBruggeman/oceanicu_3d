@@ -180,8 +180,8 @@ smooth:
       rx0: 0.10
 
 output:
-  report_dir: ./report/nse_st_malo_native_test/
-  file: /home/kb/source/repos/OceanICU/oceanicu_3d/Bathymetry/bathymetry_nse_st_malo_native_test.nc
+  report_dir: ./report/nse_with_st_malo/
+  file: /home/kb/source/repos/OceanICU/oceanicu_3d/Bathymetry/bathymetry_nse_with_st_malo_candidate.nc
   coastline_scale: "10m"
   log_depth_scale: true   # use log10 colour scale on depth plots
   # Inward scan depth (cells) per side — bridges thin forced-land strips.
