@@ -1,14 +1,21 @@
 #!/usr/bin/env python
-"""Reference driver for nse_from_oceanicu.yaml (this directory), demonstrating the
-composable pattern from pygetm-config's docs/yaml_vs_python.md: the Domain itself
-is now built generically by pygetm_config.loader from the config's `domain:`
+"""General-purpose pygetm-config driver for OceanICU domain configs (NSe,
+and any future domain that follows the same schema-validated shape) --
+NOT NSe-specific despite its origin as "nse_driver.py"; renamed and moved
+here (out of the old pygetm_config/ directory, which collided with the
+actual `pygetm_config` PACKAGE name) so this general-purpose driver/
+oceanicu_providers.py/scripts/ trio lives separately from any one domain's
+own config, which belongs under that domain's own config directory instead
+(e.g. NSe/config/nse_from_oceanicu.yaml). Demonstrates the composable
+pattern from pygetm-config's docs/yaml_vs_python.md: the Domain itself is
+built generically by pygetm_config.loader from the config's `domain:`
 section (schema-validated, one choice among several -- see
-schema._build_bathymetry_file_choice), since reading a pre-prepared bathymetry
-file turned out to need only variable names and a mask convention, not bespoke
-code. Rivers, by contrast, genuinely stay bespoke, project-specific Python here
-(mirroring OceanICU's real cfg_rivers.py, verified against that source): they're
-dynamic and threshold-filtered from an EMORID file at run time, not a static
-list.
+schema._build_bathymetry_file_choice), since reading a pre-prepared
+bathymetry file turned out to need only variable names and a mask
+convention, not bespoke code. Rivers, by contrast, genuinely stay bespoke,
+project-specific Python here (mirroring OceanICU's real cfg_rivers.py,
+verified against that source): they're dynamic and threshold-filtered from
+an EMORID file at run time, not a static list.
 
 This is a REFERENCE / illustrative script -- it needs a real bathymetry NetCDF
 (referenced by the config's own `domain:` section) and a real EMORID
@@ -21,7 +28,7 @@ pygetm-config repo) -- no sys.path hacks, this script has no dependency on
 being located near the pygetm-config repo, only on pygetm_config being
 importable:
 
-    python nse_driver.py nse_from_oceanicu.yaml --start 2024-03-01T00:00:00 --stop 2024-03-02T00:00:00
+    python driver/oceanicu_driver.py NSe/config/nse_from_oceanicu.yaml --start 2024-03-01T00:00:00 --stop 2024-03-02T00:00:00
 """
 
 from __future__ import annotations
@@ -47,7 +54,7 @@ from pygetm_config.yaml_parse import validate_config
 # set_sst_proxy/set_hydrography_ic) now live in scripts/ -- one file per
 # provider role, grouped by role rather than fully atomized (river position +
 # data stay together, see oceanicu_providers.py's own comment on why), since
-# nse_driver.py itself was becoming a grab-bag of unrelated per-role logic.
+# this file itself was becoming a grab-bag of unrelated per-role logic.
 # Nothing about HOW they're loaded changed: still load_dotted_target'd via
 # "path/to/file.py:name" (see scripts/rivers.py, scripts/meteo.py,
 # scripts/hydrography.py), never imported directly here -- see those files'
@@ -183,13 +190,13 @@ def main(argv=None) -> int:
     # setdefault-after-apply_data_roots pattern as PYGETM_CONFIG_PROVIDERS
     # above -- an explicit --data-root/roots-file override (already applied
     # by apply_data_roots) wins; otherwise default to THIS checkout's own
-    # real locations, so a plain `nse_driver.py run` still works out of the
-    # box with zero configuration. The config fields themselves (below) are
-    # now written as "${SCRIPT_FOLDER}/rivers.py:add_rivers" etc, NOT a
+    # real locations, so a plain `oceanicu_driver.py run` still works out of
+    # the box with zero configuration. The config fields themselves (below)
+    # are now written as "${SCRIPT_FOLDER}/rivers.py:add_rivers" etc, NOT a
     # frozen Path(__file__)-relative absolute string -- the earlier version
     # of this comment argued the opposite ("not a ${VAR} case, nothing
     # machine-specific to configure here"), which is true for LIVE execution
-    # of nse_driver.py itself, but not for the frozen artifacts --dump-python
+    # of this driver itself, but not for the frozen artifacts --dump-python
     # produces (generated_nse_config.yaml, and simulation.gotm's own
     # resolve_data_path(...) call embedded live in generated_nse.py) -- those
     # bake in whatever literal string was in `config` at generation time, and
