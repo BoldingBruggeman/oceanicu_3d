@@ -509,6 +509,12 @@ def main(argv=None) -> int:
 
         out_path = args.dump_python if isinstance(args.dump_python, str) else "generated_nse.py"
         config_yaml_path = str(Path(out_path).with_name(Path(out_path).stem + "_config.yaml"))
+        # pygetm-config TODO item 35: argparse/config-loading/script-hook
+        # boilerplate goes to a companion "_utils.py" module now -- "in
+        # principle a user only needs to see" generated_nse.py's own pyGETM
+        # call sequence, not the rivers.py/hydrography.py/meteo.py hook
+        # bodies embedded inline in the way.
+        utils_module_path = str(Path(out_path).with_name(Path(out_path).stem + "_utils.py"))
         script = codegen.generate_script(
             config,
             schema,
@@ -518,11 +524,13 @@ def main(argv=None) -> int:
             save_restart=args.save_restart,
             skip_unavailable_output=args.skip_unavailable_output,
             config_yaml_path=config_yaml_path,
+            utils_module_path=utils_module_path,
             style=args.dump_python_style,
         )
         with open(out_path, "w") as f:
             f.write(script)
         print(f"wrote {out_path}", file=sys.stderr)
+        print(f"wrote {utils_module_path}", file=sys.stderr)
         print(f"wrote {config_yaml_path}", file=sys.stderr)
         return 0
 
