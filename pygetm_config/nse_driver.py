@@ -107,6 +107,17 @@ def main(argv=None) -> int:
         "runtime arguments of THAT script, defaulting to whatever was given here, not fixed "
         "at generation time. Defaults to generated_nse.py, or pass a path.",
     )
+    parser.add_argument(
+        "--dump-python-style",
+        choices=["functions", "flat"],
+        default="functions",
+        help="only relevant with --dump-python. 'functions' (default) structures the "
+        "script into create_domain()/create_simulation(domain)/configure_output(sim)/"
+        "run(sim)/main(), matching this project's own run_model.py shape. 'flat' emits "
+        "the exact same statements as one top-to-bottom module-level sequence with no "
+        "function defs -- easier to manually cut into/extend ad hoc, matching "
+        "pygetm-config's own docs/getting_started.md non-OceanICU-shaped driver example.",
+    )
     parser.add_argument("--load-restart", default=None, metavar="PATH", help="resume from a restart file; overrides runtime.time with the restart's own time")
     parser.add_argument("--save-restart", default=None, metavar="PATH", help="write a restart file for this run")
     parser.add_argument(
@@ -167,6 +178,29 @@ def main(argv=None) -> int:
         "PYGETM_CONFIG_PROVIDERS",
         f"{Path(__file__).parent / 'oceanicu_providers.py'}:register_oceanicu_providers",
     )
+
+    # TODO item 34 (pygetm-config): SCRIPT_FOLDER/GOTM_FOLDER, same
+    # setdefault-after-apply_data_roots pattern as PYGETM_CONFIG_PROVIDERS
+    # above -- an explicit --data-root/roots-file override (already applied
+    # by apply_data_roots) wins; otherwise default to THIS checkout's own
+    # real locations, so a plain `nse_driver.py run` still works out of the
+    # box with zero configuration. The config fields themselves (below) are
+    # now written as "${SCRIPT_FOLDER}/rivers.py:add_rivers" etc, NOT a
+    # frozen Path(__file__)-relative absolute string -- the earlier version
+    # of this comment argued the opposite ("not a ${VAR} case, nothing
+    # machine-specific to configure here"), which is true for LIVE execution
+    # of nse_driver.py itself, but not for the frozen artifacts --dump-python
+    # produces (generated_nse_config.yaml, and simulation.gotm's own
+    # resolve_data_path(...) call embedded live in generated_nse.py) -- those
+    # bake in whatever literal string was in `config` at generation time, and
+    # a hardcoded absolute path there breaks if the pair is later copied to a
+    # different machine/checkout location. A $VAR template survives that
+    # round-trip the same way TODO item 15 already made data files survive
+    # it (loader.resolve_data_path, and now also providers.load_dotted_target
+    # for .script/.data_script/post_data_script targets specifically).
+    os.environ.setdefault("SCRIPT_FOLDER", str(Path(__file__).parent / "scripts"))
+    os.environ.setdefault("GOTM_FOLDER", str(Path(__file__).parent.parent))
+
     schema = build_schema()
 
     with open(args.config) as f:
@@ -178,22 +212,23 @@ def main(argv=None) -> int:
     # EXPLICITLY present in the raw YAML, never fills in unset ones (a
     # schema `default` is template/TUI-display-only). Set it here explicitly
     # if the YAML doesn't override it, so nse_from_oceanicu.yaml itself
-    # doesn't need a machine-specific absolute path baked in -- these
-    # `scripts/*.py:function` paths are already portable via Path(__file__)
-    # (resolve correctly wherever this repo is checked out), not a ${VAR}
-    # case. Only "emorid" today (the one real registered source, see
-    # oceanicu_providers.py's own river_discharge role).
+    # doesn't need a machine-specific absolute path baked in. TODO item 34:
+    # written as "${SCRIPT_FOLDER}/rivers.py:..." now, not a frozen
+    # Path(__file__)-relative absolute string -- see the SCRIPT_FOLDER/
+    # GOTM_FOLDER setdefault comment above for why (live execution of THIS
+    # file was already portable via __file__; the frozen --dump-python
+    # artifacts weren't). Only "emorid" today (the one real registered
+    # source, see oceanicu_providers.py's own river_discharge role).
     river_discharge = raw.get("river_discharge") or {}
     emorid_cfg = river_discharge.get("emorid") or {}
     if river_discharge.get("source") == "emorid":
         if not emorid_cfg.get("script"):
-            emorid_cfg["script"] = f"{Path(__file__).parent / 'scripts' / 'rivers.py'}:add_rivers"
+            emorid_cfg["script"] = "${SCRIPT_FOLDER}/rivers.py:add_rivers"
         # data_script (user request): the second half of river_discharge's
         # job -- real discharge data, mirroring cfg_rivers.py's own
-        # create()/data() split. Same resolve-portably-at-run-time reasoning
-        # as `script` above.
+        # create()/data() split. Same $VAR reasoning as `script` above.
         if not emorid_cfg.get("data_script"):
-            emorid_cfg["data_script"] = f"{Path(__file__).parent / 'scripts' / 'rivers.py'}:set_river_data"
+            emorid_cfg["data_script"] = "${SCRIPT_FOLDER}/rivers.py:set_river_data"
         river_discharge["emorid"] = emorid_cfg
         raw["river_discharge"] = river_discharge
 
@@ -204,12 +239,13 @@ def main(argv=None) -> int:
     # pygetm-config conversion had dropped entirely, silently falling back
     # to pyGETM's own internal k-epsilon defaults instead. gotm.yaml is a
     # fixed project asset (lives at the oceanicu_3d repo root, one level up
-    # from this file), not per-machine data, so it's set the SAME
-    # Path(__file__)-relative way as river_discharge.emorid.script above --
-    # portable regardless of where the repo is checked out -- rather than a
-    # ${VAR} data-root (nothing machine-specific to configure here).
+    # from this file). TODO item 34: written as "${GOTM_FOLDER}/gotm.yaml"
+    # now -- unlike the script/data_script fields above, `simulation.gotm`
+    # is already a real schema `path`-kind field, so this alone is enough:
+    # loader._coerce_value already calls resolve_data_path on it
+    # automatically, no pygetm-config core change was needed for this one.
     if not (raw.get("simulation") or {}).get("gotm"):
-        raw.setdefault("simulation", {})["gotm"] = str(Path(__file__).parent.parent / "gotm.yaml")
+        raw.setdefault("simulation", {})["gotm"] = "${GOTM_FOLDER}/gotm.yaml"
 
     # hydrography.<source>.data_script's own schema default (see
     # oceanicu_providers.py) isn't auto-injected either (same reasoning as
@@ -222,7 +258,7 @@ def main(argv=None) -> int:
     if hydrography_source in ("WOA", "CMEMS"):
         hydro_cfg = hydrography.get(hydrography_source) or {}
         if not hydro_cfg.get("data_script"):
-            hydro_cfg["data_script"] = f"{Path(__file__).parent / 'scripts' / 'hydrography.py'}:set_hydrography_ic"
+            hydro_cfg["data_script"] = "${SCRIPT_FOLDER}/hydrography.py:set_hydrography_ic"
         hydrography[hydrography_source] = hydro_cfg
         raw["hydrography"] = hydrography
 
@@ -347,7 +383,7 @@ def main(argv=None) -> int:
     meteo_cfg = (meteo.get(meteo_source) or {}) if meteo_source in ("ERA5", "CMIP6") else {}
     if meteo_source in ("ERA5", "CMIP6"):
         if not meteo_cfg.get("data_script"):
-            meteo_cfg["data_script"] = f"{Path(__file__).parent / 'scripts' / 'meteo.py'}:set_meteo_data"
+            meteo_cfg["data_script"] = "${SCRIPT_FOLDER}/meteo.py:set_meteo_data"
         meteo[meteo_source] = meteo_cfg
         raw["meteo"] = meteo
 
@@ -462,7 +498,7 @@ def main(argv=None) -> int:
     # so injecting into `raw` would just get it silently dropped. Placed
     # before the --print-config check below so it's visible there too, same
     # as river_discharge.script.
-    config.setdefault("post_data_script", f"{Path(__file__).parent / 'scripts' / 'meteo.py'}:set_sst_proxy")
+    config.setdefault("post_data_script", "${SCRIPT_FOLDER}/meteo.py:set_sst_proxy")
 
     if args.print_config:
         print(yaml.safe_dump(config, sort_keys=False))
@@ -482,6 +518,7 @@ def main(argv=None) -> int:
             save_restart=args.save_restart,
             skip_unavailable_output=args.skip_unavailable_output,
             config_yaml_path=config_yaml_path,
+            style=args.dump_python_style,
         )
         with open(out_path, "w") as f:
             f.write(script)
