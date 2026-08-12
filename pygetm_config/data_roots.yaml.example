@@ -31,11 +31,13 @@ BOUNDARY_FOLDER_BAROCLINIC_CMEMS: /home/kb/source/repos/boundaries/boundary_data
 TPXO_FOLDER: /server/data/TPXO9
 # HYDROGRAPHY_FOLDER is also boundaries.baroclinic's real WOA boundary-data
 # folder (deliberately reused, not a separate var -- see README.md).
-HYDROGRAPHY_FOLDER: /data/WOA
+# /data/WOA doesn't exist on orca -- confirmed directly, real path is
+# /server/data/WOA (same /server/data share as TPXO_FOLDER above).
+HYDROGRAPHY_FOLDER: /server/data/WOA
 BOUNDARY_FOLDER_BAROTROPIC_CMIP6: /data/CMIP6
 BOUNDARY_FOLDER_BAROCLINIC_CMIP6: /data/CMIP6
 ERA5_FOLDER: /data/ERA5/kaj
 CMIP6_FOLDER: /data/BiasCorrected
 RIVER_FOLDER: /data/EMORID
 KD490_FOLDER: /data/Kd490
-OUTPUT_FOLDER: /data/kb
+OUTPUT_FOLDER: .
