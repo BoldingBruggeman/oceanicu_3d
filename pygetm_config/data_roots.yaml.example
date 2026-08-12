@@ -22,21 +22,27 @@
 # --- editing on the target machine unless it shares this exact home dir.
 BATHYMETRY_FOLDER: /home/kb/source/repos/OceanICU/oceanicu_3d/Bathymetry
 HYDROGRAPHY_FOLDER_CMEMS: /home/kb/source/repos/boundaries
-BOUNDARY_FOLDER_BAROTROPIC: /home/kb/source/repos/boundaries/boundary_data
+BOUNDARY_FOLDER_BAROTROPIC_CMEMS: /home/kb/source/repos/boundaries/boundary_data
 BOUNDARY_FOLDER_BAROCLINIC_CMEMS: /home/kb/source/repos/boundaries/boundary_data
 
 # --- Possibly shared storage (/data, /server/data) -- check whether the
 # --- target machine has these mounted/reachable at the same paths before
 # --- assuming they're correct unedited.
 TPXO_FOLDER: /server/data/TPXO9
-# HYDROGRAPHY_FOLDER is also boundaries.baroclinic's real WOA boundary-data
-# folder (deliberately reused, not a separate var -- see README.md).
 # /data/WOA doesn't exist on orca -- confirmed directly, real path is
 # /server/data/WOA (same /server/data share as TPXO_FOLDER above).
-HYDROGRAPHY_FOLDER: /server/data/WOA
+HYDROGRAPHY_FOLDER_WOA: /server/data/WOA
+# boundaries.baroclinic.WOA's own folder -- the SAME real woa_t.nc/woa_s.nc
+# climatology as HYDROGRAPHY_FOLDER_WOA above (independently settable, not
+# reused automatically -- see oceanicu_providers.py's own WOA choice
+# comment), so this needs the same real value.
+BOUNDARY_FOLDER_BAROCLINIC_WOA: /server/data/WOA
 BOUNDARY_FOLDER_BAROTROPIC_CMIP6: /data/CMIP6
 BOUNDARY_FOLDER_BAROCLINIC_CMIP6: /data/CMIP6
-ERA5_FOLDER: /data/ERA5/kaj
+# Parent of the real per-extraction subfolder ("kaj" -- meteo.ERA5.model,
+# substituted via meteo.ERA5.folder_template) -- real files live at
+# ERA5_FOLDER/kaj/era5_t2m_????.nc etc, not directly in ERA5_FOLDER itself.
+ERA5_FOLDER: /data/ERA5
 CMIP6_FOLDER: /data/BiasCorrected
 RIVER_FOLDER: /data/EMORID
 KD490_FOLDER: /data/Kd490

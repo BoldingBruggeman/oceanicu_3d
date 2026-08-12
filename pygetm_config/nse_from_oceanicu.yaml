@@ -322,7 +322,7 @@ hydrography:
   CMEMS:
     folder: ${HYDROGRAPHY_FOLDER_CMEMS}/init_data/nse/
   WOA:
-    folder: ${HYDROGRAPHY_FOLDER}
+    folder: ${HYDROGRAPHY_FOLDER_WOA}
   constant:
     temp: 9
     salt: 36
@@ -332,7 +332,7 @@ boundaries:
     TPXO:
       tpxo_folder: ${TPXO_FOLDER}
     CMEMS:
-      folder: ${BOUNDARY_FOLDER_BAROTROPIC}/hourly
+      folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMEMS}/hourly
       folder_template: "{setup}/CMEMS"
       filename_template: "hourly_{start_date}_to_{end_date}.nc"
       start_date: "2024-03-01"
@@ -347,9 +347,8 @@ boundaries:
       end_date: "2026-01-01"
   baroclinic:
     source: WOA
-    # `folder` deliberately omitted -- WOA boundary data reuses hydrography.
-    # WOA.folder above (the same woa_t.nc/woa_s.nc climatology), not its own.
-    WOA: {}
+    WOA:
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_WOA}
     CMEMS:
       folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMEMS}
       folder_template: "nse/daily"
@@ -367,7 +366,16 @@ boundaries:
 meteo:
   source: ERA5
   ERA5:
+    # ERA5_FOLDER is the PARENT of the real .nc files -- folder_template
+    # (mirroring CMIP6's own {model}/{scenario} mechanism below, same
+    # nse_driver.py .format(model=..., scenario=...) call) resolves to the
+    # real per-extraction subfolder ("kaj"), same shape as CMIP6's own
+    # {model}/{scenario} even though ERA5 itself has no real model/scenario
+    # concept -- "model" here names the extraction/processing run, not a
+    # climate model.
     folder: ${ERA5_FOLDER}
+    folder_template: "{model}"
+    model: "kaj"
     evaporation: true
     shortwave_method: 1   # ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
     longwave_method: 1

@@ -274,19 +274,23 @@ def main(argv=None) -> int:
     # (true for both real branches) and stay static, in the YAML's own
     # data_assignments block.
     #
-    # WOA folder is deliberately `hydrography.WOA.folder`, NOT boundaries.
-    # baroclinic.WOA's own folder -- verified directly against cfg_
-    # boundaries.py::data_3d, whose WOA branch has a commented-out line
-    # (`#_woa_folder = cfg.boundaries.baroclinic.WOA.folder`) right above
-    # the real one it actually uses (`cfg.hydrography.WOA.folder`) -- the
-    # SAME woa_t.nc/woa_s.nc climatology already used for hydrography's own
-    # initial condition, deliberately reused rather than duplicated.
+    # WOA folder: boundaries.baroclinic.WOA.folder (BOUNDARY_FOLDER_
+    # BAROCLINIC_WOA), matching every other role's own shape (each source
+    # gets its own folder var) -- REVERSED from an earlier version of this
+    # file, which deliberately reused hydrography.WOA.folder instead,
+    # matching cfg_boundaries.py::data_3d's own upstream convention (that
+    # function's WOA branch has a commented-out line preferring
+    # `cfg.boundaries.baroclinic.WOA.folder` right above the real one it
+    # actually uses, `cfg.hydrography.WOA.folder`) -- user's explicit
+    # choice: independent naming consistency wins over matching upstream's
+    # convention here, no fallback to the old hydrography-reuse behavior --
+    # a config using WOA for boundaries.baroclinic must set this field.
     boundaries_cfg = raw.get("boundaries") or {}
     baroclinic = boundaries_cfg.get("baroclinic") or {}
     baroclinic_source = baroclinic.get("source")
     _boundary_3d_assignments: list = []
     if baroclinic_source == "WOA":
-        _woa_folder = Path((hydrography.get("WOA") or {}).get("folder", ""))
+        _woa_folder = Path((baroclinic.get("WOA") or {}).get("folder", ""))
         _boundary_3d_assignments = [
             {"target": "open_boundary.temp.values", "kind": "file", "file": str(_woa_folder / "woa_t.nc"), "variable": "t_an", "on_grid": False, "climatology": True},
             {"target": "open_boundary.salt.values", "kind": "file", "file": str(_woa_folder / "woa_s.nc"), "variable": "s_an", "on_grid": False, "climatology": True},

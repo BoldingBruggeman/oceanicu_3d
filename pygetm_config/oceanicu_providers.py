@@ -166,16 +166,18 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         "boundaries.baroclinic",
         {
             "CMEMS": (),
-            # WOA: cfg_boundaries.py::data_3d's WOA branch actually reads
-            # cfg.hydrography.WOA.folder, NOT a boundaries.baroclinic.WOA.folder
-            # of its own -- a real cross-role reuse in OceanICU's own code (WOA
-            # climatology data serves both initial conditions AND baroclinic
-            # boundary values). Not replicated here -- this schema models each
-            # role as independently configured, and doing otherwise would need
-            # loader-level plumbing this repo doesn't have; a project actually
-            # using WOA for `boundaries.baroclinic` needs to keep that
-            # cross-reference in mind (or just duplicate the folder value under
-            # both roles, which is what this shape assumes).
+            # WOA: uses its own boundaries.baroclinic.WOA.folder (the
+            # role-universal shared base's `folder` param, same as every
+            # other choice here) -- nse_driver.py reads it directly. Upstream
+            # cfg_boundaries.py::data_3d's own WOA branch instead reuses
+            # cfg.hydrography.WOA.folder (a real cross-role reuse in
+            # OceanICU's own code -- that function even has a commented-out
+            # line preferring boundaries.baroclinic.WOA.folder, right above
+            # the one it actually uses) -- user's explicit choice: this
+            # schema models each role as independently configured, so a
+            # project using WOA for both hydrography AND boundaries.
+            # baroclinic sets the same real folder value under both roles'
+            # own folder field, rather than one implicitly feeding the other.
             "WOA": (),
             "CMIP6": _CMIP6_SHARED,
         },
@@ -239,6 +241,24 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         ),
     )
 
+    # ERA5's own {model} folder_template placeholder (real request: "ERA5
+    # shall mimic CMIP6" -- same folder_template/{model} SHAPE as CMIP6's own
+    # _CMIP6_SHARED below, NOT that tuple itself -- ERA5 has no real
+    # "scenario" concept at all, and _CMIP6_SHARED's own model help text is
+    # CMIP6-specific wording that would be actively wrong here). "model"
+    # names the real extraction/processing run (e.g. "kaj"), not a climate
+    # model -- ERA5_FOLDER is the PARENT of the real per-extraction
+    # subfolder, matching how ERA5_FOLDER/kaj/era5_t2m_????.nc etc. actually
+    # sit on disk (confirmed directly, not assumed).
+    _era5_model = (
+        ParameterSpec(
+            name="model",
+            type=TypeRef(kind="scalar", scalar_type="str"),
+            help="names the real ERA5 extraction/processing run, e.g. 'kaj' -- fills the {model} folder_template placeholder",
+            importance=Importance.BASIC,
+        ),
+    )
+
     meteo = make_provider_slot(
         "meteo",
         {
@@ -246,7 +266,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
             # vs SPECIFIC_HUMIDITY for CMIP6, per cfg_airsea.py) but that's a
             # fixed consequence of the source choice, not itself a configurable
             # field -- not modeled as a param here.
-            "ERA5": _meteo_shared,
+            "ERA5": _meteo_shared + _era5_model,
             "CMIP6": _meteo_shared + _CMIP6_SHARED,
         },
         default="ERA5",
