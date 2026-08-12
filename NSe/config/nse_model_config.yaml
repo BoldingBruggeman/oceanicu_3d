@@ -7,10 +7,10 @@
 #   3: command-line argument passed to the run script
 #
 
-setup: "ns"
+setup: "nse"
 domain:
-  path: "Bathymetry/bathymetry_ns.nc"
-  name: "H"
+  path: "../Bathymetry/bathymetry_nse.nc"
+  name: "depth"
   boundaries: True
   rivers: True
   z0: 0.01
@@ -31,43 +31,53 @@ internal_pressure:
   # 1-> BlumbergMeller, 2 -> ShchepetkinMcwilliams
   type: 2
 hydrography:
-  source: "WOA"              # constant | WOA | CMEMS
+  source: "CMEMS"              # constant | WOA | CMEMS
   constant:
-    temp: 15
-    salt: 34
+    temp: 9
+    salt: 36
   WOA:
     folder: "/data/WOA"      # env: HYDROGRAPHY_FOLDER
   CMEMS:
-    folder: "/data/CMEMS/hydrography"
+    #KBfolder: "/data/CMEMS/hydrography"
+    folder: "/home/kb/source/repos/boundaries/init_data/nse/"
 boundaries:
   barotropic:
     source: "TPXO"           # TPXO | CMEMS | CMIP6
     TPXO:
       tpxo_folder: "/data/TPXO9"           # env: TPXO_FOLDER
     CMEMS:
-      folder: "/data/CMEMS"                # env: BOUNDARY_FOLDER_BAROTROPIC
+      #KBfolder: "/data/CMEMS"                # env: BOUNDARY_FOLDER_BAROTROPIC
+      folder: "//home/kb/source/repos/boundaries/boundary_data/hourly"                # env: BOUNDARY_FOLDER_BAROTROPIC
       folder_template: "{setup}/CMEMS"
       filename_template: "hourly_{start_date}_to_{end_date}.nc"
-      start_date: "2015-01-01"
-      end_date:   "2025-01-01"
+      start_date: "2024-03-01"
+      end_date:   "2026-01-01"
+        #KBstart_date: "2015-01-01"
+        #end_date:   "2025-01-01"
     CMIP6:
       folder: "/data/CMIP6"                # env: BOUNDARY_FOLDER_BAROTROPIC
       folder_template: "{setup}/CMIP6/{model}/{scenario}"
       filename_template: "{start_date}_to_{end_date}.nc"
       model: "MPI-ESM1-2-HR"
       scenario: "ssp585"
-      start_date: "2015-01-01"
-      end_date:   "2025-01-01"
+        #KBstart_date: "2015-01-01"
+        #KBend_date:   "2025-01-01"
+      start_date: "2024-03-01"
+      end_date:   "2026-01-01"
   baroclinic:
-    source: "WOA"            # WOA | CMEMS | CMIP6
+    source: "CMEMS"            # WOA | CMEMS | CMIP6
     WOA:
       folder: "/data/WOA"    # env: BOUNDARY_FOLDER_BAROCLINIC
     CMEMS:
-      folder: "/data/CMEMS"
-      folder_template: "{setup}/boundary_data"
+      #folder: "/data/CMEMS"
+      folder: "/home/kb/source/repos/boundaries/boundary_data"                # env: BOUNDARY_FOLDER_BAROTROPIC
+        #KBfolder_template: "{setup}/boundary_data"
+        #KBfolder_template: "boundary_data"
+        #KBfolder_template: "{setup}"
+      folder_template: "nse/daily"
       filename_template: "daily_{start_date}_to_{end_date}.nc"
-      start_date: "2015-01-01"
-      end_date:   "2025-01-01"
+      start_date: "2024-03-01"
+      end_date:   "2026-01-01"
     CMIP6:
       folder: "/data/CMIP6"
       folder_template: "{setup}/CMIP6/{model}/{scenario}"
@@ -77,9 +87,10 @@ boundaries:
       start_date: "2015-01-01"
       end_date:   "2025-01-01"
 meteo:
-  source: "CMIP6"             # ERA5 | CMIP6; env: METEO_SOURCE
+  source: "ERA5"             # ERA5 | CMIP6; env: METEO_SOURCE
   ERA5:
-    folder: "/data/ERA5/NA"  # env: ERA5_FOLDER
+    #KBfolder: "/data/ERA5/NA"  # env: ERA5_FOLDER
+    folder: "/data/ERA5/kaj"  # env: ERA5_FOLDER
   CMIP6:
     folder: "/data/CMIP6"                # env: CMIP6_FOLDER
     folder_template: "{model}/{scenario}/meteo"
@@ -119,24 +130,25 @@ simulation:
   kd_folder: "/data/Kd490"   # env: KD_FOLDER
   kd_file: "KD490_clim.nc"   # env: KD_FILE
 runtime:
-  timestep: 60
-  split_factor: 30
+  timestep: 20
+  split_factor: 20
   output: True
-  debug_output: False
+  debug_output: True
 output:
-  folder: "."                # env: OUTPUT_FOLDER
+  #KBfolder: "."                # env: OUTPUT_FOLDER
+  folder: "/data/kb"            # env: OUTPUT_FOLDER
   meteo: True
-  tides: False
+  tides: True
   barotropic:
-    default_2d: False
-    default_3d: False
+    default_2d: True
+    default_3d: True
   baroclinic:
     daily:
-      surface: True
-      bottom: True
-    monthly: True
+      surface: False
+      bottom: False
+    monthly: False
     default: False
 switches:
   dump_on_error: True
-  check_finite: False
+  check_finite: True
   profile: False

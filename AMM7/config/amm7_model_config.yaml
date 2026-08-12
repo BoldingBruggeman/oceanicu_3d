@@ -1,0 +1,142 @@
+# YAML formatted configuration file for the amm7-setup:
+#
+# All values are plain data — no Python expressions.
+# The precedence of configuration is:
+#   1: plain default values from this file
+#   2: environment variable (noted in comments as "env: VAR")
+#   3: command-line argument passed to the run script
+#
+
+setup: "amm7"
+domain:
+  path: "../Bathymetry/amm7_topo_getm.nc"
+  name: "bathymetry"
+  boundaries: True
+  rivers: True
+  z0: 0.01
+momentum:
+  An: 25
+  Am: 0
+  cnpar: 1
+  avmol: 1.8e-6
+vertical_coordinates:
+  # 1 -> SIGMA, 2 -> GVC, 3-> AVC
+  type: 2
+  nz: 40
+  ddu: 0.75
+  ddl: 0.75
+  Dgamma: 10.0
+  gamma_surf: True
+internal_pressure:
+  # 1-> BlumbergMeller, 2 -> ShchepetkinMcwilliams
+  type: 2
+hydrography:
+  source: "WOA"              # constant | WOA | CMEMS
+  constant:
+    temp: 15
+    salt: 34
+  WOA:
+    folder: "/data/WOA"      # env: HYDROGRAPHY_FOLDER
+  CMEMS:
+    folder: "/data/CMEMS/hydrography"
+boundaries:
+  barotropic:
+    source: "CMEMS"           # TPXO | CMEMS | CMIP6
+    TPXO:
+      tpxo_folder: "/data/TPXO9"           # env: TPXO_FOLDER
+    CMEMS:
+      folder: "/data/CMEMS"                # env: BOUNDARY_FOLDER_BAROTROPIC
+      folder_template: "{setup}/CMEMS"
+      filename_template: "hourly_{start_date}_to_{end_date}.nc"
+      start_date: "2015-01-01"
+      end_date:   "2025-01-01"
+    CMIP6:
+      folder: "/data/CMIP6"                # env: BOUNDARY_FOLDER_BAROTROPIC
+      folder_template: "{setup}/CMIP6/{model}/{scenario}"
+      filename_template: "{start_date}_to_{end_date}.nc"
+      model: "MPI-ESM1-2-HR"
+      scenario: "ssp585"
+      start_date: "2015-01-01"
+      end_date:   "2025-01-01"
+  baroclinic:
+    source: "CMEMS"            # WOA | CMEMS | CMIP6
+    WOA:
+      folder: "/data/WOA"    # env: BOUNDARY_FOLDER_BAROCLINIC
+    CMEMS:
+      folder: "/data/CMEMS"
+      folder_template: "{setup}/CMEMS"
+      filename_template: "daily_{start_date}_to_{end_date}.nc"
+      start_date: "2015-01-01"
+      end_date:   "2025-01-01"
+    CMIP6:
+      folder: "/data/CMIP6"
+      folder_template: "{setup}/CMIP6/{model}/{scenario}"
+      filename_template: "{start_date}_to_{end_date}.nc"
+      model: "MPI-ESM1-2-HR"
+      scenario: "ssp585"
+      start_date: "2015-01-01"
+      end_date:   "2025-01-01"
+meteo:
+  source: "ERA5"             # ERA5 | CMIP6; env: METEO_SOURCE
+  ERA5:
+    folder: "/data/ERA5/NA"  # env: ERA5_FOLDER
+  CMIP6:
+    folder: "/data/CMIP6"                # env: CMIP6_FOLDER
+    folder_template: "{model}/{scenario}/meteo"
+    model: "MPI-ESM1-2-HR"
+    scenario: "ssp585"
+  evaporation: True
+  # ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
+  shortwave_method: -1
+  longwave_method: -2
+rivers:
+  source: "historic"         # historic | CMIP6
+  historic:
+    source: "emorid"         # emorid | jrc
+    folder: "/data/EMORID"   # env: RIVER_FOLDER
+    file: "EMORID_1990_2024.nc"  # env: RIVER_FILE
+    threshold: 0
+  CMIP6:
+    folder: "/data/CMIP6"
+    folder_template: "{model}/{scenario}/rivers"
+    model: "MPI-ESM1-2-HR"
+    scenario: "ssp585"
+    start_date: "2015-01-01"
+    end_date: "2100-12-31"
+    filename_template: "{model}_{scenario}_{start_date}_to_{end_date}.nc"
+    threshold: 0
+fabm:
+  file: null                 # env: FABM_YAML_FILE
+  folder: "/data/FABM"       # env: FABM_FOLDER
+  config: "ersem"
+simulation:
+  gotm: null                 # env: GOTM_YAML_FILE
+  calendar: "standard"
+  runtype: 4 # 1 -> 2D, 2 -> 3D barotropic, 4 -> 3D baroclinic
+  Dcrit: 0.5
+  Dmin: 0.1
+  ObsKd: True
+  kd_folder: "/data/Kd490"   # env: KD_FOLDER
+  kd_file: "KD490_clim.nc"   # env: KD_FILE
+runtime:
+  timestep: 10
+  split_factor: 30
+  output: True
+  debug_output: False
+output:
+  folder: "."                # env: OUTPUT_FOLDER
+  meteo: False
+  tides: False
+  barotropic:
+    default_2d: False
+    default_3d: False
+  baroclinic:
+    daily:
+      surface: True
+      bottom: True
+    monthly: True
+    default: False
+switches:
+  dump_on_error: True
+  check_finite: False
+  profile: False

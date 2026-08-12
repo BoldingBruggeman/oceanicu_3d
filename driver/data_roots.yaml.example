@@ -8,8 +8,8 @@
 #
 #   python generated_nse.py --data-roots-file data_roots.yaml --start ... --stop ...
 #
-# (or to nse_driver.py itself, same flag, if running from source instead of
-# a --dump-python'd script). --data-root NAME=VALUE on the command line
+# (or to oceanicu_driver.py itself, same flag, if running from source instead
+# of a --dump-python'd script). --data-root NAME=VALUE on the command line
 # always wins over this file if you need a one-off override without editing
 # it; an already-exported real env var always wins over this file too (only
 # fills gaps, never clobbers a deliberate export).
@@ -20,7 +20,12 @@
 
 # --- Likely personal/this-machine-only paths -- almost certainly need
 # --- editing on the target machine unless it shares this exact home dir.
-BATHYMETRY_FOLDER: /home/kb/source/repos/OceanICU/oceanicu_3d/Bathymetry
+# The FULL, real path to wherever the domain's own bathymetry file actually
+# lives -- since Bathymetry/ split per-domain (NSe/Bathymetry/, AMM7/
+# Bathymetry/, ...), this needs updating per domain being run; one shared
+# var name, not a per-domain-suffixed one, since only one real value is ever
+# needed per run.
+BATHYMETRY_FOLDER: /home/kb/source/repos/OceanICU/oceanicu_3d/NSe/Bathymetry
 HYDROGRAPHY_FOLDER_CMEMS: /home/kb/source/repos/boundaries
 BOUNDARY_FOLDER_BAROTROPIC_CMEMS: /home/kb/source/repos/boundaries/boundary_data
 BOUNDARY_FOLDER_BAROCLINIC_CMEMS: /home/kb/source/repos/boundaries/boundary_data

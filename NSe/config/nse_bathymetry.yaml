@@ -1,16 +1,5 @@
 name: nse
 
-# WORKED EXAMPLE of ocean-prep's native `raw_patches:` feature -- a real, validated
-# variant of nse_bathymetry.yaml (identical except the raw_patches: block below and
-# output.file/report_dir redirected to scratch paths). NOT the production config --
-# bathymetry_nse.nc itself is still built from nse_bathymetry.yaml alone, unpatched.
-# Whether to fold raw_patches: into the real production config is a separate, later
-# decision (see ocean-prep TODO / commit history for "raw_patches" for the full
-# rationale: splicing a small region's raw depth in and letting the WHOLE domain's
-# own fixes/masking/analysis/smoothing process it, rather than processing the region
-# in isolation and splicing final output, since rx0 smoothing and basin connectivity
-# are neighbor-/whole-domain-aware).
-#
 # Load pre-existing coarse-resolution North Sea / NW European Shelf bathymetry.
 # The conservative regridding step is skipped — this file IS the coarse grid.
 # Optionally add  source: gebco  to read fine GEBCO data for comparison,
@@ -30,13 +19,16 @@ coarse_bathymetry:
 
 source: gebco           # uncomment to enable fine-source comparison
 
-raw_patches:
-  - name: st_malo
-    file: /home/kb/source/repos/OceanICU/oceanicu_3d/NSe/Bathymetry/bathymetry_st_malo.nc
-
 interpolation:
   cache_dir: /data/cache/regridding
   min_depth: 2.0
+  # St Malo bay: same extent as the raw_patches St Malo bathymetry
+  # (NSe/Bathymetry/bathymetry_st_malo.nc's own real lon/lat range). Raises
+  # (never lowers) to 10 m within this bbox only, wet cells only.
+  local_min_depth:
+    - name: st_malo_bay
+      bbox: [-3.18, -1.42, 48.5, 49.8]
+      min_depth: 10.0
 
 analysis:
   nkeep_basins: 1
@@ -134,6 +126,10 @@ mask_regions:
    name: Limfjorden
    lonlat: [8.26, 56.8]
 
+ - type: point
+   name: Busum
+   lonlat: [8.98, 54.1]
+
 thalweg:
   # auto_corridors finds articulation points in the *wet* coarse graph — it only
   # works for passages that are open in the coarse grid.  Passages that are land
@@ -180,8 +176,8 @@ smooth:
       rx0: 0.10
 
 output:
-  report_dir: ./report/nse_with_st_malo/
-  file: /home/kb/source/repos/OceanICU/oceanicu_3d/NSe/Bathymetry/bathymetry_nse_with_st_malo_candidate.nc
+  report_dir: ./report/nse/
+  file: /home/kb/source/repos/OceanICU/oceanicu_3d/NSe/Bathymetry/bathymetry_nse.nc
   coastline_scale: "10m"
   log_depth_scale: true   # use log10 colour scale on depth plots
   # Inward scan depth (cells) per side — bridges thin forced-land strips.

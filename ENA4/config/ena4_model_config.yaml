@@ -9,7 +9,7 @@
 
 setup: "ena4"
 domain:
-  path: "Bathymetry/bathymetry_ena4.nc"
+  path: "../Bathymetry/bathymetry_ena4.nc"
   name: "H"
   boundaries: True
   rivers: True
