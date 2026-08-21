@@ -33,6 +33,7 @@ open_boundaries:
   mstart: 17
   mstop: 36
   type_2d: FLATHER_TRANSPORT
+  type_3d: ZERO_GRADIENT
 - side: NORTH
   l: 226
   mstart: 37
@@ -119,8 +120,9 @@ simulation:
     FluxesFromMeteo:
       shortwave_method: ROSATI_MIYAKODA
       longwave_method: CLARK
-      humidity_measure: DEW_POINT_TEMPERATURE
+      humidity_measure: SPECIFIC_HUMIDITY
       calculate_evaporation: true
+      albedo_method: PAYNE
   radiation:
     type: TwoBand
     Radiation: {}
@@ -328,11 +330,32 @@ output:
       - baroclinic_3d
       - barotropic_3d
       - surface_variables_3d
+      time_average: true
     - groups:
       - fabm_ersem
       requires_fabm: true
+      time_average: true
+  - type: netcdf
+    netcdf:
+      sync_interval: 1
+      format: NETCDF4
+      interval: 1
+      interval_units: DAYS
+      path: surf_bott_daily.nc
+    variable_requests:
+    - fields:
+      - temp
+      - salt
+      groups: null
+      z_index: -1
+      generate_unique_name: true
+    - fields:
+      - temp
+      - salt
+      z_index: 0
+      generate_unique_name: true
 hydrography:
-  source: WOA
+  source: CMEMS
   CMEMS:
     folder: ${HYDROGRAPHY_FOLDER_CMEMS}
     data_script: ${SCRIPT_FOLDER}/hydrography.py:set_hydrography_ic
@@ -362,7 +385,7 @@ boundaries:
       start_date: '2024-03-01'
       end_date: '2026-01-01'
   baroclinic:
-    source: WOA
+    source: CMEMS
     WOA:
       folder: ${BOUNDARY_FOLDER_BAROCLINIC_WOA}
     CMEMS:
@@ -373,12 +396,12 @@ boundaries:
       end_date: '2026-08-17'
     CMIP6:
       folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}
-      folder_template: '{setup}/CMIP6/{model}/{scenario}'
-      filename_template: '{start_date}_to_{end_date}.nc'
+      folder_template: '{model}/{scenario}/bdy'
+      filename_template: bdy_3d_{variable}_{start_date}_{end_date}.nc
       model: MPI-ESM1-2-HR
-      scenario: ssp585
-      start_date: '2015-01-01'
-      end_date: '2025-01-01'
+      scenario: ssp126
+      start_date: '20150101'
+      end_date: '21001231'
   fabm:
     # FABM tracer initial conditions/SPONGE boundaries -- independent of
     # boundaries.baroclinic (T/S) and hydrography (also T/S), see
@@ -409,17 +432,27 @@ meteo:
   CMIP6:
     folder: ${CMIP6_FOLDER}
     folder_template: CMIP6/{model}/{scenario}/meteo
-    model: GFDL-ESM4
-    scenario: ssp126
+    model: MPI-ESM1-2-HR
+    scenario: historical
     evaporation: true
     shortwave_method: 1
     longwave_method: 1
+    radiation_source: pseudo_tcc
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
 river_discharge:
   source: emorid
   emorid:
     folder: ${RIVER_FOLDER}
     file: EMORID_1990_2024.nc
+    threshold: 0
+    script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
+    data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
+  CMIP6:
+    folder: ${RIVER_FOLDER_CMIP6}
+    folder_template: CMIP6/{model}/{scenario}/rivers
+    model: MPI-ESM1-2-HR
+    scenario: ssp126
+    file: river_flows_future_{scenario}.nc
     threshold: 0
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
