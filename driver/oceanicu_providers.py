@@ -440,14 +440,25 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
             inner=TypeRef(kind="mapping", inner=TypeRef(kind="scalar", scalar_type="str")),
         ),
         default=None,
-        help="FABM state variable name -> {file, variable} for tracers that get a "
-        "SPONGE boundary + real values from this source. Tracers NOT listed here "
-        "keep pygetm's own ZERO_GRADIENT default (every Tracer, FABM ones included, "
-        "gets ArrayOpenBoundaries(self, ZERO_GRADIENT) at construction, before any "
-        "config runs -- see pygetm/tracer.py's own Tracer.__init__) and their "
-        "fabm.yaml-declared initial_value for the interior IC -- not every FABM "
-        "state variable needs an explicit boundary/IC override. `file` is resolved "
-        "relative to this choice's own `folder`.",
+        help="FABM state variable name -> {file, variable, boundary_condition_type} "
+        "for tracers that get a boundary + real values from this source. "
+        "boundary_condition_type is optional, defaults to SPONGE (cfg_fabm.py's own "
+        "real, only-ever-used value) -- other valid values are the same "
+        "boundary_condition_type names data_assignments' own kind=boundary_type "
+        "entries accept (ZERO_GRADIENT, CLAMPED, SPONGE; FLATHER_ELEV/"
+        "FLATHER_TRANSPORT/SOMMERFELD don't apply to a 3D tracer), useful for "
+        "testing a tracer's sensitivity to boundary treatment without editing "
+        "Python. `file`/`variable` are REQUIRED for SPONGE/CLAMPED (both read real "
+        "prescribed values at the boundary) but OPTIONAL for ZERO_GRADIENT (computed "
+        "from the interior, never reads a file) -- omit them entirely for a tracer "
+        "you just want pinned to ZERO_GRADIENT explicitly. Tracers NOT listed here "
+        "keep pygetm's own ZERO_GRADIENT default "
+        "(every Tracer, FABM ones included, gets ArrayOpenBoundaries(self, "
+        "ZERO_GRADIENT) at construction, before any config runs -- see "
+        "pygetm/tracer.py's own Tracer.__init__) and their fabm.yaml-declared "
+        "initial_value for the interior IC -- not every FABM state variable needs "
+        "an explicit boundary/IC override. `file` is resolved relative to this "
+        "choice's own `folder`.",
         importance=Importance.BASIC,
     )
 
@@ -466,6 +477,17 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
             # left fully config-driven rather than a Python-side convention
             # like WOA's woa_*.nc files.
             "CMEMS": (_fabm_tracers_param,),
+            # CMIP6: same real time series shape as CMEMS (on_grid=True,
+            # climatology=False) -- boundary-VALUES only, mirrors
+            # boundary_baroclinic's own CMIP6 branch (_CMIP6_SHARED gives
+            # model/scenario, filling folder_template's {model}/{scenario}
+            # placeholders). NOT a valid initial-condition source -- mirrors
+            # hydrography.py's set_hydrography_ic, which only ever accepts
+            # WOA/CMEMS for the IC (`if source not in ("WOA", "CMEMS"):
+            # return`); CMIP6 delta-change output has no equivalent
+            # "monthly_ic" snapshot file convention. See scripts/fabm.py's
+            # own configure_fabm docstring for the matching IC-side gate.
+            "CMIP6": _CMIP6_SHARED + (_fabm_tracers_param,),
         },
         default="WOA",
     )
@@ -700,29 +722,64 @@ def derive_data_assignments(config: dict) -> list[dict]:
     if fabm_cfg.get("source") == "ERSEM" and fabm_cfg.get("file"):
         boundaries_fabm = config.get("boundaries", {}).get("fabm", {})
         boundaries_fabm_source = boundaries_fabm.get("source")
-        # WOA vs CMEMS: same on_grid/climatology distinction as
-        # boundaries.baroclinic's own WOA/CMEMS branches above -- a global
-        # climatology vs a real time series already at the boundary points.
-        # Which TRACERS get a boundary at all is config-driven either way
-        # (boundaries.fabm.<source>.tracers -- see that ParameterSpec's own
-        # help text for why this isn't a fixed list).
+        # WOA vs CMEMS vs CMIP6: same on_grid/climatology distinction as
+        # boundaries.baroclinic's own WOA/CMEMS/CMIP6 branches above -- a
+        # global climatology (WOA) vs a real time series already at the
+        # boundary points (CMEMS, CMIP6 delta-change output). Which TRACERS
+        # get a boundary at all is config-driven either way (boundaries.
+        # fabm.<source>.tracers -- see that ParameterSpec's own help text
+        # for why this isn't a fixed list).
         _fabm_grid_kwargs = {
             "WOA": {"on_grid": False, "climatology": True},
             "CMEMS": {"on_grid": True, "climatology": False},
+            "CMIP6": {"on_grid": True, "climatology": False},
         }.get(boundaries_fabm_source)
         _fabm_tracers = boundaries_fabm.get("tracers") or {}
         if _fabm_grid_kwargs is not None and _fabm_tracers:
             _fabm_folder = Path(boundaries_fabm.get("folder", ""))
+            if boundaries_fabm_source == "CMIP6" and boundaries_fabm.get("folder_template"):
+                # Mirrors boundaries.baroclinic's own CMIP6 branch exactly
+                # (model/scenario fill the folder_template placeholders).
+                # Unlike that branch, `file` per tracer stays a literal
+                # filename (not filename_template.format(variable=...)) --
+                # real CMIP6 BGC delta-change output naming isn't confirmed
+                # for NSe yet, same status as CMEMS's own tracers[*].file.
+                _fabm_folder = _fabm_folder / boundaries_fabm["folder_template"].format(
+                    model=boundaries_fabm.get("model", ""), scenario=boundaries_fabm.get("scenario", "")
+                )
             for _tracer, _spec in _fabm_tracers.items():
-                entries += [
-                    {"target": f"open_boundary.{_tracer}", "kind": "boundary_type", "boundary_condition_type": "SPONGE"},
+                # boundary_condition_type is optional per-tracer -- defaults
+                # to SPONGE (cfg_fabm.py's own real, only-ever-used value)
+                # when omitted.
+                _bc_type = _spec.get("boundary_condition_type", "SPONGE")
+                entries.append(
+                    {"target": f"open_boundary.{_tracer}", "kind": "boundary_type", "boundary_condition_type": _bc_type}
+                )
+                if _bc_type == "ZERO_GRADIENT":
+                    # ZERO_GRADIENT computes the boundary value FROM the
+                    # interior, unlike SPONGE/CLAMPED -- it never reads
+                    # prescribed values at all, so `file`/`variable` are
+                    # optional (and simply unused if given) for this type;
+                    # no .values entry is emitted. Real, user-caught gap:
+                    # this used to unconditionally require `_spec["file"]`,
+                    # which crashed with a bare KeyError for a tracer that
+                    # genuinely never needed one.
+                    continue
+                if "file" not in _spec or "variable" not in _spec:
+                    raise ValueError(
+                        f"boundaries.fabm.{boundaries_fabm_source}.tracers.{_tracer}: "
+                        f"boundary_condition_type={_bc_type!r} needs both 'file' and "
+                        "'variable' (only ZERO_GRADIENT can omit them -- SPONGE/CLAMPED "
+                        "both read real prescribed values at the boundary)"
+                    )
+                entries.append(
                     {
                         "target": f"open_boundary.{_tracer}.values",
                         "kind": "file",
                         "file": str(_fabm_folder / _spec["file"]),
                         "variable": _spec["variable"],
                         **_fabm_grid_kwargs,
-                    },
-                ]
+                    }
+                )
 
     return entries

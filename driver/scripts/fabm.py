@@ -133,35 +133,50 @@ def configure_fabm(sim, domain, config: dict) -> None:
         pygetm.input.from_nc(str(emep_path), "N4_flux", preprocess=_add_coord)
     )
 
-    # --- WOA-sourced FABM tracer initial conditions ---
+    # --- WOA/CMEMS-sourced FABM tracer initial conditions ---
     # Independent of the dependency setup above -- gated on this driver's
     # own boundaries.fabm role, NOT cfg_fabm.py's real cfg.hydrography.source
     # check (see this function's own docstring for why). SPONGE boundary
     # type + values are NOT set here -- oceanicu_providers.derive_data_
     # assignments emits them as plain data_assignments entries instead
     # (open_boundary.N3_n / open_boundary.N3_n.values, etc.), mirroring
-    # boundaries.baroclinic's own WOA branch there exactly, since they're a
-    # straightforward 1:1 climatology file read with no computation needed
-    # (same meteo.py ERA5-vs-CMIP6 split reasoning: plain reads are
+    # boundaries.baroclinic's own WOA/CMEMS/CMIP6 branches there exactly,
+    # since they're a straightforward 1:1 file read with no computation
+    # needed (same meteo.py ERA5-vs-CMIP6 split reasoning: plain reads are
     # data_assignments, only genuinely computed values stay in a script).
     # Only the IC below stays here, because it needs a one-time
     # `.isel(time=imonth)` pick that data_assignments' climatology=True flag
     # can't express (that flag cycles all 12 months for the whole run, not
     # "pick one month once") -- exactly the same reason hydrography.py's own
     # T/S IC pick isn't a data_assignments entry either.
+    #
+    # CMIP6 is deliberately NOT accepted here -- mirrors hydrography.py's
+    # own set_hydrography_ic, which only ever takes WOA/CMEMS for the IC
+    # (`if source not in ("WOA", "CMEMS"): return`). CMIP6 delta-change
+    # boundary output has no equivalent "monthly_ic" snapshot file
+    # convention -- CMEMS's own IC below isn't its real time-series
+    # boundary file either, it's a separate, purpose-built monthly-
+    # climatology-shaped file (matches hydrography.py's own CMEMS IC
+    # branch: so_2025_monthly_ic.nc/thetao_2025_monthly_ic.nc, NOT the
+    # real time series boundaries.baroclinic.CMEMS reads for boundary
+    # VALUES) -- so boundaries.fabm.CMEMS.tracers[*].file is expected to
+    # point at that same kind of monthly-IC file, not the real time series
+    # oceanicu_providers.derive_data_assignments reads for the boundary.
     boundaries_fabm_cfg = config.get("boundaries", {}).get("fabm") or {}
-    if boundaries_fabm_cfg.get("source") == "WOA":
+    if boundaries_fabm_cfg.get("source") in ("WOA", "CMEMS"):
         # Monthly-climatology index pick (.isel(time=imonth)) -- a ONE-TIME
         # initial value, not pygetm-config's own climatology:True
         # data_assignments flag (which cycles the whole 12-month pattern
         # for the entire run). configure_fabm's fixed (sim, domain, config)
         # signature has no imonth parameter, so it's derived from
         # runtime.time here exactly like hydrography.py's own
-        # set_hydrography_ic does.
+        # set_hydrography_ic does (that function's own CMEMS IC branch
+        # ALSO uses isel(time=imonth), on its own separate monthly-IC file
+        # -- same precedent this mirrors).
         time = config.get("runtime", {}).get("time")
         if time is None:
             raise RuntimeError(
-                "configure_fabm's WOA-sourced FABM tracer initial condition needs a real start "
+                "configure_fabm's FABM tracer initial condition needs a real start "
                 "time, but runtime.time isn't set anywhere -- pass --start explicitly (either "
                 "when generating this script, or when running it)."
             )
@@ -169,11 +184,11 @@ def configure_fabm(sim, domain, config: dict) -> None:
             time = datetime.datetime.fromisoformat(time)
         imonth = time.month - 1
 
-        woa_folder = Path(resolve_data_path(boundaries_fabm_cfg["folder"]))
+        ic_folder = Path(resolve_data_path(boundaries_fabm_cfg["folder"]))
 
         # Same tracer set as derive_data_assignments' boundary_type/values
-        # entries (boundaries.fabm.WOA.tracers) -- defined once, used for
-        # both, so the IC and boundary tracer lists can't drift apart.
+        # entries (boundaries.fabm.<source>.tracers) -- defined once, used
+        # for both, so the IC and boundary tracer lists can't drift apart.
         # A FABM state variable NOT listed here is simply never touched by
         # this loop -- it keeps whatever `initial_value` its own fabm.yaml
         # declares (standard FABM behavior when the host model doesn't
@@ -185,5 +200,5 @@ def configure_fabm(sim, domain, config: dict) -> None:
         # pygetm's own default, not by anything this driver has to arrange.
         for tracer, spec in (boundaries_fabm_cfg.get("tracers") or {}).items():
             sim[tracer].set(
-                pygetm.input.from_nc(woa_folder / spec["file"], spec["variable"]).isel(time=imonth)
+                pygetm.input.from_nc(ic_folder / spec["file"], spec["variable"]).isel(time=imonth)
             )

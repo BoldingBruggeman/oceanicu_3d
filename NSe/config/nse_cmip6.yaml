@@ -416,11 +416,15 @@ boundaries:
       # anything else keeps whatever boundary type FABM/pygetm defaults to.
       # Same tracer set drives both the boundary values (oceanicu_providers.
       # derive_data_assignments) and the initial condition (scripts/fabm.py).
+      # boundary_condition_type is optional per tracer (defaults to SPONGE
+      # if omitted) -- written explicitly below so it's visible/editable
+      # here directly, e.g. for testing a tracer's sensitivity to boundary
+      # treatment without touching Python.
       tracers:
-        N3_n: {file: woa_n.nc, variable: n_an}
-        N1_p: {file: woa_p.nc, variable: p_an}
-        N5_s: {file: woa_i.nc, variable: i_an}
-        O2_o: {file: woa_o.nc, variable: o_an}
+        N3_n: {file: woa_n.nc, variable: n_an, boundary_condition_type: SPONGE}
+        N1_p: {file: woa_p.nc, variable: p_an, boundary_condition_type: SPONGE}
+        N5_s: {file: woa_i.nc, variable: i_an, boundary_condition_type: SPONGE}
+        O2_o: {file: woa_o.nc, variable: o_an, boundary_condition_type: SPONGE}
 meteo:
   source: CMIP6
   ERA5:
