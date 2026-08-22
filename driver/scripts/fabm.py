@@ -10,6 +10,27 @@ how that's wired (fabm.<source>.data_script's default points here).
 
 from __future__ import annotations
 
+# Module level, NOT inside configure_fabm -- matches hydrography.py/meteo.py/
+# rivers.py's own identical pattern, for a real reason (a bug this file used
+# to have): codegen._emit_script_hook's inspect.getsource() only captures a
+# hook's own FUNCTION BODY, not imports sitting above it at module level, and
+# codegen's generated _utils.py already defines its OWN standalone
+# resolve_data_path (no pygetm_config dependency -- the whole generated
+# script needs it regardless of which hooks are used). So a module-level
+# import here is invisible to the embedded copy, which then resolves
+# `resolve_data_path` via the enclosing _utils.py module's own definition
+# instead -- works both live (real pygetm_config.loader import) and embedded
+# (pygetm_config-free). Putting this import INSIDE configure_fabm instead (as
+# an earlier version of this file did, matching the "keep everything
+# self-contained" convention used for genuinely custom helpers like
+# _add_coord below) gets copied verbatim into the embedded code and executes
+# on the target machine at call time -- a real, reproduced ModuleNotFoundError
+# on a machine with pygetm installed but not pygetm_config (the whole point
+# of --dump-python is a script that only needs the former).
+from pathlib import Path
+
+from pygetm_config.loader import resolve_data_path
+
 
 def configure_fabm(sim, domain, config: dict) -> None:
     """Mirrors cfg_fabm.py's own configure(sim, cfg, imonth): the piece of
@@ -61,12 +82,9 @@ def configure_fabm(sim, domain, config: dict) -> None:
     source uses the same shape before trusting this unmodified.
     """
     import datetime
-    from pathlib import Path
 
     import pygetm
     import pygetm.input
-
-    from pygetm_config.loader import resolve_data_path
 
     if not sim.fabm:
         return
@@ -86,8 +104,17 @@ def configure_fabm(sim, domain, config: dict) -> None:
 
     sim.logger.info("configure_fabm: providing FABM configuration for ERSEM (not provided by pyGETM)")
 
-    ersem_cfg = fabm_cfg.get("ERSEM") or {}
-    fabm_folder = Path(resolve_data_path(ersem_cfg["folder"]))
+    # NOT fabm_cfg.get("ERSEM") -- validate_config's choice-flattening puts
+    # the ACTIVE choice's own fields directly on the parent dict (here,
+    # fabm_cfg itself, since source == "ERSEM"); only an INACTIVE
+    # alternative stays nested under its own label key. Real, reproduced
+    # bug (caught on a remote production run): fabm_cfg.get("ERSEM") found
+    # nothing (that key doesn't exist once ERSEM is active) and silently
+    # fell back to {}, then KeyError'd on "folder" -- exactly the same
+    # pitfall scripts/meteo.py's own set_meteo_data docstring already
+    # documents and avoids (reading meteo.get("folder") directly, not
+    # meteo.get("CMIP6")).
+    fabm_folder = Path(resolve_data_path(fabm_cfg["folder"]))
 
     # A routine by Gennadi to make data compatible with the input manager --
     # nested here (not module-level) since codegen's _emit_script_hook only

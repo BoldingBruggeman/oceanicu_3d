@@ -120,7 +120,7 @@ simulation:
     FluxesFromMeteo:
       shortwave_method: ROSATI_MIYAKODA
       longwave_method: CLARK
-      humidity_measure: SPECIFIC_HUMIDITY
+      humidity_measure: DEW_POINT_TEMPERATURE
       calculate_evaporation: true
       albedo_method: PAYNE
   radiation:
