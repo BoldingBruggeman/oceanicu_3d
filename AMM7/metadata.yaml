@@ -1,0 +1,101 @@
+# AMM7 area metadata — read by ocean-post reporting.py
+#
+# ---------------------------------------------------------------------------
+# input_generation — how each set of input files is produced.
+#
+# Each entry:
+#   label       — heading shown in the report
+#   description — one-sentence summary
+#   configs     — list of {label, github_url, cli, note}
+#                 github_url is rendered as a hyperlink to the config on GitHub
+# ---------------------------------------------------------------------------
+input_generation:
+
+  bathymetry:
+    label: "Bathymetry"
+    description: >
+      Regridded conservatively from GEBCO onto the AMM7 ~1/12° spherical grid
+      using bathymetry-regrid (ocean-prep), with Beckmann-Haidvogel smoothing
+      (rx0 ≤ 0.2).  Output: amm7_topo_getm.nc with variables lon, lat, mask, H.
+    configs:
+      - label: "AMM7 bathymetry config"
+        github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_bathy_create.yaml"
+        cli: "bathymetry-regrid --config config/amm7_bathy_create.yaml"
+        note: "Config not yet committed."
+
+  boundaries:
+    - label: "CMEMS historical boundaries (T, S, SSH, currents)"
+      description: >
+        NWS AMM7 MY reanalysis (1993–present) providing hourly barotropic
+        and daily baroclinic boundary conditions.  Processed with
+        ocean-prep run_cmems_boundaries.
+      configs:
+        - label: "AMM7 CMEMS boundary config"
+          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_bdy_create.yaml"
+          cli: "python cli/run_cmems_boundaries.py --config config/amm7_bdy_create.yaml"
+          note: "Config not yet committed."
+
+    - label: "Tidal boundaries (TPXO9 + CMIP6 mean SSH / barotropic transport)"
+      description: >
+        TPXO9-atlas (13 constituents) tidal prediction for zos, uo, vo
+        combined with CMIP6 monthly mean sea-surface height and
+        depth-integrated barotropic transport.  Scenario-specific; see
+        Scenario Summary table below.
+      configs:
+        - label: "AMM7 tidal boundary config"
+          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_tidal_bdy.yaml"
+          cli: "run-tidal-boundaries --config config/amm7_tidal_bdy.yaml"
+          note: "Config not yet committed."
+
+    - label: "3-D delta-change boundaries (T, S and optionally currents)"
+      description: >
+        Future 3-D boundary conditions via the delta-change method:
+        AMM7 historical CMEMS reference cycled over the output period,
+        with a CMIP6 monthly change signal (future 20-yr climatology minus
+        historical 1985–2014 climatology) added at each boundary point.
+        Scenario-specific; see Scenario Summary table below.
+      configs:
+        - label: "AMM7 delta-change boundary config"
+          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_delta_bdy.yaml"
+          cli: "run-delta-boundaries --config config/amm7_delta_bdy.yaml --scenario ssp585"
+          note: "Config not yet committed."
+
+  initial_conditions:
+    - label: "Initial conditions (temperature, salinity)"
+      description: >
+        Monthly snapshots (1st of each month) from CMEMS NWS AMM7 MY
+        reanalysis.  Flood-fill propagates valid values into any remaining
+        NaN cells on the model grid.
+      configs:
+        - label: "AMM7 initial conditions config"
+          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_init_create.yaml"
+          cli: "python cli/download_init_conditions.py --config config/amm7_init_create.yaml --source AMM7 --year 2015"
+          note: "Config not yet committed."
+
+# ---------------------------------------------------------------------------
+# scenario_matrix — one table per CMIP6 model, rows = boundary type,
+# columns = SSP scenarios.
+# ---------------------------------------------------------------------------
+scenario_matrix:
+  description: >
+    Future ocean boundary conditions use CMIP6 model output as the
+    climate-change signal on top of the historical CMEMS AMM7 reference.
+
+  _ssp_labels:
+    ssp126: "SSP1-2.6"
+    ssp245: "SSP2-4.5"
+    ssp370: "SSP3-7.0"
+    ssp585: "SSP5-8.5"
+
+  _type_labels:
+    tidal_mean_state: "Tidal mean state (2-D)"
+    delta_3d: "3-D delta-change"
+
+  models:
+    MPI-ESM1-2-HR:
+      tidal_mean_state:
+        ssp585:
+          variables: [zos, uo, vo]
+      delta_3d:
+        ssp585:
+          variables: [thetao, so, uo, vo]

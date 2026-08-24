@@ -1,0 +1,67 @@
+# =============================================================================
+# NSe – tidal + CMIP6 mean SSH / barotropic transport boundary conditions
+#
+# Combines:
+#   TPXO9 tidal prediction (elevation h, transports u, v)
+#   CMIP6 monthly mean SSH (zos) and depth-integrated barotropic transport (uo, vo)
+#
+# Output (one hourly NetCDF, all on T-grid, dims: time × nbdyp):
+#   zos  [m]     = TPXO tidal elevation  + CMIP6 monthly zos
+#   uo   [m²/s]  = TPXO tidal U-transport + CMIP6 depth-integrated uo
+#   vo   [m²/s]  = TPXO tidal V-transport + CMIP6 depth-integrated vo
+#
+# Usage
+# -----
+#   run-tidal-boundaries --config config/nse_tidal_bdy.yaml
+#   run-tidal-boundaries --config config/nse_tidal_bdy.yaml --dryrun
+#   run-tidal-boundaries --config config/nse_tidal_bdy.yaml \
+#       --start 2060-01-01 --end 2060-12-31
+# =============================================================================
+
+source_type: tidal_ssh
+
+# ---------------------------------------------------------------------------
+# TPXO9 — tidal constituents data directory
+# Must contain:  grid_tpxo9_atlas[_v5].nc  and
+#                {h,u}_{component}_tpxo9_atlas_30[_v5].nc for each constituent
+# ---------------------------------------------------------------------------
+tpxo:
+  root: /data/TPXO9             # set to your local TPXO9 data directory (bb-server1 path)
+  cache_dir: /data/cache/tpxo9  # cached tidal predictions (shared across scenarios)
+
+# ---------------------------------------------------------------------------
+# CMIP6 — source of the mean (non-tidal) sea level and currents
+# ---------------------------------------------------------------------------
+cmip6:
+  source_id: GFDL-ESM4
+    #experiment_id: ssp126
+  experiment_id: ssp370
+  access: local              # 'local' | 'esgf' | 'pangeo'
+  local_root: /data/CMIP6    # only required when access: local
+  table_id: [Oday, Omon]     # try daily first, fall back to monthly
+  download_if_missing: true  # download from ESGF when local files absent
+  variant_label: r1i1p1f1
+  grid_label: gn
+
+# ---------------------------------------------------------------------------
+# Boundary points — T-grid only (all variables on same grid)
+# Format: header row (grid type), column headers (lon,lat[,segment]), then data
+# ---------------------------------------------------------------------------
+boundary_points:
+  file_path: ./Bathymetry/nse_bdy_lonlat.txt
+  min_gap_degrees: 0.5       # gap threshold for auto-detecting segments
+
+# ---------------------------------------------------------------------------
+# Time range
+# ---------------------------------------------------------------------------
+time_range:
+  start_date: "2015-01-01"
+  end_date:   "2100-12-31"
+  calendar: standard         # standard | no_leap | all_leap | 360_day
+
+# ---------------------------------------------------------------------------
+# Output
+# ---------------------------------------------------------------------------
+output:
+  base_directory: /data/OceanICU/oceanicu_3d/data/NSe
+  filename_template: "CMIP6/{source_id}/{experiment_id}/bdy/bdy_2d_{start}_{end}.nc"

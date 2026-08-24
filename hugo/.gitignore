@@ -1,0 +1,8 @@
+# Generated content lives in /data - not in the repo
+content/
+# Theme clones (not submodules)
+themes/
+# Hugo build output
+public/
+resources/
+.hugo_build.lock

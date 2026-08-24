@@ -1,0 +1,359 @@
+# AMM7 pygetm-config setup, converted from AMM7/config/amm7_model_config.yaml
+# the same way NSe/config/nse_from_oceanicu.yaml was converted from
+# NSe/config/nse_model_config.yaml -- see that file's own header for the
+# general shape/conventions this follows (runtime.time intentionally
+# omitted, --start/--stop are per-invocation).
+#
+#   python driver/oceanicu_driver.py AMM7/config/amm7_from_oceanicu.yaml --start ... --stop ...
+#
+# Two real, flagged deviations from the old amm7_model_config.yaml (both
+# found and confirmed while doing this conversion, not silently worked
+# around):
+#
+# 1. boundaries.barotropic.source is TPXO here, NOT CMEMS (the old config's
+#    own real active choice) -- oceanicu_driver.py has NO code building
+#    barotropic 2D boundary values from CMEMS at all (confirmed directly:
+#    only a TPXO branch exists), unlike boundaries.baroclinic.CMEMS, which
+#    IS wired up. Real CMEMS values are present below as an inactive
+#    alternative (real folder/dates), for whenever that gap gets closed.
+# 2. output's daily surface/bottom files use the new `z_index` mechanism
+#    (pygetm-config TODO item 37, built for this real need) -- confirmed
+#    the old cfg_output.py's own surface/bottom output really is a discrete
+#    layer slice (Array.isel(z=-1)/isel(z=0)), not the schema's older `z:`
+#    param (which interpolates to a fixed physical depth instead).
+
+# ----------------------------------------------------------------------
+# Domain -- reads the pre-prepared bathymetry NetCDF file. No separate mask
+# variable (confirmed directly against the real file: only bathymetry/lon/
+# lat/grid_type) -- mask is inferred from the -10.0 fill value instead
+# (confirmed directly: -10.0 is the dominant value, 43385 of the real
+# cells).
+domain:
+  method: BathymetryFile
+  path: ${BATHYMETRY_FOLDER}/amm7_topo_getm.nc
+  depth_variable: bathymetry
+  lon_variable: lon
+  lat_variable: lat
+  mask_fill_value: -10.0
+  z0: 0.01
+
+# ----------------------------------------------------------------------
+# Open boundaries -- straight from lib/cfg_boundaries.py's own real,
+# hardcoded `if cfg.setup == "amm7":` block (5 segments), the authoritative
+# source for every setup's boundary geometry, same as NSe's own segments
+# were regenerated from that file's "nse" block. type_3d intentionally
+# omitted, same reasoning as NSe: temp/salt boundary type is forced to
+# SPONGE unconditionally via data_assignments below (confirmed against
+# cfg_boundaries.py::data_3d -- SPONGE forcing is domain-independent, not
+# NSe-specific), so a per-segment default here would never actually apply.
+open_boundaries:
+  - side: WEST
+    l: 1
+    mstart: 1
+    mstop: 353
+    type_2d: FLATHER_TRANSPORT
+  - side: NORTH
+    l: 373
+    mstart: 55
+    mstop: 284
+    type_2d: FLATHER_TRANSPORT
+  - side: SOUTH
+    l: 1
+    mstart: 2
+    mstop: 100
+    type_2d: FLATHER_TRANSPORT
+  - side: SOUTH
+    l: 247
+    mstart: 273
+    mstop: 276
+    type_2d: FLATHER_TRANSPORT
+  - side: SOUTH
+    l: 247
+    mstart: 277
+    mstop: 296
+    type_2d: FLATHER_TRANSPORT
+
+# ----------------------------------------------------------------------
+simulation:
+  runtype: BAROCLINIC
+  Dcrit: 0.5
+  Dmin: 0.1
+  advection_scheme: SUPERBEE
+
+  # Same real GVC values as NSe -- confirmed no diff between amm7_model_
+  # config.yaml's and nse_model_config.yaml's own vertical_coordinates
+  # blocks.
+  vertical_coordinates:
+    type: GVC
+    Sigma:
+      nz: 40
+      ddl: 0.0
+      ddu: 0.0
+    GVC:
+      nz: 40
+      ddu: 0.75
+      ddl: 0.75
+      Dgamma: 10.0
+      gamma_surf: true
+    Adaptive:
+      nz: 40
+      ddu: 0.0
+      ddl: 0.0
+      gamma_surf: true
+      Dgamma: 0.0
+      csigma: 0.0
+      cgvc: 1.0
+      chsurf: 0.0
+      hsurf: 0.5
+      chmidd: 0.0
+      hmidd: -4.0
+      chbott: 0.0
+      hbott: -0.25
+      decay: 0.6666666666666666
+      hpow: 3
+      cneigh: 0.0
+      rneigh: 0.25
+      cNN: 0.0
+      drho: 0.3
+      cSS: 0.0
+      dvel: 0.1
+      chmin: 0.0
+      hmin: 0.3
+      nvfilter: 1
+      vfilter: 0.3
+      nhfilter: 1
+      hfilter: 0.4
+      timescale: 14400.0
+
+  internal_pressure:
+    type: ShchepetkinMcwilliams
+    Prescribed:
+      idpdx: 0.0
+      idpdy: 0.0
+    BlumbergMellor: {}
+    ShchepetkinMcwilliams: {}
+
+  radiation:
+    type: TwoBand
+    Radiation: {}
+    TwoBand:
+      reflect_at_bottom: false
+
+  momentum:
+    An: 25
+    Am: 0
+    cnpar: 1
+    avmmol: 1.8e-6
+    advection_scheme: null
+    advection_split_2d: FULL
+    coriolis_scheme: DEFAULT
+
+# ----------------------------------------------------------------------
+runtime:
+  timestep: 10
+  split_factor: 30
+  dump_on_error: true
+  profile: null
+  check_finite: false
+  report: {days: 1}
+  report_totals: {days: 7}
+  debug_output: false
+
+# ----------------------------------------------------------------------
+data_assignments:
+  - target: simulation.radiation.A
+    kind: constant
+    constant_value: 0.7
+  - target: simulation.radiation.kc1
+    kind: constant
+    constant_value: 0.54
+  # AMM7's real ObsKd: True (unlike NSe's False) -- a real, space-varying
+  # KD490 climatology for kc2 instead of a fixed constant, matching
+  # run_model.py's own real ObsKd branch exactly.
+  - target: simulation.radiation.kc2
+    kind: file
+    file: ${KD490_FOLDER}/KD490_clim.nc
+    variable: KD490_filled
+    climatology: true
+
+  # Open-boundary 2D (barotropic tidal elevation/transport) via TPXO --
+  # see the module docstring above for why TPXO is used here instead of
+  # the old config's own real CMEMS choice (a real, unwired driver gap,
+  # not a silent behavior change).
+  - target: open_boundaries.z
+    kind: tpxo
+    tpxo_folder: ${TPXO_FOLDER}
+    tpxo_variable: h
+    on_grid: true
+  - target: open_boundaries.u
+    kind: tpxo
+    tpxo_folder: ${TPXO_FOLDER}
+    tpxo_variable: u
+    on_grid: true
+  - target: open_boundaries.v
+    kind: tpxo
+    tpxo_folder: ${TPXO_FOLDER}
+    tpxo_variable: v
+    on_grid: true
+
+  # Open-boundary 3D (temp/salt) TYPE -- forced to SPONGE unconditionally
+  # (cfg_boundaries.py::data_3d, confirmed domain-independent). The actual
+  # VALUES (real CMEMS thetao/so) are computed dynamically by
+  # oceanicu_driver.py, not set here.
+  - target: open_boundary.temp
+    kind: boundary_type
+    boundary_condition_type: SPONGE
+  - target: open_boundary.salt
+    kind: boundary_type
+    boundary_condition_type: SPONGE
+
+# ----------------------------------------------------------------------
+# Output. AMM7's real old output shape is baroclinic-focused (no meteo/
+# tides/barotropic files at all -- output.meteo/tides/barotropic.default_
+# 2d/3d were all False), unlike NSe's own barotropic-focused example.
+# Daily surface/bottom use z_index (TODO item 37) to match cfg_output.py's
+# own real Array.isel(z=-1)/isel(z=0) single-layer slices exactly; monthly
+# uses the full 3D groups (same shape as NSe's own monthly-equivalent
+# file) with time_average: true, matching cfg_output.py's own real
+# time_average=True for its monthly file (NSe's own file is NOT time-
+# averaged -- a real, deliberate difference between the two old configs,
+# not copied blindly).
+output:
+  folder: ${OUTPUT_FOLDER}
+  variable_groups:
+    barotropic_3d: [uk, vk, ww, SS, num]
+    baroclinic_3d: [temp, salt, rho, nuh]
+  files:
+    - type: netcdf
+      path: amm7_surface_daily.nc
+      interval: 1
+      interval_units: HOURS
+      sync_interval: null
+      default_dtype: float32
+      save_initial: false
+      variable_requests:
+        - fields: [temp]
+          z_index: -1
+        - fields: [salt]
+          z_index: -1
+
+    - type: netcdf
+      path: amm7_bottom_daily.nc
+      interval: 1
+      interval_units: DAYS
+      sync_interval: null
+      default_dtype: float32
+      save_initial: false
+      variable_requests:
+        - fields: [temp]
+          z_index: 0
+        - fields: [salt]
+          z_index: 0
+
+    - type: netcdf
+      path: amm7_monthly.nc
+      interval: 1
+      interval_units: MONTHS
+      sync_interval: null
+      default_dtype: float32
+      save_initial: false
+      variable_requests:
+        - groups: [barotropic_3d, baroclinic_3d]
+          time_average: true
+
+# ----------------------------------------------------------------------
+# Data provenance -- every real alternative per role stays present, not
+# just the active one (see nse_from_oceanicu.yaml's own header for why).
+hydrography:
+  source: WOA
+  CMEMS:
+    # Real old value differs from NSe's own CMEMS hydrography folder --
+    # same shared var name (${HYDROGRAPHY_FOLDER_CMEMS}), different real
+    # value per domain being run, same convention as ${BATHYMETRY_FOLDER}.
+    folder: ${HYDROGRAPHY_FOLDER_CMEMS}
+  WOA:
+    folder: ${HYDROGRAPHY_FOLDER_WOA}
+  constant:
+    temp: 15
+    salt: 34
+boundaries:
+  barotropic:
+    source: TPXO
+    TPXO:
+      tpxo_folder: ${TPXO_FOLDER}
+    # NOT wired up in oceanicu_driver.py (see module docstring above) --
+    # present with real values/dates for when that gap is closed. Real
+    # data confirmed to exist: boundaries/boundary_data/amm7/hourly/
+    # hourly_2015-01-01_to_2025-01-01.nc -- folder_template is the LITERAL
+    # resolved "amm7/hourly" (not "{setup}/CMEMS", which oceanicu_driver.py
+    # never substitutes -- see nse_from_oceanicu.yaml's own baroclinic.
+    # CMEMS.folder_template for the same real convention).
+    CMEMS:
+      folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMEMS}
+      folder_template: "amm7/hourly"
+      filename_template: "hourly_{start_date}_to_{end_date}.nc"
+      start_date: "2015-01-01"
+      end_date: "2025-01-01"
+    CMIP6:
+      folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}
+      folder_template: "{setup}/CMIP6/{model}/{scenario}"
+      filename_template: "{start_date}_to_{end_date}.nc"
+      model: "MPI-ESM1-2-HR"
+      scenario: "ssp585"
+      start_date: "2015-01-01"
+      end_date: "2025-01-01"
+  baroclinic:
+    source: CMEMS
+    WOA:
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_WOA}
+    # AMM7's real active baroclinic boundary source -- IS wired up
+    # (oceanicu_driver.py's own baroclinic_source == "CMEMS" branch).
+    # Real data confirmed to exist: boundaries/boundary_data/amm7/daily/
+    # daily_2015-01-01_to_2025-01-01.nc -- folder_template is the literal
+    # resolved "amm7/daily" (same {setup}-not-substituted reasoning as
+    # barotropic.CMEMS above).
+    CMEMS:
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMEMS}
+      folder_template: "amm7/daily"
+      filename_template: "daily_{start_date}_to_{end_date}.nc"
+      start_date: "2015-01-01"
+      end_date: "2025-01-01"
+    CMIP6:
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}
+      folder_template: "{setup}/CMIP6/{model}/{scenario}"
+      filename_template: "{start_date}_to_{end_date}.nc"
+      model: "MPI-ESM1-2-HR"
+      scenario: "ssp585"
+      start_date: "2015-01-01"
+      end_date: "2025-01-01"
+meteo:
+  source: ERA5
+  ERA5:
+    # Real old value: /data/ERA5/NA (confirmed directly to exist on this
+    # machine, real era5_*_2019.nc... files present) -- a DIFFERENT real
+    # ERA5 extraction than NSe's own "kaj", same folder_template/{model}
+    # mechanism, just a different model= value.
+    folder: ${ERA5_FOLDER}
+    folder_template: "{model}"
+    model: "NA"
+    evaporation: true
+    # Real old values -- differ from NSe's own ROSATI_MIYAKODA/1: NET_FLUX=-1, DOWNWARD_FLUX=-2.
+    shortwave_method: -1
+    longwave_method: -2
+  CMIP6:
+    # Real old values (AMM7's own, not copied from NSe -- different model/
+    # scenario/folder_template shape: {model}/{scenario}/meteo, no CMIP6/
+    # prefix).
+    folder: ${CMIP6_FOLDER}
+    folder_template: "{model}/{scenario}/meteo"
+    model: "MPI-ESM1-2-HR"
+    scenario: "ssp585"
+    evaporation: true
+    shortwave_method: -1
+    longwave_method: -2
+river_discharge:
+  source: emorid
+  emorid:
+    folder: ${RIVER_FOLDER}
+    file: EMORID_1990_2024.nc
+    threshold: 0

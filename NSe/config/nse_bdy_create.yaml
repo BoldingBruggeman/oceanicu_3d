@@ -1,0 +1,214 @@
+# =============================================================================
+# NSe – North Sea Extension boundary conditions
+#
+# Two NWS sources stitched in time:
+#   AMM7  NWS 7 km MY reanalysis  (NWSHELF_MULTIYEAR_PHY_004_009)   1993 – 2026-04-30 / 2026-05-01
+#   AMM15 NWS 1.5 km ANFC         (NWSHELF_ANALYSISFORECAST_PHY_004_013)  2026-05-01 –
+#
+# AMM15 covers most of the NSe domain but has a masked halo in the southern
+# Kattegat / Belt Sea (roughly lon > 10°E, lat < 57°N).  Segment 7 (eastern
+# Kattegat entrance) uses Baltic products as override for both periods.
+#
+# Three layers of control
+# -----------------------
+# 1. MODEL SETUP   – one YAML file per model configuration.
+# 2. HISTORICAL / FUTURE SCENARIOS  – each dataset entry uses a `scenarios`
+#    list; each scenario has its own `dataset_id` plus optional `start_date` /
+#    `end_date` clipped against the global `time_range`.
+# 3. PER-SEGMENT DATA SOURCE  – `segment_overrides` pulls individual segments
+#    from a different source.  `on_gap: use_default` falls back to the parent
+#    NWS dataset for any time window the override doesn't cover.
+#
+# Segments are auto-detected (0-indexed, min_gap_size=0.5°) from the coord file.
+#
+# Dataset variables and coverage — verified 2026-06-02:
+#   cmems_mod_nws_phy-t_my_7km-3D_P1D-m        thetao  1993-01-01 – 2026-04-30  33 lev (0–5727 m)
+#   cmems_mod_nws_phy-s_my_7km-3D_P1D-m        so      1993-01-01 – 2026-04-30  33 lev
+#   cmems_mod_nws_phy-ssh_my_7km-2D_PT1H-i     zos     1993-01-01 – 2026-05-01  hourly
+#   cmems_mod_nws_phy-uv_my_7km-3D_P1D-m       uo vo   1993-01-01 – 2026-04-30  33 lev
+#   cmems_mod_nws_phy-uv_my_7km-2D_PT1H-i      uo vo   1993-01-01 – 2026-05-01  hourly barotropic
+#   cmems_mod_nws_phy-tem_anfc_1.5km-3D_P1D-m  thetao  2024-03-01 –             33 lev (0–5000 m)
+#   cmems_mod_nws_phy-sal_anfc_1.5km-3D_P1D-m  so      2024-03-01 –             33 lev
+#   cmems_mod_nws_phy-ssh_anfc_1.5km-2D_PT1H-i zos     2024-03-02 –             hourly
+#   cmems_mod_nws_phy-cur_anfc_1.5km-3D_P1D-m  uo vo   2024-03-01 –             33 lev
+#   cmems_mod_nws_phy-cur_anfc_1.5km-2D_PT1H-i uo vo   2024-03-02 –             hourly barotropic
+#   cmems_mod_bal_phy_my_P1D-m                  thetao so sla uo vo  1993-01-01 – 2022-12-31  (SSH as 'sla')
+#   cmems_mod_bal_phy_anfc_P1D-m                thetao so uo vo      2023-01-01 –             (no SSH)
+#   cmems_mod_bal_phy-ssh_anfc_detided_P1D-m    zos_detided          2022-12-02 – 2026-06-29  (seg 7 SSH only)
+#
+# Segment layout (9 segments, 0-indexed, min_gap_size=0.5°):
+#   0  western  lon=-7.500  lat 48.50–52.10 N  ( 73 pts)
+#   1  western  lon=-7.500  lat 55.30–56.90 N  ( 33 pts)
+#   2  western  lon=-6.220  lat 58.50–59.15 N  ( 14 pts)
+#   3  western  lon=-4.620  lat 59.20–59.80 N  ( 13 pts)
+#   4  northern lon=-6.14– -4.70°E  lat 59.15 N  ( 19 pts)
+#   5  northern lon=-4.54– -1.42°E  lat 59.80 N  ( 40 pts)
+#   6  northern lon=-0.78–  4.90°E  lat 59.15–60.80 N  ( 72 pts)
+#   7  eastern  lon=12.980  lat 54.45–55.35 N  ( 19 pts)  ← Baltic override
+#   8  southern lon=-7.42 – -4.78°E  lat 48.50 N  ( 34 pts)
+#
+# Usage
+# -----
+#   python cli/run_cmems_boundaries.py --config nse_bdy_create.yaml
+#   python cli/run_cmems_boundaries.py --config nse_bdy_create.yaml --dataset temperature salinity
+#   python cli/run_cmems_boundaries.py --config nse_bdy_create.yaml --dryrun
+# =============================================================================
+
+setup:
+  name: nse
+  description: "NSe – North Sea Extension (AMM7 MY → AMM15 ANFC forcing)"
+
+boundary_points:
+  file_path: "/home/kb/source/repos/OceanICU/oceanicu_3d/NSe/Bathymetry/nse_bdy_lonlat.txt"
+
+time_range:
+  start_date: "2010-01-01"
+  end_date:   "2026-08-17"   # today -- pipeline only pulls what's actually available anyway
+
+processing:
+  coordinate_tolerance: 0.0001
+  chunk_size_days: 30
+  bbox_buffer: 0.25
+  cache_directory: "/data/cache/cmems/bdy"  # set to null to disable
+
+output:
+  base_directory: "/data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy"
+  filename_template: "{dataset_id}_{start_date}_to_{end_date}.nc"
+
+# =============================================================================
+# Datasets — physics only
+#
+# Default for all segments: NWS 7km MY → NWS 1.5km ANFC at 2024-03-01.
+# Segment 7 (eastern Kattegat/Belt Sea, outside NWS valid domain) uses Baltic
+# products: MY reanalysis (1993–2022) then ANFC (2023–).
+# Baltic has no SSH variable; on_gap: skip for that segment.
+# =============================================================================
+
+datasets:
+
+  # --- temperature (3-D, daily) ---
+  temperature:
+    category: physics
+    output_group: daily
+    variables:
+      - name: thetao
+    target_frequency: daily
+    depth_range:
+      minimum: 0.0
+      maximum: 5000.0
+    scenarios:
+      - dataset_id: "cmems_mod_nws_phy-t_my_7km-3D_P1D-m"        # AMM7 MY  (– 2026-04-30)
+        end_date:   "2026-04-30"
+      - dataset_id: "cmems_mod_nws_phy-tem_anfc_1.5km-3D_P1D-m"  # AMM15 ANFC (2026-05-01 –)
+        start_date: "2026-05-01"
+    segment_overrides:
+      - segments: [7]   # eastern Kattegat — outside NWS valid domain
+        on_gap: use_default
+        scenarios:
+          - dataset_id: "cmems_mod_bal_phy_my_P1D-m"    # Baltic MY   (– 2022-12-31)
+            end_date:   "2022-12-31"
+          - dataset_id: "cmems_mod_bal_phy_anfc_P1D-m"  # Baltic ANFC (2023-01-01 –)
+            start_date: "2023-01-01"
+
+  # --- salinity (3-D, daily) ---
+  salinity:
+    category: physics
+    output_group: daily
+    variables:
+      - name: so
+    target_frequency: daily
+    depth_range:
+      minimum: 0.0
+      maximum: 5000.0
+    scenarios:
+      - dataset_id: "cmems_mod_nws_phy-s_my_7km-3D_P1D-m"        # AMM7 MY  (– 2026-04-30)
+        end_date:   "2026-04-30"
+      - dataset_id: "cmems_mod_nws_phy-sal_anfc_1.5km-3D_P1D-m"  # AMM15 ANFC (2026-05-01 –)
+        start_date: "2026-05-01"
+    segment_overrides:
+      - segments: [7]
+        on_gap: use_default
+        scenarios:
+          - dataset_id: "cmems_mod_bal_phy_my_P1D-m"
+            end_date:   "2022-12-31"
+          - dataset_id: "cmems_mod_bal_phy_anfc_P1D-m"
+            start_date: "2023-01-01"
+
+  # --- sea-surface height (2-D, hourly) ---
+  # Segment 7 (Kattegat) is outside the NWS SSH valid domain — NWS data is masked
+  # at the eastern boundary and cannot be flood-filled from nearby interior points.
+  # Baltic sources used throughout:
+  #   1993–2022  cmems_mod_bal_phy_my_P1D-m         SSH as 'sla' (daily → resampled hourly)
+  #   2022-12-02 cmems_mod_bal_phy-ssh_anfc_detided_P1D-m  'zos_detided' (daily → resampled hourly)
+  ssh:
+    category: physics
+    output_group: hourly
+    variables:
+      - name: zos
+    target_frequency: hourly
+    scenarios:
+      - dataset_id: "cmems_mod_nws_phy-ssh_my_7km-2D_PT1H-i"      # AMM7 MY  (– 2026-05-01)
+        end_date:   "2026-05-01"
+      - dataset_id: "cmems_mod_nws_phy-ssh_anfc_1.5km-2D_PT1H-i"  # AMM15 ANFC (2026-05-02 –)
+        start_date: "2026-05-02"
+    segment_overrides:
+      - segments: [7]
+        on_gap: skip   # NWS SSH does not cover the Kattegat; Baltic sources cover the full range
+        scenarios:
+          - dataset_id: "cmems_mod_bal_phy_my_P1D-m"        # Baltic MY SSH as 'sla' (1993–2022)
+            end_date:   "2022-12-31"
+            variable_map:
+              sla: zos
+          - dataset_id: "cmems_mod_bal_phy-ssh_anfc_detided_P1D-m"  # Baltic ANFC detided SSH (2022-12-02 –)
+            start_date: "2023-01-01"
+            variable_map:
+              zos_detided: zos
+
+  # --- depth-integrated transport from 3-D daily velocities ---
+  transport:
+    category: physics
+    output_group: hourly
+    variables:
+      - name: uo
+        output_name: transport_x
+      - name: vo
+        output_name: transport_y
+    target_frequency: daily
+    compute_transport: true
+    scenarios:
+      - dataset_id: "cmems_mod_nws_phy-uv_my_7km-3D_P1D-m"       # AMM7 MY  (– 2026-04-30)
+        end_date:   "2026-04-30"
+      - dataset_id: "cmems_mod_nws_phy-cur_anfc_1.5km-3D_P1D-m"  # AMM15 ANFC (2026-05-01 –)
+        start_date: "2026-05-01"
+    segment_overrides:
+      - segments: [7]
+        on_gap: use_default
+        scenarios:
+          - dataset_id: "cmems_mod_bal_phy_my_P1D-m"
+            end_date:   "2022-12-31"
+          - dataset_id: "cmems_mod_bal_phy_anfc_P1D-m"
+            start_date: "2023-01-01"
+
+  # --- barotropic (2-D) velocities, hourly ---
+  # Use in place of `transport` if depth-integration is not required.
+  # Baltic ANFC exposes 3-D daily uo/vo; the processor resamples to hourly.
+  barotropic_vel:
+    category: physics
+    output_group: hourly
+    variables:
+      - name: uo
+      - name: vo
+    target_frequency: hourly
+    scenarios:
+      - dataset_id: "cmems_mod_nws_phy-uv_my_7km-2D_PT1H-i"       # AMM7 MY  (– 2026-05-01)
+        end_date:   "2026-05-01"
+      - dataset_id: "cmems_mod_nws_phy-cur_anfc_1.5km-2D_PT1H-i"  # AMM15 ANFC (2026-05-02 –)
+        start_date: "2026-05-02"
+    segment_overrides:
+      - segments: [7]
+        on_gap: use_default
+        scenarios:
+          - dataset_id: "cmems_mod_bal_phy_my_P1D-m"
+            end_date:   "2022-12-31"
+          - dataset_id: "cmems_mod_bal_phy_anfc_P1D-m"
+            start_date: "2023-01-01"

@@ -134,8 +134,6 @@ def create_simulation(
         Dmin=cfg.simulation.Dmin,
         delay_slow_ip=False,
     )
-    print(cfg.fabm.file)
-    quit()
 
     initial = not load_restart
     sim = MySimulation(
@@ -245,11 +243,12 @@ def parse_args():
         help="Path to World Ocean Atlas files",
         default=Path(os.getenv("HYDROGRAPHY_FOLDER", cfg.hydrography.WOA.folder)),
     )
+    _meteo_env = "ERA5_FOLDER" if cfg.meteo.source == "ERA5" else "CMIP6_FOLDER"
     p.add_argument(
         "--meteo_dir",
         type=Path,
         help="Folder with meteo files",
-        default=Path(os.getenv("METEO_FOLDER", getattr(cfg.meteo, cfg.meteo.source).folder)),
+        default=Path(os.getenv(_meteo_env, getattr(cfg.meteo, cfg.meteo.source).folder)),
     )
     p.add_argument(
         "--river_source",
@@ -356,7 +355,7 @@ def parse_args():
 
     # Switch off configs depending on command line arguments
     cfg.domain.boundaries = args.boundaries
-    #KBcfg.domain.rivers = not args.rivers
+    cfg.domain.rivers = not args.rivers
     if args.runtype:
         cfg.simulation.runtype = args.runtype
 
@@ -413,7 +412,8 @@ def parse_args():
         if cfg.meteo.source == "CMIP6":
             cfg.simulation.calendar = "noleap"
         _meteo_src = getattr(cfg.meteo, cfg.meteo.source)
-        _meteo_src.folder = Path(args.meteo_dir or os.getenv("METEO_FOLDER", _meteo_src.folder))
+        _meteo_env = "ERA5_FOLDER" if cfg.meteo.source == "ERA5" else "CMIP6_FOLDER"
+        _meteo_src.folder = Path(args.meteo_dir or os.getenv(_meteo_env, _meteo_src.folder))
 
     if cfg.rivers.source is not None:
         _rsrc = getattr(cfg.rivers, cfg.rivers.source)

@@ -24,6 +24,8 @@ import xarray as xr
 
 import pygetm
 
+from .cfg_utils import resolve_path as _resolve_path
+
 """
 A dictionary to provide a common interface to different river sources.
 """

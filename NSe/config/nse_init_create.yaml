@@ -1,0 +1,107 @@
+# =============================================================================
+# NSe – initial conditions (multi-source config)
+#
+# Downloads temperature and salinity for the NSe model domain and saves
+# 12 monthly snapshots (1st of each month) as a single NetCDF per variable.
+#
+# Two source options, selected with --source on the command line:
+#
+#   AMM7   NWS 7 km MY reanalysis + Baltic MY   (1993–2026-04-30)
+#   AMM15  NWS 1.5 km ANFC + Baltic ANFC        (2024-03-01 –)
+#
+# In both cases the NWS product is primary (defines the output grid) and
+# the Baltic product fills the southern Kattegat/Belt Sea masked halo.
+#
+# Usage
+# -----
+#   python cli/download_init_conditions.py --config config/nse_init_create.yaml --source AMM7
+#   python cli/download_init_conditions.py --config config/nse_init_create.yaml --source AMM15
+#   python cli/download_init_conditions.py --config config/nse_init_create.yaml --source AMM7  --year 2015
+#   python cli/download_init_conditions.py --config config/nse_init_create.yaml --source AMM15 --year 2026
+#   python cli/download_init_conditions.py --config config/nse_init_create.yaml --source AMM7  --dryrun
+# =============================================================================
+
+setup:
+  name: nse
+  description: "NSe initial conditions"
+
+boundary_points:
+  file_path: "/home/kb/source/repos/OceanICU/oceanicu_3d/NSe/Bathymetry/nse_bdy_lonlat.txt"   # kept for reference; domain overrides bbox
+
+# Explicit domain — covers the full NSe model grid.
+domain:
+  lon_min: -8.0
+  lon_max: 13.0
+  lat_min: 47.5
+  lat_max: 62.0
+
+# Flood-fill: add {variable}_ff alongside the original variable.
+flood_fill: true
+
+processing:
+  bbox_buffer: 0.1
+  download_cache_dir: "/data/cache/cmems/ic"   # null to disable
+
+output:
+  base_directory: "/data/OceanICU/oceanicu_3d/data/NSe/CMEMS/init"
+  filename_template: "{source}_{variable}_{year}_monthly_ic.nc"
+
+# =============================================================================
+# Per-source dataset definitions
+# Select with --source AMM7 or --source AMM15.
+# Each source has a default year (overridable with --year).
+# =============================================================================
+
+sources:
+
+  AMM7:
+    year: 2015   # default; override with --year
+    datasets:
+      temperature:
+        sources:
+          - dataset_id: "cmems_mod_nws_phy-t_my_7km-3D_P1D-m"   # NWS MY  1993–2026-04-30
+            priority: 1
+          - dataset_id: "cmems_mod_bal_phy_my_P1D-m"             # Baltic MY  1993–2022-12-31
+            priority: 0
+        variables:
+          - name: thetao
+        depth_range:
+          minimum: 0.0
+          maximum: 5000.0
+      salinity:
+        sources:
+          - dataset_id: "cmems_mod_nws_phy-s_my_7km-3D_P1D-m"   # NWS MY  1993–2026-04-30
+            priority: 1
+          - dataset_id: "cmems_mod_bal_phy_my_P1D-m"             # Baltic MY  1993–2022-12-31
+            priority: 0
+        variables:
+          - name: so
+        depth_range:
+          minimum: 0.0
+          maximum: 5000.0
+
+  AMM15:
+    year: 2025   # default; override with --year
+    datasets:
+      temperature:
+        sources:
+          - dataset_id: "cmems_mod_nws_phy-tem_anfc_1.5km-3D_P1D-m"  # NWS ANFC  2024-03-01–
+            priority: 1
+          - dataset_id: "cmems_mod_bal_phy_anfc_P1D-m"                # Baltic ANFC  2023-01-01–
+            priority: 0
+        variables:
+          - name: thetao
+        depth_range:
+          minimum: 0.0
+          maximum: 5000.0
+      salinity:
+        sources:
+          - dataset_id: "cmems_mod_nws_phy-sal_anfc_1.5km-3D_P1D-m"  # NWS ANFC  2024-03-01–
+            priority: 1
+          - dataset_id: "cmems_mod_bal_phy_anfc_P1D-m"                # Baltic ANFC  2023-01-01–
+            priority: 0
+        variables:
+          - name: so
+        depth_range:
+          minimum: 0.0
+          maximum: 5000.0

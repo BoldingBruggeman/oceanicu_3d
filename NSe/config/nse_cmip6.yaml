@@ -1,0 +1,475 @@
+domain:
+  method: BathymetryFile
+  BathymetryFile:
+    path: ${BATHYMETRY_FOLDER}/bathymetry_nse.nc
+    depth_variable: depth_rx0_0p20
+    lon_variable: lon
+    lat_variable: lat
+    mask_variable: ocean_mask
+    z0: 0.01
+open_boundaries:
+- side: WEST
+  l: 0
+  mstart: 0
+  mstop: 73
+  type_2d: FLATHER_TRANSPORT
+- side: WEST
+  l: 0
+  mstart: 136
+  mstop: 169
+  type_2d: FLATHER_TRANSPORT
+- side: WEST
+  l: 16
+  mstart: 201
+  mstop: 214
+  type_2d: FLATHER_TRANSPORT
+- side: WEST
+  l: 36
+  mstart: 214
+  mstop: 227
+  type_2d: FLATHER_TRANSPORT
+- side: NORTH
+  l: 213
+  mstart: 17
+  mstop: 36
+  type_2d: FLATHER_TRANSPORT
+  type_3d: ZERO_GRADIENT
+- side: NORTH
+  l: 226
+  mstart: 37
+  mstop: 77
+  type_2d: FLATHER_TRANSPORT
+- side: NORTH
+  l: 246
+  mstart: 84
+  mstop: 154
+  type_2d: FLATHER_TRANSPORT
+- side: EAST
+  l: 256
+  mstart: 120
+  mstop: 136
+  type_2d: FLATHER_TRANSPORT
+- side: SOUTH
+  l: 0
+  mstart: 1
+  mstop: 35
+  type_2d: FLATHER_TRANSPORT
+simulation:
+  runtype: BAROCLINIC
+  gotm: ${GOTM_FOLDER}/gotm.yaml
+  Dcrit: 0.5
+  Dmin: 0.1
+  advection_scheme: SUPERBEE
+  vertical_coordinates:
+    type: GVC
+    Sigma:
+      nz: 40
+      ddl: 0.0
+      ddu: 0.0
+    GVC:
+      nz: 40
+      ddu: 0.75
+      ddl: 0.75
+      Dgamma: 10.0
+      gamma_surf: true
+    Adaptive:
+      nz: 40
+      ddu: 0.0
+      ddl: 0.0
+      gamma_surf: true
+      Dgamma: 0.0
+      csigma: 0.0
+      cgvc: 1.0
+      chsurf: 0.0
+      hsurf: 0.5
+      chmidd: 0.0
+      hmidd: -4.0
+      chbott: 0.0
+      hbott: -0.25
+      decay: 0.6666666666666666
+      hpow: 3
+      cneigh: 0.0
+      rneigh: 0.25
+      cNN: 0.0
+      drho: 0.3
+      cSS: 0.0
+      dvel: 0.1
+      chmin: 0.0
+      hmin: 0.3
+      nvfilter: 1
+      vfilter: 0.3
+      nhfilter: 1
+      hfilter: 0.4
+      timescale: 14400.0
+  internal_pressure:
+    type: ShchepetkinMcwilliams
+    Prescribed:
+      idpdx: 0.0
+      idpdy: 0.0
+    BlumbergMellor: {}
+    ShchepetkinMcwilliams: {}
+  airsea:
+    type: FluxesFromMeteo
+    Fluxes:
+      taux: 0.0
+      tauy: 0.0
+      sp: 101325.0
+      shf: 0.0
+      swr: 0.0
+      pe: 0.0
+    FluxesFromMeteo:
+      shortwave_method: ROSATI_MIYAKODA
+      longwave_method: CLARK
+      humidity_measure: SPECIFIC_HUMIDITY
+      calculate_evaporation: true
+      albedo_method: PAYNE
+  radiation:
+    type: TwoBand
+    Radiation: {}
+    TwoBand:
+      reflect_at_bottom: false
+  momentum:
+    An: 25
+    Am: 0
+    cnpar: 1
+    avmmol: 1.8e-06
+    advection_scheme: null
+    advection_split_2d: FULL
+    coriolis_scheme: DEFAULT
+runtime:
+  timestep: 20
+  split_factor: 30
+  dump_on_error: false
+  profile: null
+  check_finite: false
+  report:
+    days: 1
+  report_totals:
+    days: 7
+  debug_output: false
+data_assignments:
+- target: simulation.radiation.A
+  kind: constant
+  constant_value: 0.7
+- target: simulation.radiation.kc1
+  kind: constant
+  constant_value: 0.54
+- target: simulation.radiation.kc2
+  kind: constant
+  constant_value: 3.23
+- target: open_boundaries.z
+  kind: tpxo
+  tpxo_folder: ${TPXO_FOLDER}
+  tpxo_variable: h
+  on_grid: true
+- target: open_boundaries.u
+  kind: tpxo
+  tpxo_folder: ${TPXO_FOLDER}
+  tpxo_variable: u
+  on_grid: true
+- target: open_boundaries.v
+  kind: tpxo
+  tpxo_folder: ${TPXO_FOLDER}
+  tpxo_variable: v
+  on_grid: true
+- target: open_boundary.temp
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.salt
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+output:
+  folder: ${OUTPUT_FOLDER}
+  variable_groups:
+    airsea_standard:
+    - u10
+    - v10
+    - sp
+    - t2m
+    - tcc
+    - tp
+    airsea_fluxes:
+    - swr
+    - shf
+    - tausxu
+    - tausyv
+    tidal:
+    - zt
+    - u1
+    - v1
+    barotropic_2d:
+    - Ht
+    - zt
+    - Dt
+    - u1
+    - v1
+    barotropic_3d:
+    - uk
+    - vk
+    - ww
+    - SS
+    - num
+    baroclinic_3d:
+    - temp
+    - salt
+    - rho
+    - nuh
+    barotropic_2d_debug:
+    - maskt
+    - masku
+    - maskv
+    - dxt
+    - dyt
+    - Hu
+    - Hv
+    - U
+    - V
+    - Du
+    - Dv
+    - dpdx
+    - dpdy
+    - z0bu
+    - z0bv
+    - z0bt
+    - ru
+    - rv
+    barotropic_3d_debug:
+    - rru
+    - rrv
+    - advpk
+    - advqk
+    - diffpk
+    - diffqk
+    baroclinic_3d_debug:
+    - rad
+    - sst
+    - hnt
+    - idpdx
+    - idpdy
+    surface_variables_3d:
+    - temp
+    - salt
+    bottom_variables_3d:
+    - temp
+    - salt
+    fabm_ersem:
+    - P1_c
+    - P2_c
+    - P3_c
+    - P4_c
+    - O2_o
+    - N3_n
+    - N4_n
+    - N1_p
+    - N5_s
+    - Q6_c
+    - Y2_c
+    - Y3_c
+    - O3_c
+    - O3_fair
+    - Q7_c
+    - Q6_pen_depth_c
+    - ben_col_D1m
+    - ben_col_D2m
+    - N5_s_bdy
+    - N5_s_sms
+    - N5_s_sfl
+    - N5_s_bfl
+    - N5_s_sfl_tot_calculator_result
+    - N5_s_bfl_tot_calculator_result
+    - N5_s_sms_tot_calculator_result
+  files:
+  - type: netcdf
+    netcdf:
+      path: nse_meteo.nc
+      interval: 1
+      interval_units: HOURS
+      sync_interval: 1
+      default_dtype: float32
+      format: NETCDF4
+      active: false
+    variable_requests:
+    - groups:
+      - airsea_standard
+      - airsea_fluxes
+  - type: netcdf
+    netcdf:
+      path: nse_tides.nc
+      interval: 1
+      interval_units: HOURS
+      sync_interval: 1
+      default_dtype: float32
+      format: NETCDF4
+      active: false
+    variable_requests:
+    - groups:
+      - tidal
+      fields:
+      - maskt
+  - type: netcdf
+    netcdf:
+      path: nse_2d.nc
+      interval: 1
+      interval_units: DAYS
+      sync_interval: 1
+      default_dtype: float32
+      format: NETCDF4
+    variable_requests:
+    - groups:
+      - barotropic_2d
+  - type: netcdf
+    netcdf:
+      path: nse_3d.nc
+      interval: 1
+      interval_units: MONTHS
+      sync_interval: 1
+      default_dtype: float32
+      format: NETCDF4
+    variable_requests:
+    - groups:
+      - baroclinic_3d
+      - barotropic_3d
+      - surface_variables_3d
+      time_average: true
+    - groups:
+      - fabm_ersem
+      requires_fabm: true
+      time_average: true
+  - type: netcdf
+    netcdf:
+      sync_interval: 1
+      format: NETCDF4
+      interval: 1
+      interval_units: DAYS
+      path: surf_bott_daily.nc
+    variable_requests:
+    - fields:
+      - temp
+      - salt
+      groups: null
+      z_index: -1
+      generate_unique_name: true
+    - fields:
+      - temp
+      - salt
+      z_index: 0
+      generate_unique_name: true
+hydrography:
+  source: WOA
+  CMEMS:
+    folder: ${HYDROGRAPHY_FOLDER_CMEMS}
+    data_script: ${SCRIPT_FOLDER}/hydrography.py:set_hydrography_ic
+  WOA:
+    folder: ${HYDROGRAPHY_FOLDER_WOA}
+    data_script: ${SCRIPT_FOLDER}/hydrography.py:set_hydrography_ic
+  constant:
+    temp: 9
+    salt: 36
+boundaries:
+  barotropic:
+    source: TPXO
+    TPXO:
+      tpxo_folder: ${TPXO_FOLDER}
+    CMEMS:
+      folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMEMS}
+      folder_template: nse/hourly
+      filename_template: hourly_{start_date}_to_{end_date}.nc
+      start_date: '2024-03-02'
+      end_date: '2026-01-01'
+    CMIP6:
+      folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}
+      folder_template: '{setup}/CMIP6/{model}/{scenario}'
+      filename_template: '{start_date}_to_{end_date}.nc'
+      model: MPI-ESM1-2-HR
+      scenario: ssp585
+      start_date: '2024-03-01'
+      end_date: '2026-01-01'
+  baroclinic:
+    source: CMIP6
+    WOA:
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_WOA}
+    CMEMS:
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMEMS}
+      folder_template: null
+      filename_template: daily_{start_date}_to_{end_date}.nc
+      start_date: '2010-01-01'
+      end_date: '2026-08-17'
+    CMIP6:
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}
+      folder_template: '{model}/{scenario}/bdy'
+      filename_template: bdy_3d_{variable}_{start_date}_{end_date}.nc
+      model: MPI-ESM1-2-HR
+      scenario: ssp126
+      start_date: '20150101'
+      end_date: '21001231'
+  fabm:
+    # FABM tracer initial conditions/SPONGE boundaries -- independent of
+    # boundaries.baroclinic (T/S) and hydrography (also T/S), see
+    # oceanicu_providers.py's boundaries.fabm comment for why. Only takes
+    # effect once fabm.ERSEM.file below is actually set (FABM stays off
+    # otherwise) -- see driver/scripts/fabm.py's configure_fabm.
+    source: WOA
+    WOA:
+      folder: ${BOUNDARY_FOLDER_FABM_WOA}
+      # Not every FABM state variable needs an explicit open-ocean boundary
+      # -- only tracers listed here get SPONGE + a real WOA climatology;
+      # anything else keeps whatever boundary type FABM/pygetm defaults to.
+      # Same tracer set drives both the boundary values (oceanicu_providers.
+      # derive_data_assignments) and the initial condition (scripts/fabm.py).
+      # boundary_condition_type is optional per tracer (defaults to SPONGE
+      # if omitted) -- written explicitly below so it's visible/editable
+      # here directly, e.g. for testing a tracer's sensitivity to boundary
+      # treatment without touching Python.
+      tracers:
+        N3_n: {file: woa_n.nc, variable: n_an, boundary_condition_type: SPONGE}
+        N1_p: {file: woa_p.nc, variable: p_an, boundary_condition_type: SPONGE}
+        N5_s: {file: woa_i.nc, variable: i_an, boundary_condition_type: SPONGE}
+        O2_o: {file: woa_o.nc, variable: o_an, boundary_condition_type: SPONGE}
+meteo:
+  source: CMIP6
+  ERA5:
+    folder: ${ERA5_FOLDER}
+    evaporation: true
+    shortwave_method: 1
+    longwave_method: 1
+    data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
+  CMIP6:
+    folder: ${CMIP6_FOLDER}
+    folder_template: CMIP6/{model}/{scenario}/meteo
+    model: MPI-ESM1-2-HR
+    scenario: historical
+    evaporation: true
+    shortwave_method: 1
+    longwave_method: 1
+    radiation_source: pseudo_tcc
+    data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
+river_discharge:
+  source: emorid
+  emorid:
+    folder: ${RIVER_FOLDER}
+    file: EMORID_1990_2024.nc
+    threshold: 0
+    script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
+    data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
+  CMIP6:
+    folder: ${RIVER_FOLDER_CMIP6}
+    folder_template: CMIP6/{model}/{scenario}/rivers
+    model: MPI-ESM1-2-HR
+    scenario: ssp126
+    file: river_flows_future_{scenario}.nc
+    threshold: 0
+    script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
+    data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
+
+# FABM off by default -- simulation.fabm only gets set (via
+# oceanicu_driver.py's propagation) once ERSEM.file below is uncommented
+# and pointed at a real fabm.yaml. Guarded to runtype: BAROCLINIC in
+# driver/scripts/fabm.py's configure_fabm regardless. See
+# boundaries.fabm above for the (also independent, also off-by-default)
+# WOA-sourced FABM tracer ICs/boundaries.
+fabm:
+  source: ERSEM
+  ERSEM:
+    # file: ${FABM_ERSEM_FOLDER}/fabm.yaml  # uncomment and set FABM_ERSEM_FOLDER to enable FABM
+    folder: ${FABM_ERSEM_FOLDER}
+    data_script: ${SCRIPT_FOLDER}/fabm.py:configure_fabm

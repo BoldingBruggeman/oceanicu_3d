@@ -1,0 +1,200 @@
+# Rebuild the NSe domain bathymetry FRESH from GEBCO or EMODnet, instead of
+# loading the pre-existing coarse bathymetry_nse.nc / topo_nse_orig.nc
+# (nse_bathymetry.yaml) -- that was a reasonable starting point at the time,
+# but is worth comparing against a direct regrid from a real, current source.
+#
+# Grid is EXACTLY the same as nse_bathymetry.yaml's own real target grid
+# (verified against that config's own printed "Target grid" report: nx=257,
+# ny=251, lon -7.5..12.98, lat 48.5..61.0, dlon=0.07999999821186066,
+# dlat=0.05) -- so this is directly comparable cell-for-cell to the existing
+# bathymetry_nse.nc, and either could become a raw_patches: source for the
+# other if useful.
+#
+# Try both sources:
+#   bathymetry-regrid --config NSe/config/nse_bathymetry_from_source.yaml            # gebco (default below)
+#   bathymetry-regrid --config NSe/config/nse_bathymetry_from_source.yaml --source emodnet --output .../bathymetry_nse_from_emodnet.nc
+# `source2: emodnet` below also runs a live GEBCO-vs-EMODnet comparison
+# (mask agreement counts + depth-difference plot) in the SAME run as the
+# primary `source: gebco` build -- see the "Source mask comparison" section
+# of the generated report. This is real work: EMODnet's WCS service has a
+# 12 deg^2/tile limit, and this domain is ~256 deg^2 (20.5 deg lon-span x
+# 12.5 deg lat-span) -- i.e. ~22 tiles fetched over the network for the
+# EMODnet side alone (checked directly: a single ~12 deg^2 tile for the much
+# smaller St Malo patch took ~10-15s, so budget several minutes for this).
+# Comment out source2 below for a fast GEBCO-only run while iterating.
+
+name: nse_from_source
+
+grid:
+  type: spherical
+  lon_min: -7.5
+  lon_max: 12.98
+  lat_min: 48.5
+  lat_max: 61.0
+  dlon: 0.07999999821186066   # == bathymetry_nse.nc's own lon spacing, exactly
+  dlat: 0.05                   # == bathymetry_nse.nc's own lat spacing, exactly
+  equidistant: false           # both dlon/dlat given explicitly -- do not recompute either
+
+source: gebco     # already cached locally in full (/data/cache/gebco/gebco_2026.nc) -- fast
+# source2: emodnet  # dropped for now (2026-08-11): full-domain EMODnet comparison OOM-killed
+                    # even with tiling not yet confirmed to fix it -- tile_cells/tile_buf_deg
+                    # below are already in place if you want to retry; uncomment this line to
+                    # bring the comparison back once that's been proven out on a real run
+
+interpolation:
+  cache_dir: /data/cache/regridding
+  min_depth: 2.0        # matches nse_bathymetry.yaml's own min_depth, for a comparable result
+  # Real OOM hit on the first attempt (2026-08-11): a single-pass conservative
+  # regrid of EMODnet's own native-resolution source over the WHOLE NSe domain
+  # is ~75.7M source cells (vs GEBCO's ~18.9M at the same padded extent -- EMODnet's
+  # ~230m native resolution is ~4x finer) -- ESMF's weight computation for that
+  # got OOM-killed (dmesg confirmed: ~50GB RSS on a 62GB box). tile_cells bounds
+  # memory by regridding the destination grid in chunks, each pulling only the
+  # source data it actually needs -- applies to BOTH source and source2.
+  tile_cells: 60
+  tile_buf_deg: 0.5
+  # Real, previously-hit bug (found building the St Malo patch): these default to
+  # 0.0/unset if omitted, which means only a 100%-dry cell gets closed to land --
+  # nse_bathymetry.yaml's own coarse_bathymetry: mode never needed these (the
+  # loaded file was already correctly classified), but a FRESH regrid does.
+  min_wet_fraction: 0.5
+  coastline_mask: "10m"
+
+analysis:
+  nkeep_basins: 1   # matches nse_bathymetry.yaml
+
+# No fixes: yet, deliberately -- nse_bathymetry.yaml's own 180+ fixes are literal
+# set_depth overrides tuned against the OLD topo_nse_orig.nc source's specific
+# numbers; likely wrong (or simply unnecessary) against a different source's own
+# values. Start plain, let the real report/thalweg-suggested fixes.yaml drive
+# what (if anything) actually needs correcting for THIS source, matching how
+# nse_bathymetry.yaml's own fixes accumulated over time and how st_malo_bathy_
+# create.yaml started too.
+fixes: []
+
+# mask_regions: and thalweg: below are copied VERBATIM from nse_bathymetry.yaml --
+# these correct for coarse-GRID-RESOLUTION geometry (islands/straits too small
+# to resolve at this cell size, boundary-row edge cases), not source-specific
+# depth errors, so they're expected to still be needed regardless of which
+# source feeds the regrid. Revisit if the real report shows otherwise.
+mask_regions:
+ - type: rectangle
+   name: Northern Strip
+   lon: [ -7.5,  6.0]
+   lat: [ 60.85, 61.0]
+
+ - type: rectangle
+   name: Norwegian coast
+   lon: [  4.82,  4.90]
+   lat: [ 60.70, 60.80]
+
+ - type: rectangle
+   name: North Western Boundary
+   lon: [ -7.50, -6.30]
+   lat: [ 58.50, 61.0]
+
+ - type: rectangle
+   name: North Eastern Boundary
+   lon: [  4.98,  5.3]
+   lat: [ 60.75, 60.8]
+
+ - type: rectangle
+   name: West of the Shetlands
+   lon: [-7.50,  -1.34]
+   lat: [59.85,  61.00]
+
+ - type: rectangle
+   name: West of Orkney
+   lon: [-6.22, -4.70]
+   lat: [59.2, 59.85]
+
+ - type: rectangle
+   name: West of Hebrides
+   lon: [-7.5, -6.3]
+   lat: [58.4, 58.5]
+
+ - type: point
+   name: Lerwick
+   lonlat: [-1.1, 60.45]
+
+ - type: point
+   name: Between Hebrides
+   lonlat: [-7.1, 57.75]
+
+ - type: polygon
+   name: South Hebrides
+   vertices:
+     - [-7.42, 57.05]
+     - [-7.34, 57.1]
+
+ - type: point
+   name: River Dee
+   lonlat: [-3.18, 53.35]
+
+ - type: rectangle
+   name: Humber
+   lon: [-0.14,  0.02]
+   lat: [53.65, 53.65]
+
+ - type: rectangle
+   name: Limfjorden
+   lon: [ 8.18,  8.26]
+   lat: [56.65, 56.75]
+
+ - type: point
+   name: Limfjorden
+   lonlat: [8.26, 56.8]
+
+thalweg:
+  auto_corridors: true
+  waypoints:
+    - name: "Little Belt"
+      begin: [9.75, 55.58]
+      end:   [9.9, 55.1]
+      via:
+        - [9.768, 55.233]
+      bbox: [9.3, 10.2, 55.0, 55.7]
+      bbox_depth_percentile: 75
+    - name: "Great Belt"
+      begin: [11.0, 55.8]
+      end:   [11.0, 54.7]
+      bbox:  [10.5, 12.0, 54.5, 56.0]
+      bbox_depth_percentile: 55
+    - name: "Öresund"
+      begin: [12.6, 56.1]
+      end:   [12.8, 55.65]
+      via:
+        - [12.65, 56.04]
+      bbox: [12.4, 13.0, 55.5, 56.2]
+      bbox_depth_percentile: 75
+    - name: "Irish Sea"
+      begin: [-4.9, 51.4]
+      end:   [-5.7, 55.2]
+      bbox:  [-7.0, -3.0, 51.0, 55.5]
+
+smooth:
+  local_filters:
+    - name: "Northern boundary deep water"
+      bbox: [-7.5, 6.0, 59.5, 61.0]
+      filter: gaussian
+      sigma: 3.0
+      taper_width: 20
+      taper_edge: north
+      taper_shape: cosine
+  rx0: 0.20
+  local_rx0:
+    - name: "Northern boundary tighter"
+      bbox: [2.5, 6.0, 59.5, 61.0]
+      rx0: 0.10
+
+output:
+  report_dir: ./report/nse_from_source/
+  file: /home/kb/source/repos/OceanICU/oceanicu_3d/NSe/Bathymetry/bathymetry_nse_from_gebco.nc
+  coastline_scale: "10m"
+  log_depth_scale: true
+  boundary_scan_depth:
+    west: 17
+    north: 10
+    east: 5
+    south: 5
+  boundary_min_segment_cells: 3

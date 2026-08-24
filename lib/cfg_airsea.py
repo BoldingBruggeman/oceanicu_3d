@@ -20,6 +20,8 @@ from pathlib import Path
 
 import pygetm
 
+from .cfg_utils import resolve_folder
+
 
 def create(cfg) -> pygetm.airsea:
     # If a meteo source is not set use the simple Fluxes method
@@ -61,10 +63,7 @@ def data(sim, cfg):
 
     if isinstance(sim.airsea, pygetm.airsea.FluxesFromMeteo):
         _meteo_cfg = getattr(cfg.meteo, cfg.meteo.source)
-        if cfg.meteo.source == "CMIP6":
-            _folder = Path(_meteo_cfg.folder) / _meteo_cfg.model / _meteo_cfg.scenario
-        else:
-            _folder = Path(_meteo_cfg.folder)
+        _folder = resolve_folder(_meteo_cfg)
 
         if cfg.meteo.source == "ERA5":
             sim.airsea.u10.set(pygetm.input.from_nc(str(_folder / "era5_u10_????.nc"), "u10"))
@@ -89,20 +88,20 @@ def data(sim, cfg):
                 )
 
         if cfg.meteo.source == "CMIP6":
-            sim.airsea.u10.set(pygetm.input.from_nc(str(_folder / "uas.nc"), "uas"))
-            sim.airsea.v10.set(pygetm.input.from_nc(str(_folder / "vas.nc"), "vas"))
-            sim.airsea.t2m.set(pygetm.input.from_nc(str(_folder / "tas.nc"), "tas") - 273.15)
-            sim.airsea.qa.set(pygetm.input.from_nc(str(_folder / "huss.nc"), "huss"))
-            sim.airsea.sp.set(pygetm.input.from_nc(str(_folder / "ps.nc"), "ps"))
-            sim.airsea.tp.set(pygetm.input.from_nc(str(_folder / "pr.nc"), "pr") / 1000.0)
+            sim.airsea.u10.set(pygetm.input.from_nc(str(_folder / "uas_*_????.nc"), "uas"))
+            sim.airsea.v10.set(pygetm.input.from_nc(str(_folder / "vas_*_????.nc"), "vas"))
+            sim.airsea.t2m.set(pygetm.input.from_nc(str(_folder / "tas_*_????.nc"), "tas") - 273.15)
+            sim.airsea.qa.set(pygetm.input.from_nc(str(_folder / "huss_*_????.nc"), "huss"))
+            sim.airsea.sp.set(pygetm.input.from_nc(str(_folder / "ps_*_????.nc"), "ps"))
+            sim.airsea.tp.set(pygetm.input.from_nc(str(_folder / "pr_*_????.nc"), "pr") / 1000.0)
 
             sim.airsea.swr.set(
-                pygetm.input.from_nc(str(_folder / "rsds.nc"), "rsds")
-                - pygetm.input.from_nc(str(_folder / "rsus.nc"), "rsus")
+                pygetm.input.from_nc(str(_folder / "rsds_*_????.nc"), "rsds")
+                - pygetm.input.from_nc(str(_folder / "rsus_*_????.nc"), "rsus")
             )
             sim.airsea.ql.set(
-                pygetm.input.from_nc(str(_folder / "rlds.nc"), "rlds")
-                - pygetm.input.from_nc(str(_folder / "rlus.nc"), "rlus")
+                pygetm.input.from_nc(str(_folder / "rlds_*_????.nc"), "rlds")
+                - pygetm.input.from_nc(str(_folder / "rlus_*_????.nc"), "rlus")
             )
             # required even if not used
             sim.airsea.tcc.set(0.5)

@@ -3,8 +3,36 @@
 *.prof
 *.prof.stats
 __pycache__
+reorganise_meteo.sh
 
 # Generated validation outputs — sync via rsync/manage-analyses, not git
 # analyses/ itself is NOT ignored — it contains hand-authored markdown.
 # analyses/.gitignore handles selective ignoring of generated subdirs.
 /validation-data/
+
+# driver/oceanicu_driver.py --dump-python's default output filename (and
+# NSe/config/'s own, for the real nse_from_oceanicu.yaml output) -- a
+# one-off standalone debugging script (see pygetm_config.codegen's own
+# docstring), regenerated on demand, not meant to be committed. Includes its
+# companion config YAML (TODO item 10 -- config_yaml_path) and, since TODO
+# item 35 (pygetm-config), its companion "_utils.py" module.
+driver/generated*.py
+driver/generated*_config.yaml
+NSe/config/generated*.py
+NSe/config/generated*_config.yaml
+
+# driver/dist/schema.json -- a build artifact (pygetm-config dump output,
+# with PYGETM_CONFIG_PROVIDERS pointed at oceanicu_providers.py so it
+# includes hydrography/boundaries.*/river_discharge/meteo too, not just core
+# pygetm-config sections), goes stale the moment pygetm/pygetm-config/
+# oceanicu_providers.py changes -- regenerate, don't commit. Matches
+# pygetm-config's own dist/ convention (also gitignored there). See
+# driver/README.md for the regeneration command.
+driver/dist/
+
+# scripts/relay.env -- per-machine OCEANICU_RUN_DB/OCEANICU_RELAY_DIR
+# values (see scripts/relay.env.example, which IS committed, and
+# scripts/RUN_TRACKING.md's "Working across machines" section). Not
+# secret by itself, just genuinely per-machine -- nothing to gain from
+# committing one machine's copy as if it were canonical.
+scripts/relay.env

@@ -1,0 +1,62 @@
+# See README.md ("data_roots.yaml.example") for what this is and how it's used.
+# Every *_CMIP6 variable below (boundaries.barotropic/baroclinic, meteo,
+# river_discharge) is a real parent folder -- the matching domain config's own
+# CMIP6.folder_template appends {model}/{scenario} onto it, unlike e.g. ERA5_FOLDER.
+
+# domain
+BATHYMETRY_FOLDER: /home/kb/source/repos/OceanICU/oceanicu_3d/NSe/Bathymetry
+
+# hydrography
+HYDROGRAPHY_FOLDER_WOA: /data/WOA
+# HYDROGRAPHY_FOLDER_CMEMS not verified against bb-server1's real layout this
+# session (unlike the WOA/TPXO/boundary CMEMS paths below, which were) --
+# left as this local machine's own value; may need the same kind of fix.
+HYDROGRAPHY_FOLDER_CMEMS: /home/kb/source/repos/boundaries.old
+
+# boundaries.barotropic
+TPXO_FOLDER: /data/TPXO9
+# Real, live CMEMS extraction on bb-server1 (contains both daily_*.nc and
+# hourly_*.nc in the same folder -- confirmed this session, see
+# lib/boundaries/delta_change.py's load_ref_dataset). NOT this local
+# machine's stale ./boundaries.old snapshot the .example previously pointed
+# at, which doesn't exist on bb-server1 at all.
+BOUNDARY_FOLDER_BAROTROPIC_CMEMS: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
+BOUNDARY_FOLDER_BAROTROPIC_CMIP6: /data/CMIP6
+
+# boundaries.baroclinic
+BOUNDARY_FOLDER_BAROCLINIC_WOA: /data/WOA
+BOUNDARY_FOLDER_BAROCLINIC_CMEMS: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
+# ocean-prep's run-delta-boundaries output (NOT /data/CMIP6, which is the raw
+# CMIP6 extraction location -- delta-change-corrected boundary files live
+# under NSe/CMIP6/{model}/{scenario}/bdy/ instead).
+BOUNDARY_FOLDER_BAROCLINIC_CMIP6: /data/OceanICU/oceanicu_3d/data/NSe/CMIP6
+
+# meteo
+ERA5_FOLDER: /data/ERA5
+CMIP6_FOLDER: /data/BiasCorrected
+
+# river_discharge
+RIVER_FOLDER: /data/EMORID
+RIVER_FOLDER_CMIP6: /data/BiasCorrected
+
+# boundaries.fabm / fabm -- FABM is off by default in every nse_*.yaml
+# (fabm.ERSEM.file commented out), and neither of these has a confirmed
+# real path yet: no NSe-domain mesh_mask.nc/EMEP-N-deposition/gelbstoff
+# product or WOA-equivalent BGC tracer files exist to point at. Placeholder
+# values only, unlike every other entry in this file (which are all
+# verified against bb-server1's real layout) -- update once real files
+# exist.
+FABM_ERSEM_FOLDER: /data/FABM/ERSEM
+BOUNDARY_FOLDER_FABM_WOA: /data/FABM/WOA
+
+# data_assignments (radiation.kc2, when ObsKd/space-varying is active)
+KD490_FOLDER: /data/Kd490
+
+# output
+OUTPUT_FOLDER: .
+
+# driver plumbing -- oceanicu_driver.py already defaults these via
+# os.environ.setdefault when run from source; only needed for a
+# --dump-python'd script run from elsewhere.
+GOTM_FOLDER: /home/kb/source/repos/OceanICU/oceanicu_3d
+SCRIPT_FOLDER: /home/kb/source/repos/OceanICU/oceanicu_3d/driver/scripts

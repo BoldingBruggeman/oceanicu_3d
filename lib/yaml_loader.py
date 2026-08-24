@@ -94,29 +94,37 @@ def print_cfg(cfg):
     print(f"     TPXO:")
     print(f"       tpxo_folder:    {cfg.boundaries.barotropic.TPXO.tpxo_folder}")
     print(f"     CMEMS:")
-    print(f"       folder:    {cfg.boundaries.barotropic.CMEMS.folder}")
-    print(f"       template:  {cfg.boundaries.barotropic.CMEMS.filename_template}")
-    print(f"       start:     {cfg.boundaries.barotropic.CMEMS.start_date}")
-    print(f"       end:       {cfg.boundaries.barotropic.CMEMS.end_date}")
+    print(f"       folder:          {cfg.boundaries.barotropic.CMEMS.folder}")
+    print(f"       folder_template: {cfg.boundaries.barotropic.CMEMS.folder_template}")
+    print(f"       template:        {cfg.boundaries.barotropic.CMEMS.filename_template}")
+    print(f"       start:           {cfg.boundaries.barotropic.CMEMS.start_date}")
+    print(f"       end:             {cfg.boundaries.barotropic.CMEMS.end_date}")
     print(f"     CMIP6:")
-    print(f"       folder:    {cfg.boundaries.barotropic.CMIP6.folder}")
-    print(f"       model:     {cfg.boundaries.barotropic.CMIP6.model}")
-    print(f"       scenario:  {cfg.boundaries.barotropic.CMIP6.scenario}")
-    print(f"       filename:  {cfg.boundaries.barotropic.CMIP6.filename}")
+    print(f"       folder:          {cfg.boundaries.barotropic.CMIP6.folder}")
+    print(f"       folder_template: {cfg.boundaries.barotropic.CMIP6.folder_template}")
+    print(f"       template:        {cfg.boundaries.barotropic.CMIP6.filename_template}")
+    print(f"       model:           {cfg.boundaries.barotropic.CMIP6.model}")
+    print(f"       scenario:        {cfg.boundaries.barotropic.CMIP6.scenario}")
+    print(f"       start:           {cfg.boundaries.barotropic.CMIP6.start_date}")
+    print(f"       end:             {cfg.boundaries.barotropic.CMIP6.end_date}")
     print(f"  Baroclinic:")
     print(f"     Source:      {cfg.boundaries.baroclinic.source}")
     print(f"     WOA:")
     print(f"       folder:    {cfg.boundaries.baroclinic.WOA.folder}")
     print(f"     CMEMS:")
-    print(f"       folder:    {cfg.boundaries.baroclinic.CMEMS.folder}")
-    print(f"       template:  {cfg.boundaries.baroclinic.CMEMS.filename_template}")
-    print(f"       start:     {cfg.boundaries.baroclinic.CMEMS.start_date}")
-    print(f"       end:       {cfg.boundaries.baroclinic.CMEMS.end_date}")
+    print(f"       folder:          {cfg.boundaries.baroclinic.CMEMS.folder}")
+    print(f"       folder_template: {cfg.boundaries.baroclinic.CMEMS.folder_template}")
+    print(f"       template:        {cfg.boundaries.baroclinic.CMEMS.filename_template}")
+    print(f"       start:           {cfg.boundaries.baroclinic.CMEMS.start_date}")
+    print(f"       end:             {cfg.boundaries.baroclinic.CMEMS.end_date}")
     print(f"     CMIP6:")
-    print(f"       folder:    {cfg.boundaries.baroclinic.CMIP6.folder}")
-    print(f"       model:     {cfg.boundaries.baroclinic.CMIP6.model}")
-    print(f"       scenario:  {cfg.boundaries.baroclinic.CMIP6.scenario}")
-    print(f"       filename:  {cfg.boundaries.baroclinic.CMIP6.filename}")
+    print(f"       folder:          {cfg.boundaries.baroclinic.CMIP6.folder}")
+    print(f"       folder_template: {cfg.boundaries.baroclinic.CMIP6.folder_template}")
+    print(f"       template:        {cfg.boundaries.baroclinic.CMIP6.filename_template}")
+    print(f"       model:           {cfg.boundaries.baroclinic.CMIP6.model}")
+    print(f"       scenario:        {cfg.boundaries.baroclinic.CMIP6.scenario}")
+    print(f"       start:           {cfg.boundaries.baroclinic.CMIP6.start_date}")
+    print(f"       end:             {cfg.boundaries.baroclinic.CMIP6.end_date}")
 
 
 
@@ -184,17 +192,18 @@ def print_cfg(cfg):
 
     _source = cfg.boundaries.barotropic.source
     if _source == "TPXO":
-      print(cfg.boundaries.barotropic.TPXO.tpxo_folder)
+        print(cfg.boundaries.barotropic.TPXO.tpxo_folder)
     else:
-      _barotropic_cfg = getattr(cfg.boundaries.barotropic, _source)
-      print(_barotropic_cfg.folder)
-      print(_barotropic_cfg.filename)
+        _barotropic_cfg = getattr(cfg.boundaries.barotropic, _source)
+        print(_barotropic_cfg.folder)
+        if hasattr(_barotropic_cfg, 'filename_template'):
+            print(_barotropic_cfg.filename_template)
 
     _source = cfg.boundaries.baroclinic.source
     _baroclinic = getattr(cfg.boundaries.baroclinic, _source)
     print(_baroclinic.folder)
-    if hasattr(_baroclinic, 'filename'):
-        print(_baroclinic.filename)
+    if hasattr(_baroclinic, 'filename_template'):
+        print(_baroclinic.filename_template)
 
 
 # ----------------------------------------------------------------------
