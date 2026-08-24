@@ -272,6 +272,26 @@ def cmd_rerun(args: argparse.Namespace) -> int:
     return 0
 
 
+def _add_common(sp: argparse.ArgumentParser) -> None:
+    """Give a subparser its own --db/--dry-run so they work AFTER the
+    subcommand too (e.g. `oceanicu_runs.py list --db X`), not just before.
+
+    default=SUPPRESS is required, not just default=None/False: argparse
+    parses each subparser into a fresh namespace and then unconditionally
+    copies every key from it onto the parent namespace, so a plain default
+    here would silently clobber a real --db/--dry-run value already given
+    BEFORE the subcommand whenever it isn't repeated after. SUPPRESS makes
+    argparse omit the key entirely when the flag isn't present in the
+    subcommand's own args, so the parent's value survives untouched.
+    """
+    sp.add_argument("--db", default=argparse.SUPPRESS, help="override the SQLite registry path")
+    sp.add_argument("--dry-run", action="store_true", default=argparse.SUPPRESS,
+                    help="copy the real registry to a scratch file in /tmp, run the command "
+                         "against THAT (a real execution, not a simulated one), report what "
+                         "changed, and leave the resulting file for inspection. The real "
+                         "registry is never opened for writing.")
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--db", default=None, help="override the SQLite registry path")
@@ -282,7 +302,7 @@ def main() -> int:
                          "registry is never opened for writing.")
     sub = p.add_subparsers(dest="cmd", required=True)
 
-    a = sub.add_parser("add"); a.set_defaults(func=cmd_add)
+    a = sub.add_parser("add"); _add_common(a); a.set_defaults(func=cmd_add)
     a.add_argument("--run-id", required=True)
     a.add_argument("--run-root", required=True)
     a.add_argument("--script", required=True)
@@ -297,41 +317,41 @@ def main() -> int:
     a.add_argument("--priority", type=int, default=0)
     a.add_argument("--notes", default=None)
 
-    r = sub.add_parser("remove"); r.set_defaults(func=cmd_remove)
+    r = sub.add_parser("remove"); _add_common(r); r.set_defaults(func=cmd_remove)
     r.add_argument("--run-id", required=True)
     r.add_argument("--force", action="store_true")
 
-    l = sub.add_parser("list"); l.set_defaults(func=cmd_list)
+    l = sub.add_parser("list"); _add_common(l); l.set_defaults(func=cmd_list)
     l.add_argument("--status", default=None, choices=list(rt.RUN_STATUSES))
     l.add_argument("--like", default=None, help="substring filter on run_id")
 
-    s = sub.add_parser("show"); s.set_defaults(func=cmd_show)
+    s = sub.add_parser("show"); _add_common(s); s.set_defaults(func=cmd_show)
     s.add_argument("--run-id", required=True)
 
-    c = sub.add_parser("chunk-size"); c.set_defaults(func=cmd_chunk_size)
+    c = sub.add_parser("chunk-size"); _add_common(c); c.set_defaults(func=cmd_chunk_size)
     c.add_argument("--run-id", required=True)
     c.add_argument("--chunk-kind", default=None, choices=["annual", "monthly", "daily"])
     c.add_argument("--chunk-multiplier", type=int, default=None)
 
-    sp = sub.add_parser("set-priority"); sp.set_defaults(func=cmd_set_priority)
+    sp = sub.add_parser("set-priority"); _add_common(sp); sp.set_defaults(func=cmd_set_priority)
     sp.add_argument("--run-id", required=True)
     sp.add_argument("--priority", type=int, required=True)
 
-    sd = sub.add_parser("set-stop-date"); sd.set_defaults(func=cmd_set_stop_date)
+    sd = sub.add_parser("set-stop-date"); _add_common(sd); sd.set_defaults(func=cmd_set_stop_date)
     sd.add_argument("--run-id", required=True)
     sd.add_argument("--stop-date", required=True, metavar="YYYY-MM-DD")
 
-    pa = sub.add_parser("pause"); pa.set_defaults(func=cmd_pause)
+    pa = sub.add_parser("pause"); _add_common(pa); pa.set_defaults(func=cmd_pause)
     g1 = pa.add_mutually_exclusive_group(required=True)
     g1.add_argument("--run-id")
     g1.add_argument("--all", action="store_true")
 
-    re_ = sub.add_parser("resume"); re_.set_defaults(func=cmd_resume)
+    re_ = sub.add_parser("resume"); _add_common(re_); re_.set_defaults(func=cmd_resume)
     g2 = re_.add_mutually_exclusive_group(required=True)
     g2.add_argument("--run-id")
     g2.add_argument("--all", action="store_true")
 
-    rr = sub.add_parser("rerun"); rr.set_defaults(func=cmd_rerun)
+    rr = sub.add_parser("rerun"); _add_common(rr); rr.set_defaults(func=cmd_rerun)
     rr.add_argument("--run-id", required=True)
     g3 = rr.add_mutually_exclusive_group()
     g3.add_argument("--from-chunk", type=int, default=None, metavar="N")
