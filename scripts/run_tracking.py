@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS runs (
     chunk_multiplier INTEGER NOT NULL DEFAULT 1,
     np               INTEGER NOT NULL DEFAULT 1,
     launcher         TEXT NOT NULL DEFAULT 'srun',
+    fabm             TEXT,
     status           TEXT NOT NULL DEFAULT 'not_started',
     control          TEXT NOT NULL DEFAULT 'run',
     priority         INTEGER NOT NULL DEFAULT 0,
@@ -323,17 +324,18 @@ def add_run(
     initial_date: str, stop_date: str, data_roots_file: Optional[str] = None,
     chunk_kind: str = "annual", chunk_multiplier: int = 1, np: int = 1,
     launcher: str = "srun", priority: int = 0, notes: Optional[str] = None,
+    fabm: Optional[str] = None,
 ) -> None:
     if launcher not in ("srun", "mpiexec"):
         raise ValueError(f"launcher must be 'srun' or 'mpiexec', got {launcher!r}")
     now = _now()
     conn.execute(
         """INSERT INTO runs (run_id, run_root, script, config, data_roots_file,
-               initial_date, stop_date, chunk_kind, chunk_multiplier, np, launcher,
+               initial_date, stop_date, chunk_kind, chunk_multiplier, np, launcher, fabm,
                status, control, priority, notes, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'not_started', 'run', ?, ?, ?, ?)""",
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'not_started', 'run', ?, ?, ?, ?)""",
         (run_id, run_root, script, config, data_roots_file, initial_date, stop_date,
-         chunk_kind, chunk_multiplier, np, launcher, priority, notes, now, now),
+         chunk_kind, chunk_multiplier, np, launcher, fabm, priority, notes, now, now),
     )
     conn.commit()
 
