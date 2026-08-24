@@ -7,19 +7,25 @@ order, from where*.
 
 ## 0. The boundary point file — read this first
 
-**Canonical copy:** `NSe/nse_bdy_lonlat.txt` (currently 311 points).
+**Canonical copy:** `NSe/Bathymetry/nse_bdy_lonlat.txt` (currently 311
+points). Moved here from `NSe/nse_bdy_lonlat.txt` on 2026-08-17 — this
+file's entire validity is defined by wet/land status against
+`NSe/Bathymetry/bathymetry_nse.nc`, needs re-verification after every
+bathymetry regeneration (see below), and lives alongside the other
+grid/mask artifacts there, not the YAML domain configs in `NSe/config/`.
 
 This is the file the running model actually uses — confirmed empirically by
 comparing it against `lon_bdy`/`lat_bdy` in a `getm-dump.nc` crash dump
 written by a live run: **exact match, 0 points different**. Treat any other
 copy as untrustworthy until proven otherwise (see "Known copies" below).
 
-**Policy: this file belongs to the setup.** It must live under `NSe/`, not
-in `ocean-prep/bdy_coords/` or `boundaries/bdy_coords/` or the
-`oceanicu_3d/` repo root. Those locations should reference this copy
-(symlink or an updated `file_path:` in their configs), not hold independent
-copies. As of 2026-08-03 they do NOT — see "Known copies" below — this is
-unresolved technical debt, not the intended design.
+**Policy: this file belongs to the setup.** It must live under
+`NSe/Bathymetry/`, not in `ocean-prep/bdy_coords/` or
+`boundaries.old/bdy_coords/` or the `oceanicu_3d/` repo root, and not as a
+symlink from those locations either — every consuming config references
+this one real path directly (fixed 2026-08-17; see §3). Verify with
+`ls -la` / `grep -rln nse_bdy_lonlat` before trusting any copy if this ever
+looks inconsistent again.
 
 ### Verifying it against the bathymetry
 
@@ -34,7 +40,7 @@ with netCDF4.Dataset("NSe/Bathymetry/bathymetry_nse.nc") as nc:
     mask = np.array(nc["ocean_mask"][:]).astype(bool)
 
 pts = []
-with open("NSe/nse_bdy_lonlat.txt") as f:
+with open("NSe/Bathymetry/nse_bdy_lonlat.txt") as f:
     for line in f.readlines()[2:]:
         line = line.strip()
         if not line: continue
@@ -61,13 +67,27 @@ pre-existing "West of Orkney" region, which had been silently *not* closing
 due to the same rounding issue. 123 of 311 points ended up on land as a
 side effect of a bathymetry fix that had nothing to do with boundaries.
 
+**Update, 2026-08-17:** re-checked against the current `bathymetry_nse.nc`
+— **0 of 311 points on land.** The bathymetry has evidently been
+regenerated/corrected again since the above regression, independently of
+any boundary-point edit. A partial fix for the 123-point regression was
+attempted the same day it happened (121 of the 123 points moved to nearby
+wet cells, 2 dropped as a redundant corner vertex once both adjacent
+segments shifted) but landed on the wrong file (`oceanicu_3d/nse_bdy_lonlat.txt`
+at the repo root, not the canonical copy) and was never actually applied —
+now archived at `NSe/Bathymetry/nse_bdy_lonlat.txt.mislanded_edit_20260803`
+for reference in case this regression (or a similar one) recurs. **Always
+re-run the check above before trusting either "0 on land" or an old
+point-count from this doc** — bathymetry regenerations happen independently
+of this file and can silently invalidate either state.
+
 ### If a point needs to move or be dropped
 
 1. **Back up first** — always: `.bak` copies with a timestamp suffix if a
-   second round of fixes is likely (see `NSe/nse_bdy_lonlat.txt.bak*` for
-   the pattern used so far).
-2. Edit `NSe/nse_bdy_lonlat.txt` directly (plain `lon,lat` per line, header
-   `T-grid` / `lon,lat`).
+   second round of fixes is likely (see `NSe/Bathymetry/nse_bdy_lonlat.txt.bak*`
+   for the pattern used so far).
+2. Edit `NSe/Bathymetry/nse_bdy_lonlat.txt` directly (plain `lon,lat` per
+   line, header `T-grid` / `lon,lat`).
 3. **If boundary_data NC files already exist** (see §2 below) for the *old*
    point list, they must be re-cut to match — the point count/order in the
    NC files' `nbdyp` dimension must stay in lockstep with the text file, or
@@ -90,7 +110,7 @@ from any `cwd`):
 
 | Stage | Produces | Tool | Config |
 |---|---|---|---|
-| 1. Historical reference | `boundary_data/nse/{hourly,daily}/*.nc` — real CMEMS reanalysis + near-real-time forecast, 2015–present | `run-cmems-boundaries` | `boundaries/config/nse_bdy_create.yaml` |
+| 1. Historical reference | `boundary_data/nse/{hourly,daily}/*.nc` — real CMEMS reanalysis + near-real-time forecast, 2015–present | `run-cmems-boundaries` | `NSe/config/nse_bdy_create.yaml` |
 | 2a. Future scenario (T/S) | `CMIP6/{model}/{experiment}/bdy_3d_{var}_*.nc` — delta-change projection | `run-delta-boundaries` | `NSe/config/nse_delta_bdy.yaml` |
 | 2b. Future scenario (SSH/currents) | Tidal + CMIP6 mean SSH/transport, hourly | `run-tidal-boundaries` | `NSe/config/nse_tidal_bdy.yaml` |
 
@@ -99,12 +119,12 @@ the historical hourly/daily files as its cycling reference (it has no
 independent boundary-point list; it inherits points from those NC files'
 own `boundary_lon`/`boundary_lat`/`segment_id` variables). Stage 2b
 (tidal) is independent of stage 1 — it reads TPXO9 + CMIP6 directly, using
-`NSe/nse_bdy_lonlat.txt` for its own point list.
+`NSe/Bathymetry/nse_bdy_lonlat.txt` for its own point list.
 
 ### Stage 1 — historical reference (CMEMS)
 
 ```bash
-cd /home/kb/source/repos/boundaries    # nse_bdy_create.yaml lives here
+cd /home/kb/source/repos/OceanICU/oceanicu_3d/NSe    # nse_bdy_create.yaml lives here (NSe-specific, not in ocean-prep)
 run-cmems-boundaries --config config/nse_bdy_create.yaml --dryrun
 run-cmems-boundaries --config config/nse_bdy_create.yaml
 # selectively:
@@ -112,13 +132,11 @@ run-cmems-boundaries --config config/nse_bdy_create.yaml --dataset temperature s
 run-cmems-boundaries --config config/nse_bdy_create.yaml --category physics
 ```
 
-⚠️ **As of 2026-08-03, `nse_bdy_create.yaml`'s `boundary_points.file_path`
-resolves (via `boundaries/bdy_coords/nse_bdy_lonlat.txt`, a symlink) to
-`oceanicu_3d/nse_bdy_lonlat.txt` at the repo root — NOT `NSe/nse_bdy_lonlat.txt`.**
-Do not run this for real until that's repointed (see "Known copies"), or
-you will regenerate the historical reference files against a boundary point
-list that doesn't match the live model's — reintroducing exactly the kind
-of mismatch this doc exists to prevent.
+`nse_bdy_create.yaml`'s `boundary_points.file_path` is a real absolute path
+directly at `NSe/Bathymetry/nse_bdy_lonlat.txt` — no symlink indirection
+(fixed 2026-08-17; every domain setup follows this same pattern, its own
+canonical copy in its own repo, referenced directly — a shared symlink
+target doesn't generalize across setups).
 
 ### Stage 2a — future scenario, temperature/salinity (delta-change)
 
@@ -135,9 +153,8 @@ Method: `corrected(t) = AMM7/AMM15_ref(t_analog) + [CMIP6_future_clim(month) −
 where `t_analog` cycles through the historical reference period (same
 calendar day/hour, year mapped modulo the reference length). Safe to run as
 long as stage 1's hourly/daily files are current and correctly aligned with
-`NSe/nse_bdy_lonlat.txt` (they inherit its point layout automatically, since
-they were hand-trimmed against it this session — see "Known copies" for the
-current true state).
+`NSe/Bathymetry/nse_bdy_lonlat.txt` (they inherit its point layout
+automatically from their own `boundary_lon`/`boundary_lat`/`segment_id`).
 
 ### Stage 2b — future scenario, SSH/currents (tidal + CMIP6)
 
@@ -149,9 +166,9 @@ run-tidal-boundaries --config config/nse_tidal_bdy.yaml --start 2060-01-01 --end
 run-tidal-boundaries --config config/nse_tidal_bdy.yaml --model UKESM1-0-LL --scenario ssp126
 ```
 
-Must be run with `cwd = NSe/` — its config uses `file_path: ./nse_bdy_lonlat.txt`,
-a relative path resolved against the working directory, not the config file's
-own location.
+`NSe/config/nse_tidal_bdy.yaml`'s `file_path` is `./Bathymetry/nse_bdy_lonlat.txt`,
+a relative path resolved against the working directory — must still be run
+with `cwd = NSe/`.
 
 ## 2. Post-generation sanity checks
 
@@ -171,25 +188,34 @@ own location.
   for boundary orientation, not the GETM-textbook single code 2, which only
   the T-mask `maskt` uses here.)
 
-## 3. Known copies of `nse_bdy_lonlat.txt` — current mess, as of 2026-08-03
+## 3. Known copies of `nse_bdy_lonlat.txt` — resolved 2026-08-17
 
-| Path | Points | Status |
-|---|---|---|
-| `NSe/nse_bdy_lonlat.txt` | 311 | **Canonical** — matches the live model (verified via getm-dump.nc), but currently has 123 points on land due to the 2026-08-03 mask_regions regression (§0) — needs re-fixing before any regeneration |
-| `oceanicu_3d/nse_bdy_lonlat.txt` (repo root) | 309 | User-edited 2026-08-03, NOT the file the model reads. 121 of its points differ from `NSe/`'s and are verified wet against the current bathymetry — the edit looks directionally correct but landed on the wrong copy |
-| `boundaries/bdy_coords/nse_bdy_lonlat.txt` | — | Symlink → the repo-root file above (not `NSe/`) |
-| `ocean-prep/bdy_coords/nse_bdy_lonlat.txt` | 317 | Real file, not a symlink. Stale — byte-identical to `NSe/nse_bdy_lonlat.txt.bak` (session's very first backup, before *any* fixes this session) |
+As of 2026-08-03 there were four divergent copies of this file across three
+repos (`NSe/`, the `oceanicu_3d` repo root, `boundaries` (now
+`boundaries.old`), and `ocean-prep`), with most configs pointing at the
+wrong one — this section used to document that mess in detail. It's now
+resolved:
 
-**Configs currently pointing at the wrong copy** (via the `boundaries/bdy_coords`
-symlink or `ocean-prep`'s own stale copy), needing repointing at `NSe/nse_bdy_lonlat.txt`:
-`boundaries/config/nse_bdy_create.yaml`, `boundaries/config/nse_init_create.yaml`,
-`ocean-prep/config/nse_bdy_create.yaml`, `ocean-prep/config/nse_tidal_bdy.yaml`,
-`ocean-prep/config/nse_init_create.yaml`.
+- **Canonical, single copy:** `NSe/Bathymetry/nse_bdy_lonlat.txt` (moved
+  from `NSe/nse_bdy_lonlat.txt`; still verified against `getm-dump.nc`, 0
+  points different).
+- **Every config** (`NSe/config/{nse_bdy_create,nse_init_create,nse_tidal_bdy}.yaml`,
+  and `boundaries.old/config/{nse_bdy_create,nse_init_create}.yaml`)
+  references this one copy directly — a real absolute path in every case
+  except `NSe/config/nse_tidal_bdy.yaml`, which uses a relative path
+  resolved against `cwd=NSe/` (see stage 2b). `nse_bdy_create.yaml` and
+  `nse_init_create.yaml` moved here from `ocean-prep/config/` on
+  2026-08-24 (NSe-specific configs belong with the NSe setup, not inside
+  the generic `ocean-prep` tool repo).
+  **No symlinks anywhere** — deliberate: this file changes per domain
+  setup, not just NSe, so a shared symlink target wouldn't generalize.
+- The old `oceanicu_3d/nse_bdy_lonlat.txt` (repo-root, 309-point mis-landed
+  edit — see §0's "Update, 2026-08-17" note) is archived at
+  `NSe/Bathymetry/nse_bdy_lonlat.txt.mislanded_edit_20260803`, not left at
+  the repo root where it could be mistaken for a live copy again.
 
-**Config already pointing at the right copy:** `NSe/config/nse_tidal_bdy.yaml`
-(relative path resolves correctly *only* when run with `cwd=NSe/`, see stage 2b above).
-
-Until this is cleaned up (repoint the symlinks/configs at `NSe/nse_bdy_lonlat.txt`,
-delete or symlink-away the stale/divergent copies), don't run stage 1
-(`run-cmems-boundaries`) for real — it would write new historical reference
-files keyed to the wrong point list.
+If this ever drifts again: `grep -rln nse_bdy_lonlat` across
+`OceanICU/oceanicu_3d`, `ocean-prep`, and `boundaries.old` to find every
+reference, then verify each with `ls -la` (should show a real file at
+`NSe/Bathymetry/nse_bdy_lonlat.txt` and nothing else with that basename
+outside `.bak*`/archived copies) before trusting any of them.

@@ -28,11 +28,11 @@ source_type: cmip6_delta_change
 # ---------------------------------------------------------------------------
 reference:
   directories:
-    thetao:   ./boundary_data/nse/daily      # daily 3-D files (thetao variable)
-    so:       ./boundary_data/nse/daily      # daily 3-D files (so variable)
-    zos:      ./boundary_data/nse/hourly     # hourly 2-D files (zos variable)
-    uo:       ./boundary_data/nse/hourly     # hourly 2-D barotropic transport
-    vo:       ./boundary_data/nse/hourly     # hourly 2-D barotropic transport
+    thetao:   /data/kb/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # daily 3-D files (thetao variable)
+    so:       /data/kb/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # daily 3-D files (so variable)
+    zos:      /data/kb/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D files (zos variable)
+    uo:       /data/kb/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D barotropic transport
+    vo:       /data/kb/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D barotropic transport
   period:
     start: "1993-01-01"   # start of the historical reference to cycle
     end:   "2022-12-31"   # end   of the historical reference to cycle
@@ -42,7 +42,8 @@ reference:
 # ---------------------------------------------------------------------------
 cmip6:
   source_id: GFDL-ESM4
-  experiment_id: ssp126          # default scenario; override with --scenario
+    #experiment_id: ssp126          # default scenario; override with --scenario
+  experiment_id: ssp370          # default scenario; override with --scenario
   access: local                  # 'local' | 'esgf' | 'pangeo'
   local_root: /data/CMIP6
   table_id: Omon                 # monthly mean; override per variable below
@@ -106,5 +107,5 @@ time_range:
 # Output
 # ---------------------------------------------------------------------------
 output:
-  base_directory: ./boundary_data/nse/delta_change
-  filename_template: "delta_{source_id}_{experiment_id}_{variable}_{start}_{end}.nc"
+  base_directory: /data/OceanICU/oceanicu_3d/data/NSe
+  filename_template: "CMIP6/{source_id}/{experiment_id}/bdy/bdy_3d_{variable}_{start}_{end}.nc"
