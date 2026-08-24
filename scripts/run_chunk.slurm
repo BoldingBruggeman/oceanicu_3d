@@ -79,10 +79,13 @@ export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi2.so
 cd "$SCRIPT_DIR" || exit 1
 
 # --- run the chunk -----------------------------------------------------
-# chunk_runner.py itself invokes mpiexec/the driver script and waits for
-# it (it does not background the srun the way the old pml.slurm did) --
-# NaN monitoring runs alongside it here so this script can still scancel
-# a runaway job, and records the NaN on the chunk's own DB row.
+# chunk_runner.py itself invokes the driver script (via srun -- the
+# preferred launcher, matching the real production SLURM scripts; see
+# its own --launcher/the run's `launcher` column for the mpiexec
+# fallback) and waits for it (it does not background the srun the way
+# the old pml.slurm did) -- NaN monitoring runs alongside it here so this
+# script can still scancel a runaway job, and records the NaN on the
+# chunk's own DB row.
 
 RUN_ROOT=$(python -c "
 import run_tracking as rt
@@ -96,8 +99,8 @@ python chunk_runner.py --run-id "$RUN_ID" --slurm-job-id "$SLURM_JOB_ID" &
 RUNNER_PID=$!
 
 # Wait for chunk_runner.py to tell us which directory it's using (written
-# right before it launches mpiexec), then tail that chunk's log for NaN
-# for as long as the runner is alive.
+# right before it launches the driver script), then tail that chunk's
+# log for NaN for as long as the runner is alive.
 for _ in $(seq 1 60); do
     [ -s "$POINTER_FILE" ] && break
     sleep 1
@@ -106,9 +109,14 @@ LOGFILE="$(cat "$POINTER_FILE" 2>/dev/null)/getm-0000.log"
 
 ( tail -n 0 -F "$LOGFILE" 2>/dev/null |
   while IFS= read -r line; do
-      if echo "$line" | grep -qiE 'salt:[[:space:]]*nan'; then
+      # \bnan\b, not a fixed 'salt:' prefix -- NaN can show up in any
+      # logged variable (temp, u, v, elevation, ...), not just salinity;
+      # word-boundaried so it only matches a standalone "nan" token, not
+      # a substring inside some unrelated word.
+      if echo "$line" | grep -qiE '\bnan\b'; then
           echo "========================================"
-          echo "NaN detected in salinity! Cancelling SLURM job $SLURM_JOB_ID"
+          echo "NaN detected! Cancelling SLURM job $SLURM_JOB_ID"
+          echo "  offending line: $line"
           echo "========================================"
           scancel "$SLURM_JOB_ID"
           exit 1
