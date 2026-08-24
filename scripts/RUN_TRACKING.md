@@ -75,6 +75,18 @@ chunk (5 x annual = 5-year chunks).
 scripts); pass `--launcher mpiexec` if a particular setup needs it
 instead.
 
+`--fabm` overrides FABM at chunk-run time, without regenerating the
+driver script -- real testing need: run the exact same setup with and
+without FABM. Mirrors the generated driver script's own `--fabm`/
+`--no-fabm` (see `pygetm_config.codegen`'s `_emit_argparse`) one level up:
+
+```bash
+--fabm                    # force FABM on, reusing the script's own configured path
+--fabm /path/to/fabm.yaml # force FABM on with a specific path
+--no-fabm                 # force FABM off, regardless of the script's own setting
+# omit entirely           # no override -- run with whatever the script was generated with
+```
+
 ## Launch it
 
 ```bash

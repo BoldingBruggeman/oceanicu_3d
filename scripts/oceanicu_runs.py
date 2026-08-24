@@ -167,7 +167,7 @@ def cmd_add(args: argparse.Namespace) -> int:
             config=args.config, initial_date=args.initial_date, stop_date=args.stop_date,
             data_roots_file=args.data_roots_file, chunk_kind=args.chunk_kind,
             chunk_multiplier=args.chunk_multiplier, np=args.np, launcher=args.launcher,
-            priority=args.priority, notes=args.notes,
+            priority=args.priority, notes=args.notes, fabm=args.fabm,
         )
     print(f"added {args.run_id!r}")
     return 0
@@ -200,7 +200,7 @@ def cmd_show(args: argparse.Namespace) -> int:
             print(f"ERROR: no such run_id: {args.run_id!r}", file=sys.stderr)
             return 1
         print("run:")
-        _print_table([run], _RUN_COLUMNS + ["run_root", "script", "config", "np", "notes"])
+        _print_table([run], _RUN_COLUMNS + ["run_root", "script", "config", "np", "launcher", "fabm", "data_roots_file", "notes"])
         print()
         print("chunks:")
         chunks = rt.list_chunks(conn, args.run_id)
@@ -316,6 +316,19 @@ def main() -> int:
     a.add_argument("--launcher", default="srun", choices=["srun", "mpiexec"])
     a.add_argument("--priority", type=int, default=0)
     a.add_argument("--notes", default=None)
+    # Mirrors the generated driver script's own --fabm/--no-fabm exactly
+    # (see pygetm_config.codegen's _emit_argparse) -- None here means "no
+    # override, run the script's own baked-in FABM setting unchanged";
+    # 'off'/'on' are sentinels for bare --no-fabm/--fabm; anything else is
+    # an explicit fabm.yaml path. chunk_runner.py passes this straight
+    # through to the driver's own --fabm/--no-fabm.
+    a.add_argument("--fabm", nargs="?", const="on", default=None, metavar="PATH",
+                    help="override the run's FABM state at chunk-run time (bare --fabm "
+                         "reuses the script's configured path; --fabm PATH forces a "
+                         "specific one; default: don't override, use whatever the "
+                         "script was generated with)")
+    a.add_argument("--no-fabm", dest="fabm", action="store_const", const="off",
+                    help="force FABM off at chunk-run time, regardless of the script's own setting")
 
     r = sub.add_parser("remove"); _add_common(r); r.set_defaults(func=cmd_remove)
     r.add_argument("--run-id", required=True)
