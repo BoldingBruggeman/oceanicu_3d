@@ -28,11 +28,11 @@ source_type: cmip6_delta_change
 # ---------------------------------------------------------------------------
 reference:
   directories:
-    thetao:   /data/kb/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # daily 3-D files (thetao variable)
-    so:       /data/kb/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # daily 3-D files (so variable)
-    zos:      /data/kb/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D files (zos variable)
-    uo:       /data/kb/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D barotropic transport
-    vo:       /data/kb/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D barotropic transport
+    thetao:   /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # daily 3-D files (thetao variable)
+    so:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # daily 3-D files (so variable)
+    zos:      /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D files (zos variable)
+    uo:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D barotropic transport
+    vo:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D barotropic transport
   period:
     start: "1993-01-01"   # start of the historical reference to cycle
     end:   "2022-12-31"   # end   of the historical reference to cycle

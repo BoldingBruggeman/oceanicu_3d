@@ -1,0 +1,9 @@
+#!/bin/bash
+# Wrapper so `oceanicu-runs ...` works from anywhere (e.g. from inside a
+# run's own chunk directory) once scripts/bin is on PATH -- see
+# RUN_TRACKING.md and relay.env.example. Just forwards to the real script,
+# which lives one directory up from this one; pure stdlib, no conda env
+# needed for this one (only the actual pyGETM driver subprocess needs
+# that, handled separately via chunk_runner.py's own --conda-env).
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+exec python3 "$(dirname "$SELF")/../oceanicu_runs.py" "$@"
