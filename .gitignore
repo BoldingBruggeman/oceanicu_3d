@@ -29,3 +29,10 @@ NSe/config/generated*_config.yaml
 # pygetm-config's own dist/ convention (also gitignored there). See
 # driver/README.md for the regeneration command.
 driver/dist/
+
+# scripts/relay.env -- per-machine OCEANICU_RUN_DB/OCEANICU_RELAY_DIR
+# values (see scripts/relay.env.example, which IS committed, and
+# scripts/RUN_TRACKING.md's "Working across machines" section). Not
+# secret by itself, just genuinely per-machine -- nothing to gain from
+# committing one machine's copy as if it were canonical.
+scripts/relay.env

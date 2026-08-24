@@ -1,0 +1,349 @@
+#!/usr/bin/env python
+"""chunk_runner.py -- run exactly ONE chunk of a simulation.
+
+Two modes:
+
+  Tracked (production):
+      chunk_runner.py --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
+
+  Standalone (testing -- NO database interaction at all, nothing looked
+  up or written; for trying out a script/config/date-range by hand before
+  it's registered):
+      chunk_runner.py --script generated_nse_cmip6.py --config setup.yaml \\
+          --start 2015-01-01T00:00:00 --stop 2016-01-01T00:00:00 \\
+          --save-restart restart_setup_20160101.nc [--load-restart ...] \\
+          [--chunk-dir DIR] [--np 4] [--launcher srun|mpiexec]
+
+In tracked mode, everything about the run (script, config, dates, chunk
+size) comes from its `runs` row in run_tracking.py's SQLite registry --
+looked up by --run-id. Intended to be called once per SLURM job (see
+run_chunk.slurm), which self-resubmits for the next chunk after this one
+finishes; this script itself only ever does one.
+
+Chunk boundary math (annual/monthly/daily x multiplier) is the same idea
+as the earlier run_chunks.py prototype, calendar-aware via cftime.
+
+Everything for a chunk lives together in ONE directory (logs, 2d/3d
+output, AND the restart file it saves) -- <run_root>/chunks/NNN_<start>_
+<stop>/. The next chunk's --load-restart simply points at the previous
+chunk's own save_restart path.
+
+Exit codes: 0 = chunk completed cleanly; 1 = nothing to do (already at
+stop_date, or paused) -- tracked mode only; 2 = the chunk itself failed
+(non-zero exit from the driver script).
+"""
+
+from __future__ import annotations
+
+import argparse
+import sqlite3
+import subprocess
+import sys
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Optional
+
+
+def _parse_date(s: str, calendar: str):
+    import cftime
+    return cftime.datetime.strptime(s, "%Y-%m-%d", calendar=calendar)
+
+
+def _advance_date(start, kind: str, multiplier: int):
+    if kind == "daily":
+        return start + timedelta(days=multiplier)
+    if kind == "monthly":
+        yy, mm = start.year, start.month
+        mm = mm - 1 + multiplier
+        yy += mm // 12
+        mm = mm % 12 + 1
+        return start.replace(year=yy, month=mm)
+    # annual (default): run to January 1st of the target year, so a
+    # mid-year start (e.g. a spin-up beginning in December) still lands
+    # chunk boundaries on calendar-year edges from then on.
+    stop = start.replace(year=start.year + multiplier)
+    if stop.month != 1:
+        stop = stop.replace(month=1, day=1)
+    return stop
+
+
+def _is_slurm_job_running(job_id: Optional[str]) -> Optional[bool]:
+    """True/False if squeue can tell us the job is still active; None if
+    it can't be determined (no job_id recorded, squeue unavailable, or it
+    errored) -- callers fall back to a time-based staleness check."""
+    if not job_id:
+        return None
+    try:
+        result = subprocess.run(
+            ["squeue", "-h", "-j", str(job_id)], capture_output=True, text=True, timeout=15,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
+    if result.returncode != 0:
+        return None
+    return bool(result.stdout.strip())
+
+
+def _launch_prefix(launcher: str, np: int) -> list[str]:
+    if launcher == "srun":
+        return ["srun", "--mpi=pmi2", "-n", str(np)]
+    if launcher == "mpiexec":
+        return ["mpiexec", "-n", str(np)]
+    raise ValueError(f"unknown launcher {launcher!r} (expected 'srun' or 'mpiexec')")
+
+
+def _run_one(
+    *, script: str, config: str, start_iso: str, stop_iso: str, save_restart: str,
+    load_restart: Optional[str], data_roots_file: Optional[str], chunk_dir: Path,
+    launcher: str, np: int, dry_run: bool, conda_env: Optional[str] = None,
+) -> subprocess.CompletedProcess | None:
+    cmd = [
+        *_launch_prefix(launcher, np),
+        "python", script, config,
+        "--start", start_iso,
+        "--stop", stop_iso,
+        "--save-restart", save_restart,
+    ]
+    if load_restart:
+        cmd.extend(["--load-restart", load_restart])
+    if data_roots_file:
+        cmd.extend(["--data-roots-file", data_roots_file])
+
+    if conda_env:
+        # Makes the command self-contained regardless of whether the
+        # calling shell already ran `conda activate` -- the tracked/SLURM
+        # path relies on run_chunk.slurm having activated it once up
+        # front (unaffected, conda_env stays unset there), but standalone
+        # testing from an arbitrary shell shouldn't have to remember to.
+        cmd = ["conda", "run", "-n", conda_env, "--no-capture-output", *cmd]
+
+    print("  cwd:", chunk_dir)
+    print("  cmd:", " ".join(cmd))
+    if dry_run:
+        return None
+    return subprocess.run(cmd, cwd=str(chunk_dir))
+
+
+def _main_standalone(args: argparse.Namespace) -> int:
+    """No database interaction whatsoever -- nothing looked up, nothing
+    written. For trying a script/config/date-range by hand before it's
+    registered (or just outside the tracked-production workflow entirely).
+    """
+    chunk_dir = Path(args.chunk_dir) if args.chunk_dir else Path.cwd()
+    chunk_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"[standalone, untracked]  {args.start} -> {args.stop}")
+    result = _run_one(
+        script=args.script, config=args.config, start_iso=args.start, stop_iso=args.stop,
+        save_restart=args.save_restart, load_restart=args.load_restart,
+        data_roots_file=args.data_roots_file, chunk_dir=chunk_dir,
+        launcher=args.launcher, np=args.np, dry_run=args.dry_run, conda_env=args.conda_env,
+    )
+    if result is None:
+        return 0
+    return 0 if result.returncode == 0 else 2
+
+
+def _main_tracked(args: argparse.Namespace) -> int:
+    import run_tracking as rt
+
+    with rt.connect(args.db) as conn:
+        run = rt.get_run(conn, args.run_id)
+        if run is None:
+            print(f"ERROR: no such run_id in registry: {args.run_id!r}", file=sys.stderr)
+            return 2
+        run = dict(run)  # mutable regardless of Row (local) vs dict (RPC result)
+
+        # script/config are commonly registered as bare filenames (living
+        # in the run's own folder, alongside its own generated driver
+        # script -- see RUN_TRACKING.md), but the actual chunk subprocess
+        # always runs with cwd=chunk_dir, several levels below run_root.
+        # Resolve them against run_root here, once, so a bare filename
+        # still works regardless of where this script itself lives or
+        # what the process's cwd ends up being.
+        run_root_path = Path(run["run_root"])
+        for key in ("script", "config", "data_roots_file"):
+            if run.get(key) and not Path(run[key]).is_absolute():
+                run[key] = str(run_root_path / run[key])
+
+        if rt.is_paused(conn, args.run_id, run["run_root"]):
+            print(f"{args.run_id}: paused (control or PAUSE sentinel) -- not starting a new chunk.")
+            return 1
+
+        # Lock: refuse to start a new chunk while one is already recorded
+        # as running for this run_id -- guards against an accidental
+        # double-submit racing the currently-running chunk (two processes
+        # both computing the same next chunk_index and colliding). If the
+        # recorded chunk's SLURM job is confirmed gone (or old enough that
+        # squeue being unavailable can't excuse it any longer), it's
+        # treated as crashed/orphaned rather than a live lock -- marked
+        # failed and left for a human 'rerun' rather than silently
+        # retried, same as any other failure.
+        running = rt.get_running_chunk(conn, args.run_id)
+        if running is not None:
+            alive = _is_slurm_job_running(running["slurm_job_id"])
+            stale_by_age = False
+            if running["start_time"]:
+                started = datetime.fromisoformat(running["start_time"])
+                stale_by_age = (datetime.now(timezone.utc) - started) > timedelta(days=4)
+
+            if alive:
+                print(f"{args.run_id}: chunk {running['chunk_index']} is already running "
+                      f"(SLURM job {running['slurm_job_id']}) -- not starting another.",
+                      file=sys.stderr)
+                return 1
+            if alive is None and not stale_by_age:
+                print(f"{args.run_id}: chunk {running['chunk_index']} is marked running and "
+                      f"its SLURM job status can't be confirmed (squeue unavailable) but it "
+                      f"isn't old enough yet to treat as orphaned -- not starting another.",
+                      file=sys.stderr)
+                return 1
+
+            print(f"{args.run_id}: chunk {running['chunk_index']} was marked running but its "
+                  f"SLURM job is no longer active -- treating as crashed/orphaned.",
+                  file=sys.stderr)
+            rt.finish_chunk(conn, run_id=args.run_id, chunk_index=running["chunk_index"],
+                             exit_code=-1, nan_detected=False)
+            print(f"Marked failed. Investigate, then "
+                  f"'oceanicu_runs.py rerun --run-id {args.run_id} --from-current' to redo it.",
+                  file=sys.stderr)
+            return 2
+
+        calendar = "noleap" if "CMIP6" in run["script"] or "CMIP6" in run["config"] else "standard"
+        stop_date = _parse_date(run["stop_date"], calendar)
+
+        start_str = rt.next_chunk_start(conn, args.run_id, run["initial_date"])
+        start = _parse_date(start_str, calendar)
+        if start >= stop_date:
+            print(f"{args.run_id}: already reached stop_date ({run['stop_date']}) -- nothing to do.")
+            rt.recompute_run_status(conn, args.run_id)
+            return 1
+
+        stop = _advance_date(start, run["chunk_kind"], run["chunk_multiplier"])
+        if stop > stop_date:
+            stop = stop_date
+
+        chunk_index = rt.next_chunk_index(conn, args.run_id)
+        run_root = Path(run["run_root"])
+        chunk_name = f"{chunk_index:03d}_{start.strftime('%Y%m%d')}_{stop.strftime('%Y%m%d')}"
+        chunk_dir = run_root / "chunks" / chunk_name
+
+        # Archive a pre-existing dir aside instead of silently overwriting
+        # it -- happens on a rerun (run_tracking.rerun_from only rewinds
+        # the DB, it never deletes files) or after a crash that never
+        # reached finish_chunk(). A previous attempt's logs are worth
+        # keeping for diagnosis, not clobbering.
+        if chunk_dir.exists():
+            stamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+            archived = chunk_dir.with_name(chunk_dir.name + f".attempt-{stamp}")
+            print(f"{chunk_dir} already exists -- archiving aside as {archived.name}")
+            chunk_dir.rename(archived)
+        chunk_dir.mkdir(parents=True)
+
+        load_restart = None
+        if chunk_index > 0:
+            load_restart = rt.get_done_chunk_restart(conn, args.run_id, chunk_index - 1)
+            if load_restart is None:
+                print(f"ERROR: chunk {chunk_index} has no completed predecessor to load a restart from.",
+                      file=sys.stderr)
+                return 2
+
+        setup_name = Path(run["config"]).stem
+        save_restart = str(chunk_dir / f"restart_{setup_name}_{stop.strftime('%Y%m%d')}.nc")
+
+        print(f"{args.run_id}  chunk {chunk_index:03d}  {start} -> {stop}")
+        if args.dry_run:
+            _run_one(
+                script=run["script"], config=run["config"],
+                start_iso=start.strftime("%Y-%m-%dT%H:%M:%S"), stop_iso=stop.strftime("%Y-%m-%dT%H:%M:%S"),
+                save_restart=save_restart, load_restart=load_restart, data_roots_file=run["data_roots_file"],
+                chunk_dir=chunk_dir, launcher=run["launcher"] or "srun", np=run["np"], dry_run=True,
+            )
+            chunk_dir.rmdir()  # dry-run shouldn't leave an empty dir behind
+            return 0
+
+        # Pointer file so a wrapper (e.g. run_chunk.slurm) that needs this
+        # chunk's log path to tail it live doesn't have to guess or parse
+        # stdout -- it can just wait for this file and read it.
+        (run_root / ".current_chunk_dir").write_text(str(chunk_dir) + "\n")
+
+        # The running-chunk check above and this insert aren't wrapped in
+        # one atomic transaction, so two processes starting at the exact
+        # same instant could both pass the check and then collide here
+        # (run_id, chunk_index) is the primary key. Rare in practice (a
+        # new chunk only ever starts via one sbatch resubmission at a
+        # time), but fail cleanly rather than crash if it ever happens --
+        # whichever process loses just backs off, the winner proceeds.
+        try:
+            rt.start_chunk(
+                conn, run_id=args.run_id, chunk_index=chunk_index,
+                start=start.strftime("%Y-%m-%d"), stop=stop.strftime("%Y-%m-%d"),
+                chunk_dir=str(chunk_dir), load_restart=load_restart, save_restart=save_restart,
+                slurm_job_id=args.slurm_job_id,
+            )
+        except sqlite3.IntegrityError:
+            print(f"{args.run_id}: chunk {chunk_index} was just claimed by another process "
+                  f"-- backing off.", file=sys.stderr)
+            chunk_dir.rmdir()
+            return 1
+
+    # DB connection closed while the (potentially long-running) simulation
+    # executes, so it isn't held open across the whole chunk.
+    result = _run_one(
+        script=run["script"], config=run["config"],
+        start_iso=start.strftime("%Y-%m-%dT%H:%M:%S"), stop_iso=stop.strftime("%Y-%m-%dT%H:%M:%S"),
+        save_restart=save_restart, load_restart=load_restart, data_roots_file=run["data_roots_file"],
+        chunk_dir=chunk_dir, launcher=run["launcher"] or "srun", np=run["np"], dry_run=False,
+    )
+    assert result is not None  # dry_run=False above always returns a CompletedProcess
+
+    with rt.connect(args.db) as conn:
+        rt.finish_chunk(
+            conn, run_id=args.run_id, chunk_index=chunk_index,
+            exit_code=result.returncode, nan_detected=False,
+        )
+
+    return 0 if result.returncode == 0 else 2
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--run-id", default=None, help="tracked mode: look everything up from the registry")
+    p.add_argument("--db", default=None, help="tracked mode: override the SQLite registry path")
+    p.add_argument("--slurm-job-id", default=None)
+    p.add_argument("--dry-run", action="store_true", help="print the command, don't execute")
+
+    standalone = p.add_argument_group(
+        "standalone mode (no --run-id; NO database interaction at all)")
+    standalone.add_argument("--script")
+    standalone.add_argument("--config")
+    standalone.add_argument("--start", metavar="ISO8601")
+    standalone.add_argument("--stop", metavar="ISO8601")
+    standalone.add_argument("--save-restart", metavar="PATH")
+    standalone.add_argument("--load-restart", default=None, metavar="PATH")
+    standalone.add_argument("--data-roots-file", default=None)
+    standalone.add_argument("--chunk-dir", default=None, help="default: current directory")
+    standalone.add_argument("--np", type=int, default=1)
+    standalone.add_argument("--launcher", default="srun", choices=["srun", "mpiexec"])
+    standalone.add_argument("--conda-env", default=None, metavar="NAME",
+                             help="wrap the command in 'conda run -n NAME' -- for testing "
+                                  "from a shell that hasn't already activated it")
+
+    args = p.parse_args()
+
+    if args.run_id:
+        try:
+            return _main_tracked(args)
+        except RuntimeError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 2
+
+    missing = [f"--{name.replace('_', '-')}" for name in ("script", "config", "start", "stop", "save_restart")
+               if getattr(args, name) is None]
+    if missing:
+        p.error(f"standalone mode (no --run-id given) requires {', '.join(missing)}")
+    return _main_standalone(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
