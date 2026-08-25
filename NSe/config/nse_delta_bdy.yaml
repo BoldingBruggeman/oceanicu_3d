@@ -1,13 +1,29 @@
 # =============================================================================
 # NSe – delta-change boundary conditions for future climate projections
 #
-# Method: AMM7/AMM15 historical cycling + CMIP6 monthly change signal
+# Method: AMM7/AMM15 historical cycling + TRENDING CMIP6 monthly change signal
 #
 #   corrected(t) = AMM7/AMM15_ref(t_analog)
-#                + [CMIP6_future_clim(month) − CMIP6_hist_clim(month)]
+#                + intercept(month(t)) + slope(month(t)) * year(t)
 #
-# where t_analog cycles through the reference period (same DOY/hour,
-# year mapped modulo the reference period length).
+# where t_analog cycles through the reference period (same DOY/hour, year
+# mapped modulo the reference period length), and intercept/slope come from
+# an ordinary-least-squares linear fit, per calendar month, of CMIP6 monthly
+# means against year across the FULL future period (2015-2100), minus the
+# fixed hist_period climatology. This means the climate-change signal grows
+# smoothly across the run instead of jumping straight to its full end-of-run
+# magnitude in the very first output year. A trend fit (rather than
+# splitting the period into blocks and interpolating block means) was
+# chosen deliberately: with only ONE CMIP6 ensemble member, raw N-year block
+# means carry substantial internal-variability noise on top of the forced
+# signal -- observed directly for GFDL-ESM4/ssp126 at this boundary, whose
+# four 20ish-year block deltas came out +0.80/+0.54/+0.90/+0.42 degC (a real
+# warming in every block, but a non-monotonic, noisy sequence that a block-
+# interpolation scheme would pass straight through as if it were a real
+# trend). An OLS fit across all 86 future years is far less sensitive to any
+# single decade's noise. The old, cheaper "single fixed epoch" design is
+# still available via cmip6.transient: false + cmip6.future_period, but
+# produces one static shift applied identically to 2015 and 2100 alike.
 #
 # Usage
 # -----
@@ -27,38 +43,74 @@ source_type: cmip6_delta_change
 # One directory entry per variable name; 'default' is the fallback.
 # ---------------------------------------------------------------------------
 reference:
+  # Real production CMEMS boundary data (data/NSe/CMEMS/bdy/ on bb-server1),
+  # NOT the local ./boundary_data/nse/{daily,hourly} snapshot this config
+  # previously pointed at -- that copy is a stale 2015-2026-06-28 export;
+  # the real, actively-maintained series (2010-01-01 through the latest
+  # real-time update) lives on bb-server1. Both confirmed to have the
+  # current, correct 311-point boundary set (see nse_bdy_lonlat.txt /
+  # trim_bdy.py's own history -- 317 -> 312 -> 311, two land/anomaly-point
+  # corrections after this config's own delta-change output was first
+  # produced against the stale 317-point set).
   directories:
-    thetao:   /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # daily 3-D files (thetao variable)
-    so:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # daily 3-D files (so variable)
-    zos:      /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D files (zos variable)
-    uo:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D barotropic transport
-    vo:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy   # hourly 2-D barotropic transport
+    thetao:   /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy      # daily 3-D files (thetao variable)
+    so:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy      # daily 3-D files (so variable)
+    zos:      /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy      # hourly 2-D files (zos variable)
+    uo:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy      # hourly 2-D barotropic transport
+    vo:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy      # hourly 2-D barotropic transport
   period:
-    start: "1993-01-01"   # start of the historical reference to cycle
-    end:   "2022-12-31"   # end   of the historical reference to cycle
+    # Matches the REAL span of the live CMEMS data above (confirmed via
+    # direct inspection: 2010-01-01 to 2026-08-17) -- NOT the old local
+    # snapshot's 1993-2022 range this was previously (and wrongly) left at
+    # after the directories above were repointed at bb-server1's live data.
+    # That mismatch was a real bug: analog-date cycling tried to map onto
+    # 1993-2009, which don't exist in this directory, silently collapsing
+    # onto whichever year the fallback search found first (~2010) for
+    # those dates. Trimmed to whole years (2025, not 2026 partial) for
+    # clean cycling. Shorter than the original 30y design (now ~16y), so
+    # the reference repeats more often over a long output range and
+    # samples fewer years of interannual variability -- accepted tradeoff
+    # for using the live, current data instead of the stale local copy.
+    start: "2010-01-01"
+    end:   "2025-12-31"
 
 # ---------------------------------------------------------------------------
 # CMIP6 change signal source
 # ---------------------------------------------------------------------------
 cmip6:
-  source_id: GFDL-ESM4
-    #experiment_id: ssp126          # default scenario; override with --scenario
+  source_id: MPI-ESM1-2-HR
   experiment_id: ssp370          # default scenario; override with --scenario
   access: local                  # 'local' | 'esgf' | 'pangeo'
   local_root: /data/CMIP6
   table_id: Omon                 # monthly mean; override per variable below
-  variant_label: r1i1p1f1
-  grid_label: gn
+  # variant_label intentionally omitted: auto-resolved per source_id from
+  # the same built-in member-defaults table bc-correct uses (e.g.
+  # CNRM-ESM2-1 -> r1i1p1f2, everything else -> r1i1p1f1), so this one
+  # config works unchanged for all 3 models via --model. Set explicitly
+  # here (or under member_defaults: {ModelName: rXiXpXfX}) only to override.
+  # grid_label intentionally omitted too: auto-resolved per source_id
+  # (GFDL-ESM4's Omon output is 'gr', not 'gn' like the other two models).
+  # Set explicitly here (or under grid_defaults: {ModelName: grX}) to override.
   download_if_missing: true
   esgf_cache_dir: /data/cache/cmip6
 
+  # Transient delta-change (default): OLS linear trend per calendar month,
+  # fit across the full time_range below -- see the file header. Set
+  # transient: false to fall back to the old single-fixed-epoch design
+  # (uses future_period below instead of fitting a trend over the whole
+  # time_range).
+  transient: true
+
   # Period used to compute the historical climatology (CMIP6 historical run)
+  # -- this stays a single FIXED baseline either way (transient or not).
   hist_period:
     start: "1985-01-01"
     end:   "2014-12-31"
 
-  # Period used to compute the future climatology (default; override per run)
-  # A 20–30 year window centred on the epoch of interest is recommended.
+  # Only used when transient: false -- the single future window whose
+  # climatology (minus hist_period) becomes the one fixed shift applied to
+  # every output year alike. Ignored under transient: true (which fits a
+  # trend over time_range.start_date .. end_date instead).
   future_period:
     start: "2070-01-01"
     end:   "2099-12-31"
@@ -107,5 +159,8 @@ time_range:
 # Output
 # ---------------------------------------------------------------------------
 output:
-  base_directory: /data/OceanICU/oceanicu_3d/data/NSe
-  filename_template: "CMIP6/{source_id}/{experiment_id}/bdy/bdy_3d_{variable}_{start}_{end}.nc"
+  # Real production location -- {model}/{scenario}/bdy mirrors the existing
+  # meteo forcing convention (/data/BiasCorrected/CMIP6/{model}/{scenario}/
+  # meteo/) rather than grouping all models under one shared bdy/ folder.
+  base_directory: /data/OceanICU/oceanicu_3d/data/NSe/CMIP6
+  filename_template: "{source_id}/{experiment_id}/bdy/bdy_3d_{variable}_{start}_{end}.nc"
