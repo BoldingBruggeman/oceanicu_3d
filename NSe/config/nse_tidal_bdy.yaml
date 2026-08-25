@@ -34,8 +34,7 @@ tpxo:
 # ---------------------------------------------------------------------------
 cmip6:
   source_id: GFDL-ESM4
-    #experiment_id: ssp126
-  experiment_id: ssp370
+  experiment_id: ssp126
   access: local              # 'local' | 'esgf' | 'pangeo'
   local_root: /data/CMIP6    # only required when access: local
   table_id: [Oday, Omon]     # try daily first, fall back to monthly
@@ -48,7 +47,7 @@ cmip6:
 # Format: header row (grid type), column headers (lon,lat[,segment]), then data
 # ---------------------------------------------------------------------------
 boundary_points:
-  file_path: ./Bathymetry/nse_bdy_lonlat.txt
+  file_path: /home/kb/source/repos/OceanICU/oceanicu_3d/NSe/Bathymetry/nse_bdy_lonlat.txt
   min_gap_degrees: 0.5       # gap threshold for auto-detecting segments
 
 # ---------------------------------------------------------------------------
