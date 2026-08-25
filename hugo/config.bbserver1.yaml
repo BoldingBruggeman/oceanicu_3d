@@ -1,0 +1,15 @@
+# Path overrides for building on bb-server1/the relay, where the
+# generated content/static/public live at /data/OceanICU/oceanicu_3d/
+# (no "kb" in the path -- that's orca's local convention, see
+# config.yaml's own contentDir/staticDir/publishDir). Merge on top of the
+# base config with:
+#   hugo --config config.yaml,config.bbserver1.yaml ...
+# A CLI flag (--contentDir) exists for the single-value keys but there is
+# no --staticDir flag, and HUGO_STATICDIR as an env var doesn't parse a
+# multi-entry list correctly -- a real config file is the only reliable
+# way to override a list-typed key like staticDir.
+contentDir: '/data/OceanICU/oceanicu_3d/content'
+publishDir: '/data/OceanICU/oceanicu_3d/public'
+staticDir:
+  - static
+  - '/data/OceanICU/oceanicu_3d/static'
