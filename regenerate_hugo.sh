@@ -55,6 +55,10 @@ if [ "$(hostname)" != "${RELAY_HOST}" ] && [ -z "${REGEN_HUGO_NO_RELAY:-}" ]; th
         echo "Synced. To preview locally before deploying:"
         echo "  cd ${SCRIPT_DIR}/hugo && hugo server"
         echo "Then open http://localhost:1313/oceanicu_3d/ in a browser."
+        echo ""
+        echo "Once you're happy with the preview, publish it (a real, public,"
+        echo "hard-to-reverse push to gh-pages -- not run automatically here):"
+        echo "  cd ~/source/repos/ocean-post && ./deploy_ghpages.sh"
     fi
     exit 0
 fi
