@@ -60,9 +60,14 @@ def relay(config: dict, relay_host: str, args: argparse.Namespace) -> None:
     # real bug class (forget to forward one new flag here and it's
     # silently dropped on the relay hop, not an error; this exact pattern
     # in deploy_ghpages.py's relay() caused a real, unintended production
-    # deploy during testing). --sync-back is local-machine-only (it runs
-    # here, after the ssh call returns) so it's excluded, not forwarded.
-    drop = {"--no-relay", "--sync-back"}
+    # deploy during testing). --sync-back and --serve are both
+    # local-machine-only concerns (they run here, after the ssh call
+    # returns -- see below) so they're excluded, not forwarded. --serve
+    # in particular must never reach the relay: cli.reporting's own
+    # --serve runs `hugo server` on whatever machine it's given to, and
+    # bb-server1 is in Hetzner/Germany -- a live dev server there would
+    # have bad latency for anyone actually browsing it.
+    drop = {"--no-relay", "--sync-back", "--serve"}
     remote_args = [a for a in sys.argv[1:] if a not in drop] + ["--no-relay"]
     remote_cmd = (
         "cd ~/source/repos/OceanICU/oceanicu_3d && "
@@ -70,8 +75,10 @@ def relay(config: dict, relay_host: str, args: argparse.Namespace) -> None:
     )
     subprocess.run(["ssh", relay_host, remote_cmd], check=True)
 
-    if args.sync_back:
-        sync_back(config, relay_host)
+    # --serve implies --sync-back (no point serving without local content)
+    if args.sync_back or args.serve:
+        sync_back(config, relay_host, serve=args.serve)
+        return
 
     print()
     print("Done. To publish (a real, public, hard-to-reverse push to")
@@ -79,7 +86,7 @@ def relay(config: dict, relay_host: str, args: argparse.Namespace) -> None:
     print("  cd ~/source/repos/ocean-post && ./deploy_ghpages.py --apply")
 
 
-def sync_back(config: dict, relay_host: str) -> None:
+def sync_back(config: dict, relay_host: str, serve: bool = False) -> None:
     """rsync content/static from the relay down to this machine's own
     local paths, so a local `hugo server` has something current to read."""
     local_cfg = host_config(config, socket.gethostname())
@@ -92,13 +99,29 @@ def sync_back(config: dict, relay_host: str) -> None:
             ["rsync", "-a", "--delete", f"{relay_host}:{relay_out}/{sub}/", f"{local_out}/{sub}/"],
             check=True,
         )
-    print()
-    print("Synced. To preview locally:")
-    print(f"  cd {SCRIPT_DIR / 'hugo'} && hugo server")
-    print("Then open http://localhost:1313/oceanicu_3d/ in a browser.")
+
+    hugo_dir = SCRIPT_DIR / "hugo"
+    if serve:
+        print()
+        print(f"Synced. Starting hugo server here (not on {relay_host}) …")
+        print("Open http://localhost:1313/oceanicu_3d/ in a browser. Ctrl-C to stop.")
+        subprocess.run(["hugo", "server"], cwd=hugo_dir, check=True)
+    else:
+        print()
+        print("Synced. To preview locally:")
+        print(f"  cd {hugo_dir} && hugo server")
+        print("Then open http://localhost:1313/oceanicu_3d/ in a browser.")
 
 
-def generate_locally(config: dict, hostname: str, args: argparse.Namespace) -> None:
+def generate_locally(config: dict, hostname: str, relay_host: str, args: argparse.Namespace) -> None:
+    if args.serve and hostname == relay_host:
+        sys.exit(
+            f"ERROR: refusing --serve on {relay_host} -- it's in Hetzner/Germany, "
+            f"so a live dev server there has bad latency for anyone actually "
+            f"browsing it. Run this from another machine with --sync-back "
+            f"(or --serve, which implies it) instead."
+        )
+
     host_cfg = host_config(config, hostname)
 
     # Invoke the conda env's python3 directly rather than "conda run":
@@ -118,10 +141,19 @@ def generate_locally(config: dict, hostname: str, args: argparse.Namespace) -> N
         cmd += ["--db", host_cfg["db"]]
     if args.area:
         cmd += ["--area", args.area]
-    if args.serve:
-        cmd.append("--serve")
+    # --serve is handled separately below (a plain local hugo server on
+    # this machine), never forwarded to cli.reporting -- see the refusal
+    # check above for why.
 
     subprocess.run(cmd, check=True)
+
+    if args.serve:
+        hugo_dir = SCRIPT_DIR / "hugo"
+        print()
+        print(f"Starting hugo server here ({hostname}) …")
+        print("Open http://localhost:1313/oceanicu_3d/ in a browser. Ctrl-C to stop.")
+        subprocess.run(["hugo", "server"], cwd=hugo_dir, check=True)
+        return
 
     hugo_dir = SCRIPT_DIR / "hugo"
     print()
@@ -137,7 +169,10 @@ def main() -> None:
     parser.add_argument("--area", help="Regenerate a single area only")
     parser.add_argument(
         "--serve", action="store_true",
-        help='Run "hugo server" after generating (implies --build)',
+        help="Run a local `hugo server` preview after generating -- never "
+             "on the relay itself (Hetzner/Germany latency), so this "
+             "implies --sync-back when relaying and is refused outright "
+             "if this machine IS the relay host.",
     )
     parser.add_argument(
         "--sync-back", action="store_true",
@@ -171,7 +206,7 @@ def main() -> None:
     if hostname != relay_host and not args.no_relay:
         relay(config, relay_host, args)
     else:
-        generate_locally(config, hostname, args)
+        generate_locally(config, hostname, relay_host, args)
 
 
 if __name__ == "__main__":
