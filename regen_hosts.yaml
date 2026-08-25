@@ -1,0 +1,23 @@
+# Per-host settings for regenerate_hugo.py.
+#
+# Generation always runs on `relay_host` (that's where the consolidated
+# registry and analyses/ output actually live) -- running the script from
+# any other machine listed here auto-relays over ssh. To let generation
+# run from a new machine (another workstation, the production/simulation
+# machine itself, ...), just add an entry under `hosts:` -- no code
+# changes needed. The key is the machine's `hostname` output.
+
+relay_host: bb-server1
+
+hosts:
+  bb-server1:
+    analyses_dir: /data/OceanICU/oceanicu_3d/analyses
+    hugo_out: /data/OceanICU/oceanicu_3d
+    conda_env: ocean-stack
+    db: /data/OceanICU/oceanicu_3d/experiments/run_registry.sqlite
+
+  orca:
+    analyses_dir: /data/kb/OceanICU/oceanicu_3d/analyses
+    hugo_out: /data/kb/OceanICU/oceanicu_3d
+    conda_env: pygetm
+    db: null   # falls back to cli.reporting's own <analyses-dir>/simulation_list.db discovery
