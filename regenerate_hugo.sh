@@ -16,6 +16,11 @@
 # (e.g. for testing non-DB-dependent page types on orca -- the status
 # page/production filter won't reflect real data in that mode, since the
 # registry only lives on the relay).
+#
+# By default nothing is synced back to orca -- bb-server1 is the primary
+# path end to end (generate here, then deploy_ghpages.sh also runs here
+# directly). Set REGEN_HUGO_SYNC_BACK=1 if you specifically want a local
+# low-latency `hugo server` preview on orca before deploying.
 
 set -euo pipefail
 
@@ -39,27 +44,26 @@ if [ "$(hostname)" != "${RELAY_HOST}" ] && [ -z "${REGEN_HUGO_NO_RELAY:-}" ]; th
         ./regenerate_hugo.sh${remote_args}
     "
 
-    # The hugo binary (and hugo/config.yaml's contentDir/staticDir, which
-    # point at this machine's own local paths) only exist here, not on the
-    # relay -- sync the freshly-generated content/static back so a local
-    # `hugo server`/`hugo` build actually has something current to read,
-    # letting you preview before running deploy_ghpages.sh. Skippable with
-    # REGEN_HUGO_NO_SYNC_BACK=1 (e.g. if you only wanted the DB/analyses
-    # side-effects of generation and don't care about a local preview).
-    if [ -z "${REGEN_HUGO_NO_SYNC_BACK:-}" ]; then
+    # bb-server1 is the primary deployment path now (both generation and
+    # deploy_ghpages.sh run there directly, no orca involvement needed) --
+    # syncing content/static back to orca is only for the optional
+    # low-latency `hugo server` live-preview case (Hetzner/Germany makes
+    # running hugo server *on* bb-server1 itself a bad experience), so
+    # it's opt-in, not automatic. Set REGEN_HUGO_SYNC_BACK=1 for that.
+    if [ -n "${REGEN_HUGO_SYNC_BACK:-}" ]; then
         LOCAL_CONTENT_DIR="${REGEN_HUGO_LOCAL_CONTENT_DIR:-/data/kb/OceanICU/oceanicu_3d}"
         echo "Syncing content/static back to ${LOCAL_CONTENT_DIR} for local preview..." >&2
         rsync -a --delete "${RELAY_HOST}:/data/OceanICU/oceanicu_3d/content/" "${LOCAL_CONTENT_DIR}/content/"
         rsync -a --delete "${RELAY_HOST}:/data/OceanICU/oceanicu_3d/static/"  "${LOCAL_CONTENT_DIR}/static/"
         echo ""
-        echo "Synced. To preview locally before deploying:"
+        echo "Synced. To preview locally on orca:"
         echo "  cd ${SCRIPT_DIR}/hugo && hugo server"
         echo "Then open http://localhost:1313/oceanicu_3d/ in a browser."
-        echo ""
-        echo "Once you're happy with the preview, publish it (a real, public,"
-        echo "hard-to-reverse push to gh-pages -- not run automatically here):"
-        echo "  cd ~/source/repos/ocean-post && ./deploy_ghpages.sh"
     fi
+    echo ""
+    echo "Done. To publish (a real, public, hard-to-reverse push to"
+    echo "gh-pages -- not run automatically here), from anywhere:"
+    echo "  cd ~/source/repos/ocean-post && ./deploy_ghpages.sh"
     exit 0
 fi
 
