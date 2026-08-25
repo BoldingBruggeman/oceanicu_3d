@@ -1,0 +1,56 @@
+format: '1.1'
+variable: temp_bottom
+title: TEMP_BOTTOM Validation Statistics
+created: '2026-05-04 08:37:40'
+area: NS
+experiment: CMEMS
+author: KB
+project: OceanICU
+institute: BB
+periods:
+- period: 2016-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-04 09:24:22'
+  datasets:
+    NWS-bottomT:
+      rmse: 1.412233
+      bias: -0.613613
+      mae: 0.911491
+      correlation: 0.920767
+      n_points: 58068
+      mean_model: 8.642372
+      mean_obs: 9.255984
+      std_model: 3.07625
+      std_obs: 3.254035
+      error_distribution:
+        min: -10.278856
+        p05: -3.128386
+        p25: -1.129939
+        median: -0.239238
+        p75: 0.167672
+        p95: 0.790375
+        max: 3.411644
+- period: '2016'
+  is_all_period: false
+  model: pyGETM
+  analysed: '2026-05-04 09:24:22'
+  datasets:
+    NWS-bottomT:
+      rmse: 1.412233
+      bias: -0.613613
+      mae: 0.911491
+      correlation: 0.920767
+      n_points: 58068
+      mean_model: 8.642372
+      mean_obs: 9.255984
+      std_model: 3.07625
+      std_obs: 3.254035
+      error_distribution:
+        min: -10.278856
+        p05: -3.128386
+        p25: -1.129939
+        median: -0.239238
+        p75: 0.167672
+        p95: 0.790375
+        max: 3.411644

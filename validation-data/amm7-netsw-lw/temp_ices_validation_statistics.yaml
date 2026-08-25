@@ -1,0 +1,67 @@
+format: '1.1'
+variable: TEMP
+title: TEMP Profile Validation Statistics
+created: '2026-05-06 12:39:49'
+area: AMM7
+experiment: NetSW_LW
+periods:
+- period: 2016-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-07 07:18:25'
+  datasets:
+    ICES point observations:
+      rmse: 1.192921
+      bias: 0.307052
+      mae: 0.846936
+      correlation: 0.959338
+      n_points: 4488796
+      mean_model: 7.945083
+      mean_obs: 7.638031
+      std_model: 4.034082
+      std_obs: 4.049553
+      n_profiles: 28989
+      error_distribution:
+        min: -8.816599
+        p05: -1.40725
+        p25: -0.256554
+        median: 0.265985
+        p75: 0.87383
+        p95: 2.206906
+        max: 9.790371
+      by_depth:
+        0-10m:
+          n: 286658
+          bias: 0.369714
+          rmse: 1.243336
+          correlation: 0.962518
+        10-25m:
+          n: 422418
+          bias: 0.194511
+          rmse: 1.2322
+          correlation: 0.946277
+        25-50m:
+          n: 570518
+          bias: 0.191216
+          rmse: 1.23215
+          correlation: 0.888333
+        50-100m:
+          n: 766720
+          bias: 0.402307
+          rmse: 1.021807
+          correlation: 0.860947
+        100-200m:
+          n: 684363
+          bias: 0.364883
+          rmse: 0.922145
+          correlation: 0.852811
+        200-500m:
+          n: 783657
+          bias: 0.253111
+          rmse: 1.410928
+          correlation: 0.852091
+        500-1000m:
+          n: 586581
+          bias: 0.243926
+          rmse: 1.277147
+          correlation: 0.957559

@@ -4,35 +4,10 @@
     <title>Guides on Ocean Model Validation</title>
     <link>https://bolding-bruggeman.com/oceanicu_3d/guides/</link>
     <description>Recent content in Guides on Ocean Model Validation</description>
-    <generator>Hugo -- 0.155.3</generator>
+    <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/guides/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Data Loader</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/data-loader/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/data-loader/</guid>
-      <description>&lt;h1 id=&#34;data-loader-guide&#34;&gt;Data Loader Guide&lt;/h1&gt;
-&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;data-loader&lt;/code&gt; (entry point for &lt;code&gt;cli/data_loader.py&lt;/code&gt;) is the unified command for
-fetching and inspecting ocean data from multiple sources:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Local NetCDF&lt;/strong&gt; — single file, glob pattern, or directory (auto-concatenated along time)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Local / cloud Zarr&lt;/strong&gt; — local &lt;code&gt;.zarr&lt;/code&gt; stores or cloud URIs (&lt;code&gt;s3://&lt;/code&gt;, &lt;code&gt;gs://&lt;/code&gt;, &lt;code&gt;az://&lt;/code&gt;)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Copernicus Marine (CMEMS)&lt;/strong&gt; — live remote download via &lt;code&gt;copernicus://&lt;/code&gt; URI&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;CMIP6 (PANGEO / intake-esm)&lt;/strong&gt; — via &lt;code&gt;cmip6://&lt;/code&gt; URI&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;ISIMIP&lt;/strong&gt; — via &lt;code&gt;isimip://&lt;/code&gt; URI&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;ERA5 cloud&lt;/strong&gt; — ARCO-ERA5 on Google Cloud (&lt;code&gt;era5gcs://&lt;/code&gt;) or ERA5-PDS on AWS (&lt;code&gt;era5aws://&lt;/code&gt;)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Argo floats&lt;/strong&gt; — Ifremer GDAC ERDDAP (&lt;code&gt;argo://&lt;/code&gt;)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;ICES Oceanographic Database&lt;/strong&gt; — via &lt;code&gt;ices://&lt;/code&gt; or &lt;code&gt;ices-fp://&lt;/code&gt;; pre-exported Feather files via &lt;code&gt;ices-profiles&lt;/code&gt; CLI&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;World Ocean Database (WOD)&lt;/strong&gt; — NOAA ERDDAP via &lt;code&gt;wod-profiles&lt;/code&gt; CLI&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;EMODnet Physics&lt;/strong&gt; — via &lt;code&gt;emodnet://&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;EMODnet Chemistry&lt;/strong&gt; — contaminants (metals, PAHs, organotins) via &lt;code&gt;emodnet_chemistry_loader&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;All sources support domain and time-range subsetting.  Loaded data is returned as
-an &lt;code&gt;xr.Dataset&lt;/code&gt; (or &lt;code&gt;xr.DataArray&lt;/code&gt; when a single variable is requested).&lt;/p&gt;</description>
-    </item>
     <item>
       <title>Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/tidal-analysis/</link>
@@ -122,7 +97,7 @@ gridded observation product.  Three layer modes are supported:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Model NetCDF output accessible as a file-glob pattern&lt;/li&gt;
 &lt;li&gt;A gridded observation file (local or Copernicus Marine / WOA)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;pip install -e .&lt;/code&gt; with the &lt;code&gt;ocean-stats&lt;/code&gt; package&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pip install -e .&lt;/code&gt; with the &lt;code&gt;ocean-post&lt;/code&gt; package&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;recommended-observation-sources&#34;&gt;Recommended observation sources&lt;/h2&gt;
 &lt;table&gt;
@@ -336,76 +311,11 @@ for one scenario at a time or across multiple scenarios simultaneously.&lt;/li&g
 &lt;/ol&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;step-1--bias-correction&#34;&gt;Step 1 — Bias correction&lt;/h2&gt;
-&lt;h3 id=&#34;commands&#34;&gt;Commands&lt;/h3&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;Command&lt;/th&gt;
-          &lt;th&gt;Role&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;bc correct&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;Apply bias correction → write corrected NetCDF&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;bc diagnostics&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;Inspect correction → maps, seasonal cycles, trend plots&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;Aliases: &lt;code&gt;bc-correct&lt;/code&gt;, &lt;code&gt;bc-diagnostics&lt;/code&gt;.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Humidity Bias Correction</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/humidity-bc/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/humidity-bc/</guid>
-      <description>&lt;h1 id=&#34;humidity-bias-correction-guide&#34;&gt;Humidity Bias Correction Guide&lt;/h1&gt;
-&lt;h2 id=&#34;background-two-ways-to-express-atmospheric-humidity&#34;&gt;Background: two ways to express atmospheric humidity&lt;/h2&gt;
-&lt;p&gt;The atmosphere can hold a limited amount of water vapour, and that limit rises
-strongly with temperature.  Near-surface humidity is routinely reported in two
-different forms:&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Dew-point temperature&lt;/strong&gt; (&lt;code&gt;d2m&lt;/code&gt;, unit K or °C) is the temperature to which a
-parcel of air must be cooled at constant pressure before water vapour begins to
-condense.  At the dew point the air is exactly saturated — its actual vapour
-pressure equals the saturation vapour pressure.  ERA5 stores this as the 2 m
-dew-point temperature.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Radiation Bias Correction</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/radiation-bc/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/radiation-bc/</guid>
-      <description>&lt;h1 id=&#34;radiation-bias-correction-guide&#34;&gt;Radiation Bias Correction Guide&lt;/h1&gt;
-&lt;h2 id=&#34;background-downwelling-vs-net-radiation&#34;&gt;Background: downwelling vs net radiation&lt;/h2&gt;
-&lt;p&gt;Surface radiation comes in two forms relevant for bias correction:&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Downwelling radiation&lt;/strong&gt; is what the atmosphere delivers to the surface —
-shortwave (&lt;code&gt;ssrd&lt;/code&gt; / &lt;code&gt;rsds&lt;/code&gt;) from the sun and longwave (&lt;code&gt;strd&lt;/code&gt; / &lt;code&gt;rlds&lt;/code&gt;) from
-greenhouse gases and clouds.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Net radiation&lt;/strong&gt; is what the surface actually exchanges after reflection and
-re-emission.  For shortwave this is &lt;code&gt;ssr = ssrd − reflected SW&lt;/code&gt;; for longwave
-&lt;code&gt;str = strd − surface upwelling LW&lt;/code&gt;.  Net radiation is the physically relevant
-quantity for the ocean heat balance.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>CMEMS / CMIP6 Variable Mapping</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/cmems-cmip6-variable-mapping/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/cmems-cmip6-variable-mapping/</guid>
-      <description>&lt;h1 id=&#34;cmems--cmip6-variable-mapping&#34;&gt;CMEMS / CMIP6 Variable Mapping&lt;/h1&gt;
-&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
-&lt;p&gt;This guide documents how biogeochemical variables are named across three systems:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;CMEMS&lt;/strong&gt; — Copernicus Marine Service products (OBC boundary conditions)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;CMIP6 / ESGF&lt;/strong&gt; — climate model output (scenario forcing)&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;FABM-ERSEM&lt;/strong&gt; — the biogeochemical model variables inside GETM/ERSEM&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;key-unit-difference&#34;&gt;Key unit difference&lt;/h3&gt;
-&lt;p&gt;CMIP6 uses &lt;strong&gt;SI units&lt;/strong&gt; (concentrations in mol m⁻³), whereas CMEMS products typically
-report in &lt;strong&gt;mmol m⁻³&lt;/strong&gt;.  A factor-of-1000 conversion is required when using CMIP6
-data as boundary conditions alongside CMEMS climatologies.&lt;/p&gt;</description>
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; &lt;code&gt;bc correct&lt;/code&gt;, &lt;code&gt;bc diagnostics&lt;/code&gt;, and &lt;code&gt;bc check&lt;/code&gt; have moved to
+&lt;strong&gt;ocean-prep&lt;/strong&gt;.  Install and run them from the &lt;code&gt;ocean-prep&lt;/code&gt; repo.
+Config and guides are at &lt;code&gt;ocean-prep/config/bc_correct_example.yaml&lt;/code&gt; and
+&lt;code&gt;ocean-prep/guides/&lt;/code&gt;.&lt;/p&gt;</description>
     </item>
     <item>
       <title>River Flow and Nutrient Load Projection</title>

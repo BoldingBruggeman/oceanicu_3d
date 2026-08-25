@@ -1,0 +1,127 @@
+format: '1.1'
+variable: DOXY
+title: DOXY Profile Validation Statistics
+created: '2026-05-29 12:42:18'
+area: AMM7
+experiment: CMEMS_prof
+periods:
+- period: 2016-2022
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-29 12:56:38'
+  datasets:
+    ICES point observations:
+      rmse: 22.393432
+      bias: 0.858303
+      mae: 16.548555
+      correlation: 0.720323
+      n_points: 788493
+      mean_model: 261.317773
+      mean_obs: 260.45947
+      std_model: 25.888504
+      std_obs: 31.999719
+      n_profiles: 8867
+      error_distribution:
+        min: -265.940891
+        p05: -30.113189
+        p25: -12.67281
+        median: -0.205865
+        p75: 13.16361
+        p95: 38.03674
+        max: 218.308665
+      by_depth:
+        0-10m:
+          n: 72290
+          bias: 5.38261
+          rmse: 24.04545
+          correlation: 0.773129
+        10-25m:
+          n: 94367
+          bias: 5.051545
+          rmse: 25.706171
+          correlation: 0.656879
+        25-50m:
+          n: 109714
+          bias: 4.418778
+          rmse: 26.374929
+          correlation: 0.635669
+        50-100m:
+          n: 111067
+          bias: 2.513989
+          rmse: 20.947637
+          correlation: 0.690345
+        100-200m:
+          n: 81293
+          bias: -3.219569
+          rmse: 17.251887
+          correlation: 0.660713
+        200-500m:
+          n: 119756
+          bias: -7.012326
+          rmse: 18.993433
+          correlation: 0.742281
+        500-1000m:
+          n: 107712
+          bias: 6.083367
+          rmse: 23.61918
+          correlation: 0.876119
+- period: 2016-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-29 15:16:21'
+  datasets:
+    ICES point observations:
+      rmse: 25.982507
+      bias: 1.518454
+      mae: 18.228925
+      correlation: 0.675814
+      n_points: 968855
+      mean_model: 258.895777
+      mean_obs: 257.377324
+      std_model: 29.504036
+      std_obs: 34.076826
+      n_profiles: 10067
+      error_distribution:
+        min: -925.775434
+        p05: -31.929909
+        p25: -12.254387
+        median: 0.697947
+        p75: 15.094952
+        p95: 44.016351
+        max: 218.308665
+      by_depth:
+        0-10m:
+          n: 93782
+          bias: 4.821832
+          rmse: 24.550564
+          correlation: 0.777173
+        10-25m:
+          n: 114682
+          bias: 2.317251
+          rmse: 31.152043
+          correlation: 0.59466
+        25-50m:
+          n: 129274
+          bias: 1.396287
+          rmse: 33.698464
+          correlation: 0.538308
+        50-100m:
+          n: 130004
+          bias: 0.343745
+          rmse: 24.791292
+          correlation: 0.604646
+        100-200m:
+          n: 97589
+          bias: -4.181341
+          rmse: 18.332285
+          correlation: 0.62962
+        200-500m:
+          n: 148259
+          bias: -5.259217
+          rmse: 18.711506
+          correlation: 0.743759
+        500-1000m:
+          n: 144578
+          bias: 13.045145
+          rmse: 28.466598
+          correlation: 0.861038

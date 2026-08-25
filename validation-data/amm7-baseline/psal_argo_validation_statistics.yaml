@@ -1,0 +1,67 @@
+format: '1.1'
+variable: PSAL
+title: PSAL Profile Validation Statistics
+created: '2026-05-05 10:00:29'
+area: AMM7
+experiment: Baseline
+periods:
+- period: 2016-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-05 10:00:29'
+  datasets:
+    ARGO floats:
+      rmse: 4.334235
+      bias: 0.664587
+      mae: 0.758318
+      correlation: 0.174252
+      n_points: 4905728
+      mean_model: 35.356308
+      mean_obs: 34.69172
+      std_model: 0.308183
+      std_obs: 4.325917
+      n_profiles: 18473
+      error_distribution:
+        min: -26.443256
+        p05: -0.245278
+        p25: -0.012829
+        median: 0.06079
+        p75: 0.183847
+        p95: 0.449978
+        max: 36.889631
+      by_depth:
+        0-10m:
+          n: 97572
+          bias: 0.554633
+          rmse: 3.268436
+          correlation: 0.171869
+        10-25m:
+          n: 146016
+          bias: 0.702534
+          rmse: 3.602419
+          correlation: 0.158011
+        25-50m:
+          n: 232397
+          bias: 0.774686
+          rmse: 3.73049
+          correlation: 0.122869
+        50-100m:
+          n: 425227
+          bias: 0.795017
+          rmse: 3.850566
+          correlation: 0.100378
+        100-200m:
+          n: 495254
+          bias: 0.720787
+          rmse: 4.46442
+          correlation: 0.16271
+        200-500m:
+          n: 1075494
+          bias: 0.713659
+          rmse: 4.616825
+          correlation: 0.200514
+        500-1000m:
+          n: 1117739
+          bias: 0.614786
+          rmse: 4.511691
+          correlation: 0.251975

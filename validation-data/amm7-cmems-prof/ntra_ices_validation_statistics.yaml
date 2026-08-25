@@ -1,0 +1,127 @@
+format: '1.1'
+variable: NTRA
+title: NTRA Profile Validation Statistics
+created: '2026-05-29 12:42:37'
+area: AMM7
+experiment: CMEMS_prof
+periods:
+- period: 2016-2022
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-29 12:56:49'
+  datasets:
+    ICES point observations:
+      rmse: 15.862906
+      bias: 6.70189
+      mae: 7.760569
+      correlation: 0.460744
+      n_points: 10883
+      mean_model: 14.956269
+      mean_obs: 8.254379
+      std_model: 16.152266
+      std_obs: 8.548361
+      n_profiles: 5542
+      error_distribution:
+        min: -129.225476
+        p05: -2.355653
+        p25: -0.315946
+        median: 1.367174
+        p75: 6.044869
+        p95: 40.934897
+        max: 128.893663
+      by_depth:
+        0-10m:
+          n: 5725
+          bias: 11.184137
+          rmse: 21.510931
+          correlation: 0.462013
+        10-25m:
+          n: 1177
+          bias: 3.267259
+          rmse: 5.749654
+          correlation: 0.756501
+        25-50m:
+          n: 1295
+          bias: 2.891909
+          rmse: 4.932868
+          correlation: 0.333858
+        50-100m:
+          n: 911
+          bias: 1.903499
+          rmse: 3.998733
+          correlation: 0.268893
+        100-200m:
+          n: 468
+          bias: 0.082503
+          rmse: 2.390909
+          correlation: 0.505965
+        200-500m:
+          n: 437
+          bias: -0.480508
+          rmse: 1.465636
+          correlation: 0.682741
+        500-1000m:
+          n: 408
+          bias: -0.526405
+          rmse: 1.157218
+          correlation: 0.668951
+- period: 2016-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-29 15:16:40'
+  datasets:
+    ICES point observations:
+      rmse: 16.648701
+      bias: 7.16147
+      mae: 8.137765
+      correlation: 0.409026
+      n_points: 12333
+      mean_model: 15.054472
+      mean_obs: 7.893003
+      std_model: 16.384458
+      std_obs: 8.242037
+      n_profiles: 6264
+      error_distribution:
+        min: -129.225476
+        p05: -2.270371
+        p25: -0.210837
+        median: 1.434327
+        p75: 6.358462
+        p95: 41.977598
+        max: 128.893663
+      by_depth:
+        0-10m:
+          n: 6441
+          bias: 10.624449
+          rmse: 21.185712
+          correlation: 0.443724
+        10-25m:
+          n: 1539
+          bias: 6.528703
+          rmse: 14.376521
+          correlation: 0.264706
+        25-50m:
+          n: 1508
+          bias: 4.422287
+          rmse: 9.717569
+          correlation: -0.03972
+        50-100m:
+          n: 999
+          bias: 3.194719
+          rmse: 7.653554
+          correlation: -0.084479
+        100-200m:
+          n: 525
+          bias: 0.791516
+          rmse: 3.557512
+          correlation: 0.223778
+        200-500m:
+          n: 451
+          bias: -0.415524
+          rmse: 1.506441
+          correlation: 0.663668
+        500-1000m:
+          n: 408
+          bias: -0.526405
+          rmse: 1.157218
+          correlation: 0.668951

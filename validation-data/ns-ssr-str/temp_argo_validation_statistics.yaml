@@ -1,0 +1,67 @@
+format: '1.1'
+variable: TEMP
+title: TEMP Profile Validation Statistics
+created: '2026-05-04 13:53:29'
+area: NS
+experiment: SSR_STR
+periods:
+- period: 2016-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-04 20:59:19'
+  datasets:
+    ARGO floats:
+      rmse: 1.12415
+      bias: -0.211086
+      mae: 0.706941
+      correlation: 0.881359
+      n_points: 9278
+      mean_model: 8.445803
+      mean_obs: 8.656889
+      std_model: 1.361941
+      std_obs: 2.097725
+      n_profiles: 38
+      error_distribution:
+        min: -5.444904
+        p05: -2.750774
+        p25: -0.503206
+        median: 0.119877
+        p75: 0.301745
+        p95: 1.044808
+        max: 3.653065
+      by_depth:
+        0-10m:
+          n: 190
+          bias: -1.174589
+          rmse: 1.585235
+          correlation: 0.919313
+        10-25m:
+          n: 537
+          bias: -1.178986
+          rmse: 1.98159
+          correlation: 0.772516
+        25-50m:
+          n: 861
+          bias: -1.33299
+          rmse: 2.363378
+          correlation: 0.705258
+        50-100m:
+          n: 1730
+          bias: -0.494514
+          rmse: 1.330247
+          correlation: 0.692765
+        100-200m:
+          n: 2809
+          bias: -0.013071
+          rmse: 0.420344
+          correlation: 0.719397
+        200-500m:
+          n: 2940
+          bias: 0.238483
+          rmse: 0.414522
+          correlation: 0.230332
+        500-1000m:
+          n: 211
+          bias: 1.121426
+          rmse: 1.124129
+          correlation: -0.163627

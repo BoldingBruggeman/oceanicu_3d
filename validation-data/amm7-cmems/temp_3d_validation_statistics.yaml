@@ -1,0 +1,250 @@
+format: '1.1'
+variable: temp
+title: TEMP Validation Statistics
+created: '2026-05-08 10:23:23'
+area: AMM7
+experiment: CMEMS
+author: RT
+project: OceanICU
+institute: BB
+periods:
+- period: 2016-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-29 09:16:59'
+  datasets:
+    WOA:
+      rmse: 2.77338
+      bias: -0.973394
+      mae: 1.959953
+      correlation: 0.823894
+      n_points: 115591776
+      mean_model: 8.205706
+      mean_obs: 9.179101
+      std_model: 4.582144
+      std_obs: 3.759792
+      error_distribution:
+        min: -8.945814
+        p05: -6.064509
+        p25: -2.348702
+        median: -0.37646
+        p75: 0.624758
+        p95: 2.29914
+        max: 12.364826
+      monthly:
+        Jan:
+          variable: Jan
+          n_points: 9632648
+          rmse: 2.659363
+          bias: -1.095894
+          mae: 1.842675
+          correlation: 0.791559
+          mean_model: 7.618443
+          mean_obs: 8.714337
+          std_model: 3.949954
+          std_obs: 3.338411
+          min_diff: -8.842419
+          max_diff: 11.338195
+          p05_diff: -6.032452
+          p25_diff: -2.355379
+          p50_diff: -0.398656
+          p75_diff: 0.502291
+          p95_diff: 1.775221
+        Feb:
+          variable: Feb
+          n_points: 9632648
+          rmse: 2.646463
+          bias: -1.107512
+          mae: 1.826358
+          correlation: 0.783242
+          mean_model: 7.448579
+          mean_obs: 8.55609
+          std_model: 3.847738
+          std_obs: 3.247242
+          min_diff: -8.772632
+          max_diff: 10.823522
+          p05_diff: -6.053468
+          p25_diff: -2.320619
+          p50_diff: -0.41112
+          p75_diff: 0.469341
+          p95_diff: 1.72013
+        Mar:
+          variable: Mar
+          n_points: 9632648
+          rmse: 2.640644
+          bias: -1.093634
+          mae: 1.815444
+          correlation: 0.776654
+          mean_model: 7.375652
+          mean_obs: 8.469286
+          std_model: 3.788909
+          std_obs: 3.226302
+          min_diff: -8.756038
+          max_diff: 10.737516
+          p05_diff: -6.046977
+          p25_diff: -2.275252
+          p50_diff: -0.386787
+          p75_diff: 0.486169
+          p95_diff: 1.680551
+        Apr:
+          variable: Apr
+          n_points: 9632648
+          rmse: 2.642386
+          bias: -1.06026
+          mae: 1.812456
+          correlation: 0.779262
+          mean_model: 7.506195
+          mean_obs: 8.566455
+          std_model: 3.844461
+          std_obs: 3.226593
+          min_diff: -8.764575
+          max_diff: 10.423417
+          p05_diff: -6.068716
+          p25_diff: -2.266395
+          p50_diff: -0.332615
+          p75_diff: 0.529022
+          p95_diff: 1.750576
+        May:
+          variable: May
+          n_points: 9632648
+          rmse: 2.701717
+          bias: -0.928146
+          mae: 1.890403
+          correlation: 0.789835
+          mean_model: 7.900604
+          mean_obs: 8.828749
+          std_model: 4.128039
+          std_obs: 3.427136
+          min_diff: -8.808475
+          max_diff: 10.338642
+          p05_diff: -6.121104
+          p25_diff: -2.17453
+          p50_diff: -0.266571
+          p75_diff: 0.698217
+          p95_diff: 2.218632
+        Jun:
+          variable: Jun
+          n_points: 9632648
+          rmse: 2.920784
+          bias: -0.736121
+          mae: 2.120316
+          correlation: 0.806324
+          mean_model: 8.54055
+          mean_obs: 9.276671
+          std_model: 4.774421
+          std_obs: 3.729531
+          min_diff: -8.900006
+          max_diff: 12.100016
+          p05_diff: -6.091949
+          p25_diff: -2.241237
+          p50_diff: -0.295249
+          p75_diff: 0.890681
+          p95_diff: 3.492123
+        Jul:
+          variable: Jul
+          n_points: 9632648
+          rmse: 3.022564
+          bias: -0.716395
+          mae: 2.194753
+          correlation: 0.832467
+          mean_model: 8.98632
+          mean_obs: 9.702715
+          std_model: 5.282138
+          std_obs: 4.158263
+          min_diff: -8.945814
+          max_diff: 12.364826
+          p05_diff: -6.104555
+          p25_diff: -2.282207
+          p50_diff: -0.349761
+          p75_diff: 0.898168
+          p95_diff: 3.75865
+        Aug:
+          variable: Aug
+          n_points: 9632648
+          rmse: 2.992436
+          bias: -0.771172
+          mae: 2.189172
+          correlation: 0.852088
+          mean_model: 9.191711
+          mean_obs: 9.962883
+          std_model: 5.503125
+          std_obs: 4.436803
+          min_diff: -8.758548
+          max_diff: 12.27832
+          p05_diff: -6.053488
+          p25_diff: -2.400625
+          p50_diff: -0.385188
+          p75_diff: 0.880762
+          p95_diff: 3.493494
+        Sep:
+          variable: Sep
+          n_points: 9632648
+          rmse: 2.871499
+          bias: -0.911061
+          mae: 2.088498
+          correlation: 0.86037
+          mean_model: 9.062916
+          mean_obs: 9.973977
+          std_model: 5.326834
+          std_obs: 4.371732
+          min_diff: -8.881812
+          max_diff: 12.019421
+          p05_diff: -6.032297
+          p25_diff: -2.451437
+          p50_diff: -0.435396
+          p75_diff: 0.741271
+          p95_diff: 2.882045
+        Oct:
+          variable: Oct
+          n_points: 9632648
+          rmse: 2.760265
+          bias: -1.084095
+          mae: 1.963158
+          correlation: 0.853624
+          mean_model: 8.658871
+          mean_obs: 9.742966
+          std_model: 4.867643
+          std_obs: 4.032526
+          min_diff: -8.856311
+          max_diff: 10.930026
+          p05_diff: -6.090321
+          p25_diff: -2.491885
+          p50_diff: -0.466531
+          p75_diff: 0.534399
+          p95_diff: 2.213148
+        Nov:
+          variable: Nov
+          n_points: 9632648
+          rmse: 2.706071
+          bias: -1.072952
+          mae: 1.901705
+          correlation: 0.830604
+          mean_model: 8.258469
+          mean_obs: 9.331421
+          std_model: 4.461182
+          std_obs: 3.701581
+          min_diff: -8.79326
+          max_diff: 12.032527
+          p05_diff: -6.058078
+          p25_diff: -2.436936
+          p50_diff: -0.399845
+          p75_diff: 0.567913
+          p95_diff: 1.935423
+        Dec:
+          variable: Dec
+          n_points: 9632648
+          rmse: 2.675859
+          bias: -1.10349
+          mae: 1.874502
+          correlation: 0.812869
+          mean_model: 7.920165
+          mean_obs: 9.023656
+          std_model: 4.184429
+          std_obs: 3.451917
+          min_diff: -8.939812
+          max_diff: 11.460073
+          p05_diff: -6.024292
+          p25_diff: -2.446426
+          p50_diff: -0.416765
+          p75_diff: 0.531411
+          p95_diff: 1.857904

@@ -1,0 +1,67 @@
+format: '1.1'
+variable: PSAL
+title: PSAL Profile Validation Statistics
+created: '2026-05-05 09:34:58'
+area: AMM7
+experiment: ObsKd
+periods:
+- period: 2016-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-07 07:32:29'
+  datasets:
+    ICES point observations:
+      rmse: 1.056343
+      bias: 0.231208
+      mae: 0.324346
+      correlation: 0.679386
+      n_points: 4479563
+      mean_model: 35.011707
+      mean_obs: 34.780498
+      std_model: 0.747833
+      std_obs: 1.380582
+      n_profiles: 32134
+      error_distribution:
+        min: -34.425378
+        p05: -0.235921
+        p25: -0.000767
+        median: 0.114783
+        p75: 0.237293
+        p95: 0.71069
+        max: 34.516334
+      by_depth:
+        0-10m:
+          n: 288165
+          bias: 1.314689
+          rmse: 3.646082
+          correlation: 0.5575
+        10-25m:
+          n: 420745
+          bias: 0.500401
+          rmse: 1.443435
+          correlation: 0.680541
+        25-50m:
+          n: 567989
+          bias: 0.204591
+          rmse: 0.526776
+          correlation: 0.764168
+        50-100m:
+          n: 763824
+          bias: 0.144295
+          rmse: 0.298265
+          correlation: 0.79171
+        100-200m:
+          n: 681882
+          bias: 0.089444
+          rmse: 0.180302
+          correlation: 0.808799
+        200-500m:
+          n: 782467
+          bias: 0.103801
+          rmse: 0.145602
+          correlation: 0.831519
+        500-1000m:
+          n: 586611
+          bias: 0.062463
+          rmse: 0.132634
+          correlation: 0.889658

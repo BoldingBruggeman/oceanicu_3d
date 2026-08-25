@@ -1,0 +1,56 @@
+format: '1.1'
+variable: salt_bottom
+title: SALT_BOTTOM Validation Statistics
+created: '2026-05-04 08:38:02'
+area: NS
+experiment: CMEMS
+author: KB
+project: OceanICU
+institute: BB
+periods:
+- period: 2016-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-04 09:24:44'
+  datasets:
+    NWS-salinity:
+      rmse: 0.48794
+      bias: 0.074883
+      mae: 0.279645
+      correlation: 0.839823
+      n_points: 58068
+      mean_model: 34.73843
+      mean_obs: 34.663551
+      std_model: 0.881626
+      std_obs: 0.798895
+      error_distribution:
+        min: -10.17235
+        p05: -0.629576
+        p25: -0.028458
+        median: 0.114447
+        p75: 0.267054
+        p95: 0.522998
+        max: 9.781069
+- period: '2016'
+  is_all_period: false
+  model: pyGETM
+  analysed: '2026-05-04 09:24:44'
+  datasets:
+    NWS-salinity:
+      rmse: 0.48794
+      bias: 0.074883
+      mae: 0.279645
+      correlation: 0.839823
+      n_points: 58068
+      mean_model: 34.73843
+      mean_obs: 34.663551
+      std_model: 0.881626
+      std_obs: 0.798895
+      error_distribution:
+        min: -10.17235
+        p05: -0.629576
+        p25: -0.028458
+        median: 0.114447
+        p75: 0.267054
+        p95: 0.522998
+        max: 9.781069

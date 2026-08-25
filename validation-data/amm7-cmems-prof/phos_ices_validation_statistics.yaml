@@ -1,0 +1,127 @@
+format: '1.1'
+variable: PHOS
+title: PHOS Profile Validation Statistics
+created: '2026-05-29 12:42:54'
+area: AMM7
+experiment: CMEMS_prof
+periods:
+- period: 2016-2022
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-29 12:56:58'
+  datasets:
+    ICES point observations:
+      rmse: 0.487498
+      bias: -0.052167
+      mae: 0.213362
+      correlation: 0.518205
+      n_points: 12705
+      mean_model: 0.551777
+      mean_obs: 0.603944
+      std_model: 0.307964
+      std_obs: 0.566502
+      n_profiles: 6166
+      error_distribution:
+        min: -12.990562
+        p05: -0.39221
+        p25: -0.123179
+        median: -0.016668
+        p75: 0.096789
+        p95: 0.411669
+        max: 1.284056
+      by_depth:
+        0-10m:
+          n: 6471
+          bias: -0.011558
+          rmse: 0.414938
+          correlation: 0.337349
+        10-25m:
+          n: 1472
+          bias: 0.060595
+          rmse: 0.241296
+          correlation: 0.569206
+        25-50m:
+          n: 1327
+          bias: -0.000705
+          rmse: 0.299457
+          correlation: 0.239457
+        50-100m:
+          n: 876
+          bias: -0.135947
+          rmse: 0.43941
+          correlation: 0.363787
+        100-200m:
+          n: 550
+          bias: -0.184168
+          rmse: 0.471126
+          correlation: 0.435034
+        200-500m:
+          n: 507
+          bias: -0.342898
+          rmse: 0.917197
+          correlation: 0.217419
+        500-1000m:
+          n: 535
+          bias: -0.445778
+          rmse: 1.26724
+          correlation: 0.060125
+- period: 2016-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-29 15:16:56'
+  datasets:
+    ICES point observations:
+      rmse: 0.47005
+      bias: -0.031472
+      mae: 0.214993
+      correlation: 0.489775
+      n_points: 15065
+      mean_model: 0.546716
+      mean_obs: 0.578188
+      std_model: 0.30525
+      std_obs: 0.535697
+      n_profiles: 7364
+      error_distribution:
+        min: -12.990562
+        p05: -0.377934
+        p25: -0.119527
+        median: -0.009439
+        p75: 0.113175
+        p95: 0.441914
+        max: 4.766171
+      by_depth:
+        0-10m:
+          n: 7749
+          bias: -0.015996
+          rmse: 0.395621
+          correlation: 0.3473
+        10-25m:
+          n: 2001
+          bias: 0.10597
+          rmse: 0.283064
+          correlation: 0.436356
+        25-50m:
+          n: 1656
+          bias: 0.055412
+          rmse: 0.357047
+          correlation: 0.026878
+        50-100m:
+          n: 990
+          bias: -0.095264
+          rmse: 0.460781
+          correlation: 0.167444
+        100-200m:
+          n: 622
+          bias: -0.167097
+          rmse: 0.445852
+          correlation: 0.392462
+        200-500m:
+          n: 526
+          bias: -0.33258
+          rmse: 0.901386
+          correlation: 0.216372
+        500-1000m:
+          n: 540
+          bias: -0.441691
+          rmse: 1.261398
+          correlation: 0.055223

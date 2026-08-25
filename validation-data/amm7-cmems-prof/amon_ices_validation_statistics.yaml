@@ -1,0 +1,117 @@
+format: '1.1'
+variable: AMON
+title: AMON Profile Validation Statistics
+created: '2026-05-29 12:43:37'
+area: AMM7
+experiment: CMEMS_prof
+periods:
+- period: 2016-2022
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-29 12:57:40'
+  datasets:
+    ICES point observations:
+      rmse: 2.383259
+      bias: -0.750099
+      mae: 1.099082
+      correlation: 0.202813
+      n_points: 2107
+      mean_model: 0.702488
+      mean_obs: 1.452587
+      std_model: 0.377805
+      std_obs: 2.308851
+      n_profiles: 1601
+      error_distribution:
+        min: -23.310491
+        p05: -5.04934
+        p25: -0.721898
+        median: 0.043836
+        p75: 0.297146
+        p95: 0.681792
+        max: 1.814048
+      by_depth:
+        0-10m:
+          n: 1683
+          bias: -0.924193
+          rmse: 2.65215
+          correlation: 0.135526
+        10-25m:
+          n: 170
+          bias: 0.082961
+          rmse: 0.401981
+          correlation: 0.179023
+        25-50m:
+          n: 157
+          bias: -0.1333
+          rmse: 0.642197
+          correlation: 0.379087
+        50-100m:
+          n: 59
+          bias: -0.297465
+          rmse: 0.755995
+          correlation: 0.576472
+        100-200m:
+          n: 31
+          bias: -0.023876
+          rmse: 0.33107
+          correlation: 0.371214
+        200-500m:
+          n: 7
+          bias: 0.010531
+          rmse: 0.174723
+          correlation: -0.414878
+- period: 2016-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-05-29 15:17:56'
+  datasets:
+    ICES point observations:
+      rmse: 2.383259
+      bias: -0.750099
+      mae: 1.099082
+      correlation: 0.202813
+      n_points: 2107
+      mean_model: 0.702488
+      mean_obs: 1.452587
+      std_model: 0.377805
+      std_obs: 2.308851
+      n_profiles: 1601
+      error_distribution:
+        min: -23.310491
+        p05: -5.04934
+        p25: -0.721898
+        median: 0.043836
+        p75: 0.297146
+        p95: 0.681792
+        max: 1.814048
+      by_depth:
+        0-10m:
+          n: 1683
+          bias: -0.924193
+          rmse: 2.65215
+          correlation: 0.135526
+        10-25m:
+          n: 170
+          bias: 0.082961
+          rmse: 0.401981
+          correlation: 0.179023
+        25-50m:
+          n: 157
+          bias: -0.1333
+          rmse: 0.642197
+          correlation: 0.379087
+        50-100m:
+          n: 59
+          bias: -0.297465
+          rmse: 0.755995
+          correlation: 0.576472
+        100-200m:
+          n: 31
+          bias: -0.023876
+          rmse: 0.33107
+          correlation: 0.371214
+        200-500m:
+          n: 7
+          bias: 0.010531
+          rmse: 0.174723
+          correlation: -0.414878
