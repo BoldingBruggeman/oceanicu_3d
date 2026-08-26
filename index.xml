@@ -6,12 +6,12 @@
     <description>Recent content on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 25 Aug 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 26 Aug 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AMM7 — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</guid>
       <description>&lt;h1 id=&#34;amm7-analysis-overview&#34;&gt;AMM7 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;AMM7&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -63,7 +63,7 @@
     <item>
       <title>ENA4 — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4/overview/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4/overview/</guid>
       <description>&lt;h1 id=&#34;ena4-analysis-overview&#34;&gt;ENA4 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA4&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -79,7 +79,7 @@
     <item>
       <title>ENA8 — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8/overview/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8/overview/</guid>
       <description>&lt;h1 id=&#34;ena8-analysis-overview&#34;&gt;ENA8 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA8&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -95,7 +95,7 @@
     <item>
       <title>NS — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</guid>
       <description>&lt;h1 id=&#34;ns-analysis-overview&#34;&gt;NS Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NS&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -151,6 +151,22 @@
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/&#34;&gt;SSR_STR&lt;/a&gt;&lt;/strong&gt; — 2016-2023&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NSe — Analysis Overview</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</link>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</guid>
+      <description>&lt;h1 id=&#34;nse-analysis-overview&#34;&gt;NSe Analysis Overview&lt;/h1&gt;
+&lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NSe&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
+&lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No horizontal surface validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>Tidal Analysis</title>
@@ -663,30 +679,47 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
     <item>
       <title>AMM7</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</guid>
       <description>AMM7 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>ENA4</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ena4/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ena4/</guid>
       <description>ENA4 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>ENA8</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ena8/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ena8/</guid>
       <description>ENA8 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>NS</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</guid>
       <description>NS modeling area — validation results and experiment overview.</description>
+    </item>
+    <item>
+      <title>NSe</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</link>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</guid>
+      <description>NSe modeling area — validation results and experiment overview.</description>
+    </item>
+    <item>
+      <title>NSe — Future Boundary Conditions</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</link>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</guid>
+      <description>&lt;p&gt;Cross-model, cross-scenario summary of NSe&amp;rsquo;s future open-boundary conditions: delta-change temperature/salinity (CMIP6, bias-corrected against the CMEMS Northwest Shelf reanalysis) and tidal elevation/currents (TPXO9 plus the CMIP6 ensemble-mean sea-level trend). Biogeochemical boundaries are not yet included here &amp;ndash; CMIP6 ESM biogeochemistry is considerably simpler than the CMEMS regional product, and whether a delta-change approach is even appropriate for it is still under evaluation.&lt;/p&gt;
+&lt;h2 id=&#34;delta-change-temperature--salinity&#34;&gt;Delta-change (temperature / salinity)&lt;/h2&gt;
+&lt;h3 id=&#34;temperature-thetao&#34;&gt;Temperature (thetao)&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;Source: AMM7/AMM15 delta-change: GFDL-ESM4/ssp126 [1985-01-01–2014-12-31 vs 2015-01-01–2100-12-31]&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>AMM7 - Experiment CMEMS</title>

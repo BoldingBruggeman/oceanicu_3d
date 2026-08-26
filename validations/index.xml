@@ -6,12 +6,12 @@
     <description>Recent content in Validations on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 25 Aug 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 26 Aug 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/validations/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AMM7 — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</guid>
       <description>&lt;h1 id=&#34;amm7-analysis-overview&#34;&gt;AMM7 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;AMM7&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -63,7 +63,7 @@
     <item>
       <title>ENA4 — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4/overview/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena4/overview/</guid>
       <description>&lt;h1 id=&#34;ena4-analysis-overview&#34;&gt;ENA4 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA4&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -79,7 +79,7 @@
     <item>
       <title>ENA8 — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8/overview/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ena8/overview/</guid>
       <description>&lt;h1 id=&#34;ena8-analysis-overview&#34;&gt;ENA8 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;ENA8&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -95,7 +95,7 @@
     <item>
       <title>NS — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</guid>
       <description>&lt;h1 id=&#34;ns-analysis-overview&#34;&gt;NS Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NS&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -151,6 +151,22 @@
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/&#34;&gt;SSR_STR&lt;/a&gt;&lt;/strong&gt; — 2016-2023&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NSe — Analysis Overview</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</link>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</guid>
+      <description>&lt;h1 id=&#34;nse-analysis-overview&#34;&gt;NSe Analysis Overview&lt;/h1&gt;
+&lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NSe&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
+&lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No horizontal surface validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>AMM7 - Experiment CMEMS</title>

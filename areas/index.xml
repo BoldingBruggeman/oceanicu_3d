@@ -6,35 +6,52 @@
     <description>Recent content in Modeling Areas on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 25 Aug 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 26 Aug 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/areas/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AMM7</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</guid>
       <description>AMM7 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>ENA4</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ena4/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ena4/</guid>
       <description>ENA4 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>ENA8</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ena8/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ena8/</guid>
       <description>ENA8 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>NS</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</link>
-      <pubDate>Tue, 25 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</guid>
       <description>NS modeling area — validation results and experiment overview.</description>
+    </item>
+    <item>
+      <title>NSe</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</link>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</guid>
+      <description>NSe modeling area — validation results and experiment overview.</description>
+    </item>
+    <item>
+      <title>NSe — Future Boundary Conditions</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</link>
+      <pubDate>Wed, 26 Aug 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</guid>
+      <description>&lt;p&gt;Cross-model, cross-scenario summary of NSe&amp;rsquo;s future open-boundary conditions: delta-change temperature/salinity (CMIP6, bias-corrected against the CMEMS Northwest Shelf reanalysis) and tidal elevation/currents (TPXO9 plus the CMIP6 ensemble-mean sea-level trend). Biogeochemical boundaries are not yet included here &amp;ndash; CMIP6 ESM biogeochemistry is considerably simpler than the CMEMS regional product, and whether a delta-change approach is even appropriate for it is still under evaluation.&lt;/p&gt;
+&lt;h2 id=&#34;delta-change-temperature--salinity&#34;&gt;Delta-change (temperature / salinity)&lt;/h2&gt;
+&lt;h3 id=&#34;temperature-thetao&#34;&gt;Temperature (thetao)&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;Source: AMM7/AMM15 delta-change: GFDL-ESM4/ssp126 [1985-01-01–2014-12-31 vs 2015-01-01–2100-12-31]&lt;/em&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
