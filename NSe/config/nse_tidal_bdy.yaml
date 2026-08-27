@@ -6,9 +6,17 @@
 #   CMIP6 monthly mean SSH (zos) and depth-integrated barotropic transport (uo, vo)
 #
 # Output (one hourly NetCDF, all on T-grid, dims: time × nbdyp):
-#   zos  [m]     = TPXO tidal elevation  + CMIP6 monthly zos
-#   uo   [m²/s]  = TPXO tidal U-transport + CMIP6 depth-integrated uo
-#   vo   [m²/s]  = TPXO tidal V-transport + CMIP6 depth-integrated vo
+#   zos  [m]     = TPXO tidal elevation  + (CMIP6 monthly zos  minus its own reference_period mean)
+#   uo   [m²/s]  = TPXO tidal U-transport + (CMIP6 depth-integrated uo minus its own reference_period mean)
+#   vo   [m²/s]  = TPXO tidal V-transport + (CMIP6 depth-integrated vo minus its own reference_period mean)
+#
+# CMIP6 zos/uo/vo have no common physical datum across models (fixed
+# 2026-08-27: raw absolute zos leaked each model's own arbitrary offset
+# straight into the boundary -- confirmed as a flat, non-physical -0.45 m
+# for the entire GFDL-ESM4 2015-2100 record). Our reference datum is MSL,
+# so each model's own cmip6.reference_period historical-period mean is
+# removed before adding to TPXO, making the CMIP6 term a real anomaly
+# around 0.
 #
 # Usage
 # -----
@@ -41,6 +49,11 @@ cmip6:
   download_if_missing: true  # download from ESGF when local files absent
   variant_label: r1i1p1f1
   grid_label: gn
+  reference_period:          # MSL datum: subtract this 'historical'-experiment
+    start: "1985-01-01"      # time-mean (per point) from future zos/uo/vo before
+    end:   "2014-12-31"      # adding TPXO -- matches the delta-change thetao/so
+                              # reference window. Omit this section to use the
+                              # same default.
 
 # ---------------------------------------------------------------------------
 # Boundary points — T-grid only (all variables on same grid)
