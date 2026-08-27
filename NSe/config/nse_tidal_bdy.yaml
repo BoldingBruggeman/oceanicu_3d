@@ -47,8 +47,21 @@ cmip6:
   local_root: /data/CMIP6    # only required when access: local
   table_id: [Oday, Omon]     # try daily first, fall back to monthly
   download_if_missing: true  # download from ESGF when local files absent
-  variant_label: r1i1p1f1
-  grid_label: gn
+  # variant_label intentionally omitted: auto-resolved per source_id (e.g.
+  # CNRM-ESM2-1 -> r1i1p1f2, everything else -> r1i1p1f1) -- same
+  # mechanism nse_delta_bdy.yaml already uses. Real bug fixed 2026-08-27:
+  # this used to hardcode r1i1p1f1 for every model, silently wrong for
+  # CNRM-ESM2-1. Set explicitly here (or under member_defaults:
+  # {ModelName: rXiXpXfX}) only to override.
+  # grid_label intentionally omitted too: auto-resolved per source_id
+  # (GFDL-ESM4's Omon output is 'gr', not 'gn' like the other two
+  # models). Real bug fixed 2026-08-27: this used to hardcode 'gn' for
+  # every model, silently wrong for GFDL-ESM4 -- its uo/vo ESGF search
+  # found nothing under the wrong grid, so GFDL's uo/vo silently fell
+  # back to tidal-only (confirmed: period-means were flat ~0 and
+  # byte-identical between ssp126/ssp370 at every decade -- pure TPXO,
+  # no CMIP6 term at all). Set explicitly here (or under grid_defaults:
+  # {ModelName: grX}) to override.
   reference_period:          # MSL datum: subtract this 'historical'-experiment
     start: "1985-01-01"      # time-mean (per point) from future zos/uo/vo before
     end:   "2014-12-31"      # adding TPXO -- matches the delta-change thetao/so
