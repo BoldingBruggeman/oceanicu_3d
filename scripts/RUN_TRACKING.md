@@ -52,6 +52,7 @@ happy to run with no DB configured at all (see "Dry-run" below).
 ```bash
 python oceanicu_runs.py add \
     --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
+    --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
     --script generated_nse_cmip6.py \
     --config generated_nse_cmip6_config.yaml \
     --data-roots-file bb-server1_data_roots.yaml \
@@ -70,21 +71,20 @@ filename**, resolved against `run-root`, so they just need to live there
 `annual`/`monthly`/`daily`, `chunk-multiplier` is how many of those per
 chunk (5 x annual = 5-year chunks).
 
-**`run-root` defaults to `run-id`** (omitted above) -- the common case:
-they're the same relative path already. Pass `--run-root` explicitly only
-when they differ. Either way it can be relative, for the same reason
-`script`/`config` can: you often `add` a run from a workstation that
-doesn't know exactly where its output will actually land on the
-production machine. A relative `run-root` is resolved against
-`OCEANICU_RUN_ROOT_BASE`, an env var set independently on each machine
-that actually touches this run's files (chunk_runner.py,
-`run_chunk.slurm`, is_paused's own PAUSE-file check) -- not stored in the
-DB, same idea as `OCEANICU_RUN_DB`/`OCEANICU_RELAY_DIR`. An absolute
-`run-root` is used as-is and needs no base path at all; existing runs
-registered with one keep working unchanged. If a relative `run-root` is
-used and `OCEANICU_RUN_ROOT_BASE` isn't set on whichever machine is
-currently touching the filesystem, that machine fails loudly rather than
-guessing.
+**`run-root` can be relative too**, for the same reason `script`/`config`
+can: you often `add` a run from a workstation that doesn't know exactly
+where its output will actually land on the production machine (it's
+often, but not always, the same relative path as `run-id`, as above --
+`--run-root` is always explicit, never inferred from `run-id`). A
+relative `run-root` is resolved against `OCEANICU_RUN_ROOT_BASE`, an env
+var set independently on each machine that actually touches this run's
+files (chunk_runner.py, `run_chunk.slurm`, is_paused's own PAUSE-file
+check) -- not stored in the DB, same idea as
+`OCEANICU_RUN_DB`/`OCEANICU_RELAY_DIR`. An absolute `run-root` is used
+as-is and needs no base path at all; existing runs registered with one
+keep working unchanged. If a relative `run-root` is used and
+`OCEANICU_RUN_ROOT_BASE` isn't set on whichever machine is currently
+touching the filesystem, that machine fails loudly rather than guessing.
 
 ```bash
 export OCEANICU_RUN_ROOT_BASE=/data/OceanICU/oceanicu_3d/experiments   # on the production machine
