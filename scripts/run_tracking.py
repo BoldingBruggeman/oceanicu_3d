@@ -116,11 +116,42 @@ CREATE TABLE IF NOT EXISTS chunks (
 );
 
 CREATE INDEX IF NOT EXISTS idx_chunks_run ON chunks(run_id);
+
+-- Append-only audit log: when a run was registered, when each chunk
+-- started/finished, when the run itself reached a terminal state, and
+-- every pause/resume/rerun/priority/stop-date/chunk-size change --
+-- everything oceanicu_runs.py can do to a run, in the order it happened.
+-- Deliberately NOT foreign-keyed to runs(run_id): remove_run only ever
+-- deletes registry/chunk rows (see its own docstring), never touches
+-- files -- history is the same idea applied to the audit trail itself,
+-- so it survives a run being removed (and, if the same run_id is ever
+-- re-added later, shows its full lifecycle across that gap too).
+CREATE TABLE IF NOT EXISTS history (
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id    TEXT NOT NULL,
+    timestamp TEXT NOT NULL,
+    event     TEXT NOT NULL,
+    detail    TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_history_run ON history(run_id);
 """
 
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _log_history(conn: sqlite3.Connection, run_id: str, event: str, detail: Optional[str] = None) -> None:
+    """Append one audit-log row. Not itself @_rpc_or_local -- it's only
+    ever called from inside another already-decorated function's own
+    body, with a real conn either way (locally, or on the relay's own
+    side of an RPC dispatch), so it needs no remote-transparency of its
+    own. Caller is responsible for the surrounding conn.commit()."""
+    conn.execute(
+        "INSERT INTO history (run_id, timestamp, event, detail) VALUES (?, ?, ?, ?)",
+        (run_id, _now(), event, detail),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -239,6 +270,17 @@ def _rpc_or_local(func):
     return wrapper
 
 
+@_rpc_or_local
+def list_history(conn: sqlite3.Connection, run_id: str) -> list[sqlite3.Row]:
+    """Full audit trail for one run, oldest first -- registration, every
+    chunk start/finish, the run itself reaching a terminal status, and
+    every pause/resume/rerun/priority/stop-date/chunk-size change. Shown
+    by oceanicu_runs.py show."""
+    return conn.execute(
+        "SELECT * FROM history WHERE run_id = ? ORDER BY id", (run_id,)
+    ).fetchall()
+
+
 @contextmanager
 def connect(
     db_path: Optional[Union[str, Path, "RemoteSpec"]] = None,
@@ -337,6 +379,11 @@ def add_run(
         (run_id, run_root, script, config, data_roots_file, initial_date, stop_date,
          chunk_kind, chunk_multiplier, np, launcher, fabm, priority, notes, now, now),
     )
+    _log_history(
+        conn, run_id, "added",
+        f"{chunk_multiplier} {chunk_kind} chunk(s) per step, {initial_date} -> {stop_date}, "
+        f"priority={priority}, script={script}",
+    )
     conn.commit()
 
 
@@ -351,6 +398,11 @@ def remove_run(conn: sqlite3.Connection, run_id: str, *, force: bool = False) ->
             f"if you're sure (this only removes registry/chunk-history rows, "
             f"it never touches files on disk)."
         )
+    # Logged before the delete, not after -- history itself is never
+    # deleted (no FK to runs, see the schema's own comment), but it would
+    # be a strange audit trail if its very last entry for a removed run
+    # didn't mention the removal at all.
+    _log_history(conn, run_id, "removed", "forced (was in_progress)" if force and row["status"] == "in_progress" else None)
     conn.execute("DELETE FROM chunks WHERE run_id = ?", (run_id,))
     conn.execute("DELETE FROM runs WHERE run_id = ?", (run_id,))
     conn.commit()
@@ -374,10 +426,13 @@ def list_runs(
 
 @_rpc_or_local
 def set_priority(conn: sqlite3.Connection, run_id: str, priority: int) -> None:
+    old = get_run(conn, run_id)
     conn.execute(
         "UPDATE runs SET priority = ?, updated_at = ? WHERE run_id = ?",
         (priority, _now(), run_id),
     )
+    if old is not None:
+        _log_history(conn, run_id, "priority_changed", f"{old['priority']} -> {priority}")
     conn.commit()
 
 
@@ -391,10 +446,13 @@ def set_stop_date(conn: sqlite3.Connection, run_id: str, stop_date: str) -> None
     date already reached just means the run is already 'done' towards its
     (revised) goal -- it does not undo or delete any chunk already run
     past the new date."""
+    old = get_run(conn, run_id)
     conn.execute(
         "UPDATE runs SET stop_date = ?, updated_at = ? WHERE run_id = ?",
         (stop_date, _now(), run_id),
     )
+    if old is not None:
+        _log_history(conn, run_id, "stop_date_changed", f"{old['stop_date']} -> {stop_date}")
     conn.commit()
     recompute_run_status(conn, run_id)
 
@@ -486,6 +544,7 @@ def set_chunk_settings(
     """Change chunk size for the REMAINING (not-yet-run) part of a run.
     Already-completed chunks and their date-based restart filenames are
     untouched -- the next chunk simply picks up the new size."""
+    old = get_run(conn, run_id)
     fields, params = [], []
     if chunk_kind is not None:
         fields.append("chunk_kind = ?"); params.append(chunk_kind)
@@ -496,6 +555,14 @@ def set_chunk_settings(
     fields.append("updated_at = ?"); params.append(_now())
     params.append(run_id)
     conn.execute(f"UPDATE runs SET {', '.join(fields)} WHERE run_id = ?", params)
+    if old is not None:
+        changes = []
+        if chunk_kind is not None and chunk_kind != old["chunk_kind"]:
+            changes.append(f"chunk_kind: {old['chunk_kind']} -> {chunk_kind}")
+        if chunk_multiplier is not None and chunk_multiplier != old["chunk_multiplier"]:
+            changes.append(f"chunk_multiplier: {old['chunk_multiplier']} -> {chunk_multiplier}")
+        if changes:
+            _log_history(conn, run_id, "chunk_settings_changed", "; ".join(changes))
     conn.commit()
 
 
@@ -507,7 +574,24 @@ def set_control(conn: sqlite3.Connection, run_id: str, control: str) -> None:
         "UPDATE runs SET control = ?, updated_at = ? WHERE run_id = ?",
         (control, _now(), run_id),
     )
+    # "pause_requested"/"run" are what oceanicu_runs.py pause/resume
+    # actually set -- named for what the user DID, not the raw column
+    # value, so the history reads like an audit trail rather than a
+    # column dump. "paused" is only ever set some other way (e.g. a
+    # future direct API caller), kept as its own event for that case.
+    event = {"pause_requested": "pause_requested", "run": "resumed", "paused": "paused"}[control]
+    _log_history(conn, run_id, event)
     conn.commit()
+    # Real, pre-existing inconsistency found 2026-08-28 while adding this
+    # history log: neither this function nor chunk_runner.py's own
+    # "already paused, not starting a new chunk" bail-out ever called
+    # recompute_run_status, so the `status` column could lag `control`
+    # indefinitely (is_paused() -- the check everything else actually
+    # uses -- was always correct; only the displayed `status` enum was
+    # stale). Fixed here since it's a one-line, clearly-safe addition
+    # exactly where the inconsistency lives, not a separate unrelated
+    # change.
+    recompute_run_status(conn, run_id)
 
 
 # ---------------------------------------------------------------------------
@@ -556,6 +640,10 @@ def start_chunk(
         "AND status != 'in_progress'",
         (now, run_id),
     )
+    detail = f"chunk {chunk_index}: {start} -> {stop}"
+    if load_restart:
+        detail += f" (load_restart={load_restart})"
+    _log_history(conn, run_id, "chunk_started", detail)
     conn.commit()
 
 
@@ -577,8 +665,20 @@ def finish_chunk(
            WHERE run_id = ? AND chunk_index = ?""",
         (_now(), exit_code, int(nan_detected), status, run_id, chunk_index),
     )
+    event = "chunk_finished" if exit_code == 0 else "chunk_failed"
+    detail = f"chunk {chunk_index} exit_code={exit_code}" + (" nan_detected" if nan_detected else "")
+    _log_history(conn, run_id, event, detail)
     conn.commit()
-    recompute_run_status(conn, run_id)
+    new_status = recompute_run_status(conn, run_id)
+    # "a full simulation stops" (user, 2026-08-28): a terminal status --
+    # reached stop_date (clean or with warnings) or failed outright --
+    # gets its own top-level history entry distinct from the per-chunk
+    # one above, so scanning history for "did this run ever finish" (or
+    # "when did it finish") doesn't require re-deriving it from chunk
+    # rows every time.
+    if new_status in ("complete", "complete_with_warnings", "failed"):
+        _log_history(conn, run_id, f"run_{new_status}", f"after chunk {chunk_index}")
+        conn.commit()
 
 
 @_rpc_or_local
@@ -652,6 +752,7 @@ def rerun_from(conn: sqlite3.Connection, run_id: str, *, chunk_index: Optional[i
         "UPDATE runs SET control = 'run', updated_at = ? WHERE run_id = ?",
         (_now(), run_id),
     )
+    _log_history(conn, run_id, "rerun", f"dropped {n_dropped} chunk(s) from index {chunk_index} onward")
     conn.commit()
     recompute_run_status(conn, run_id)
     return n_dropped

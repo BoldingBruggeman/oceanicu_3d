@@ -110,7 +110,8 @@ def _snapshot(db_path: Path) -> dict:
     with rt.connect(db_path) as conn:
         runs = [dict(r) for r in rt.list_runs(conn)]
         chunks = {r["run_id"]: [dict(c) for c in rt.list_chunks(conn, r["run_id"])] for r in runs}
-    return {"runs": runs, "chunks": chunks}
+        history = {r["run_id"]: [dict(h) for h in rt.list_history(conn, r["run_id"])] for r in runs}
+    return {"runs": runs, "chunks": chunks, "history": history}
 
 
 def _print_diff(before: dict, after: dict) -> None:
@@ -142,6 +143,12 @@ def _print_diff(before: dict, after: dict) -> None:
         n_after = len(after["chunks"].get(rid, []))
         if n_before != n_after:
             print(f"    chunks: {n_before} -> {n_after}")
+        h_before = before["history"].get(rid, [])
+        h_after = after["history"].get(rid, [])
+        if len(h_after) != len(h_before):
+            print(f"    history: {len(h_before)} -> {len(h_after)} entries")
+            for h in h_after[len(h_before):]:
+                print(f"      + {h['event']}" + (f": {h['detail']}" if h['detail'] else ""))
 
 
 def _preview_chunk_runner(scratch_db: Path, run_id: str) -> None:
@@ -209,6 +216,10 @@ def cmd_show(args: argparse.Namespace) -> int:
             ["chunk_index", "start", "stop", "status", "exit_code", "nan_detected",
              "slurm_job_id", "start_time", "end_time"],
         )
+        print()
+        print("history:")
+        history = rt.list_history(conn, args.run_id)
+        _print_table(history, ["timestamp", "event", "detail"])
     return 0
 
 
