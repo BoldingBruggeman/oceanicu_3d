@@ -212,10 +212,23 @@ def cmd_show(args: argparse.Namespace) -> int:
         print()
         print("chunks:")
         chunks = rt.list_chunks(conn, args.run_id)
+        # Full sha256 is 64 hex chars -- far too wide for this table, and a
+        # short prefix is all a human needs to eyeball "did this change
+        # between chunks" (run_tracking.start_chunk's own script_changed/
+        # config_changed history events already carry the same prefix
+        # length, so a hash spotted here is directly greppable there).
+        chunks_display = [
+            {
+                **dict(c),
+                "script_sha256": (c["script_sha256"] or "")[:12],
+                "config_sha256": (c["config_sha256"] or "")[:12],
+            }
+            for c in chunks
+        ]
         _print_table(
-            chunks,
+            chunks_display,
             ["chunk_index", "start", "stop", "status", "exit_code", "nan_detected",
-             "slurm_job_id", "start_time", "end_time"],
+             "script_sha256", "config_sha256", "slurm_job_id", "start_time", "end_time"],
         )
         print()
         print("history:")
@@ -282,7 +295,7 @@ def cmd_rerun(args: argparse.Namespace) -> int:
     else:
         chunk_index = None  # "from the present chunk"
     with rt.connect(args.db) as conn:
-        n = rt.rerun_from(conn, args.run_id, chunk_index=chunk_index, user=rt._current_user())
+        n = rt.rerun_from(conn, args.run_id, chunk_index=chunk_index, user=rt._current_user(), note=args.note)
     print(f"{args.run_id}: dropped {n} chunk record(s) -- next submission redoes from there")
     return 0
 
@@ -381,6 +394,12 @@ def main() -> int:
 
     rr = sub.add_parser("rerun"); _add_common(rr); rr.set_defaults(func=cmd_rerun)
     rr.add_argument("--run-id", required=True)
+    rr.add_argument("--note", default=None,
+                     help="optional free-text reason, recorded in the history log alongside "
+                          "this rerun (e.g. 'fixed off-by-one in river forcing script') -- "
+                          "complements the automatic script_changed/config_changed detection "
+                          "(see chunk_runner.py), which shows THAT something changed; this is "
+                          "for saying WHY.")
     g3 = rr.add_mutually_exclusive_group()
     g3.add_argument("--from-chunk", type=int, default=None, metavar="N")
     g3.add_argument("--from-current", action="store_true")

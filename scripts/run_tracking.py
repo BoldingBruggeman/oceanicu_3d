@@ -111,6 +111,19 @@ CREATE TABLE IF NOT EXISTS chunks (
     exit_code     INTEGER,
     nan_detected  INTEGER NOT NULL DEFAULT 0,
     status        TEXT NOT NULL DEFAULT 'running',
+    -- script_sha256/config_sha256 added 2026-08-28 (see _migrate_schema --
+    -- CREATE TABLE IF NOT EXISTS alone won't add columns to an
+    -- already-existing chunks table). Content hash of run['script']/
+    -- ['config'] AT THE MOMENT this chunk started -- lets a human editing
+    -- the driver script after a failure (a real, expected workflow: chunk
+    -- blows up, fix a bug in the script, `rerun --from-current`) actually
+    -- SEE that the script changed between attempts, rather than the DB
+    -- only ever recording the unchanging path string. See
+    -- chunk_runner.py's own "script_changed"/"config_changed" history
+    -- event, logged automatically by comparing this chunk's hash against
+    -- the run's previous chunk.
+    script_sha256 TEXT,
+    config_sha256 TEXT,
     PRIMARY KEY (run_id, chunk_index),
     FOREIGN KEY (run_id) REFERENCES runs(run_id)
 );
@@ -148,9 +161,17 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
     alone can't express -- new columns on a table that may already exist
     from before the column was added. Safe to run on every connect(): each
     check is cheap and a no-op once already applied."""
-    cols = {row["name"] for row in conn.execute("PRAGMA table_info(history)")}
-    if "user" not in cols:
+    history_cols = {row["name"] for row in conn.execute("PRAGMA table_info(history)")}
+    if "user" not in history_cols:
         conn.execute("ALTER TABLE history ADD COLUMN user TEXT")
+        conn.commit()
+
+    chunk_cols = {row["name"] for row in conn.execute("PRAGMA table_info(chunks)")}
+    if "script_sha256" not in chunk_cols:
+        conn.execute("ALTER TABLE chunks ADD COLUMN script_sha256 TEXT")
+        conn.commit()
+    if "config_sha256" not in chunk_cols:
+        conn.execute("ALTER TABLE chunks ADD COLUMN config_sha256 TEXT")
         conn.commit()
 
 
@@ -678,15 +699,47 @@ def start_chunk(
     conn: sqlite3.Connection, *, run_id: str, chunk_index: int, start: str, stop: str,
     chunk_dir: str, load_restart: Optional[str], save_restart: str,
     slurm_job_id: Optional[str] = None, user: Optional[str] = None,
+    script_sha256: Optional[str] = None, config_sha256: Optional[str] = None,
 ) -> None:
     now = _now()
+
+    # Compare against the most recent chunk still ON RECORD for this run
+    # (BEFORE inserting this chunk's own row) -- catches a real, verifiable
+    # edit to the driver script/config between attempts (a chunk blows up,
+    # someone fixes a bug in the script, `rerun --from-current`, this
+    # chunk_index runs again) without relying on anyone remembering to
+    # mention it. Still correct across a rerun even though rerun_from
+    # deletes the failed attempt's own row first: comparing against
+    # whatever chunk IS still there (the last one that actually succeeded)
+    # answers the same real question -- "did the script change since the
+    # last chunk that ran" -- either way. None for the very first chunk of
+    # a run (nothing to compare against yet).
+    prev = conn.execute(
+        "SELECT script_sha256, config_sha256 FROM chunks WHERE run_id = ? "
+        "ORDER BY chunk_index DESC LIMIT 1",
+        (run_id,),
+    ).fetchone()
+    if prev is not None:
+        if script_sha256 and prev["script_sha256"] and script_sha256 != prev["script_sha256"]:
+            _log_history(
+                conn, run_id, "script_changed",
+                f"{prev['script_sha256'][:12]} -> {script_sha256[:12]} (before chunk {chunk_index})",
+                user=user,
+            )
+        if config_sha256 and prev["config_sha256"] and config_sha256 != prev["config_sha256"]:
+            _log_history(
+                conn, run_id, "config_changed",
+                f"{prev['config_sha256'][:12]} -> {config_sha256[:12]} (before chunk {chunk_index})",
+                user=user,
+            )
+
     conn.execute(
         """INSERT INTO chunks (run_id, chunk_index, start, stop, chunk_dir,
                load_restart, save_restart, slurm_job_id, submit_time,
-               start_time, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'running')""",
+               start_time, status, script_sha256, config_sha256)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'running', ?, ?)""",
         (run_id, chunk_index, start, stop, chunk_dir, load_restart, save_restart,
-         slurm_job_id, now, now),
+         slurm_job_id, now, now, script_sha256, config_sha256),
     )
     conn.execute(
         "UPDATE runs SET status = 'in_progress', updated_at = ? WHERE run_id = ? "
@@ -771,7 +824,10 @@ def list_chunks(conn: sqlite3.Connection, run_id: str) -> list[sqlite3.Row]:
 
 
 @_rpc_or_local
-def rerun_from(conn: sqlite3.Connection, run_id: str, *, chunk_index: Optional[int] = None, user: Optional[str] = None) -> int:
+def rerun_from(
+    conn: sqlite3.Connection, run_id: str, *, chunk_index: Optional[int] = None,
+    user: Optional[str] = None, note: Optional[str] = None,
+) -> int:
     """Rewind a run's tracked history so its NEXT execution redoes chunk
     *chunk_index* onward (dropping any record of it and everything after).
     Chunks before it are untouched, so the redo naturally resumes from the
@@ -797,6 +853,21 @@ def rerun_from(conn: sqlite3.Connection, run_id: str, *, chunk_index: Optional[i
             return 0  # nothing has run yet, nothing to rewind
         chunk_index = int(row["n"])
 
+    # Capture the hash of the chunk actually being redone BEFORE dropping
+    # it: start_chunk's own script_changed/config_changed detection
+    # compares the NEXT chunk against whatever's still in the chunks
+    # table, but this DELETE is about to remove the very row that would
+    # otherwise be compared against -- most visible when chunk_index is
+    # the run's first chunk (nothing precedes it to fall back to), where
+    # that automatic detection would otherwise have nothing to compare
+    # against at all. Embedding it here means the information is never
+    # lost even in that case -- just read from the rerun event's own text
+    # instead of a separate script_changed event.
+    dropped = conn.execute(
+        "SELECT script_sha256, config_sha256 FROM chunks WHERE run_id = ? AND chunk_index = ?",
+        (run_id, chunk_index),
+    ).fetchone()
+
     cur = conn.execute(
         "DELETE FROM chunks WHERE run_id = ? AND chunk_index >= ?", (run_id, chunk_index)
     )
@@ -805,7 +876,13 @@ def rerun_from(conn: sqlite3.Connection, run_id: str, *, chunk_index: Optional[i
         "UPDATE runs SET control = 'run', updated_at = ? WHERE run_id = ?",
         (_now(), run_id),
     )
-    _log_history(conn, run_id, "rerun", f"dropped {n_dropped} chunk(s) from index {chunk_index} onward", user=user)
+    detail = f"dropped {n_dropped} chunk(s) from index {chunk_index} onward"
+    if dropped is not None and (dropped["script_sha256"] or dropped["config_sha256"]):
+        detail += (f" (chunk {chunk_index} was script={(dropped['script_sha256'] or '?')[:12]} "
+                   f"config={(dropped['config_sha256'] or '?')[:12]})")
+    if note:
+        detail += f" -- {note}"
+    _log_history(conn, run_id, "rerun", detail, user=user)
     conn.commit()
     recompute_run_status(conn, run_id)
     return n_dropped

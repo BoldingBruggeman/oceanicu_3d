@@ -248,6 +248,26 @@ compare.
 `--from-scratch` is the same primitive with chunk 0 -- drops everything,
 next run starts at `initial_date` with no restart.
 
+**A rerun after manually editing the driver script (a real, expected
+workflow -- a chunk blows up, you fix a bug in the script, rerun) shows up
+in the history log automatically**, not just as a "rerun happened" line:
+every chunk records a content hash (sha256) of the script/config it
+actually ran with, and the next chunk that starts compares its own hash
+against the previous one, logging a `script_changed`/`config_changed`
+history entry if they differ. When the chunk being redone is the run's
+*first* one (nothing earlier to compare against), the dropped chunk's own
+hash is instead embedded directly in the `rerun` event's text, so the
+before/after is still fully visible -- just read from one line instead of
+two. Add `--note "why"` to `rerun` to record the reason alongside it:
+
+```bash
+python oceanicu_runs.py rerun --run-id ... --from-current --note "fixed off-by-one in river forcing"
+```
+
+`oceanicu_runs.py show --run-id ...` prints the full history (who did
+what, when, including these events) as its own table, and the chunks
+table shows each chunk's own script/config hash (first 12 hex chars).
+
 ## Remove a run from the registry
 
 ```bash

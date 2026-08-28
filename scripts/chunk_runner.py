@@ -37,12 +37,29 @@ stop_date, or paused) -- tracked mode only; 2 = the chunk itself failed
 from __future__ import annotations
 
 import argparse
+import hashlib
 import sqlite3
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
+
+
+def _sha256_of(path: Optional[str]) -> Optional[str]:
+    """Content hash of *path*, or None if it's unset/unreadable -- used to
+    let run_tracking.start_chunk detect a real edit to the driver script/
+    config between chunk attempts (see its own docstring), rather than the
+    DB only ever recording an unchanging path string. Failing quietly
+    (missing file, permissions) rather than raising: this is a nice-to-
+    have audit signal, not something that should ever block a chunk from
+    starting."""
+    if not path:
+        return None
+    try:
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    except OSError:
+        return None
 
 
 def _parse_date(s: str, calendar: str):
@@ -310,6 +327,7 @@ def _main_tracked(args: argparse.Namespace) -> int:
                 start=start.strftime("%Y-%m-%d"), stop=stop.strftime("%Y-%m-%d"),
                 chunk_dir=str(chunk_dir), load_restart=load_restart, save_restart=save_restart,
                 slurm_job_id=args.slurm_job_id, user=user,
+                script_sha256=_sha256_of(run["script"]), config_sha256=_sha256_of(run["config"]),
             )
         except sqlite3.IntegrityError:
             print(f"{args.run_id}: chunk {chunk_index} was just claimed by another process "
