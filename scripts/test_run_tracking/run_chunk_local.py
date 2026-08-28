@@ -75,6 +75,20 @@ def _wait_for_delay_all(db: str) -> None:
         time.sleep(poll)
 
 
+def _wait_for_run_chunk_delay(db: str, run_id: str) -> None:
+    """Persistent, per-run pacing (oceanicu_runs.py set-chunk-delay / the
+    run's own chunk_delay_seconds column, default 0) -- mirrors
+    run_chunk.slurm's own _wait_for_run_chunk_delay bash function.
+    Different from DELAY_ALL: an ongoing setting for ONE specific run,
+    not a global one-shot timed pause."""
+    with rt.connect(db) as conn:
+        run = rt.get_run(conn, run_id)
+    delay = (run["chunk_delay_seconds"] if run else 0) or 0
+    if delay > 0:
+        print(f"  {run_id}: chunk_delay_seconds={delay} -- waiting before starting...", flush=True)
+        time.sleep(delay)
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--db", required=True, help="registry path (local file or ssh://host/path)")
@@ -98,6 +112,7 @@ def main() -> int:
             first_job = False
         else:
             _wait_for_delay_all(args.db)
+            _wait_for_run_chunk_delay(args.db, run_id)
 
         print(f"\n=== {run_id}: running next chunk ===", flush=True)
         result = subprocess.run(

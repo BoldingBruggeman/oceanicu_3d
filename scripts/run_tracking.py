@@ -92,6 +92,18 @@ CREATE TABLE IF NOT EXISTS runs (
     status           TEXT NOT NULL DEFAULT 'not_started',
     control          TEXT NOT NULL DEFAULT 'run',
     priority         INTEGER NOT NULL DEFAULT 0,
+    -- chunk_delay_seconds added 2026-08-28 (see _migrate_schema for an
+    -- already-existing runs table -- CREATE TABLE IF NOT EXISTS alone
+    -- won't add it there). Persistent, per-run pacing: wait this many
+    -- seconds before EACH resubmission of this run's own chunks, or
+    -- before picking this run up as the next queued one -- unlike
+    -- DELAY_ALL (a global, one-shot TIMED pause), this is an ongoing
+    -- setting for this run specifically, exactly the same shape as
+    -- chunk_multiplier/priority: default 0 (no delay, previous
+    -- behaviour), settable at `add` time, changeable live via
+    -- set-chunk-delay -- takes effect on the very next hand-off, never
+    -- retroactively, same as chunk_multiplier/stop_date already do.
+    chunk_delay_seconds INTEGER NOT NULL DEFAULT 0,
     notes            TEXT,
     created_at       TEXT NOT NULL,
     updated_at       TEXT NOT NULL
@@ -173,6 +185,11 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         conn.commit()
     if "config_sha256" not in chunk_cols:
         conn.execute("ALTER TABLE chunks ADD COLUMN config_sha256 TEXT")
+        conn.commit()
+
+    run_cols = {row["name"] for row in conn.execute("PRAGMA table_info(runs)")}
+    if "chunk_delay_seconds" not in run_cols:
+        conn.execute("ALTER TABLE runs ADD COLUMN chunk_delay_seconds INTEGER NOT NULL DEFAULT 0")
         conn.commit()
 
 
@@ -436,7 +453,7 @@ def add_run(
     initial_date: str, stop_date: str, data_roots_file: Optional[str] = None,
     chunk_kind: str = "annual", chunk_multiplier: int = 1, np: int = 1,
     launcher: str = "srun", priority: int = 0, notes: Optional[str] = None,
-    fabm: Optional[str] = None, user: Optional[str] = None,
+    fabm: Optional[str] = None, chunk_delay_seconds: int = 0, user: Optional[str] = None,
 ) -> None:
     if launcher not in ("srun", "mpiexec"):
         raise ValueError(f"launcher must be 'srun' or 'mpiexec', got {launcher!r}")
@@ -444,17 +461,19 @@ def add_run(
     conn.execute(
         """INSERT INTO runs (run_id, run_root, script, config, data_roots_file,
                initial_date, stop_date, chunk_kind, chunk_multiplier, np, launcher, fabm,
-               status, control, priority, notes, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'not_started', 'run', ?, ?, ?, ?)""",
+               status, control, priority, chunk_delay_seconds, notes, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'not_started', 'run', ?, ?, ?, ?, ?)""",
         (run_id, run_root, script, config, data_roots_file, initial_date, stop_date,
-         chunk_kind, chunk_multiplier, np, launcher, fabm, priority, notes, now, now),
+         chunk_kind, chunk_multiplier, np, launcher, fabm, priority, chunk_delay_seconds,
+         notes, now, now),
     )
-    _log_history(
-        conn, run_id, "added",
+    detail = (
         f"{chunk_multiplier} {chunk_kind} chunk(s) per step, {initial_date} -> {stop_date}, "
-        f"priority={priority}, script={script}",
-        user=user,
+        f"priority={priority}, script={script}"
     )
+    if chunk_delay_seconds:
+        detail += f", chunk_delay_seconds={chunk_delay_seconds}"
+    _log_history(conn, run_id, "added", detail, user=user)
     conn.commit()
 
 
@@ -508,6 +527,30 @@ def set_priority(conn: sqlite3.Connection, run_id: str, priority: int, user: Opt
     )
     if old is not None:
         _log_history(conn, run_id, "priority_changed", f"{old['priority']} -> {priority}", user=user)
+    conn.commit()
+
+
+@_rpc_or_local
+def set_chunk_delay(
+    conn: sqlite3.Connection, run_id: str, chunk_delay_seconds: int, user: Optional[str] = None,
+) -> None:
+    """Persistent, per-run pacing (see the schema's own comment on this
+    column): wait this many seconds before EACH future resubmission of
+    this run's own chunks, or before picking it up as the next queued
+    run. Unlike DELAY_ALL (a global, one-shot TIMED pause), this has no
+    expiry -- 0 (the default) means no delay; set back to 0 to cancel.
+    Takes effect on the very next hand-off, never retroactively, same as
+    set_priority/set_stop_date/set_chunk_settings."""
+    old = get_run(conn, run_id)
+    conn.execute(
+        "UPDATE runs SET chunk_delay_seconds = ?, updated_at = ? WHERE run_id = ?",
+        (chunk_delay_seconds, _now(), run_id),
+    )
+    if old is not None:
+        _log_history(
+            conn, run_id, "chunk_delay_changed",
+            f"{old['chunk_delay_seconds']} -> {chunk_delay_seconds}", user=user,
+        )
     conn.commit()
 
 

@@ -237,6 +237,23 @@ Only affects chunks that haven't run yet. Restart files are named by
 actual date, not by chunk index, so a size change never conflicts with
 what's already on disk.
 
+## Pace one run's own chunks
+
+Persistent, per-run setting -- wait N seconds before EACH future
+resubmission of THIS run's own chunks (or before it's picked up as the
+next queued run), unlike `delay-all` above (a global, one-shot TIMED
+pause covering every run). Default 0 (no delay) if never set:
+
+```bash
+python oceanicu_runs.py add ... --chunk-delay-seconds 30   # at registration time
+python oceanicu_runs.py set-chunk-delay --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --seconds 30
+python oceanicu_runs.py set-chunk-delay --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --seconds 0  # cancel
+```
+
+Same "takes effect on the very next hand-off, never retroactively"
+behaviour as `chunk-size`/`set-stop-date` above -- read fresh from the DB
+each time, not cached anywhere. Shown in both `list` and `show`.
+
 ## Run only partway, or change the target mid-run
 
 Some experiments only need to run to 2050, not 2100 -- that's just

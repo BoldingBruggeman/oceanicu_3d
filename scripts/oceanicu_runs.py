@@ -9,6 +9,7 @@
     oceanicu_runs.py list   [--status in_progress] [--like MPI-ESM1-2-HR]
     oceanicu_runs.py show   --run-id ...              # run + full chunk history
     oceanicu_runs.py chunk-size --run-id ... --chunk-kind ... --chunk-multiplier ...
+    oceanicu_runs.py set-chunk-delay --run-id ... --seconds N   # persistent, per-run pacing
     oceanicu_runs.py pause  --run-id ... | --all
     oceanicu_runs.py resume --run-id ... | --all
     oceanicu_runs.py delay-all --seconds N | --clear
@@ -50,7 +51,7 @@ import run_tracking as rt
 
 _RUN_COLUMNS = [
     "run_id", "status", "control", "chunk_kind", "chunk_multiplier",
-    "initial_date", "stop_date", "priority",
+    "initial_date", "stop_date", "priority", "chunk_delay_seconds",
 ]
 
 
@@ -185,7 +186,8 @@ def cmd_add(args: argparse.Namespace) -> int:
             config=args.config, initial_date=args.initial_date, stop_date=args.stop_date,
             data_roots_file=args.data_roots_file, chunk_kind=args.chunk_kind,
             chunk_multiplier=args.chunk_multiplier, np=args.np, launcher=args.launcher,
-            priority=args.priority, notes=args.notes, fabm=args.fabm, user=rt._current_user(),
+            priority=args.priority, notes=args.notes, fabm=args.fabm,
+            chunk_delay_seconds=args.chunk_delay_seconds, user=rt._current_user(),
         )
     print(f"added {args.run_id!r}")
     return 0
@@ -251,6 +253,14 @@ def cmd_set_priority(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         rt.set_priority(conn, args.run_id, args.priority, user=rt._current_user())
     print(f"{args.run_id}: priority set to {args.priority}")
+    return 0
+
+
+def cmd_set_chunk_delay(args: argparse.Namespace) -> int:
+    with rt.connect(args.db) as conn:
+        rt.set_chunk_delay(conn, args.run_id, args.seconds, user=rt._current_user())
+    print(f"{args.run_id}: chunk_delay_seconds set to {args.seconds} "
+          f"(takes effect on the next chunk/resubmission)")
     return 0
 
 
@@ -369,6 +379,12 @@ def main() -> int:
     a.add_argument("--np", type=int, default=1)
     a.add_argument("--launcher", default="srun", choices=["srun", "mpiexec"])
     a.add_argument("--priority", type=int, default=0)
+    a.add_argument("--chunk-delay-seconds", type=int, default=0,
+                    help="wait this many seconds before EACH future resubmission of this "
+                         "run's own chunks, or before it's picked up as the next queued run "
+                         "(default: 0, no delay). Persistent, not one-shot -- changeable "
+                         "later with set-chunk-delay. Different from delay-all, which is a "
+                         "global, one-shot TIMED pause, not tied to one run.")
     a.add_argument("--notes", default=None)
     # Mirrors the generated driver script's own --fabm/--no-fabm exactly
     # (see pygetm_config.codegen's _emit_argparse) -- None here means "no
@@ -403,6 +419,16 @@ def main() -> int:
     sp = sub.add_parser("set-priority"); _add_common(sp); sp.set_defaults(func=cmd_set_priority)
     sp.add_argument("--run-id", required=True)
     sp.add_argument("--priority", type=int, required=True)
+
+    scd = sub.add_parser(
+        "set-chunk-delay",
+        help="persistent, per-run pacing -- wait N seconds before EACH future resubmission "
+             "of this run's own chunks (0 = no delay, the default). Different from "
+             "delay-all, which is a global, one-shot TIMED pause covering every run.",
+    )
+    _add_common(scd); scd.set_defaults(func=cmd_set_chunk_delay)
+    scd.add_argument("--run-id", required=True)
+    scd.add_argument("--seconds", type=int, required=True, metavar="N")
 
     sd = sub.add_parser("set-stop-date"); _add_common(sd); sd.set_defaults(func=cmd_set_stop_date)
     sd.add_argument("--run-id", required=True)

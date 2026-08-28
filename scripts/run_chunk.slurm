@@ -118,6 +118,28 @@ with rt.connect() as conn:
     done
 }
 
+# Persistent, per-run pacing (oceanicu_runs.py set-chunk-delay / the
+# run's own chunk_delay_seconds column, default 0) -- unlike DELAY_ALL
+# above (a global, one-shot TIMED pause), this is an ongoing setting for
+# ONE specific run, read fresh each call so a change picks up on the very
+# next hand-off. $1 is the run_id about to be (re)submitted -- the NEXT
+# run's own delay applies when picking a new one up from the queue, not
+# the run that just finished.
+_wait_for_run_chunk_delay() {
+    local target_run_id="$1"
+    local delay
+    delay=$(python -c "
+import run_tracking as rt
+with rt.connect() as conn:
+    run = rt.get_run(conn, '$target_run_id')
+    print(run['chunk_delay_seconds'] if run else 0)
+")
+    if [ "$delay" -gt 0 ]; then
+        echo "  $target_run_id: chunk_delay_seconds=$delay -- waiting before submitting..."
+        sleep "$delay"
+    fi
+}
+
 # --- run the chunk -----------------------------------------------------
 # chunk_runner.py itself invokes the driver script (via srun -- the
 # preferred launcher, matching the real production SLURM scripts; see
@@ -202,6 +224,7 @@ with rt.connect() as conn:
     fi
     echo "Picking up next queued run: $NEXT_RUN_ID"
     _wait_for_delay_all
+    _wait_for_run_chunk_delay "$NEXT_RUN_ID"
     sbatch --export=RUN_ID="$NEXT_RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
     exit 0
 fi
@@ -218,5 +241,6 @@ if [ "$PAUSED" = "True" ]; then
 fi
 
 _wait_for_delay_all
+_wait_for_run_chunk_delay "$RUN_ID"
 echo "$RUN_ID: submitting next chunk"
 sbatch --export=RUN_ID="$RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
