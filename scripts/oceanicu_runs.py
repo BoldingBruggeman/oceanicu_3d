@@ -175,7 +175,15 @@ def _preview_chunk_runner(scratch_db: Path, run_id: str) -> None:
         [sys.executable, str(script), "--db", str(scratch_db), "--run-id", run_id, "--dry-run"],
         capture_output=True, text=True,
     )
-    for line in (result.stdout + result.stderr).splitlines():
+    output = result.stdout + result.stderr
+    if "OCEANICU_RUN_ROOT_BASE is not set" in output:
+        print(f"    -- can't preview: run_root is relative and this machine has no "
+              f"OCEANICU_RUN_ROOT_BASE set. NOT a real problem -- this is the same known "
+              f"limitation as the PAUSE-file check (see RUN_TRACKING.md's \"One real "
+              f"limitation\" note): resolved on whichever machine actually runs the chunk, "
+              f"once that machine's OCEANICU_RUN_ROOT_BASE is exported there. --")
+        return
+    for line in output.splitlines():
         print(f"    {line}")
 
 

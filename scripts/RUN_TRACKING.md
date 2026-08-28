@@ -534,6 +534,18 @@ filesystem (it'll just read as absent). The DB `control` column and the
 `PAUSE_ALL` sentinel (which lives next to the DB, i.e. on the relay) both
 work correctly from anywhere, including in that preview.
 
+Same category, second instance: a **relative `run_root`** resolves
+against `OCEANICU_RUN_ROOT_BASE` (see above), which is also set
+per-machine and normally only on the production machine. The
+`--dry-run` "what run_chunk.slurm would do next" preview runs
+`chunk_runner.py --dry-run` for real, right there on the add-machine, so
+it needs a real resolved path -- if that machine has no
+`OCEANICU_RUN_ROOT_BASE` of its own, that one preview step can't render
+and says so explicitly instead of showing a raw error. Not a sign of a
+real problem: the actual `add` still registers correctly either way, and
+resolution happens for real once the chunk actually runs on the
+production machine, which does have its own `OCEANICU_RUN_ROOT_BASE` set.
+
 ## What's not built yet
 
 - **No folder scanning.** `add`/`remove` are the only way runs enter or
