@@ -18,6 +18,18 @@
 # script finds its OWN location at runtime (see SELF/SCRIPT_DIR below) --
 # deploy it and chunk_runner.py/run_tracking.py together anywhere on the
 # production machine, no path to hardcode or configure for that part.
+#
+# OCEANICU_CHUNK_DELAY_SECONDS (default 0, per user, 2026-08-28): pause
+# this many seconds right before self-resubmitting for the NEXT chunk of
+# the same run OR the next queued run -- never while a chunk is actually
+# executing, only at the hand-off between one job finishing and the next
+# one starting. A throttle, not a pause/resume substitute (those already
+# exist -- see oceanicu_runs.py pause/resume -- and stop resubmission
+# entirely; this just paces it). Settable from the outside on the first
+# `sbatch --export=...` and carried forward automatically on every
+# self-resubmission after that, same as OCEANICU_RUN_DB/
+# OCEANICU_RELAY_DIR:
+#   sbatch --export=RUN_ID='...',OCEANICU_RUN_DB='...',OCEANICU_CHUNK_DELAY_SECONDS='30' run_chunk.slurm
 
 #SBATCH --job-name=oceanicu_chunk
 #SBATCH --nodes=3
@@ -161,7 +173,11 @@ with rt.connect() as conn:
         exit 0
     fi
     echo "Picking up next queued run: $NEXT_RUN_ID"
-    sbatch --export=RUN_ID="$NEXT_RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
+    if [ "${OCEANICU_CHUNK_DELAY_SECONDS:-0}" -gt 0 ]; then
+        echo "Waiting ${OCEANICU_CHUNK_DELAY_SECONDS}s before starting it (OCEANICU_CHUNK_DELAY_SECONDS)..."
+        sleep "$OCEANICU_CHUNK_DELAY_SECONDS"
+    fi
+    sbatch --export=RUN_ID="$NEXT_RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}",OCEANICU_CHUNK_DELAY_SECONDS="${OCEANICU_CHUNK_DELAY_SECONDS:-0}" "$SELF"
     exit 0
 fi
 
@@ -176,5 +192,9 @@ if [ "$PAUSED" = "True" ]; then
     exit 0
 fi
 
+if [ "${OCEANICU_CHUNK_DELAY_SECONDS:-0}" -gt 0 ]; then
+    echo "$RUN_ID: waiting ${OCEANICU_CHUNK_DELAY_SECONDS}s before submitting next chunk (OCEANICU_CHUNK_DELAY_SECONDS)..."
+    sleep "$OCEANICU_CHUNK_DELAY_SECONDS"
+fi
 echo "$RUN_ID: submitting next chunk"
-sbatch --export=RUN_ID="$RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
+sbatch --export=RUN_ID="$RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}",OCEANICU_CHUNK_DELAY_SECONDS="${OCEANICU_CHUNK_DELAY_SECONDS:-0}" "$SELF"

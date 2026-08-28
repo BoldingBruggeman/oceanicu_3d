@@ -25,16 +25,27 @@ terminal:
 which this loop's own next iteration will notice and exit on, the same
 way run_chunk.slurm's own resubmission check does.
 
+OCEANICU_CHUNK_DELAY_SECONDS (default 0, per user, 2026-08-28): pause
+this many seconds right before starting the NEXT chunk of the same run OR
+the next queued run -- never while a chunk is actually running, only at
+the hand-off between one finishing and the next starting. A throttle, not
+a pause/resume substitute (that's a different, existing mechanism -- see
+above -- which stops resubmission entirely; this just paces it). Same env
+var name and meaning as the real ../run_chunk.slurm's own delay.
+
 Usage
 -----
     python run_chunk_local.py --db test_registry.sqlite --run-id fake/long/CNRM-ESM2-1/ssp126
     python run_chunk_local.py --db test_registry.sqlite      # start from the queue itself
+    OCEANICU_CHUNK_DELAY_SECONDS=30 python run_chunk_local.py --db test_registry.sqlite --run-id ...
 """
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -43,6 +54,13 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 import run_tracking as rt  # noqa: E402
 
 CHUNK_RUNNER = SCRIPTS_DIR / "chunk_runner.py"
+
+
+def _chunk_delay_seconds() -> float:
+    try:
+        return float(os.environ.get("OCEANICU_CHUNK_DELAY_SECONDS", "0"))
+    except ValueError:
+        return 0.0
 
 
 def main() -> int:
@@ -62,7 +80,16 @@ def main() -> int:
             return 1
         print(f"Starting from the queue: {run_id}")
 
+    delay = _chunk_delay_seconds()
+    first_job = True
     while True:
+        if first_job:
+            first_job = False
+        elif delay > 0:
+            print(f"(waiting {delay:g}s before starting the next chunk -- "
+                  f"OCEANICU_CHUNK_DELAY_SECONDS)", flush=True)
+            time.sleep(delay)
+
         print(f"\n=== {run_id}: running next chunk ===", flush=True)
         result = subprocess.run(
             [sys.executable, str(CHUNK_RUNNER), "--db", args.db, "--run-id", run_id],

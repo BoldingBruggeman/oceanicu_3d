@@ -121,6 +121,24 @@ an in-place continuation of the current allocation, so there can be a
 real wait between one job finishing and the next one starting if the
 cluster is busy.
 
+**Pace the hand-off between jobs** with `OCEANICU_CHUNK_DELAY_SECONDS`
+(default 0 -- resubmit immediately, the previous behaviour): a pause
+right before EACH self-resubmission (next chunk of the same run, or the
+next queued run), never while a chunk is actually executing. This is a
+throttle, not a substitute for pause/resume -- pause/resume (see below)
+stops resubmission entirely; this just paces it, e.g. to avoid several
+runs' worth of chunks all hitting shared I/O at the same instant. Settable
+on the first submission, carried forward automatically on every
+self-resubmission after that, same as `OCEANICU_RUN_DB`/
+`OCEANICU_RELAY_DIR`:
+
+```bash
+sbatch --export=RUN_ID='...',OCEANICU_RUN_DB='...',OCEANICU_CHUNK_DELAY_SECONDS='30' run_chunk.slurm
+```
+
+(The no-SLURM `test_run_tracking/run_chunk_local.py` stand-in reads the
+same env var, for the same reason, if you're testing this locally first.)
+
 ## The queue
 
 Once a run reaches its `stop_date` cleanly (`complete` or
