@@ -66,8 +66,6 @@ def create(domain, cfg):
             )
 
         if cfg.setup == "ena4":
-            type_2d =
-            type_3d = 0
             domain.open_boundaries.add_by_index(
                 pygetm.Side.WEST, 0, 0, 191 + 1, type_2d=bdy_type, type_3d=0
             )
