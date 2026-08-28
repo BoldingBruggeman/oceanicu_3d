@@ -9,6 +9,29 @@
 
 relay_host: bb-server1
 
+# Which areas this site publishes -- a persistent allowlist, not a one-off
+# CLI override you have to remember to type every time. Applies to every
+# host below (which areas exist is a property of the SITE's content, not
+# of which machine happens to run generation). Omit this key entirely (or
+# leave the list empty) to publish every area found under analyses/areas/.
+#
+# IMPORTANT (2026-08-28): cli.reporting's --area treats any area NOT named
+# here as no longer wanted on a --recursive run (which regenerate_hugo.py
+# always does) -- it doesn't just skip generating it, it actively removes
+# that area's already-published content/static pages. That's the whole
+# point of this list (deliberately narrowing what the site publishes), but
+# it's why leaving an area off here is not the same as "not touched yet" --
+# it's actively pruned. Nothing is lost by doing so though: this content is
+# fully regenerated from analyses/ data, never hand-authored, so adding an
+# area back to this list and re-running restores it exactly.
+#
+# For now: NSe only (per user, 2026-08-28). AMM7/ENA4/ENA8/NS were already
+# removed from the live site as a side effect of an earlier one-off
+# `--area NSe` regen before this list existed -- re-add them here whenever
+# ready to bring them back.
+enabled_areas:
+  - NSe
+
 hosts:
   bb-server1:
     analyses_dir: /data/OceanICU/oceanicu_3d/analyses

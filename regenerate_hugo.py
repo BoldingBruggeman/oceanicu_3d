@@ -139,8 +139,15 @@ def generate_locally(config: dict, hostname: str, relay_host: str, args: argpars
     ]
     if host_cfg.get("db"):
         cmd += ["--db", host_cfg["db"]]
+    # --area (this invocation's own one-off override) always wins over the
+    # persistent enabled_areas allowlist below -- e.g. `--area AMM7` to
+    # regenerate just that one area's own pages without touching the
+    # allowlist or any other area's already-published pages.
     if args.area:
         cmd += ["--area", args.area]
+    else:
+        for area in config.get("enabled_areas") or []:
+            cmd += ["--area", area]
     # --serve is handled separately below (a plain local hugo server on
     # this machine), never forwarded to cli.reporting -- see the refusal
     # check above for why.
