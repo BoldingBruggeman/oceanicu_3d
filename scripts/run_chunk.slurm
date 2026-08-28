@@ -149,10 +149,15 @@ with rt.connect() as conn:
 # script can still scancel a runaway job, and records the NaN on the
 # chunk's own DB row.
 
+# run_root may be relative (registered from a workstation that doesn't
+# know exactly where this run's output will land HERE) -- resolve it
+# against this machine's own OCEANICU_RUN_ROOT_BASE, same as
+# chunk_runner.py does internally. Absolute run_root passes through
+# unchanged.
 RUN_ROOT=$(python -c "
 import run_tracking as rt
 with rt.connect() as conn:
-    print(rt.get_run(conn, '$RUN_ID')['run_root'])
+    print(rt.resolve_run_root(rt.get_run(conn, '$RUN_ID')['run_root']))
 ")
 POINTER_FILE="$RUN_ROOT/.current_chunk_dir"
 rm -f "$POINTER_FILE"

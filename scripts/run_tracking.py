@@ -657,6 +657,35 @@ def _control_or_pause_all(conn: sqlite3.Connection, run_id: str) -> bool:
     return row is not None and row["control"] in ("pause_requested", "paused")
 
 
+def resolve_run_root(run_root: str) -> str:
+    """Resolve a possibly-relative run_root against THIS machine's own
+    OCEANICU_RUN_ROOT_BASE -- a per-machine env var, not stored in the DB
+    (mirrors OCEANICU_RUN_DB/OCEANICU_RELAY_DIR). Lets a run be
+    registered from a workstation that doesn't know exactly where its
+    output will land on the production machine: register with a relative
+    run_root (e.g. matching run_id's own shape), and each machine that
+    actually touches the filesystem (chunk_runner.py, is_paused, this
+    script) resolves it against its own local base path at the point of
+    use. Same idea as script/config bare filenames already being resolved
+    against run_root itself -- one more level up.
+
+    An absolute run_root is returned unchanged; no base path needed for
+    those, and existing runs registered with an absolute run_root keep
+    working exactly as before."""
+    if Path(run_root).is_absolute():
+        return run_root
+    base = os.environ.get("OCEANICU_RUN_ROOT_BASE")
+    if not base:
+        raise RuntimeError(
+            f"run_root {run_root!r} is relative but OCEANICU_RUN_ROOT_BASE is not "
+            f"set in the environment on this machine -- export "
+            f"OCEANICU_RUN_ROOT_BASE=/abs/path (each machine that touches this "
+            f"run's files sets its own), or register the run with an absolute "
+            f"--run-root instead."
+        )
+    return str(Path(base) / run_root)
+
+
 def is_paused(conn, run_id: str, run_root: Optional[str] = None) -> bool:
     """True if EITHER the DB control column, the PAUSE_ALL sentinel
     (both checked wherever the DB actually lives -- see
@@ -664,12 +693,14 @@ def is_paused(conn, run_id: str, run_root: Optional[str] = None) -> bool:
     per-run `<run_root>/PAUSE` file (ALWAYS checked locally on whichever
     machine is calling this -- run_root is a path on whichever machine
     actually has that run's output, which is normally the production
-    machine and is NEVER the relay) says to pause. Checked before every
-    chunk launch and before every self-resubmission -- never mid-chunk,
-    so a currently-running chunk always finishes cleanly first."""
+    machine and is NEVER the relay; resolved against this machine's own
+    OCEANICU_RUN_ROOT_BASE first if it's relative, see resolve_run_root)
+    says to pause. Checked before every chunk launch and before every
+    self-resubmission -- never mid-chunk, so a currently-running chunk
+    always finishes cleanly first."""
     if _control_or_pause_all(conn, run_id):
         return True
-    if run_root and (Path(run_root) / "PAUSE").exists():
+    if run_root and (Path(resolve_run_root(run_root)) / "PAUSE").exists():
         return True
     return False
 

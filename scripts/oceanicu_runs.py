@@ -180,9 +180,10 @@ def _preview_chunk_runner(scratch_db: Path, run_id: str) -> None:
 
 
 def cmd_add(args: argparse.Namespace) -> int:
+    run_root = args.run_root if args.run_root is not None else args.run_id
     with rt.connect(args.db) as conn:
         rt.add_run(
-            conn, run_id=args.run_id, run_root=args.run_root, script=args.script,
+            conn, run_id=args.run_id, run_root=run_root, script=args.script,
             config=args.config, initial_date=args.initial_date, stop_date=args.stop_date,
             data_roots_file=args.data_roots_file, chunk_kind=args.chunk_kind,
             chunk_multiplier=args.chunk_multiplier, np=args.np, launcher=args.launcher,
@@ -368,7 +369,12 @@ def main() -> int:
 
     a = sub.add_parser("add"); _add_common(a); a.set_defaults(func=cmd_add)
     a.add_argument("--run-id", required=True)
-    a.add_argument("--run-root", required=True)
+    a.add_argument("--run-root", default=None,
+                    help="defaults to --run-id (the common case: they're the same relative "
+                         "path). Absolute or relative -- a relative run-root is resolved "
+                         "against OCEANICU_RUN_ROOT_BASE on whichever machine actually "
+                         "touches this run's files (see RUN_TRACKING.md), so you don't need "
+                         "to know the production path when adding from elsewhere")
     a.add_argument("--script", required=True)
     a.add_argument("--config", required=True)
     a.add_argument("--initial-date", required=True, metavar="YYYY-MM-DD")

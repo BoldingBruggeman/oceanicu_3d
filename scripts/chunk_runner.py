@@ -200,6 +200,13 @@ def _main_tracked(args: argparse.Namespace) -> int:
             return 2
         run = dict(run)  # mutable regardless of Row (local) vs dict (RPC result)
 
+        # run_root itself may be relative (registered from a workstation
+        # that doesn't know exactly where this run's output will land on
+        # THIS machine) -- resolve it against this machine's own
+        # OCEANICU_RUN_ROOT_BASE once, here, before anything below builds
+        # a path from it. See run_tracking.resolve_run_root.
+        run["run_root"] = rt.resolve_run_root(run["run_root"])
+
         # script/config are commonly registered as bare filenames (living
         # in the run's own folder, alongside its own generated driver
         # script -- see RUN_TRACKING.md), but the actual chunk subprocess
