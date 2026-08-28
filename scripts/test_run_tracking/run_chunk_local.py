@@ -25,24 +25,28 @@ terminal:
 which this loop's own next iteration will notice and exit on, the same
 way run_chunk.slurm's own resubmission check does.
 
-OCEANICU_CHUNK_DELAY_SECONDS (default 0, per user, 2026-08-28): pause
-this many seconds right before starting the NEXT chunk of the same run OR
-the next queued run -- never while a chunk is actually running, only at
-the hand-off between one finishing and the next starting. A throttle, not
-a pause/resume substitute (that's a different, existing mechanism -- see
-above -- which stops resubmission entirely; this just paces it). Same env
-var name and meaning as the real ../run_chunk.slurm's own delay.
+`oceanicu_runs.py delay-all --seconds N` (per user, 2026-08-28: "the HPC
+must be used for something else for a while") is honored here too, the
+same live-checked DELAY_ALL sentinel run_chunk.slurm uses -- checked
+fresh right before starting the NEXT chunk of the same run OR the next
+queued run, never while a chunk is actually running, in short polls so a
+delay changed WHILE this is already waiting takes effect immediately
+rather than only on the next hand-off. Not a pause/resume substitute
+(that's the different, existing mechanism above, which stops resubmission
+indefinitely until a human resumes); this waits out the remainder then
+proceeds automatically. From another terminal, while this loop is
+running:
+    python ../oceanicu_runs.py delay-all --db <db> --seconds 300
+    python ../oceanicu_runs.py delay-all --db <db> --clear
 
 Usage
 -----
     python run_chunk_local.py --db test_registry.sqlite --run-id fake/long/CNRM-ESM2-1/ssp126
     python run_chunk_local.py --db test_registry.sqlite      # start from the queue itself
-    OCEANICU_CHUNK_DELAY_SECONDS=30 python run_chunk_local.py --db test_registry.sqlite --run-id ...
 """
 from __future__ import annotations
 
 import argparse
-import os
 import subprocess
 import sys
 import time
@@ -56,11 +60,19 @@ import run_tracking as rt  # noqa: E402
 CHUNK_RUNNER = SCRIPTS_DIR / "chunk_runner.py"
 
 
-def _chunk_delay_seconds() -> float:
-    try:
-        return float(os.environ.get("OCEANICU_CHUNK_DELAY_SECONDS", "0"))
-    except ValueError:
-        return 0.0
+def _wait_for_delay_all(db: str) -> None:
+    """Mirrors run_chunk.slurm's own _wait_for_delay_all bash function --
+    poll rather than one fixed sleep, so a delay that's shortened,
+    extended, or cleared while already waiting takes effect right away."""
+    while True:
+        with rt.connect(db) as conn:
+            remaining = rt.get_chunk_delay_remaining(conn)
+        if remaining <= 0:
+            return
+        poll = min(remaining, 60)
+        print(f"  DELAY_ALL active: {remaining:.0f}s remaining -- waiting "
+              f"(re-checking in {poll:.0f}s)...", flush=True)
+        time.sleep(poll)
 
 
 def main() -> int:
@@ -80,15 +92,12 @@ def main() -> int:
             return 1
         print(f"Starting from the queue: {run_id}")
 
-    delay = _chunk_delay_seconds()
     first_job = True
     while True:
         if first_job:
             first_job = False
-        elif delay > 0:
-            print(f"(waiting {delay:g}s before starting the next chunk -- "
-                  f"OCEANICU_CHUNK_DELAY_SECONDS)", flush=True)
-            time.sleep(delay)
+        else:
+            _wait_for_delay_all(args.db)
 
         print(f"\n=== {run_id}: running next chunk ===", flush=True)
         result = subprocess.run(

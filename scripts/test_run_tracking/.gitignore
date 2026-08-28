@@ -3,3 +3,6 @@ test_registry.sqlite
 test_registry.sqlite-wal
 test_registry.sqlite-shm
 runs/
+
+# Written by `oceanicu_runs.py delay-all` -- a live runtime sentinel, not source.
+DELAY_ALL

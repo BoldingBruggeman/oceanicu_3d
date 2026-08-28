@@ -65,6 +65,7 @@ import os
 import shlex
 import sqlite3
 import subprocess
+import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -529,6 +530,56 @@ def set_stop_date(conn: sqlite3.Connection, run_id: str, stop_date: str, user: O
         _log_history(conn, run_id, "stop_date_changed", f"{old['stop_date']} -> {stop_date}", user=user)
     conn.commit()
     recompute_run_status(conn, run_id)
+
+
+@_rpc_or_local
+def chunk_delay_sentinel_path(conn: sqlite3.Connection) -> Path:
+    """Path of the DELAY_ALL sentinel: same idea and same location
+    convention as pause_all_sentinel_path (right next to the registry DB
+    file, via PRAGMA database_list), but for a TIMED pause rather than an
+    indefinite one -- "the HPC needs to be used for something else for a
+    while" (user, 2026-08-28), not "stop until a human says resume".
+
+    Content is the delay in seconds; the file's own mtime marks when it
+    was set. resume_time = mtime + int(content). Checked fresh right
+    before every self-resubmission (run_chunk.slurm / run_chunk_local.py)
+    -- if still before resume_time, that hop sleeps out the remainder
+    then proceeds automatically, no manual `resume` needed; once elapsed,
+    the file is simply inert (no auto-cleanup) until touched again with a
+    fresh value. `echo 3600 > <this path>` delays 1 hour from now; `rm`
+    (or letting it expire) goes back to normal. Unlike PAUSE_ALL this
+    never blocks a chunk from ever running -- it only ever adds a bounded
+    wait at the hand-off between one finishing and the next starting."""
+    row = conn.execute("PRAGMA database_list").fetchone()
+    db_file = row["file"] if row is not None else None
+    if not db_file:
+        raise RuntimeError("could not determine the open database's file path")
+    return Path(db_file).parent / "DELAY_ALL"
+
+
+def get_chunk_delay_remaining(conn) -> float:
+    """Seconds still remaining on the DELAY_ALL sentinel (see its own
+    docstring), 0.0 if absent, unreadable, or already expired. Not
+    @_rpc_or_local: like is_paused/next_run_to_start, this needs a LOCAL
+    filesystem check (the sentinel lives next to wherever the DB actually
+    is, which for a RemoteConn is the relay, not necessarily reachable by
+    plain Path() from wherever this is called) -- calls
+    chunk_delay_sentinel_path (relay-transparent on its own) for the path,
+    then always stats it locally on whichever machine is asking, exactly
+    mirroring _control_or_pause_all's own split."""
+    try:
+        path = Path(chunk_delay_sentinel_path(conn))
+    except RuntimeError:
+        return 0.0
+    if not path.exists():
+        return 0.0
+    try:
+        delay_seconds = float(path.read_text().strip())
+        resume_time = path.stat().st_mtime + delay_seconds
+    except (ValueError, OSError):
+        return 0.0
+    remaining = resume_time - time.time()
+    return remaining if remaining > 0 else 0.0
 
 
 @_rpc_or_local

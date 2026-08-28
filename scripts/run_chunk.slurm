@@ -19,17 +19,21 @@
 # deploy it and chunk_runner.py/run_tracking.py together anywhere on the
 # production machine, no path to hardcode or configure for that part.
 #
-# OCEANICU_CHUNK_DELAY_SECONDS (default 0, per user, 2026-08-28): pause
-# this many seconds right before self-resubmitting for the NEXT chunk of
-# the same run OR the next queued run -- never while a chunk is actually
-# executing, only at the hand-off between one job finishing and the next
-# one starting. A throttle, not a pause/resume substitute (those already
-# exist -- see oceanicu_runs.py pause/resume -- and stop resubmission
-# entirely; this just paces it). Settable from the outside on the first
-# `sbatch --export=...` and carried forward automatically on every
-# self-resubmission after that, same as OCEANICU_RUN_DB/
-# OCEANICU_RELAY_DIR:
-#   sbatch --export=RUN_ID='...',OCEANICU_RUN_DB='...',OCEANICU_CHUNK_DELAY_SECONDS='30' run_chunk.slurm
+# Pace the hand-off to the next chunk/run with `oceanicu_runs.py delay-all
+# --seconds N` (per user, 2026-08-28: "the HPC must be used for something
+# else for a while") -- a TIMED pause, checked LIVE right before EACH
+# self-resubmission, not a static env var baked in at the first `sbatch`
+# (which can't be changed once a job is queued/running). Unlike pause/
+# resume (which stop resubmission indefinitely until a human resumes),
+# this waits out the remainder then proceeds automatically -- set it,
+# forget it, the system catches up on its own. Live-adjustable at any
+# time while jobs are already chaining: run `delay-all --seconds N` again
+# with a new value, or `delay-all --clear` to cancel early. Never
+# interrupts a chunk already running. See run_tracking.
+# chunk_delay_sentinel_path/get_chunk_delay_remaining for the mechanism
+# (a DELAY_ALL file next to the registry DB, mirroring PAUSE_ALL's own
+# convention -- content is the delay in seconds, its own mtime marks when
+# it was set).
 
 #SBATCH --job-name=oceanicu_chunk
 #SBATCH --nodes=3
@@ -89,6 +93,30 @@ module load intel_ipp_intel64/latest
 export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi2.so
 
 cd "$SCRIPT_DIR" || exit 1
+
+# Live-checks the DELAY_ALL sentinel (oceanicu_runs.py delay-all --
+# run_tracking.get_chunk_delay_remaining's own docstring has the full
+# mechanism) and, if a delay is currently active, waits it out in short
+# polls rather than one fixed sleep -- so a delay that gets shortened,
+# extended, or cleared WHILE this is already waiting takes effect right
+# away instead of only on the next chunk's own hand-off. No-op (returns
+# immediately) when nothing is set.
+_wait_for_delay_all() {
+    while true; do
+        remaining=$(python -c "
+import run_tracking as rt
+with rt.connect() as conn:
+    print(int(rt.get_chunk_delay_remaining(conn)))
+")
+        if [ "$remaining" -le 0 ]; then
+            return 0
+        fi
+        poll=$remaining
+        [ "$poll" -gt 60 ] && poll=60
+        echo "  DELAY_ALL active: ${remaining}s remaining -- waiting (re-checking in ${poll}s)..."
+        sleep "$poll"
+    done
+}
 
 # --- run the chunk -----------------------------------------------------
 # chunk_runner.py itself invokes the driver script (via srun -- the
@@ -173,11 +201,8 @@ with rt.connect() as conn:
         exit 0
     fi
     echo "Picking up next queued run: $NEXT_RUN_ID"
-    if [ "${OCEANICU_CHUNK_DELAY_SECONDS:-0}" -gt 0 ]; then
-        echo "Waiting ${OCEANICU_CHUNK_DELAY_SECONDS}s before starting it (OCEANICU_CHUNK_DELAY_SECONDS)..."
-        sleep "$OCEANICU_CHUNK_DELAY_SECONDS"
-    fi
-    sbatch --export=RUN_ID="$NEXT_RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}",OCEANICU_CHUNK_DELAY_SECONDS="${OCEANICU_CHUNK_DELAY_SECONDS:-0}" "$SELF"
+    _wait_for_delay_all
+    sbatch --export=RUN_ID="$NEXT_RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
     exit 0
 fi
 
@@ -192,9 +217,6 @@ if [ "$PAUSED" = "True" ]; then
     exit 0
 fi
 
-if [ "${OCEANICU_CHUNK_DELAY_SECONDS:-0}" -gt 0 ]; then
-    echo "$RUN_ID: waiting ${OCEANICU_CHUNK_DELAY_SECONDS}s before submitting next chunk (OCEANICU_CHUNK_DELAY_SECONDS)..."
-    sleep "$OCEANICU_CHUNK_DELAY_SECONDS"
-fi
+_wait_for_delay_all
 echo "$RUN_ID: submitting next chunk"
-sbatch --export=RUN_ID="$RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}",OCEANICU_CHUNK_DELAY_SECONDS="${OCEANICU_CHUNK_DELAY_SECONDS:-0}" "$SELF"
+sbatch --export=RUN_ID="$RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"

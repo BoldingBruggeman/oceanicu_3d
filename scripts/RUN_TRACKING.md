@@ -121,23 +121,34 @@ an in-place continuation of the current allocation, so there can be a
 real wait between one job finishing and the next one starting if the
 cluster is busy.
 
-**Pace the hand-off between jobs** with `OCEANICU_CHUNK_DELAY_SECONDS`
-(default 0 -- resubmit immediately, the previous behaviour): a pause
-right before EACH self-resubmission (next chunk of the same run, or the
-next queued run), never while a chunk is actually executing. This is a
-throttle, not a substitute for pause/resume -- pause/resume (see below)
-stops resubmission entirely; this just paces it, e.g. to avoid several
-runs' worth of chunks all hitting shared I/O at the same instant. Settable
-on the first submission, carried forward automatically on every
-self-resubmission after that, same as `OCEANICU_RUN_DB`/
-`OCEANICU_RELAY_DIR`:
+**Pause the hand-off between jobs for a while, live, on a system that's
+already running** -- e.g. "the HPC needs to be used for something else
+for a while" -- with:
 
 ```bash
-sbatch --export=RUN_ID='...',OCEANICU_RUN_DB='...',OCEANICU_CHUNK_DELAY_SECONDS='30' run_chunk.slurm
+python oceanicu_runs.py delay-all --seconds 3600   # wait 1h before the next submission
+python oceanicu_runs.py delay-all --clear          # cancel early
 ```
 
-(The no-SLURM `test_run_tracking/run_chunk_local.py` stand-in reads the
-same env var, for the same reason, if you're testing this locally first.)
+Unlike pause/resume (a separate, existing mechanism -- see below -- which
+stops resubmission indefinitely until a human runs `resume`), this is a
+TIMED pause: the next self-resubmission (next chunk of the same run, or
+the next queued run -- never while a chunk is actually executing) waits
+out the remainder then proceeds automatically, no manual resume needed.
+It's genuinely live-adjustable, not just settable-once-at-launch: run
+`delay-all --seconds N` again with a new value at any time, including
+while a job is already mid-wait because of an earlier call -- the wait is
+polled, not one fixed sleep, so a shortened, extended, or cleared delay
+takes effect within the poll interval (60s), not only on the next
+hand-off. Mechanically this is a `DELAY_ALL` file next to the registry
+DB, mirroring the `PAUSE_ALL` sentinel's own convention (see
+`run_tracking.chunk_delay_sentinel_path` for the raw file if this tool
+itself is unreachable) -- content is the delay in seconds, its own mtime
+marks when it was set.
+
+(The no-SLURM `test_run_tracking/run_chunk_local.py` stand-in honors the
+same sentinel, for the same reason, if you're testing this locally
+first.)
 
 ## The queue
 

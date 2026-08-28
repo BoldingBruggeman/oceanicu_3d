@@ -11,7 +11,8 @@
     oceanicu_runs.py chunk-size --run-id ... --chunk-kind ... --chunk-multiplier ...
     oceanicu_runs.py pause  --run-id ... | --all
     oceanicu_runs.py resume --run-id ... | --all
-    oceanicu_runs.py rerun  --run-id ... [--from-chunk N | --from-current | --from-scratch]
+    oceanicu_runs.py delay-all --seconds N | --clear
+    oceanicu_runs.py rerun  --run-id ... [--from-chunk N | --from-current | --from-scratch] [--note ...]
 
     # preview ANY of the above for real, against a scratch copy in /tmp,
     # without ever writing to the configured registry:
@@ -23,7 +24,16 @@ works even if this tool or the DB itself is unreachable; for pausing
 everything, see run_tracking.pause_all_sentinel_path (its location is
 derived from wherever the registry DB actually lives, not a fixed path).
 Either mechanism takes effect only between chunks, never mid-chunk -- a
-currently-running chunk always finishes cleanly first.
+currently-running chunk always finishes cleanly first, and needs a manual
+resume to lift.
+
+delay-all is different: a TIMED pause on an already-running system ("the
+HPC needs to be used for something else for a while") -- the next
+submission waits out the remainder then proceeds automatically, no manual
+resume needed, and it's live-adjustable at any time by running `delay-all
+--seconds N` again with a new value (see run_tracking.
+chunk_delay_sentinel_path for the raw file, if this tool itself is
+unreachable).
 """
 
 from __future__ import annotations
@@ -287,6 +297,22 @@ def cmd_resume(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_delay_all(args: argparse.Namespace) -> int:
+    with rt.connect(args.db) as conn:
+        path = rt.chunk_delay_sentinel_path(conn)
+        if args.clear:
+            Path(path).unlink(missing_ok=True)
+            print(f"cleared {path} -- resubmissions proceed immediately again")
+            return 0
+        Path(path).write_text(str(args.seconds))
+        mins = args.seconds / 60
+        print(f"wrote {path} ({args.seconds}s) -- any chunk/run about to be submitted "
+              f"in the next ~{mins:.0f} min will wait out the remainder first, then "
+              f"proceed automatically. A chunk already RUNNING is never interrupted -- "
+              f"this only delays the hand-off to the next one.")
+    return 0
+
+
 def cmd_rerun(args: argparse.Namespace) -> int:
     if args.from_scratch:
         chunk_index = 0
@@ -391,6 +417,23 @@ def main() -> int:
     g2 = re_.add_mutually_exclusive_group(required=True)
     g2.add_argument("--run-id")
     g2.add_argument("--all", action="store_true")
+
+    da = sub.add_parser(
+        "delay-all",
+        help="pause the hand-off before the next chunk/run submission for N seconds, "
+             "then resume automatically -- e.g. the HPC is needed for something else "
+             "for a while. Unlike pause/resume, a chunk already running is never "
+             "affected, and nothing needs to be manually resumed afterward.",
+    )
+    _add_common(da)
+    da.set_defaults(func=cmd_delay_all)
+    g4 = da.add_mutually_exclusive_group(required=True)
+    g4.add_argument("--seconds", type=int, metavar="N",
+                     help="wait this many seconds (from now) before the next "
+                          "submission proceeds; live-adjustable at any time by "
+                          "running this again with a new value")
+    g4.add_argument("--clear", action="store_true",
+                     help="cancel any pending delay -- submissions proceed immediately again")
 
     rr = sub.add_parser("rerun"); _add_common(rr); rr.set_defaults(func=cmd_rerun)
     rr.add_argument("--run-id", required=True)

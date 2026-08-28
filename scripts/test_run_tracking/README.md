@@ -89,16 +89,21 @@ trying out the CLI, which wants the real 5-10 min feel):
 FAKE_CHUNK_SECONDS=5 python run_chunk_local.py --db test_registry.sqlite --run-id fake/quick/run01
 ```
 
-**Pace the hand-off between chunks/runs** with `OCEANICU_CHUNK_DELAY_SECONDS`
-(default 0 -- same env var and meaning as the real `../run_chunk.slurm`,
-see `../RUN_TRACKING.md`'s own "Launch it" section) -- a pause right before
-starting the NEXT chunk or the next queued run, never while one is
-actually executing. Not a substitute for pause/resume, which stops
-resubmission entirely; this just paces it:
+**Pause the hand-off between chunks/runs for a while, live** (same
+mechanism and meaning as the real `../run_chunk.slurm`, see
+`../RUN_TRACKING.md`'s own "Launch it" section) -- from a second
+terminal, while a worker loop is already running:
 
 ```bash
-OCEANICU_CHUNK_DELAY_SECONDS=30 python run_chunk_local.py --db test_registry.sqlite --run-id fake/long/CNRM-ESM2-1/ssp126
+python ../oceanicu_runs.py delay-all --db test_registry.sqlite --seconds 300
+python ../oceanicu_runs.py delay-all --db test_registry.sqlite --clear
 ```
+
+Not a substitute for pause/resume (stops resubmission indefinitely until
+a human resumes); this waits out the given number of seconds then
+proceeds automatically, and is genuinely live-adjustable -- run it again
+with a new value even while the loop is already mid-wait from an earlier
+call, and it picks up the change within its poll interval (60s).
 
 ## Option B -- a real SLURM machine
 
