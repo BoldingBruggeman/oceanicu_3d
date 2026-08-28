@@ -138,6 +138,12 @@ CREATE TABLE IF NOT EXISTS chunks (
     -- the run's previous chunk.
     script_sha256 TEXT,
     config_sha256 TEXT,
+    -- submitted_host added 2026-08-28 (see _migrate_schema). Hostname of
+    -- whichever machine actually issued this chunk's submission --
+    -- normally the production machine's own sbatch self-resubmission,
+    -- but chunk_runner.py can also be invoked by hand for testing, so
+    -- this records reality per chunk rather than assuming.
+    submitted_host TEXT,
     PRIMARY KEY (run_id, chunk_index),
     FOREIGN KEY (run_id) REFERENCES runs(run_id)
 );
@@ -186,6 +192,9 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         conn.commit()
     if "config_sha256" not in chunk_cols:
         conn.execute("ALTER TABLE chunks ADD COLUMN config_sha256 TEXT")
+        conn.commit()
+    if "submitted_host" not in chunk_cols:
+        conn.execute("ALTER TABLE chunks ADD COLUMN submitted_host TEXT")
         conn.commit()
 
     run_cols = {row["name"] for row in conn.execute("PRAGMA table_info(runs)")}
@@ -634,6 +643,48 @@ def set_priority(conn: sqlite3.Connection, run_id: str, priority: int, user: Opt
 
 
 @_rpc_or_local
+def set_data_roots_file(
+    conn: sqlite3.Connection, run_id: str, data_roots_file: Optional[str], user: Optional[str] = None,
+) -> None:
+    """Change which data-roots file a run's chunks use, same reason
+    run_root itself can be relative (see resolve_run_root): the machine
+    that added a run doesn't always know the right data-roots file for
+    wherever it actually ends up running, or that may simply change over
+    the run's lifetime (new data mount, different machine). Read fresh at
+    each chunk hand-off (chunk_runner.py resolves it against run_root the
+    same way as script/config, if it's a bare filename), same
+    next-hand-off-only semantics as set_priority/set_chunk_delay."""
+    old = get_run(conn, run_id)
+    conn.execute(
+        "UPDATE runs SET data_roots_file = ?, updated_at = ? WHERE run_id = ?",
+        (data_roots_file, _now(), run_id),
+    )
+    if old is not None:
+        _log_history(
+            conn, run_id, "data_roots_file_changed",
+            f"{old['data_roots_file']!r} -> {data_roots_file!r}", user=user,
+        )
+    conn.commit()
+
+
+@_rpc_or_local
+def set_np(conn: sqlite3.Connection, run_id: str, np: int, user: Optional[str] = None) -> None:
+    """Change a run's process count, e.g. after finding the original --np
+    was wrong for the actual production machine's node layout. Read fresh
+    at each chunk hand-off, same next-hand-off-only semantics as
+    set_priority/set_chunk_delay -- never affects a chunk already
+    running."""
+    old = get_run(conn, run_id)
+    conn.execute(
+        "UPDATE runs SET np = ?, updated_at = ? WHERE run_id = ?",
+        (np, _now(), run_id),
+    )
+    if old is not None:
+        _log_history(conn, run_id, "np_changed", f"{old['np']} -> {np}", user=user)
+    conn.commit()
+
+
+@_rpc_or_local
 def set_chunk_delay(
     conn: sqlite3.Connection, run_id: str, chunk_delay_seconds: int, user: Optional[str] = None,
 ) -> None:
@@ -928,6 +979,7 @@ def start_chunk(
     chunk_dir: str, load_restart: Optional[str], save_restart: str,
     slurm_job_id: Optional[str] = None, user: Optional[str] = None,
     script_sha256: Optional[str] = None, config_sha256: Optional[str] = None,
+    submitted_host: Optional[str] = None,
 ) -> None:
     now = _now()
 
@@ -964,10 +1016,10 @@ def start_chunk(
     conn.execute(
         """INSERT INTO chunks (run_id, chunk_index, start, stop, chunk_dir,
                load_restart, save_restart, slurm_job_id, submit_time,
-               start_time, status, script_sha256, config_sha256)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'running', ?, ?)""",
+               start_time, status, script_sha256, config_sha256, submitted_host)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'running', ?, ?, ?)""",
         (run_id, chunk_index, start, stop, chunk_dir, load_restart, save_restart,
-         slurm_job_id, now, now, script_sha256, config_sha256),
+         slurm_job_id, now, now, script_sha256, config_sha256, submitted_host),
     )
     conn.execute(
         "UPDATE runs SET status = 'in_progress', updated_at = ? WHERE run_id = ? "

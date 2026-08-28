@@ -10,6 +10,8 @@
     oceanicu_runs.py show   --run-id ...              # run + full chunk history
     oceanicu_runs.py chunk-size --run-id ... --chunk-kind ... --chunk-multiplier ...
     oceanicu_runs.py set-chunk-delay --run-id ... --seconds N   # persistent, per-run pacing
+    oceanicu_runs.py set-data-roots-file --run-id ... --path ...
+    oceanicu_runs.py set-np --run-id ... --np ...
     oceanicu_runs.py pause  --run-id ... | --all
     oceanicu_runs.py resume --run-id ... | --all
     oceanicu_runs.py delay-all --seconds N | --clear
@@ -248,7 +250,8 @@ def cmd_show(args: argparse.Namespace) -> int:
         _print_table(
             chunks_display,
             ["chunk_index", "start", "stop", "status", "exit_code", "nan_detected",
-             "script_sha256", "config_sha256", "slurm_job_id", "start_time", "end_time"],
+             "script_sha256", "config_sha256", "slurm_job_id", "submitted_host",
+             "start_time", "end_time"],
         )
         print()
         print("history:")
@@ -261,6 +264,20 @@ def cmd_set_priority(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         rt.set_priority(conn, args.run_id, args.priority, user=rt._current_user())
     print(f"{args.run_id}: priority set to {args.priority}")
+    return 0
+
+
+def cmd_set_data_roots_file(args: argparse.Namespace) -> int:
+    with rt.connect(args.db) as conn:
+        rt.set_data_roots_file(conn, args.run_id, args.path, user=rt._current_user())
+    print(f"{args.run_id}: data_roots_file set to {args.path!r}")
+    return 0
+
+
+def cmd_set_np(args: argparse.Namespace) -> int:
+    with rt.connect(args.db) as conn:
+        rt.set_np(conn, args.run_id, args.np, user=rt._current_user())
+    print(f"{args.run_id}: np set to {args.np}")
     return 0
 
 
@@ -445,6 +462,27 @@ def main() -> int:
     sd = sub.add_parser("set-stop-date"); _add_common(sd); sd.set_defaults(func=cmd_set_stop_date)
     sd.add_argument("--run-id", required=True)
     sd.add_argument("--stop-date", required=True, metavar="YYYY-MM-DD")
+
+    sdrf = sub.add_parser(
+        "set-data-roots-file",
+        help="change which data-roots file this run's future chunks use -- same reason "
+             "run-root can be relative (RUN_TRACKING.md): the add-machine doesn't always "
+             "know the right one for wherever this ends up actually running, or it can "
+             "change over the run's lifetime. Takes effect on the next chunk, never "
+             "retroactively.",
+    )
+    _add_common(sdrf); sdrf.set_defaults(func=cmd_set_data_roots_file)
+    sdrf.add_argument("--run-id", required=True)
+    sdrf.add_argument("--path", required=True)
+
+    snp = sub.add_parser(
+        "set-np",
+        help="change this run's process count -- takes effect on the next chunk, never "
+             "retroactively (never affects a chunk already running).",
+    )
+    _add_common(snp); snp.set_defaults(func=cmd_set_np)
+    snp.add_argument("--run-id", required=True)
+    snp.add_argument("--np", type=int, required=True)
 
     pa = sub.add_parser("pause"); _add_common(pa); pa.set_defaults(func=cmd_pause)
     g1 = pa.add_mutually_exclusive_group(required=True)

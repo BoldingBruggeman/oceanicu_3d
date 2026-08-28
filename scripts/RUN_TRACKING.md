@@ -273,6 +273,37 @@ Same "takes effect on the very next hand-off, never retroactively"
 behaviour as `chunk-size`/`set-stop-date` above -- read fresh from the DB
 each time, not cached anywhere. Shown in both `list` and `show`.
 
+## Change data-roots-file or np mid-run
+
+Same reason `run-root` can be relative (see "Set up a run" above): the
+machine that added a run doesn't always know the right `data-roots-file`
+for wherever it actually ends up running, and `np` sometimes turns out
+wrong for the real target machine's node layout -- both can be changed
+after the fact, same next-hand-off-only semantics as `chunk-size`/
+`set-stop-date`/`set-chunk-delay`, never affecting a chunk already
+running:
+
+```bash
+python oceanicu_runs.py set-data-roots-file --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
+    --path bb-server1_data_roots.yaml
+python oceanicu_runs.py set-np --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --np 192
+```
+
+Both shown in `show`'s run table.
+
+## Where a chunk was actually submitted from
+
+Each row in `chunks` records `submitted_host` -- the hostname of
+whichever machine actually issued that chunk's submission (normally the
+production machine's own `sbatch` self-resubmission, but `chunk_runner.py`
+can be invoked by hand for testing too, so this records reality per
+chunk rather than assuming). Shown in `show`'s chunks table. Distinct
+from `history`'s `user` column (which machine vs. which account) and
+from `run_root`'s own machine-dependence (where a run's files live vs.
+where a given chunk was submitted from -- normally the same machine, but
+not guaranteed to be, e.g. if someone runs `chunk_runner.py` by hand from
+a login node different from wherever `sbatch` jobs usually land).
+
 ## Run only partway, or change the target mid-run
 
 Some experiments only need to run to 2050, not 2100 -- that's just

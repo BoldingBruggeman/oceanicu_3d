@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import socket
 import sqlite3
 import subprocess
 import sys
@@ -192,6 +193,11 @@ def _main_tracked(args: argparse.Namespace) -> int:
     # thing, and a chunk executing is a different actor from whoever
     # registered the run.
     user = rt._current_user()
+    # Hostname of whichever machine is actually issuing this submission --
+    # normally the production machine's own sbatch self-resubmission, but
+    # chunk_runner.py can be invoked by hand for testing too, so this
+    # records reality per chunk rather than assuming.
+    submitted_host = socket.gethostname()
 
     with rt.connect(args.db) as conn:
         run = rt.get_run(conn, args.run_id)
@@ -335,6 +341,7 @@ def _main_tracked(args: argparse.Namespace) -> int:
                 chunk_dir=str(chunk_dir), load_restart=load_restart, save_restart=save_restart,
                 slurm_job_id=args.slurm_job_id, user=user,
                 script_sha256=_sha256_of(run["script"]), config_sha256=_sha256_of(run["config"]),
+                submitted_host=submitted_host,
             )
         except sqlite3.IntegrityError:
             print(f"{args.run_id}: chunk {chunk_index} was just claimed by another process "
