@@ -437,6 +437,35 @@ chunk should ever take), it's treated as crashed/orphaned: marked
 `failed` and left for a human `rerun --from-current` rather than silently
 retried -- same as any other failure, never auto-continued past.
 
+## Accidental-deletion protection
+
+The registry doesn't live inside a git repo of its own, and SQLite has no
+snapshot/undo concept beyond "the current database" -- WAL checkpointing
+just folds pending writes into the main file, it isn't a backup. So
+`run_tracking.py` keeps its own: every `OCEANICU_DB_BACKUP_EVERY_N_WRITES`
+writes (default 5; set to `0` to disable), it takes a WAL-safe snapshot
+via SQLite's own backup API (not a raw file copy, which can catch the
+main file mid-checkpoint and miss pending WAL content) and commits it
+into a small local git repo living right next to the DB:
+`<db-path>.backups/`. Read-only commands (`list`, `show`, dry-run
+previews, ...) never count towards the threshold -- only a connection
+that actually changed something does.
+
+This is best-effort and silent by design: a backup failure prints a
+warning but never breaks the real command that triggered it, and never
+retroactively resets the write counter on failure (so a transient
+failure just retries at the next write instead of going quiet for a
+whole N-write cycle). To recover a deleted/corrupted registry:
+
+```bash
+cd /abs/path/to/run_registry.sqlite.backups
+git log --oneline                      # find the snapshot you want
+git show <sha>:run_registry.sqlite > /abs/path/to/run_registry.sqlite
+```
+
+The backup repo has no automatic pruning -- for a DB this small, unlimited
+history is cheap; squash/prune by hand later if it ever matters.
+
 ## Working across machines with no direct network path
 
 Runs are often ADDED from one machine (wherever you're planning from) and

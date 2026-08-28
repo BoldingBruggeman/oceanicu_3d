@@ -65,6 +65,7 @@ import os
 import shlex
 import sqlite3
 import subprocess
+import sys
 import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -411,6 +412,7 @@ def connect(
         _ensure_group_writable(path)
         yield conn
     finally:
+        _maybe_backup_after_write(conn, path)
         conn.close()
 
 
@@ -441,6 +443,107 @@ def _ensure_group_writable(db_path: Path) -> None:
             candidate.chmod(candidate.stat().st_mode | 0o664)
         except PermissionError:
             pass
+
+
+# ---------------------------------------------------------------------------
+# Accidental-deletion protection: an append-only git history of the DB
+# itself, in a small local repo next to it. `rm run_registry.sqlite` (or a
+# botched edit) is otherwise unrecoverable -- the DB doesn't live in a repo
+# of its own, and SQLite has no snapshot/undo concept beyond "the current
+# database" (checkpointing just folds the WAL into the main file, it isn't
+# a backup -- see RUN_TRACKING.md). Every N writes (default 5, see
+# OCEANICU_DB_BACKUP_EVERY_N_WRITES), take a WAL-safe snapshot via
+# sqlite3's own backup API (NOT a raw file copy, which can catch the main
+# file mid-checkpoint and miss pending WAL content) and commit it. Hooked
+# into connect()'s local-mode teardown -- the one chokepoint every write
+# passes through either directly or, via run_tracking_server.py's own
+# connect() call, on the relay side of an RPC dispatch.
+# ---------------------------------------------------------------------------
+
+_DEFAULT_BACKUP_EVERY_N_WRITES = 5
+
+
+def _backup_repo_dir(db_path: Path) -> Path:
+    return db_path.parent / f"{db_path.name}.backups"
+
+
+def _backup_write_count_path(db_path: Path) -> Path:
+    return db_path.parent / f".{db_path.name}.backup_write_count"
+
+
+def _maybe_backup_after_write(conn: sqlite3.Connection, db_path: Path) -> None:
+    """Called right before closing a connection that actually wrote
+    something (conn.total_changes > 0 -- read-only connections, e.g. from
+    `list`/`show`, never trigger this). Best-effort throughout: a backup
+    failure must never break the real command that triggered it, same
+    spirit as _ensure_group_writable above."""
+    if conn.total_changes <= 0:
+        return
+    try:
+        n = int(os.environ.get("OCEANICU_DB_BACKUP_EVERY_N_WRITES", _DEFAULT_BACKUP_EVERY_N_WRITES))
+    except ValueError:
+        n = _DEFAULT_BACKUP_EVERY_N_WRITES
+    if n <= 0:
+        return  # explicitly disabled
+
+    count_path = _backup_write_count_path(db_path)
+    try:
+        count = int(count_path.read_text().strip()) if count_path.exists() else 0
+    except (ValueError, OSError):
+        count = 0
+    count += 1
+
+    if count < n:
+        try:
+            count_path.write_text(str(count))
+        except OSError:
+            pass
+        return
+
+    try:
+        _write_backup_snapshot_and_commit(conn, db_path, writes_covered=count)
+        count_path.write_text("0")
+    except Exception as exc:  # noqa: BLE001 -- best-effort, never fatal
+        print(f"WARNING: DB backup snapshot failed (continuing anyway): {exc}", file=sys.stderr)
+        # Don't reset the counter on failure -- retry at the next write
+        # instead of silently going quiet for a full N-write cycle.
+        try:
+            count_path.write_text(str(count))
+        except OSError:
+            pass
+
+
+def _write_backup_snapshot_and_commit(conn: sqlite3.Connection, db_path: Path, writes_covered: int) -> None:
+    repo_dir = _backup_repo_dir(db_path)
+    repo_dir.mkdir(parents=True, exist_ok=True)
+    if not (repo_dir / ".git").exists():
+        subprocess.run(["git", "init", "-q"], cwd=repo_dir, check=True)
+
+    snapshot_path = repo_dir / db_path.name
+    # sqlite3's own backup API, not shutil.copy -- WAL-safe (takes a real
+    # transactional snapshot, including anything only in the -wal file so
+    # far), unlike a raw file copy which can catch the main file mid-write.
+    dest = sqlite3.connect(str(snapshot_path))
+    try:
+        conn.backup(dest)
+    finally:
+        dest.close()
+
+    git_env_args = [
+        "-c", "user.email=run_tracking_backup@localhost",
+        "-c", "user.name=run_tracking_backup",
+    ]
+    subprocess.run(["git", *git_env_args, "add", db_path.name], cwd=repo_dir, check=True)
+    # Nothing to commit if this snapshot is byte-identical to the last one
+    # (e.g. a write that got rolled back) -- diff-index exits non-zero only
+    # when there ARE staged changes, so skip the commit rather than fail.
+    staged = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=repo_dir).returncode != 0
+    if staged:
+        subprocess.run(
+            ["git", *git_env_args, "commit", "-q", "-m",
+             f"snapshot after {writes_covered} write(s), {datetime.now(timezone.utc).isoformat()}"],
+            cwd=repo_dir, check=True,
+        )
 
 
 # ---------------------------------------------------------------------------

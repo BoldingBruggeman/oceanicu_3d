@@ -6,3 +6,9 @@ runs/
 
 # Written by `oceanicu_runs.py delay-all` -- a live runtime sentinel, not source.
 DELAY_ALL
+
+# Written by run_tracking.py's own DB-backup mechanism (a nested git repo
+# holding periodic snapshots) -- runtime output, not source, and a nested
+# .git would confuse tooling if left tracked.
+test_registry.sqlite.backups/
+.test_registry.sqlite.backup_write_count
