@@ -148,7 +148,8 @@ def _print_diff(before: dict, after: dict) -> None:
         if len(h_after) != len(h_before):
             print(f"    history: {len(h_before)} -> {len(h_after)} entries")
             for h in h_after[len(h_before):]:
-                print(f"      + {h['event']}" + (f": {h['detail']}" if h['detail'] else ""))
+                who = f" ({h['user']})" if h['user'] else ""
+                print(f"      + {h['event']}{who}" + (f": {h['detail']}" if h['detail'] else ""))
 
 
 def _preview_chunk_runner(scratch_db: Path, run_id: str) -> None:
@@ -174,7 +175,7 @@ def cmd_add(args: argparse.Namespace) -> int:
             config=args.config, initial_date=args.initial_date, stop_date=args.stop_date,
             data_roots_file=args.data_roots_file, chunk_kind=args.chunk_kind,
             chunk_multiplier=args.chunk_multiplier, np=args.np, launcher=args.launcher,
-            priority=args.priority, notes=args.notes, fabm=args.fabm,
+            priority=args.priority, notes=args.notes, fabm=args.fabm, user=rt._current_user(),
         )
     print(f"added {args.run_id!r}")
     return 0
@@ -183,7 +184,7 @@ def cmd_add(args: argparse.Namespace) -> int:
 def cmd_remove(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         try:
-            rt.remove_run(conn, args.run_id, force=args.force)
+            rt.remove_run(conn, args.run_id, force=args.force, user=rt._current_user())
         except (KeyError, ValueError) as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
@@ -219,20 +220,20 @@ def cmd_show(args: argparse.Namespace) -> int:
         print()
         print("history:")
         history = rt.list_history(conn, args.run_id)
-        _print_table(history, ["timestamp", "event", "detail"])
+        _print_table(history, ["timestamp", "user", "event", "detail"])
     return 0
 
 
 def cmd_set_priority(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rt.set_priority(conn, args.run_id, args.priority)
+        rt.set_priority(conn, args.run_id, args.priority, user=rt._current_user())
     print(f"{args.run_id}: priority set to {args.priority}")
     return 0
 
 
 def cmd_set_stop_date(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rt.set_stop_date(conn, args.run_id, args.stop_date)
+        rt.set_stop_date(conn, args.run_id, args.stop_date, user=rt._current_user())
     print(f"{args.run_id}: stop_date set to {args.stop_date} (takes effect on the next chunk)")
     return 0
 
@@ -241,31 +242,34 @@ def cmd_chunk_size(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         rt.set_chunk_settings(
             conn, args.run_id, chunk_kind=args.chunk_kind, chunk_multiplier=args.chunk_multiplier,
+            user=rt._current_user(),
         )
     print(f"{args.run_id}: chunk size updated for the remaining (not-yet-run) part of the run")
     return 0
 
 
 def cmd_pause(args: argparse.Namespace) -> int:
+    user = rt._current_user()
     with rt.connect(args.db) as conn:
         if args.all:
             for r in rt.list_runs(conn):
-                rt.set_control(conn, r["run_id"], "pause_requested")
+                rt.set_control(conn, r["run_id"], "pause_requested", user=user)
             print("pause requested for all runs")
         else:
-            rt.set_control(conn, args.run_id, "pause_requested")
+            rt.set_control(conn, args.run_id, "pause_requested", user=user)
             print(f"pause requested for {args.run_id!r} (takes effect after the current chunk finishes)")
     return 0
 
 
 def cmd_resume(args: argparse.Namespace) -> int:
+    user = rt._current_user()
     with rt.connect(args.db) as conn:
         if args.all:
             for r in rt.list_runs(conn):
-                rt.set_control(conn, r["run_id"], "run")
+                rt.set_control(conn, r["run_id"], "run", user=user)
             print("resumed all runs")
         else:
-            rt.set_control(conn, args.run_id, "run")
+            rt.set_control(conn, args.run_id, "run", user=user)
             print(f"resumed {args.run_id!r}")
     return 0
 
@@ -278,7 +282,7 @@ def cmd_rerun(args: argparse.Namespace) -> int:
     else:
         chunk_index = None  # "from the present chunk"
     with rt.connect(args.db) as conn:
-        n = rt.rerun_from(conn, args.run_id, chunk_index=chunk_index)
+        n = rt.rerun_from(conn, args.run_id, chunk_index=chunk_index, user=rt._current_user())
     print(f"{args.run_id}: dropped {n} chunk record(s) -- next submission redoes from there")
     return 0
 

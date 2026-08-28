@@ -126,31 +126,78 @@ CREATE INDEX IF NOT EXISTS idx_chunks_run ON chunks(run_id);
 -- files -- history is the same idea applied to the audit trail itself,
 -- so it survives a run being removed (and, if the same run_id is ever
 -- re-added later, shows its full lifecycle across that gap too).
+-- `user` added 2026-08-28 (see _migrate_schema -- CREATE TABLE IF NOT
+-- EXISTS alone won't add a column to an already-existing history table
+-- on a registry that predates this, hence the separate ALTER TABLE
+-- migration rather than just listing it here).
 CREATE TABLE IF NOT EXISTS history (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
     run_id    TEXT NOT NULL,
     timestamp TEXT NOT NULL,
     event     TEXT NOT NULL,
-    detail    TEXT
+    detail    TEXT,
+    user      TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_history_run ON history(run_id);
 """
 
 
+def _migrate_schema(conn: sqlite3.Connection) -> None:
+    """Additive, idempotent schema fixups that CREATE TABLE IF NOT EXISTS
+    alone can't express -- new columns on a table that may already exist
+    from before the column was added. Safe to run on every connect(): each
+    check is cheap and a no-op once already applied."""
+    cols = {row["name"] for row in conn.execute("PRAGMA table_info(history)")}
+    if "user" not in cols:
+        conn.execute("ALTER TABLE history ADD COLUMN user TEXT")
+        conn.commit()
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def _log_history(conn: sqlite3.Connection, run_id: str, event: str, detail: Optional[str] = None) -> None:
+def _current_user() -> str:
+    """Best-effort identity of whoever is actually running this command,
+    for the history log. Captured at the ORIGINAL call site (oceanicu_
+    runs.py's CLI entry points, chunk_runner.py's own process) and
+    threaded through as an explicit `user` argument -- NOT derived lazily
+    inside _log_history itself, because a @_rpc_or_local-decorated
+    function's body can end up executing on the RELAY's own process (see
+    RemoteConn/run_tracking_server.py) under a shared service account
+    that has nothing to do with which human actually typed the command on
+    their own machine. os.environ checks first (USER/LOGNAME cover the
+    common cases cheaply); getpass.getuser() as a last resort (it itself
+    checks the same env vars first, then falls back to the pwd database)."""
+    for var in ("USER", "LOGNAME"):
+        val = os.environ.get(var)
+        if val:
+            return val
+    import getpass
+    try:
+        return getpass.getuser()
+    except Exception:
+        return "unknown"
+
+
+def _log_history(
+    conn: sqlite3.Connection, run_id: str, event: str, detail: Optional[str] = None,
+    user: Optional[str] = None,
+) -> None:
     """Append one audit-log row. Not itself @_rpc_or_local -- it's only
     ever called from inside another already-decorated function's own
     body, with a real conn either way (locally, or on the relay's own
     side of an RPC dispatch), so it needs no remote-transparency of its
-    own. Caller is responsible for the surrounding conn.commit()."""
+    own. Caller is responsible for the surrounding conn.commit().
+
+    *user* is whatever the outer, already-decorated function was itself
+    given (see _current_user's own docstring for why this is passed in
+    rather than computed here) -- None for the rare internal call that
+    doesn't have one to offer, which just stores NULL."""
     conn.execute(
-        "INSERT INTO history (run_id, timestamp, event, detail) VALUES (?, ?, ?, ?)",
-        (run_id, _now(), event, detail),
+        "INSERT INTO history (run_id, timestamp, event, detail, user) VALUES (?, ?, ?, ?, ?)",
+        (run_id, _now(), event, detail, user),
     )
 
 
@@ -321,6 +368,7 @@ def connect(
     try:
         conn.executescript(_SCHEMA)
         conn.commit()
+        _migrate_schema(conn)
         _ensure_group_writable(path)
         yield conn
     finally:
@@ -366,7 +414,7 @@ def add_run(
     initial_date: str, stop_date: str, data_roots_file: Optional[str] = None,
     chunk_kind: str = "annual", chunk_multiplier: int = 1, np: int = 1,
     launcher: str = "srun", priority: int = 0, notes: Optional[str] = None,
-    fabm: Optional[str] = None,
+    fabm: Optional[str] = None, user: Optional[str] = None,
 ) -> None:
     if launcher not in ("srun", "mpiexec"):
         raise ValueError(f"launcher must be 'srun' or 'mpiexec', got {launcher!r}")
@@ -383,12 +431,13 @@ def add_run(
         conn, run_id, "added",
         f"{chunk_multiplier} {chunk_kind} chunk(s) per step, {initial_date} -> {stop_date}, "
         f"priority={priority}, script={script}",
+        user=user,
     )
     conn.commit()
 
 
 @_rpc_or_local
-def remove_run(conn: sqlite3.Connection, run_id: str, *, force: bool = False) -> None:
+def remove_run(conn: sqlite3.Connection, run_id: str, *, force: bool = False, user: Optional[str] = None) -> None:
     row = get_run(conn, run_id)
     if row is None:
         raise KeyError(f"no such run_id: {run_id!r}")
@@ -402,7 +451,11 @@ def remove_run(conn: sqlite3.Connection, run_id: str, *, force: bool = False) ->
     # deleted (no FK to runs, see the schema's own comment), but it would
     # be a strange audit trail if its very last entry for a removed run
     # didn't mention the removal at all.
-    _log_history(conn, run_id, "removed", "forced (was in_progress)" if force and row["status"] == "in_progress" else None)
+    _log_history(
+        conn, run_id, "removed",
+        "forced (was in_progress)" if force and row["status"] == "in_progress" else None,
+        user=user,
+    )
     conn.execute("DELETE FROM chunks WHERE run_id = ?", (run_id,))
     conn.execute("DELETE FROM runs WHERE run_id = ?", (run_id,))
     conn.commit()
@@ -425,19 +478,19 @@ def list_runs(
 
 
 @_rpc_or_local
-def set_priority(conn: sqlite3.Connection, run_id: str, priority: int) -> None:
+def set_priority(conn: sqlite3.Connection, run_id: str, priority: int, user: Optional[str] = None) -> None:
     old = get_run(conn, run_id)
     conn.execute(
         "UPDATE runs SET priority = ?, updated_at = ? WHERE run_id = ?",
         (priority, _now(), run_id),
     )
     if old is not None:
-        _log_history(conn, run_id, "priority_changed", f"{old['priority']} -> {priority}")
+        _log_history(conn, run_id, "priority_changed", f"{old['priority']} -> {priority}", user=user)
     conn.commit()
 
 
 @_rpc_or_local
-def set_stop_date(conn: sqlite3.Connection, run_id: str, stop_date: str) -> None:
+def set_stop_date(conn: sqlite3.Connection, run_id: str, stop_date: str, user: Optional[str] = None) -> None:
     """Change a run's target end date, including while it's mid-run (e.g.
     currently at 2035, decide to stop at 2050 instead of 2099). Nothing
     caches stop_date -- chunk_runner.py and recompute_run_status both read
@@ -452,7 +505,7 @@ def set_stop_date(conn: sqlite3.Connection, run_id: str, stop_date: str) -> None
         (stop_date, _now(), run_id),
     )
     if old is not None:
-        _log_history(conn, run_id, "stop_date_changed", f"{old['stop_date']} -> {stop_date}")
+        _log_history(conn, run_id, "stop_date_changed", f"{old['stop_date']} -> {stop_date}", user=user)
     conn.commit()
     recompute_run_status(conn, run_id)
 
@@ -539,7 +592,7 @@ def next_run_to_start(conn) -> Optional[str]:
 @_rpc_or_local
 def set_chunk_settings(
     conn: sqlite3.Connection, run_id: str, *, chunk_kind: Optional[str] = None,
-    chunk_multiplier: Optional[int] = None,
+    chunk_multiplier: Optional[int] = None, user: Optional[str] = None,
 ) -> None:
     """Change chunk size for the REMAINING (not-yet-run) part of a run.
     Already-completed chunks and their date-based restart filenames are
@@ -562,12 +615,12 @@ def set_chunk_settings(
         if chunk_multiplier is not None and chunk_multiplier != old["chunk_multiplier"]:
             changes.append(f"chunk_multiplier: {old['chunk_multiplier']} -> {chunk_multiplier}")
         if changes:
-            _log_history(conn, run_id, "chunk_settings_changed", "; ".join(changes))
+            _log_history(conn, run_id, "chunk_settings_changed", "; ".join(changes), user=user)
     conn.commit()
 
 
 @_rpc_or_local
-def set_control(conn: sqlite3.Connection, run_id: str, control: str) -> None:
+def set_control(conn: sqlite3.Connection, run_id: str, control: str, user: Optional[str] = None) -> None:
     if control not in RUN_CONTROLS:
         raise ValueError(f"control must be one of {RUN_CONTROLS}, got {control!r}")
     conn.execute(
@@ -580,7 +633,7 @@ def set_control(conn: sqlite3.Connection, run_id: str, control: str) -> None:
     # column dump. "paused" is only ever set some other way (e.g. a
     # future direct API caller), kept as its own event for that case.
     event = {"pause_requested": "pause_requested", "run": "resumed", "paused": "paused"}[control]
-    _log_history(conn, run_id, event)
+    _log_history(conn, run_id, event, user=user)
     conn.commit()
     # Real, pre-existing inconsistency found 2026-08-28 while adding this
     # history log: neither this function nor chunk_runner.py's own
@@ -624,7 +677,7 @@ def next_chunk_start(conn: sqlite3.Connection, run_id: str, initial_date: str) -
 def start_chunk(
     conn: sqlite3.Connection, *, run_id: str, chunk_index: int, start: str, stop: str,
     chunk_dir: str, load_restart: Optional[str], save_restart: str,
-    slurm_job_id: Optional[str] = None,
+    slurm_job_id: Optional[str] = None, user: Optional[str] = None,
 ) -> None:
     now = _now()
     conn.execute(
@@ -643,14 +696,14 @@ def start_chunk(
     detail = f"chunk {chunk_index}: {start} -> {stop}"
     if load_restart:
         detail += f" (load_restart={load_restart})"
-    _log_history(conn, run_id, "chunk_started", detail)
+    _log_history(conn, run_id, "chunk_started", detail, user=user)
     conn.commit()
 
 
 @_rpc_or_local
 def finish_chunk(
     conn: sqlite3.Connection, *, run_id: str, chunk_index: int, exit_code: int,
-    nan_detected: bool = False,
+    nan_detected: bool = False, user: Optional[str] = None,
 ) -> None:
     # status reflects only whether the chunk's process itself completed --
     # nan_detected is tracked as an independent quality flag (see
@@ -667,7 +720,7 @@ def finish_chunk(
     )
     event = "chunk_finished" if exit_code == 0 else "chunk_failed"
     detail = f"chunk {chunk_index} exit_code={exit_code}" + (" nan_detected" if nan_detected else "")
-    _log_history(conn, run_id, event, detail)
+    _log_history(conn, run_id, event, detail, user=user)
     conn.commit()
     new_status = recompute_run_status(conn, run_id)
     # "a full simulation stops" (user, 2026-08-28): a terminal status --
@@ -677,7 +730,7 @@ def finish_chunk(
     # "when did it finish") doesn't require re-deriving it from chunk
     # rows every time.
     if new_status in ("complete", "complete_with_warnings", "failed"):
-        _log_history(conn, run_id, f"run_{new_status}", f"after chunk {chunk_index}")
+        _log_history(conn, run_id, f"run_{new_status}", f"after chunk {chunk_index}", user=user)
         conn.commit()
 
 
@@ -718,7 +771,7 @@ def list_chunks(conn: sqlite3.Connection, run_id: str) -> list[sqlite3.Row]:
 
 
 @_rpc_or_local
-def rerun_from(conn: sqlite3.Connection, run_id: str, *, chunk_index: Optional[int] = None) -> int:
+def rerun_from(conn: sqlite3.Connection, run_id: str, *, chunk_index: Optional[int] = None, user: Optional[str] = None) -> int:
     """Rewind a run's tracked history so its NEXT execution redoes chunk
     *chunk_index* onward (dropping any record of it and everything after).
     Chunks before it are untouched, so the redo naturally resumes from the
@@ -752,7 +805,7 @@ def rerun_from(conn: sqlite3.Connection, run_id: str, *, chunk_index: Optional[i
         "UPDATE runs SET control = 'run', updated_at = ? WHERE run_id = ?",
         (_now(), run_id),
     )
-    _log_history(conn, run_id, "rerun", f"dropped {n_dropped} chunk(s) from index {chunk_index} onward")
+    _log_history(conn, run_id, "rerun", f"dropped {n_dropped} chunk(s) from index {chunk_index} onward", user=user)
     conn.commit()
     recompute_run_status(conn, run_id)
     return n_dropped

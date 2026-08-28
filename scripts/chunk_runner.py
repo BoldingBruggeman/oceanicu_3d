@@ -168,6 +168,14 @@ def _main_standalone(args: argparse.Namespace) -> int:
 def _main_tracked(args: argparse.Namespace) -> int:
     import run_tracking as rt
 
+    # Whichever account is actually executing this chunk_runner.py process
+    # (the SLURM job's own account on the production machine, normally) --
+    # not necessarily who originally ran `oceanicu_runs.py add`, which is
+    # exactly the point: the history log should show who/what did each
+    # thing, and a chunk executing is a different actor from whoever
+    # registered the run.
+    user = rt._current_user()
+
     with rt.connect(args.db) as conn:
         run = rt.get_run(conn, args.run_id)
         if run is None:
@@ -224,7 +232,7 @@ def _main_tracked(args: argparse.Namespace) -> int:
                   f"SLURM job is no longer active -- treating as crashed/orphaned.",
                   file=sys.stderr)
             rt.finish_chunk(conn, run_id=args.run_id, chunk_index=running["chunk_index"],
-                             exit_code=-1, nan_detected=False)
+                             exit_code=-1, nan_detected=False, user=user)
             print(f"Marked failed. Investigate, then "
                   f"'oceanicu_runs.py rerun --run-id {args.run_id} --from-current' to redo it.",
                   file=sys.stderr)
@@ -301,7 +309,7 @@ def _main_tracked(args: argparse.Namespace) -> int:
                 conn, run_id=args.run_id, chunk_index=chunk_index,
                 start=start.strftime("%Y-%m-%d"), stop=stop.strftime("%Y-%m-%d"),
                 chunk_dir=str(chunk_dir), load_restart=load_restart, save_restart=save_restart,
-                slurm_job_id=args.slurm_job_id,
+                slurm_job_id=args.slurm_job_id, user=user,
             )
         except sqlite3.IntegrityError:
             print(f"{args.run_id}: chunk {chunk_index} was just claimed by another process "
@@ -323,7 +331,7 @@ def _main_tracked(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         rt.finish_chunk(
             conn, run_id=args.run_id, chunk_index=chunk_index,
-            exit_code=result.returncode, nan_detected=False,
+            exit_code=result.returncode, nan_detected=False, user=user,
         )
 
     return 0 if result.returncode == 0 else 2
