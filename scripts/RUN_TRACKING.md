@@ -19,6 +19,15 @@ machine use the same directory or even the same username:
 | `chunk_runner.py` | runs exactly one chunk. Called by `run_chunk.slurm`; you don't normally invoke it by hand except when testing (see below). |
 | `run_chunk.slurm` | the SLURM job. Runs one chunk, then resubmits itself for the next one -- or, once a run reaches its `stop_date`, for the next queued run (see "The queue" below). |
 | `run_tracking_server.py` | RPC entrypoint for accessing the registry across machines with no direct network path between them -- see "Working across machines" below. Only needed on the relay machine, and only if you need that at all. |
+| `apply_commands.py` | replays queued commands (see "Command queue" below) against the local registry -- only needed wherever the registry actually lives, and only if a live relay to it isn't possible. |
+
+**First time on a new machine:** `setup_run_tracking.sh hpc|relay|workstation PATH`
+sets up the env vars (`OCEANICU_RUN_DB`/`OCEANICU_RUN_ROOT_BASE`) and
+directory scaffold (`hpc_commands/`) for that machine's role in one go --
+see the script's own header for exact usage. It's a single, standalone
+file with no dependency on this repo, so it's the one thing worth
+copying ahead of everything else onto a machine that has no git access
+at all (e.g. the HPC).
 
 **Every command needs a database path -- there is no default anywhere,
 not even a hardcoded production one.** This code runs on whatever
