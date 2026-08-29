@@ -4,7 +4,7 @@ A small SQLite-backed system for running chunked pyGETM production
 simulations on SLURM and keeping track of what's been run and what's
 next, without hand-editing a spreadsheet.
 
-Five files, no packaging. This is where they live in the repo; on any
+No packaging -- plain files. This is where they live in the repo; on any
 machine that actually runs them (production machine, relay -- see
 "Working across machines" below), deploy the ones that machine needs
 together in one directory, wherever makes sense there -- `run_chunk.slurm`
@@ -20,6 +20,9 @@ machine use the same directory or even the same username:
 | `run_chunk.slurm` | the SLURM job. Runs one chunk, then resubmits itself for the next one -- or, once a run reaches its `stop_date`, for the next queued run (see "The queue" below). |
 | `run_tracking_server.py` | RPC entrypoint for accessing the registry across machines with no direct network path between them -- see "Working across machines" below. Only needed on the relay machine, and only if you need that at all. |
 | `apply_commands.py` | replays queued commands (see "Command queue" below) against the local registry -- only needed wherever the registry actually lives, and only if a live relay to it isn't possible. |
+| `setup_run_tracking.sh` | one-shot env/directory setup per machine role (see below) -- standalone, no dependency on anything else here. |
+| `push_registry_snapshot.sh` | pushes the registry out to bb-server1 (see "Keeping bb-server1's copy of the registry up to date") -- only needed wherever the registry actually lives. |
+| `test_compute_to_login_ssh.sbatch` | one-shot test for whether a compute node can reach its own login node -- see "Keeping bb-server1's copy up to date". Not part of normal operation. |
 
 ## Use `oceanicu-runs`, not `python oceanicu_runs.py`
 
@@ -481,12 +484,15 @@ first, normally).
 ## Dry-run any `oceanicu-runs` command
 
 ```bash
-oceanicu-runs --dry-run add --run-id ... [...]
 oceanicu-runs --dry-run chunk-size --run-id ... --chunk-multiplier 2
 oceanicu-runs --dry-run pause --all
+oceanicu-runs --dry-run set-stop-date --run-id ... --stop-date 2050-12-31
 ```
 
-`--dry-run` goes before the subcommand and works with **any** of them.
+`--dry-run` goes before the subcommand and works with any of the direct
+(non-`--queue`) commands -- it doesn't combine with `--queue` at all
+(queuing never opens a registry connection in the first place, so
+there's nothing for `--dry-run`'s registry-diff preview to run against).
 It is a real execution, not a simulated one -- it copies the configured
 registry to a timestamped file in `/tmp`, runs the actual command against
 *that copy only*, and reports:
@@ -513,7 +519,7 @@ interaction** -- nothing looked up, nothing written -- for trying a
 script/config/date-range by hand before it's registered:
 
 ```bash
-python chunk_runner.py \
+chunk-runner \
     --script generated_nse_cmip6.py \
     --start 2015-01-01T00:00:00 --stop 2015-02-01T00:00:00 \
     --save-restart /tmp/test_restart.nc \
@@ -876,28 +882,36 @@ committed, `rsync`'d to bb-server1 with `--chmod=a-w` (read-only on
 arrival, so an accidental write against that copy fails loudly instead
 of silently diverging the mirror).
 
-Two ways to trigger it, not mutually exclusive:
+**On this project's actual HPC, use the login-node cron -- it's the only
+mechanism that works here, not one option among several:**
 
-1. **A cron job on the login node** (needs outbound reach; compute nodes
-   don't have it) -- the always-on fallback, works regardless of
-   whether ssh from compute nodes to the login node is even possible:
-   ```bash
-   */10 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/push_registry_snapshot.sh
-   ```
-2. **Best-effort, from `run_chunk.slurm` itself**, right before each
-   self-resubmission -- fires only if `OCEANICU_LOGIN_NODE` is set (see
-   `setup_run_tracking.sh`'s optional 4th `hpc` argument) and only if
-   `ssh` from a compute node to that host actually works, which is
-   cluster-specific and unconfirmed in general -- see
-   `test_compute_to_login_ssh.sbatch` for a one-shot test to check on a
-   given cluster. Backgrounded and silenced either way: a slow or failed
-   push never delays or blocks the real resubmission that follows it.
+```bash
+*/10 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/push_registry_snapshot.sh
+```
 
-Since `$HOME` is commonly shared between login and compute nodes on HPC
-clusters, setting `OCEANICU_LOGIN_NODE` once (via `setup_run_tracking.sh`)
-is enough for `run_chunk.slurm`'s own `source ~/.bashrc` to see it on
-every compute node automatically -- no per-node setup, no threading it
-through `sbatch --export=` on every resubmission.
+(needs outbound reach, which the login node has and compute nodes don't).
+
+There's also a best-effort, event-driven path built into `run_chunk.slurm`
+itself -- right before each self-resubmission, it tries to `ssh` a
+compute node to `$OCEANICU_LOGIN_NODE` (if that env var is set, e.g. via
+`setup_run_tracking.sh`'s optional 4th `hpc` argument) and run
+`push_registry_snapshot.sh` there. **Confirmed 2026-08-29, directly by
+PML: compute nodes on this project's HPC cannot `ssh` to their own login
+node at all** -- `test_compute_to_login_ssh.sbatch` was built to check
+exactly this. So on THIS cluster, never set `OCEANICU_LOGIN_NODE` -- it
+would just silently never fire (harmless, but pointless). The mechanism
+stays in the code because it might work on a different cluster this
+tooling gets deployed to someday, not because it's a live option here.
+
+Since `$HOME`/`/work` are shared between login and compute nodes here
+(confirmed 2026-08-29), any env var set once in `~/.bashrc` (via
+`setup_run_tracking.sh`) is automatically visible on every compute node
+too, via `run_chunk.slurm`'s own `source ~/.bashrc` -- no per-node setup,
+no threading anything through `sbatch --export=`. That's what makes
+`OCEANICU_RUN_DB`/`OCEANICU_RUN_ROOT_BASE`/`OCEANICU_HPC` work with a
+single one-time setup call; it just doesn't help the event-driven push
+specifically, since that needs actual network reach, not merely a
+shared filesystem.
 
 For a chunk finishing specifically (the moment most worth syncing
 promptly): set `OCEANICU_DB_BACKUP_EVERY_N_WRITES=1` on the HPC so a

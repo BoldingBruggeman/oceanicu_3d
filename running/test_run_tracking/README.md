@@ -7,8 +7,9 @@ genuinely "in progress" to run `oceanicu_runs.py` commands against --
 `list`, `show`, `pause`, `resume`, `rerun`, `set-priority`,
 `set-stop-date`, `chunk-size`, `remove`, `--dry-run`.
 
-Nothing here touches the real production registry, and nothing here is
-committed to git yet -- this whole folder is scratch/test tooling.
+Nothing here touches the real production registry, though this folder
+IS committed to git (unlike its own generated `test_registry.sqlite`/
+`runs/`, which are gitignored) -- it's test tooling, not test data.
 
 ## Files
 
@@ -27,7 +28,7 @@ python setup_fake_runs.py                # local test_registry.sqlite, launcher=
 export OCEANICU_RUN_DB=$PWD/test_registry.sqlite
 
 # see what's registered
-python ../oceanicu_runs.py list
+oceanicu-runs list
 
 # start a worker -- this blocks, running real (sleeping) chunks one after
 # another; run it in its own terminal/tmux pane
@@ -38,16 +39,19 @@ While that's running, from a **second terminal** (same `OCEANICU_RUN_DB`
 exported), try any of:
 
 ```bash
-python ../oceanicu_runs.py list
-python ../oceanicu_runs.py list --status in_progress
-python ../oceanicu_runs.py show --run-id fake/quick/run01
-python ../oceanicu_runs.py pause --run-id fake/quick/run01
-python ../oceanicu_runs.py resume --run-id fake/quick/run01
-python ../oceanicu_runs.py set-priority --run-id fake/long/GFDL-ESM4/ssp370 --priority 99
-python ../oceanicu_runs.py set-stop-date --run-id fake/long/CNRM-ESM2-1/ssp126 --stop-date 2020-01-01
-python ../oceanicu_runs.py chunk-size --run-id fake/long/CNRM-ESM2-1/ssp126 --chunk-multiplier 1
-python ../oceanicu_runs.py --dry-run rerun --run-id fake/long/GFDL-ESM4/ssp370 --from-scratch
-python ../oceanicu_runs.py remove --run-id fake/notstarted/spare
+oceanicu-runs list
+oceanicu-runs list --status in_progress
+oceanicu-runs show --run-id fake/quick/run01
+oceanicu-runs pause --run-id fake/quick/run01
+oceanicu-runs resume --run-id fake/quick/run01
+oceanicu-runs set-priority --run-id fake/long/GFDL-ESM4/ssp370 --priority 99
+oceanicu-runs set-stop-date --run-id fake/long/CNRM-ESM2-1/ssp126 --stop-date 2020-01-01
+oceanicu-runs set-chunk-delay --run-id fake/long/GFDL-ESM4/ssp370 --seconds 30
+oceanicu-runs set-np --run-id fake/long/GFDL-ESM4/ssp370 --np 4
+oceanicu-runs set-data-roots-file --run-id fake/long/GFDL-ESM4/ssp370 --path some_other_data_roots.yaml
+oceanicu-runs chunk-size --run-id fake/long/CNRM-ESM2-1/ssp126 --chunk-multiplier 1
+oceanicu-runs --dry-run rerun --run-id fake/long/GFDL-ESM4/ssp370 --from-scratch
+oceanicu-runs remove --run-id fake/notstarted/spare
 ```
 
 `fake/quick/run01` and `fake/quick/run02` each finish in a single chunk
@@ -95,8 +99,8 @@ mechanism and meaning as the real `../run_chunk.slurm`, see
 terminal, while a worker loop is already running:
 
 ```bash
-python ../oceanicu_runs.py delay-all --db test_registry.sqlite --seconds 300
-python ../oceanicu_runs.py delay-all --db test_registry.sqlite --clear
+oceanicu-runs delay-all --db test_registry.sqlite --seconds 300
+oceanicu-runs delay-all --db test_registry.sqlite --clear
 ```
 
 Not a substitute for pause/resume (stops resubmission indefinitely until
@@ -104,6 +108,27 @@ a human resumes); this waits out the given number of seconds then
 proceeds automatically, and is genuinely live-adjustable -- run it again
 with a new value even while the loop is already mid-wait from an earlier
 call, and it picks up the change within its poll interval (60s).
+
+## Trying the command queue risk-free
+
+The queue/`apply_commands.py` mechanism (see `../RUN_TRACKING.md`
+"Command queue") works against this same scratch registry, entirely
+locally, no second machine or real network isolation needed to see it
+work end to end:
+
+```bash
+mkdir -p hpc_commands
+oceanicu-runs --queue hpc_commands/queue_kb.yaml set-priority \
+    --run-id fake/notstarted/spare --priority 42
+# nothing applied yet -- inspect hpc_commands/queue_kb.yaml, it's just a YAML file
+
+python ../apply_commands.py --db "$OCEANICU_RUN_DB" --queue-dir hpc_commands
+# OCEANICU_HPC=1 not needed here -- apply_commands.py doesn't gate itself,
+# only oceanicu_runs.py's own direct `add` does (see RUN_TRACKING.md "Set
+# up a run")
+
+oceanicu-runs show --run-id fake/notstarted/spare   # priority is now 42
+```
 
 ## Option B -- a real SLURM machine
 

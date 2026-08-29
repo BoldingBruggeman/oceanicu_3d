@@ -12,3 +12,7 @@ DELAY_ALL
 # .git would confuse tooling if left tracked.
 test_registry.sqlite.backups/
 .test_registry.sqlite.backup_write_count
+
+# Created by trying the "Trying the command queue risk-free" README
+# walkthrough -- runtime test output, not source.
+hpc_commands/

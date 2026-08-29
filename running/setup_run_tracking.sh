@@ -17,9 +17,13 @@
 # sets OCEANICU_LOGIN_NODE so run_chunk.slurm can try pushing a fresh
 # registry snapshot out from a compute node right before each
 # self-resubmission (best-effort; see push_registry_snapshot.sh and
-# test_compute_to_login_ssh.sbatch -- whether this actually works depends
-# on cluster-specific ssh reachability, unconfirmed as of writing). Omit
-# it to skip that and rely solely on the login-node cron fallback below.
+# test_compute_to_login_ssh.sbatch). On THIS project's actual HPC, DO NOT
+# pass this -- confirmed 2026-08-29 that compute nodes here can't ssh to
+# their own login node at all, so it would just silently never fire. Use
+# the login-node cron (see RUN_TRACKING.md "Keeping bb-server1's copy of
+# the registry up to date") as the only real mechanism here; this 4th
+# arg only matters if this tooling is ever deployed to a different
+# cluster where compute-to-login ssh actually works.
 # Since $HOME is shared between login and compute nodes on this cluster,
 # setting this once here makes it visible everywhere run_chunk.slurm's
 # own `source ~/.bashrc` runs, no separate per-node setup needed.

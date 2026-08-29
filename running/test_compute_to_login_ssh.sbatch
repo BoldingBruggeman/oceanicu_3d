@@ -3,6 +3,12 @@
 # to the login node it was submitted from? Answers the open question for
 # the "push the registry out from a compute node" design (RUN_TRACKING.md).
 #
+# On this project's actual production HPC: confirmed 2026-08-29, NO --
+# see RUN_TRACKING.md "Keeping bb-server1's copy of the registry up to
+# date", use the login-node cron there instead. Kept here in case this
+# tooling is ever deployed to a different cluster, where the answer may
+# differ -- re-run it there rather than assuming either way.
+#
 # Submit from an actual login-node terminal session (so $SLURM_SUBMIT_HOST
 # resolves to the real login node, no hostname to guess or hardcode):
 #   sbatch test_compute_to_login_ssh.sbatch
