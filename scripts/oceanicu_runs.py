@@ -23,12 +23,16 @@
 
     # append (any of the above except list/show) to a command-queue YAML
     # file instead of touching a real registry at all -- for a registry
-    # you have no network path to (see RUN_TRACKING.md "Command queue"):
-    oceanicu_runs.py --queue hpc_commands/queue_<you>.yaml <any write command above>
+    # you have no network path to (see RUN_TRACKING.md "Command queue").
+    # This queue directory is plain data, deliberately NOT part of this
+    # git repo -- see RUN_TRACKING.md for where it actually lives:
+    oceanicu_runs.py --queue ~/hpc_commands/queue_<you>.yaml <any write command above>
 
-    # stage exactly a new run's own files for that queue to carry across
-    # (doesn't touch any registry, no --db needed):
-    oceanicu_runs.py stage --run-root ... --file a.py --file a_utils.py --file a_config.yaml
+    # stage a new run's own files (filtered by --include, default
+    # *.py/*.yaml/*.yml) for that queue to carry across -- doesn't touch
+    # any registry, no --db needed:
+    oceanicu_runs.py stage --run-root ... --source-dir /wherever/you/generated/it \
+                            --run-files-dir ~/hpc_commands/run_files
 
 pause/resume set the DB `control` column -- the normal, auditable way.
 For a genuine HPC-overload emergency, `touch <run_root>/PAUSE` (one run)
@@ -251,7 +255,8 @@ _STAGE_DEFAULT_EXCLUDE_DIRS = ["__pycache__"]
 
 
 def cmd_stage(args: argparse.Namespace) -> int:
-    """rsync --source-dir into hpc_commands/run_files/<run-root>/,
+    """rsync --source-dir into --run-files-dir/<run-root>/ (plain data,
+    NOT part of this git repo -- see RUN_TRACKING.md "Command queue"),
     filtered to only the files that actually matter (driver script,
     utils module, config -- --include patterns, default *.py/*.yaml/
     *.yml) -- never the whole directory verbatim, since a real generated-
@@ -515,9 +520,9 @@ def main() -> int:
     st = sub.add_parser(
         "stage",
         help="rsync (filtered by --include, default *.py/*.yaml/*.yml) a run's generated "
-             "files into hpc_commands/run_files/<run-root>/, for a later --queue'd add to "
-             "pick up (see RUN_TRACKING.md \"Command queue\") -- doesn't touch any "
-             "registry, no --db needed",
+             "files into <run-files-dir>/<run-root>/, for a later --queue'd add to pick up "
+             "(see RUN_TRACKING.md \"Command queue\") -- doesn't touch any registry, no "
+             "--db needed",
     )
     st.set_defaults(func=cmd_stage)
     st.add_argument("--run-root", required=True)
@@ -530,7 +535,10 @@ def main() -> int:
     st.add_argument("--exclude-dir", action="append", default=list(_STAGE_DEFAULT_EXCLUDE_DIRS),
                     metavar="NAME", help="subdirectory name to exclude entirely, repeatable "
                                           "(default: __pycache__)")
-    st.add_argument("--run-files-dir", default="hpc_commands/run_files")
+    st.add_argument("--run-files-dir", required=True, metavar="PATH",
+                    help="e.g. ~/hpc_commands/run_files -- no default on purpose: this is "
+                         "plain data, deliberately NOT part of this git repo, so there's no "
+                         "in-repo path that would ever be right to default to")
 
     a = sub.add_parser("add"); _add_common(a); a.set_defaults(func=cmd_add)
     a.add_argument("--run-id", required=True)

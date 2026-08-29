@@ -611,20 +611,31 @@ production machine, which does have its own `OCEANICU_RUN_ROOT_BASE` set.
 The relay above (`ssh://` + `run_tracking_server.py`) needs a live,
 two-way network path -- it doesn't work when the registry's own machine
 can't be reached from outside AT ALL (a fully network-isolated HPC,
-reachable only via a human with terminal access to it). For that case,
-use a command queue instead: a YAML file that carries *requests* across
-the boundary (via whatever transport actually exists there -- `rsync`,
-a human copying it by hand, a cron job with outbound-only access) rather
-than needing a live connection.
+reachable only via a human with terminal access to it, that in turn only
+ever talks to ONE other machine -- e.g. this project's own PML HPC,
+which only ever interacts with bb-server1, never GitHub directly). For
+that case, use a command queue instead: a plain directory of small files
+that carries *requests* (and the tiny driver-script/config files a new
+run needs) across the boundary via `rsync`, at every hop.
 
-**Multiple people can queue commands from different places** (e.g. you
-and someone else, both with access to whatever machine hosts the shared
-`hpc_commands/` directory/repo). Rather than all appending to one shared
-file -- a real, if rare, git-merge-conflict risk -- **each person gets
-their own queue file**, `hpc_commands/queue_<name>.yaml`:
+**This is deliberately NOT part of the `oceanicu_3d` git repo.**
+`hpc_commands/` is a plain data directory -- same category as
+`experiments/` itself, not source -- living at a fixed, agreed location
+that every machine in the chain can reach one hop of:
+`bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands/`. The
+HPC never needs to `git pull`/clone anything from GitHub to run --
+`oceanicu_3d`'s `scripts/` are deployed there as plain files (however
+that already happens), and `hpc_commands/` moves the exact same way, via
+`rsync`, never git. Keeping it out of git also sidesteps the earlier
+worry about it looking like a second, git-tracked copy of the real
+(large, definitely-not-in-git) `experiments/` output tree -- it isn't
+one; it's a small, disposable relay directory, not a repo.
+
+**On your own workstation**, compose commands and stage files into a
+local staging directory (anywhere -- outside the git repo):
 
 ```bash
-python oceanicu_runs.py --queue hpc_commands/queue_kb.yaml add \
+python oceanicu_runs.py --queue ~/hpc_commands/queue_kb.yaml add \
     --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 \
     --script generated_nse_cmip6.py --config generated_nse_cmip6_config.yaml \
     --initial-date 2015-01-01 --stop-date 2099-12-31 --chunk-kind annual --chunk-multiplier 5 --np 192
@@ -648,6 +659,13 @@ commands:
     note: null                # command's own stdout on success, or the error on failure
 ```
 
+**Multiple people can queue commands from different places** (e.g. you
+and someone else, both able to `rsync` into bb-server1's
+`experiments/hpc_commands/`). Rather than all writing to one shared
+file, **each person gets their own**, `queue_<name>.yaml` -- avoids any
+risk of one person's `rsync` clobbering another's in-flight edit to the
+same file.
+
 **A brand-new run also needs its actual driver script/config physically
 present** at `run_root` before any chunk can start -- the queue entry
 alone only carries the DB row. `stage` gets exactly the right files
@@ -657,30 +675,41 @@ run actually needs):
 
 ```bash
 python oceanicu_runs.py stage --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 \
-    --source-dir /wherever/you/generated/the/driver/script
-    # --include defaults to *.py, *.yaml, *.yml; --exclude-dir defaults to __pycache__;
-    # --run-files-dir defaults to hpc_commands/run_files
+    --source-dir /wherever/you/generated/the/driver/script \
+    --run-files-dir ~/hpc_commands/run_files
+    # --include defaults to *.py, *.yaml, *.yml; --exclude-dir defaults to __pycache__
 ```
 
 This `rsync`s (filtered by `--include`/`--exclude-dir`, so it's real
 rsync include/exclude syntax, not a reimplementation) into
-`hpc_commands/run_files/NSe/CMIP6/CNRM-ESM2-1/ssp126/run02/` -- mirroring
-the run's own `run_root` path.
+`~/hpc_commands/run_files/NSe/CMIP6/CNRM-ESM2-1/ssp126/run02/` --
+mirroring the run's own `run_root` path.
 
-Commit the whole `hpc_commands/` directory (every `queue_*.yaml` *and*
-`run_files/`) and get it across however the boundary is actually
-crossed (rsync, git push/pull through an intermediate machine, a human
-carrying it by hand).
+**Then `rsync` your whole local staging directory to bb-server1**
+(every `queue_*.yaml` *and* `run_files/`):
 
-**On the machine where the registry actually lives**, run
+```bash
+rsync -a ~/hpc_commands/ bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands/
+```
+
+**From bb-server1 to the HPC and back** is the one remaining hop that
+needs whatever transport actually exists there (a human -- PML for this
+project -- running `rsync` by hand, or a cron job if outbound access
+from that side makes one possible -- see the topology discussion this
+was designed around). Same directory, same files, `rsync` both ways --
+nothing about `hpc_commands/` itself changes depending on how that hop
+is actually carried out.
+
+**On the machine where the registry actually lives** (the HPC, using
+its own *local* copy of `hpc_commands/` after the last hop above), run
 `apply_commands.py` against local copies of both:
 
 ```bash
 python apply_commands.py --db /local/path/run_registry.sqlite \
-    --queue-dir hpc_commands/
+    --queue-dir /local/path/hpc_commands/
     # processes every queue_*.yaml found there, combined and applied in
     # queued_at order across all of them, regardless of whose file an
-    # entry lives in. --run-files-dir defaults to hpc_commands/run_files.
+    # entry lives in. --run-files-dir defaults to <queue-dir>/run_files.
     # (--queue PATH still works too, for a single exact file.)
 ```
 

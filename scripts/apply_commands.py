@@ -32,21 +32,26 @@ being applied, whatever's staged there is copied into the REAL
 -- a copy failure never leaves an orphan, file-less DB row behind.
 
 Multiple people can queue commands from different places -- rather than
-have them all append to one shared file (a real, if rare, git-merge-
-conflict risk), each person gets their OWN queue file,
-`queue_<name>.yaml`, in the same directory. `--queue-dir` processes every
-`queue_*.yaml` found there, combined and applied in `queued_at` order
-across all of them, so real submission order is preserved regardless of
-which file an entry lives in. `--queue PATH` (a single, exact file) still
-works too, for a quick one-off or testing.
+have them all write to one shared file (a real risk of one rsync
+clobbering another's in-flight edit), each person gets their OWN queue
+file, `queue_<name>.yaml`, in the same directory. `--queue-dir` processes
+every `queue_*.yaml` found there, combined and applied in `queued_at`
+order across all of them, so real submission order is preserved
+regardless of which file an entry lives in. `--queue PATH` (a single,
+exact file) still works too, for a quick one-off or testing.
+
+`hpc_commands/` itself is plain data, deliberately NOT part of the
+`oceanicu_3d` git repo -- see RUN_TRACKING.md "Command queue" for where
+it actually lives and how it physically gets here (rsync, at every hop,
+never git/GitHub).
 
 Usage:
     python apply_commands.py --db /local/path/run_registry.sqlite \\
-        --queue-dir hpc_commands/ \\
-        [--run-files-dir hpc_commands/run_files]   # default: <queue-dir>/run_files
+        --queue-dir /local/path/hpc_commands/ \\
+        [--run-files-dir /local/path/hpc_commands/run_files]   # default: <queue-dir>/run_files
 
     # or a single exact file:
-    python apply_commands.py --db ... --queue hpc_commands/queue_kb.yaml
+    python apply_commands.py --db ... --queue /local/path/hpc_commands/queue_kb.yaml
 
 Typically run from a cron job (or by hand, or from run_chunk.slurm's own
 execution) on whichever machine physically holds both the registry and
