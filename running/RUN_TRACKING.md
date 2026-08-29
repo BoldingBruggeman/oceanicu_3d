@@ -63,12 +63,35 @@ variable only matters on whichever machine actually holds the registry.
 ## Set up a run
 
 This is the direct form -- run it wherever you have an actual, live
-path to the registry (on the production machine itself, or from
-anywhere via the `ssh://` relay, see "Working across machines" below).
-If there's no live path at all (a network-isolated HPC), use
+path to the *authoritative* registry (on the production machine itself,
+or from anywhere via the `ssh://` relay, see "Working across machines"
+below). If there's no live path at all (a network-isolated HPC), use
 `oceanicu_runs.py --queue ... add ...` instead -- see "Command queue"
 further down; same flags, same validation, it just gets there via files
 instead of a connection.
+
+**A copy of the registry sitting somewhere reachable is not the same
+thing as a live path to it.** If bb-server1 (or anywhere else) only ever
+holds a read-only mirror of the HPC's own registry (see "Keeping
+bb-server1's copy of the registry up to date"), pointing `--db` straight
+at that file is not "the direct form" -- it's writing into a copy with
+no effect on the real thing. SQLite won't warn you: the command
+succeeds, a row appears, and it looks exactly like a real `add` until
+the next push from the HPC silently overwrites it, at which point the
+change is just gone and nothing was ever registered where chunks
+actually get picked up from. If the only live path you have is the
+command queue, that's not a fallback -- it's the only correct way to add
+or change anything, full stop.
+
+**On this project's actual HPC specifically**, that's not a hypothetical
+edge case, it's the normal case: nobody ever runs this direct form by
+hand there at all. Every real write to the authoritative registry
+happens through `apply_commands.py` replaying a queued entry -- it calls
+this exact same command internally (see "Command queue"'s own
+docstring), but always against the real local path, never by a human
+typing `--db` themselves. If you find yourself about to run `add`/
+`pause`/`set-*` directly with a `--db` that points at anything other
+than that local path, stop and use `--queue` instead.
 
 ```bash
 python oceanicu_runs.py add \
@@ -559,9 +582,9 @@ python oceanicu_runs.py add --run-id ...          # exactly the same as local us
 A copy-pasteable starting point for both lines lives in
 `relay.env.example` -- copy it to `relay.env` (gitignored) and source it,
 same content on every machine. It also sets `PATH` to include
-`scripts/bin`, which gives you `oceanicu-runs`/`chunk-runner` as short
+`running/bin`, which gives you `oceanicu-runs`/`chunk-runner` as short
 commands usable from anywhere (e.g. from inside a run's own chunk
-directory) instead of the full `python .../scripts/oceanicu_runs.py`
+directory) instead of the full `python .../running/oceanicu_runs.py`
 every time -- these are thin wrappers around the real scripts, safe to
 use in place of `python oceanicu_runs.py`/`python chunk_runner.py`
 throughout this whole document.
@@ -657,7 +680,7 @@ run needs) across the boundary via `rsync`, at every hop.
 that every machine in the chain can reach one hop of:
 `bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands/`. The
 HPC never needs to `git pull`/clone anything from GitHub to run --
-`oceanicu_3d`'s `scripts/` are deployed there as plain files (however
+`oceanicu_3d`'s `running/` are deployed there as plain files (however
 that already happens), and `hpc_commands/` moves the exact same way, via
 `rsync`, never git. Keeping it out of git also sidesteps the earlier
 worry about it looking like a second, git-tracked copy of the real
