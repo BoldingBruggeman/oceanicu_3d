@@ -21,6 +21,27 @@ machine use the same directory or even the same username:
 | `run_tracking_server.py` | RPC entrypoint for accessing the registry across machines with no direct network path between them -- see "Working across machines" below. Only needed on the relay machine, and only if you need that at all. |
 | `apply_commands.py` | replays queued commands (see "Command queue" below) against the local registry -- only needed wherever the registry actually lives, and only if a live relay to it isn't possible. |
 
+## Use `oceanicu-runs`, not `python oceanicu_runs.py`
+
+Every example from here on uses `oceanicu-runs` -- a thin wrapper
+(`running/bin/oceanicu-runs`) that just forwards to the real script, so
+there's no full path to type every time. Put it on `PATH` once, on any
+machine (workstation, bb-server1, the HPC -- all the same):
+
+```bash
+export PATH="/abs/path/to/oceanicu_3d/running/bin:$PATH"
+```
+
+Add that to `~/.bashrc` to make it permanent. `chunk-runner` (for
+`chunk_runner.py`) comes along the same way, for free.
+
+**`oceanicu-runs` is never required -- it's purely convenience.**
+`python /abs/path/to/oceanicu_3d/running/oceanicu_runs.py` does exactly
+the same thing, always, with no wrapper needed; substitute it freely
+anywhere `oceanicu-runs` appears below if `PATH` isn't set up yet, or
+never will be on a given machine. `PATH` is the preferred way once it's
+in place, purely because there's less to type.
+
 **First time on a new machine:** `setup_run_tracking.sh hpc|relay|workstation PATH`
 sets up the env vars (`OCEANICU_RUN_DB`/`OCEANICU_RUN_ROOT_BASE`/
 `OCEANICU_HPC`, `hpc` role only -- see "Set up a run" for what that last
@@ -37,7 +58,7 @@ hardcoded production one, and most machines don't need one at all.**
 `--queue`/`stage` (see "Command queue" below -- the default, correct way
 for almost everybody) never open a real registry connection, so a
 workstation that only ever queues commands and stages files needs no
-`OCEANICU_RUN_DB` at all. `oceanicu_runs.py --dry-run` is the same way
+`OCEANICU_RUN_DB` at all. `oceanicu-runs --dry-run` is the same way
 (happy to run with no DB configured, see "Dry-run" below). A database
 path is required for everything else -- `list`/`show` against a real or
 mirrored registry, and any direct write command run where a live path
@@ -76,7 +97,7 @@ instead of touching a registry directly -- no network path to anything
 required, nothing to get wrong about which machine you're on:
 
 ```bash
-python oceanicu_runs.py --queue ~/hpc_commands/queue_kb.yaml add \
+oceanicu-runs --queue ~/hpc_commands/queue_kb.yaml add \
     --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
     --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
     --script generated_nse_cmip6.py \
@@ -123,7 +144,7 @@ on `add` only for now, not the other direct write commands
 (`pause`/`set-*`/etc.) -- same footgun, not yet extended there.
 
 ```bash
-python oceanicu_runs.py add \
+oceanicu-runs add \
     --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
     --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
     --script generated_nse_cmip6.py \
@@ -228,8 +249,8 @@ already running** -- e.g. "the HPC needs to be used for something else
 for a while" -- with:
 
 ```bash
-python oceanicu_runs.py delay-all --seconds 3600   # wait 1h before the next submission
-python oceanicu_runs.py delay-all --clear          # cancel early
+oceanicu-runs delay-all --seconds 3600   # wait 1h before the next submission
+oceanicu-runs delay-all --clear          # cancel early
 ```
 
 Unlike pause/resume (a separate, existing mechanism -- see below -- which
@@ -269,7 +290,7 @@ as a tiebreak) and can be changed at any time, including for a run
 that's already going:
 
 ```bash
-python oceanicu_runs.py set-priority --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --priority 10
+oceanicu-runs set-priority --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --priority 10
 ```
 
 It only affects which `not_started` run gets picked up next -- it has no
@@ -278,10 +299,10 @@ effect on a run that's already `in_progress`.
 ## Check status
 
 ```bash
-python oceanicu_runs.py list                          # everything
-python oceanicu_runs.py list --status in_progress
-python oceanicu_runs.py list --like CNRM-ESM2-1        # substring match on run_id
-python oceanicu_runs.py show --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01   # + full chunk history
+oceanicu-runs list                          # everything
+oceanicu-runs list --status in_progress
+oceanicu-runs list --like CNRM-ESM2-1        # substring match on run_id
+oceanicu-runs show --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01   # + full chunk history
 ```
 
 `status` on a run is one of:
@@ -308,10 +329,10 @@ all, before anything stops.
 
 ```bash
 # the normal way
-python oceanicu_runs.py pause  --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
-python oceanicu_runs.py resume --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
-python oceanicu_runs.py pause  --all      # everything
-python oceanicu_runs.py resume --all
+oceanicu-runs pause  --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
+oceanicu-runs resume --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
+oceanicu-runs pause  --all      # everything
+oceanicu-runs resume --all
 
 # the emergency way -- works even if the Python env is unreachable, no
 # tooling required, just `touch`. PAUSE_ALL lives next to whichever DB
@@ -331,7 +352,7 @@ everything to stop cleanly without touching the database at all.
 ## Change chunk size mid-run
 
 ```bash
-python oceanicu_runs.py chunk-size --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
+oceanicu-runs chunk-size --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
     --chunk-multiplier 10
 ```
 
@@ -347,9 +368,9 @@ next queued run), unlike `delay-all` above (a global, one-shot TIMED
 pause covering every run). Default 0 (no delay) if never set:
 
 ```bash
-python oceanicu_runs.py add ... --chunk-delay-seconds 30   # at registration time
-python oceanicu_runs.py set-chunk-delay --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --seconds 30
-python oceanicu_runs.py set-chunk-delay --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --seconds 0  # cancel
+oceanicu-runs add ... --chunk-delay-seconds 30   # at registration time
+oceanicu-runs set-chunk-delay --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --seconds 30
+oceanicu-runs set-chunk-delay --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --seconds 0  # cancel
 ```
 
 Same "takes effect on the very next hand-off, never retroactively"
@@ -367,9 +388,9 @@ after the fact, same next-hand-off-only semantics as `chunk-size`/
 running:
 
 ```bash
-python oceanicu_runs.py set-data-roots-file --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
+oceanicu-runs set-data-roots-file --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
     --path bb-server1_data_roots.yaml
-python oceanicu_runs.py set-np --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --np 192
+oceanicu-runs set-np --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --np 192
 ```
 
 Both shown in `show`'s run table.
@@ -396,7 +417,7 @@ Changing the target while a run is already going (e.g. it's currently at
 2035 and you decide to extend to 2050, or cut it short) works too:
 
 ```bash
-python oceanicu_runs.py set-stop-date --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
+oceanicu-runs set-stop-date --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
     --stop-date 2050-12-31
 ```
 
@@ -410,9 +431,9 @@ run past the new date.
 ## Rerun
 
 ```bash
-python oceanicu_runs.py rerun --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --from-current
-python oceanicu_runs.py rerun --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --from-chunk 4
-python oceanicu_runs.py rerun --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --from-scratch
+oceanicu-runs rerun --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --from-current
+oceanicu-runs rerun --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --from-chunk 4
+oceanicu-runs rerun --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 --from-scratch
 ```
 
 This only rewinds the *tracked history* (drops the DB record for that
@@ -440,29 +461,29 @@ before/after is still fully visible -- just read from one line instead of
 two. Add `--note "why"` to `rerun` to record the reason alongside it:
 
 ```bash
-python oceanicu_runs.py rerun --run-id ... --from-current --note "fixed off-by-one in river forcing"
+oceanicu-runs rerun --run-id ... --from-current --note "fixed off-by-one in river forcing"
 ```
 
-`oceanicu_runs.py show --run-id ...` prints the full history (who did
+`oceanicu-runs show --run-id ...` prints the full history (who did
 what, when, including these events) as its own table, and the chunks
 table shows each chunk's own script/config hash (first 12 hex chars).
 
 ## Remove a run from the registry
 
 ```bash
-python oceanicu_runs.py remove --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
+oceanicu-runs remove --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
 ```
 
 Only removes the registry/chunk-history rows -- never touches files.
 Refuses if the run is `in_progress` unless you pass `--force` (pause it
 first, normally).
 
-## Dry-run any `oceanicu_runs.py` command
+## Dry-run any `oceanicu-runs` command
 
 ```bash
-python oceanicu_runs.py --dry-run add --run-id ... [...]
-python oceanicu_runs.py --dry-run chunk-size --run-id ... --chunk-multiplier 2
-python oceanicu_runs.py --dry-run pause --all
+oceanicu-runs --dry-run add --run-id ... [...]
+oceanicu-runs --dry-run chunk-size --run-id ... --chunk-multiplier 2
+oceanicu-runs --dry-run pause --all
 ```
 
 `--dry-run` goes before the subcommand and works with **any** of them.
@@ -478,7 +499,7 @@ registry to a timestamped file in `/tmp`, runs the actual command against
   `chunk_runner.py --dry-run` against that same scratch copy, not by
   re-deriving the logic separately where it could drift out of sync
 - where the resulting scratch DB was left, so you can inspect it further
-  yourself (`sqlite3 <path>`, or `oceanicu_runs.py --db <path> show ...`)
+  yourself (`sqlite3 <path>`, or `oceanicu-runs --db <path> show ...`)
 
 The real registry is never opened for writing. Unlike every other
 command, `--dry-run` doesn't need `--db`/`OCEANICU_RUN_DB` configured at
@@ -614,19 +635,15 @@ instead of a local one:
 
 ```bash
 export OCEANICU_RUN_DB=ssh://oceanicu-relay/abs/path/to/run_registry.sqlite
-export OCEANICU_RELAY_DIR=/abs/path/to/scripts   # where run_tracking_server.py lives, ON the relay
-python oceanicu_runs.py add --run-id ...          # exactly the same as local use from here on
+export OCEANICU_RELAY_DIR=/abs/path/to/running   # where run_tracking_server.py lives, ON the relay
+oceanicu-runs add --run-id ...          # exactly the same as local use from here on
 ```
 
 A copy-pasteable starting point for both lines lives in
 `relay.env.example` -- copy it to `relay.env` (gitignored) and source it,
 same content on every machine. It also sets `PATH` to include
-`running/bin`, which gives you `oceanicu-runs`/`chunk-runner` as short
-commands usable from anywhere (e.g. from inside a run's own chunk
-directory) instead of the full `python .../running/oceanicu_runs.py`
-every time -- these are thin wrappers around the real scripts, safe to
-use in place of `python oceanicu_runs.py`/`python chunk_runner.py`
-throughout this whole document.
+`running/bin` (see "Use `oceanicu-runs`" at the top) as a convenience,
+same as anywhere else.
 
 **`oceanicu-relay` is a `~/.ssh/config` `Host` alias, not a raw
 hostname -- this is the recommended way to point at the relay**,
@@ -682,7 +699,7 @@ sbatch --export=RUN_ID='...',OCEANICU_RUN_DB='ssh://...',OCEANICU_RELAY_DIR='...
 (see "Pause / resume" above) always lives on whichever machine actually
 has that run's output -- normally the production machine, never the
 relay -- so it's checked locally by whichever machine is asking, not
-relayed. Concretely: `oceanicu_runs.py --dry-run` run from the
+relayed. Concretely: `oceanicu-runs --dry-run` run from the
 add-machine can preview everything else correctly, but can't see a
 per-run PAUSE file that only exists on the production machine's
 filesystem (it'll just read as absent). The DB `control` column and the
@@ -730,7 +747,7 @@ one; it's a small, disposable relay directory, not a repo.
 local staging directory (anywhere -- outside the git repo):
 
 ```bash
-python oceanicu_runs.py --queue ~/hpc_commands/queue_kb.yaml add \
+oceanicu-runs --queue ~/hpc_commands/queue_kb.yaml add \
     --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 \
     --script generated_nse_cmip6.py --config generated_nse_cmip6_config.yaml \
     --initial-date 2015-01-01 --stop-date 2099-12-31 --chunk-kind annual --chunk-multiplier 5 --np 192
@@ -754,6 +771,14 @@ commands:
     note: null                # command's own stdout on success, or the error on failure
 ```
 
+A fuller worked example -- three entries covering the whole lifecycle
+(one applied, one that "applied" but actually hit the `set-priority`
+typo gap documented further down, one still pending) -- lives in
+`queue_example.yaml`,
+right alongside this file. Reference/illustration only, not something to
+copy into place: your own real queue file is created and appended to
+automatically by `oceanicu-runs --queue ...`, never hand-edited.
+
 **Multiple people can queue commands from different places** (e.g. you
 and someone else, both able to `rsync` into bb-server1's
 `experiments/hpc_commands/`). Rather than all writing to one shared
@@ -769,7 +794,7 @@ folder commonly has `__pycache__/`, logs, etc. alongside the 2-3 files a
 run actually needs):
 
 ```bash
-python oceanicu_runs.py stage --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 \
+oceanicu-runs stage --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 \
     --source-dir /wherever/you/generated/the/driver/script \
     --run-files-dir ~/hpc_commands/run_files
     # --include defaults to *.py, *.yaml, *.yml; --exclude-dir defaults to __pycache__
