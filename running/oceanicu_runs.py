@@ -1,13 +1,50 @@
 #!/usr/bin/env python
 """oceanicu_runs.py -- manage the production-run tracking registry.
 
+Use --queue -- this is the default, correct way for almost everybody,
+not a fallback for the rare case. Appends the exact same command, same
+flags, same validation, to a local YAML file instead of touching a
+registry directly -- no network path to anything required:
+
+    oceanicu_runs.py --queue ~/hpc_commands/queue_<you>.yaml add \\
+                             --run-id ... --run-root ... --script ... --config ...
+                             --initial-date 2015-01-01 --stop-date 2099-12-31
+                             [--data-roots-file ...] [--chunk-kind annual]
+                             [--chunk-multiplier 5] [--np 192] [--priority 0]
+    oceanicu_runs.py --queue ~/hpc_commands/queue_<you>.yaml <any write command below>
+
+    # stage a new run's own files (filtered by --include, default
+    # *.py/*.yaml/*.yml) for that queue to carry across -- doesn't touch
+    # any registry, no --db needed:
+    oceanicu_runs.py stage --run-root ... --source-dir /wherever/you/generated/it \\
+                            --run-files-dir ~/hpc_commands/run_files
+
+That queue directory is plain data, deliberately NOT part of this git
+repo -- see RUN_TRACKING.md "Command queue" for where it actually lives
+and how it reaches the registry from there.
+
+list/show are read-only and safe to point at a read-only mirror (e.g.
+bb-server1) if that's all you can reach -- you just might be looking at
+a slightly stale snapshot, not live state:
+
+    oceanicu_runs.py list   [--status in_progress] [--like MPI-ESM1-2-HR]
+    oceanicu_runs.py show   --run-id ...              # run + full chunk history
+
+Every WRITE command below also works without --queue, but only if you
+have an actual, live path to the AUTHORITATIVE registry -- the
+production machine itself, or the ssh:// relay (see RUN_TRACKING.md
+"Working across machines"). A read-only mirror does NOT count for these:
+pointing --db at one "succeeds" with no warning, writes into a copy with
+no effect on the real thing, and vanishes next time a real push
+overwrites it. On this project's actual HPC, nobody runs these directly
+by hand at all -- see RUN_TRACKING.md "Set up a run" before using any of
+these without --queue:
+
     oceanicu_runs.py add    --run-id ... --run-root ... --script ... --config ...
                              --initial-date 2015-01-01 --stop-date 2099-12-31
                              [--data-roots-file ...] [--chunk-kind annual]
                              [--chunk-multiplier 5] [--np 192] [--priority 0]
     oceanicu_runs.py remove --run-id ... [--force]
-    oceanicu_runs.py list   [--status in_progress] [--like MPI-ESM1-2-HR]
-    oceanicu_runs.py show   --run-id ...              # run + full chunk history
     oceanicu_runs.py chunk-size --run-id ... --chunk-kind ... --chunk-multiplier ...
     oceanicu_runs.py set-chunk-delay --run-id ... --seconds N   # persistent, per-run pacing
     oceanicu_runs.py set-data-roots-file --run-id ... --path ...
@@ -20,19 +57,6 @@
     # preview ANY of the above for real, against a scratch copy in /tmp,
     # without ever writing to the configured registry:
     oceanicu_runs.py --dry-run <any command above>
-
-    # append (any of the above except list/show) to a command-queue YAML
-    # file instead of touching a real registry at all -- for a registry
-    # you have no network path to (see RUN_TRACKING.md "Command queue").
-    # This queue directory is plain data, deliberately NOT part of this
-    # git repo -- see RUN_TRACKING.md for where it actually lives:
-    oceanicu_runs.py --queue ~/hpc_commands/queue_<you>.yaml <any write command above>
-
-    # stage a new run's own files (filtered by --include, default
-    # *.py/*.yaml/*.yml) for that queue to carry across -- doesn't touch
-    # any registry, no --db needed:
-    oceanicu_runs.py stage --run-root ... --source-dir /wherever/you/generated/it \
-                            --run-files-dir ~/hpc_commands/run_files
 
 pause/resume set the DB `control` column -- the normal, auditable way.
 For a genuine HPC-overload emergency, `touch <run_root>/PAUSE` (one run)
