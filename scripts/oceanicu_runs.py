@@ -21,6 +21,11 @@
     # without ever writing to the configured registry:
     oceanicu_runs.py --dry-run <any command above>
 
+    # append (any of the above except list/show) to a command-queue YAML
+    # file instead of touching a real registry at all -- for a registry
+    # you have no network path to (see RUN_TRACKING.md "Command queue"):
+    oceanicu_runs.py --queue hpc_commands/commands.yaml <any write command above>
+
 pause/resume set the DB `control` column -- the normal, auditable way.
 For a genuine HPC-overload emergency, `touch <run_root>/PAUSE` (one run)
 works even if this tool or the DB itself is unreachable; for pausing
@@ -43,13 +48,21 @@ from __future__ import annotations
 
 import argparse
 import os
+import secrets
 import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import yaml
+
 import run_tracking as rt
+
+# Keys on the parsed argparse.Namespace that are about HOW the command
+# runs, never part of the command's own meaning -- never serialized into
+# a queued command (see _queue_command/apply_commands.py).
+_QUEUE_EXCLUDE_KEYS = {"db", "dry_run", "queue", "cmd", "func"}
 
 _RUN_COLUMNS = [
     "run_id", "status", "control", "chunk_kind", "chunk_multiplier",
@@ -187,6 +200,46 @@ def _preview_chunk_runner(scratch_db: Path, run_id: str) -> None:
         return
     for line in output.splitlines():
         print(f"    {line}")
+
+
+def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
+    """Append this command to a command-queue YAML file instead of
+    touching a real registry at all -- for a registry with no network
+    path to it (see RUN_TRACKING.md "Command queue"). apply_commands.py,
+    run wherever the registry actually lives, later replays each pending
+    entry through this exact same CLI (reconstructed from the stored
+    args, as real --flag values) -- so queuing and running directly go
+    through identical validation/behavior, nothing duplicated here."""
+    if args.cmd in ("list", "show"):
+        print(f"ERROR: {args.cmd!r} is read-only -- nothing to queue.", file=sys.stderr)
+        return 1
+
+    queue_path = Path(queue_path)
+    if queue_path.exists():
+        data = yaml.safe_load(queue_path.read_text()) or {}
+    else:
+        data = {}
+    commands = data.setdefault("commands", [])
+
+    call_args = {k: v for k, v in vars(args).items() if k not in _QUEUE_EXCLUDE_KEYS}
+    cmd_id = f"cmd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{secrets.token_hex(2)}"
+    commands.append({
+        "id": cmd_id,
+        "action": args.cmd,
+        "args": call_args,
+        "queued_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "queued_by": rt._current_user(),
+        "status": "pending",
+        "applied_at": None,
+        "note": None,
+    })
+
+    queue_path.parent.mkdir(parents=True, exist_ok=True)
+    queue_path.write_text(yaml.safe_dump(data, sort_keys=False))
+    print(f"queued {cmd_id}: {args.cmd} {call_args.get('run_id', '')}".rstrip())
+    print(f"-- commit and push/rsync {queue_path} for it to actually cross to the registry's "
+          f"own machine; nothing has been applied yet.")
+    return 0
 
 
 def cmd_add(args: argparse.Namespace) -> int:
@@ -379,6 +432,10 @@ def _add_common(sp: argparse.ArgumentParser) -> None:
                          "against THAT (a real execution, not a simulated one), report what "
                          "changed, and leave the resulting file for inspection. The real "
                          "registry is never opened for writing.")
+    sp.add_argument("--queue", default=argparse.SUPPRESS, metavar="PATH",
+                    help="append this command to a command-queue YAML file instead of "
+                         "touching a real registry at all -- see RUN_TRACKING.md "
+                         "\"Command queue\"")
 
 
 def main() -> int:
@@ -389,6 +446,10 @@ def main() -> int:
                          "against THAT (a real execution, not a simulated one), report what "
                          "changed, and leave the resulting file for inspection. The real "
                          "registry is never opened for writing.")
+    p.add_argument("--queue", default=None, metavar="PATH",
+                    help="append this command to a command-queue YAML file instead of "
+                         "touching a real registry at all -- see RUN_TRACKING.md "
+                         "\"Command queue\"")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     a = sub.add_parser("add"); _add_common(a); a.set_defaults(func=cmd_add)
@@ -525,6 +586,13 @@ def main() -> int:
     g3.add_argument("--from-scratch", action="store_true")
 
     args = p.parse_args()
+
+    if args.queue:
+        if args.dry_run:
+            print("ERROR: --queue and --dry-run don't combine -- queuing never touches a "
+                  "real registry to begin with.", file=sys.stderr)
+            return 1
+        return _queue_command(Path(args.queue), args)
 
     if not args.dry_run:
         try:

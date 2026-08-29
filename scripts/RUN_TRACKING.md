@@ -606,6 +606,99 @@ real problem: the actual `add` still registers correctly either way, and
 resolution happens for real once the chunk actually runs on the
 production machine, which does have its own `OCEANICU_RUN_ROOT_BASE` set.
 
+## Command queue: registering runs with no network path to the registry
+
+The relay above (`ssh://` + `run_tracking_server.py`) needs a live,
+two-way network path -- it doesn't work when the registry's own machine
+can't be reached from outside AT ALL (a fully network-isolated HPC,
+reachable only via a human with terminal access to it). For that case,
+use a command queue instead: a YAML file that carries *requests* across
+the boundary (via whatever transport actually exists there -- `rsync`,
+a human copying it by hand, a cron job with outbound-only access) rather
+than needing a live connection.
+
+**On the machine where you plan runs** (no registry access needed at all
+-- this never touches a real DB):
+
+```bash
+python oceanicu_runs.py --queue hpc_commands/commands.yaml add \
+    --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 \
+    --script generated_nse_cmip6.py --config generated_nse_cmip6_config.yaml \
+    --initial-date 2015-01-01 --stop-date 2099-12-31 --chunk-kind annual --chunk-multiplier 5 --np 192
+```
+
+Any write subcommand works this way (`add`, `set-stop-date`,
+`set-priority`, `pause`, `rerun`, ...) -- `list`/`show` are read-only and
+refuse to queue, since there's nothing to apply later. Each call appends
+one entry to the YAML file, e.g.:
+
+```yaml
+commands:
+  - id: cmd-20260829T072716Z-46d3
+    action: add
+    args: {run_id: ..., run_root: ..., script: ..., ...}
+    queued_at: "2026-08-29T07:27:16+00:00"
+    queued_by: kb
+    status: pending          # pending -> applied | failed
+    applied_at: null
+    note: null                # command's own stdout on success, or the error on failure
+```
+
+**A brand-new run also needs its actual driver script/config physically
+present** at `run_root` before any chunk can start -- the queue entry
+alone only carries the DB row. Stage those files in a sibling directory,
+mirroring the run's own `run_root` path:
+
+```
+hpc_commands/run_files/NSe/CMIP6/CNRM-ESM2-1/ssp126/run02/generated_nse_cmip6.py
+hpc_commands/run_files/NSe/CMIP6/CNRM-ESM2-1/ssp126/run02/generated_nse_cmip6_config.yaml
+```
+
+Commit the whole `hpc_commands/` directory (the queue file *and*
+`run_files/`) and get it across however the boundary is actually
+crossed (rsync, git push/pull through an intermediate machine, a human
+carrying it by hand).
+
+**On the machine where the registry actually lives**, run
+`apply_commands.py` against the local copy of both:
+
+```bash
+python apply_commands.py --db /local/path/run_registry.sqlite \
+    --queue hpc_commands/commands.yaml
+    # --run-files-dir defaults to hpc_commands/run_files, next to --queue
+```
+
+For each `pending` entry: an `add` first copies whatever's staged for
+that `run_root` into the real (resolved) `run_root` -- a copy failure
+marks the command `failed` and never registers a file-less run -- then
+every action replays through `oceanicu_runs.py`'s own CLI (reconstructed
+from the stored args as real `--flag` values), so applying a queued
+command goes through identical validation to running it directly.
+Already-`applied`/`failed` entries are skipped, so re-running
+`apply_commands.py` on a queue that hasn't changed is always a safe
+no-op. The file is rewritten after *each* command, not just at the end,
+so a crash partway through never loses already-applied statuses.
+
+**`apply_commands.py` never calls `sbatch`, for any run, new or
+resubmitting.** Submitting a job is always a deliberate manual action on
+whoever's machine actually runs SLURM -- this only ever touches the
+registry's `runs`/`history` rows. Once a run is registered (and its
+files are in place), starting it is the same manual `sbatch
+--export=RUN_ID=...,OCEANICU_RUN_DB=... run_chunk.slurm` as always;
+after that, self-resubmission for future chunks is unaffected and
+automatic as already documented above.
+
+`apply_commands.py` refuses an `ssh://` `--db` outright -- it only ever
+makes sense run locally, on the machine that actually holds the
+registry.
+
+**Known gap, not introduced by this mechanism:** `set-priority`/
+`set-chunk-delay`/`set-stop-date`/etc. silently succeed even for a
+nonexistent `run_id` (the underlying `UPDATE ... WHERE run_id = ?` just
+matches zero rows, no error) -- a typo'd `run_id` in a queued command
+will show as `applied`, not `failed`. Worth knowing when composing
+queue entries; not yet fixed.
+
 ## What's not built yet
 
 - **No folder scanning.** `add`/`remove` are the only way runs enter or
