@@ -617,20 +617,24 @@ the boundary (via whatever transport actually exists there -- `rsync`,
 a human copying it by hand, a cron job with outbound-only access) rather
 than needing a live connection.
 
-**On the machine where you plan runs** (no registry access needed at all
--- this never touches a real DB):
+**Multiple people can queue commands from different places** (e.g. you
+and someone else, both with access to whatever machine hosts the shared
+`hpc_commands/` directory/repo). Rather than all appending to one shared
+file -- a real, if rare, git-merge-conflict risk -- **each person gets
+their own queue file**, `hpc_commands/queue_<name>.yaml`:
 
 ```bash
-python oceanicu_runs.py --queue hpc_commands/commands.yaml add \
+python oceanicu_runs.py --queue hpc_commands/queue_kb.yaml add \
     --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 \
     --script generated_nse_cmip6.py --config generated_nse_cmip6_config.yaml \
     --initial-date 2015-01-01 --stop-date 2099-12-31 --chunk-kind annual --chunk-multiplier 5 --np 192
 ```
 
-Any write subcommand works this way (`add`, `set-stop-date`,
-`set-priority`, `pause`, `rerun`, ...) -- `list`/`show` are read-only and
-refuse to queue, since there's nothing to apply later. Each call appends
-one entry to the YAML file, e.g.:
+No registry access needed at all -- this never touches a real DB. Any
+write subcommand works this way (`add`, `set-stop-date`, `set-priority`,
+`pause`, `rerun`, ...) -- `list`/`show`/`stage` don't touch a registry
+and refuse to queue, since there's nothing to apply later. Each call
+appends one entry to the YAML file, e.g.:
 
 ```yaml
 commands:
@@ -646,26 +650,38 @@ commands:
 
 **A brand-new run also needs its actual driver script/config physically
 present** at `run_root` before any chunk can start -- the queue entry
-alone only carries the DB row. Stage those files in a sibling directory,
-mirroring the run's own `run_root` path:
+alone only carries the DB row. `stage` gets exactly the right files
+there (never a whole directory verbatim -- a real generated-output
+folder commonly has `__pycache__/`, logs, etc. alongside the 2-3 files a
+run actually needs):
 
-```
-hpc_commands/run_files/NSe/CMIP6/CNRM-ESM2-1/ssp126/run02/generated_nse_cmip6.py
-hpc_commands/run_files/NSe/CMIP6/CNRM-ESM2-1/ssp126/run02/generated_nse_cmip6_config.yaml
+```bash
+python oceanicu_runs.py stage --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 \
+    --source-dir /wherever/you/generated/the/driver/script
+    # --include defaults to *.py, *.yaml, *.yml; --exclude-dir defaults to __pycache__;
+    # --run-files-dir defaults to hpc_commands/run_files
 ```
 
-Commit the whole `hpc_commands/` directory (the queue file *and*
+This `rsync`s (filtered by `--include`/`--exclude-dir`, so it's real
+rsync include/exclude syntax, not a reimplementation) into
+`hpc_commands/run_files/NSe/CMIP6/CNRM-ESM2-1/ssp126/run02/` -- mirroring
+the run's own `run_root` path.
+
+Commit the whole `hpc_commands/` directory (every `queue_*.yaml` *and*
 `run_files/`) and get it across however the boundary is actually
 crossed (rsync, git push/pull through an intermediate machine, a human
 carrying it by hand).
 
 **On the machine where the registry actually lives**, run
-`apply_commands.py` against the local copy of both:
+`apply_commands.py` against local copies of both:
 
 ```bash
 python apply_commands.py --db /local/path/run_registry.sqlite \
-    --queue hpc_commands/commands.yaml
-    # --run-files-dir defaults to hpc_commands/run_files, next to --queue
+    --queue-dir hpc_commands/
+    # processes every queue_*.yaml found there, combined and applied in
+    # queued_at order across all of them, regardless of whose file an
+    # entry lives in. --run-files-dir defaults to hpc_commands/run_files.
+    # (--queue PATH still works too, for a single exact file.)
 ```
 
 For each `pending` entry: an `add` first copies whatever's staged for

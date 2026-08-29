@@ -24,7 +24,11 @@
     # append (any of the above except list/show) to a command-queue YAML
     # file instead of touching a real registry at all -- for a registry
     # you have no network path to (see RUN_TRACKING.md "Command queue"):
-    oceanicu_runs.py --queue hpc_commands/commands.yaml <any write command above>
+    oceanicu_runs.py --queue hpc_commands/queue_<you>.yaml <any write command above>
+
+    # stage exactly a new run's own files for that queue to carry across
+    # (doesn't touch any registry, no --db needed):
+    oceanicu_runs.py stage --run-root ... --file a.py --file a_utils.py --file a_config.yaml
 
 pause/resume set the DB `control` column -- the normal, auditable way.
 For a genuine HPC-overload emergency, `touch <run_root>/PAUSE` (one run)
@@ -210,8 +214,8 @@ def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
     entry through this exact same CLI (reconstructed from the stored
     args, as real --flag values) -- so queuing and running directly go
     through identical validation/behavior, nothing duplicated here."""
-    if args.cmd in ("list", "show"):
-        print(f"ERROR: {args.cmd!r} is read-only -- nothing to queue.", file=sys.stderr)
+    if args.cmd in ("list", "show", "stage"):
+        print(f"ERROR: {args.cmd!r} doesn't touch a registry -- nothing to queue.", file=sys.stderr)
         return 1
 
     queue_path = Path(queue_path)
@@ -239,6 +243,62 @@ def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
     print(f"queued {cmd_id}: {args.cmd} {call_args.get('run_id', '')}".rstrip())
     print(f"-- commit and push/rsync {queue_path} for it to actually cross to the registry's "
           f"own machine; nothing has been applied yet.")
+    return 0
+
+
+_STAGE_DEFAULT_INCLUDES = ["*.py", "*.yaml", "*.yml"]
+_STAGE_DEFAULT_EXCLUDE_DIRS = ["__pycache__"]
+
+
+def cmd_stage(args: argparse.Namespace) -> int:
+    """rsync --source-dir into hpc_commands/run_files/<run-root>/,
+    filtered to only the files that actually matter (driver script,
+    utils module, config -- --include patterns, default *.py/*.yaml/
+    *.yml) -- never the whole directory verbatim, since a real generated-
+    output folder commonly has __pycache__/ and other clutter alongside
+    the 2-3 files a run actually needs (see this project's own NSe/
+    experiments tree). For a later queued `add` to pick up and
+    apply_commands.py to copy into the real run_root on the registry's
+    own machine. Doesn't touch any registry -- pure local file staging,
+    --db/--dry-run/--queue don't apply here.
+
+    rsync, not shutil: this is filtered by pattern, not by exact
+    filename, so an include/exclude filter (rsync's own well-tested
+    syntax) is the right tool -- not reinventing it with fnmatch/glob."""
+    source_dir = Path(args.source_dir)
+    if not source_dir.is_dir():
+        print(f"ERROR: {source_dir}: not a directory", file=sys.stderr)
+        return 1
+
+    dest_dir = Path(args.run_files_dir) / args.run_root
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    includes = args.include or _STAGE_DEFAULT_INCLUDES
+    cmd = ["rsync", "-a", "--prune-empty-dirs"]
+    for name in args.exclude_dir:
+        cmd += ["--exclude", f"{name}/"]
+    for pattern in includes:
+        cmd += ["--include", pattern]
+    # --include='*/' lets rsync descend into subdirectories to look for
+    # matches (otherwise a bare --exclude='*' below would stop it from
+    # even entering them); --prune-empty-dirs above then drops any
+    # subdirectory that ends up with nothing matched inside it, so this
+    # doesn't create a hollow directory tree in the destination.
+    cmd += ["--include", "*/", "--exclude", "*"]
+    cmd += [f"{source_dir}/", f"{dest_dir}/"]
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"ERROR: rsync failed: {result.stderr.strip()}", file=sys.stderr)
+        return 1
+
+    staged = sorted(p for p in dest_dir.rglob("*") if p.is_file())
+    if not staged:
+        print(f"WARNING: nothing matched {includes} under {source_dir} -- "
+              f"{dest_dir} is empty.", file=sys.stderr)
+        return 1
+    for p in staged:
+        print(f"staged {p.relative_to(dest_dir)}")
     return 0
 
 
@@ -451,6 +511,26 @@ def main() -> int:
                          "touching a real registry at all -- see RUN_TRACKING.md "
                          "\"Command queue\"")
     sub = p.add_subparsers(dest="cmd", required=True)
+
+    st = sub.add_parser(
+        "stage",
+        help="rsync (filtered by --include, default *.py/*.yaml/*.yml) a run's generated "
+             "files into hpc_commands/run_files/<run-root>/, for a later --queue'd add to "
+             "pick up (see RUN_TRACKING.md \"Command queue\") -- doesn't touch any "
+             "registry, no --db needed",
+    )
+    st.set_defaults(func=cmd_stage)
+    st.add_argument("--run-root", required=True)
+    st.add_argument("--source-dir", required=True, metavar="PATH",
+                    help="directory containing the run's generated files -- only files "
+                         "matching --include are actually copied, so real clutter "
+                         "alongside them (__pycache__, logs, ...) is left behind")
+    st.add_argument("--include", action="append", default=None, metavar="PATTERN",
+                    help="rsync include pattern, repeatable (default: *.py, *.yaml, *.yml)")
+    st.add_argument("--exclude-dir", action="append", default=list(_STAGE_DEFAULT_EXCLUDE_DIRS),
+                    metavar="NAME", help="subdirectory name to exclude entirely, repeatable "
+                                          "(default: __pycache__)")
+    st.add_argument("--run-files-dir", default="hpc_commands/run_files")
 
     a = sub.add_parser("add"); _add_common(a); a.set_defaults(func=cmd_add)
     a.add_argument("--run-id", required=True)

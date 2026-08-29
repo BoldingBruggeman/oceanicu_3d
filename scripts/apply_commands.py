@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-"""apply_commands.py -- replay a command-queue YAML file's pending
-entries against the LOCAL registry.
+"""apply_commands.py -- replay pending command-queue entries against the
+LOCAL registry.
 
 Deployed alongside oceanicu_runs.py/run_tracking.py/chunk_runner.py
 wherever the real run_registry.sqlite actually lives (see
@@ -31,14 +31,26 @@ being applied, whatever's staged there is copied into the REAL
 (resolved) run_root first, and only then is the run actually registered
 -- a copy failure never leaves an orphan, file-less DB row behind.
 
+Multiple people can queue commands from different places -- rather than
+have them all append to one shared file (a real, if rare, git-merge-
+conflict risk), each person gets their OWN queue file,
+`queue_<name>.yaml`, in the same directory. `--queue-dir` processes every
+`queue_*.yaml` found there, combined and applied in `queued_at` order
+across all of them, so real submission order is preserved regardless of
+which file an entry lives in. `--queue PATH` (a single, exact file) still
+works too, for a quick one-off or testing.
+
 Usage:
     python apply_commands.py --db /local/path/run_registry.sqlite \\
-        --queue hpc_commands/commands.yaml \\
-        [--run-files-dir hpc_commands/run_files]   # default: <queue's own dir>/run_files
+        --queue-dir hpc_commands/ \\
+        [--run-files-dir hpc_commands/run_files]   # default: <queue-dir>/run_files
+
+    # or a single exact file:
+    python apply_commands.py --db ... --queue hpc_commands/queue_kb.yaml
 
 Typically run from a cron job (or by hand, or from run_chunk.slurm's own
 execution) on whichever machine physically holds both the registry and
-a local copy of the queue file -- see RUN_TRACKING.md.
+a local copy of the queue file(s) -- see RUN_TRACKING.md.
 """
 from __future__ import annotations
 
@@ -95,14 +107,22 @@ def _stage_run_files(run_root: str, run_files_dir: Path) -> "str | None":
     return None
 
 
+def _write_back(path: Path, data: dict) -> None:
+    path.write_text(yaml.safe_dump(data, sort_keys=False))
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--db", required=True,
                     help="LOCAL registry path -- never an ssh:// URL, this only ever runs "
                          "where the registry's own machine is")
-    p.add_argument("--queue", required=True, metavar="PATH")
+    g = p.add_mutually_exclusive_group(required=True)
+    g.add_argument("--queue", metavar="PATH", help="a single, exact queue file")
+    g.add_argument("--queue-dir", metavar="DIR",
+                    help="process every queue_*.yaml found here (one per person who queues "
+                         "commands -- see this file's own docstring)")
     p.add_argument("--run-files-dir", default=None, metavar="PATH",
-                    help="defaults to <queue's own directory>/run_files")
+                    help="defaults to <queue-dir, or --queue's own directory>/run_files")
     args = p.parse_args()
 
     if args.db.startswith("ssh://"):
@@ -110,25 +130,42 @@ def main() -> int:
               "where the registry actually lives, never over the relay.", file=sys.stderr)
         return 1
 
-    queue_path = Path(args.queue)
-    run_files_dir = Path(args.run_files_dir) if args.run_files_dir else queue_path.parent / "run_files"
+    if args.queue_dir:
+        base_dir = Path(args.queue_dir)
+        queue_paths = sorted(base_dir.glob("queue_*.yaml"))
+        if not queue_paths:
+            print(f"{base_dir}: no queue_*.yaml files found -- nothing to apply.")
+            return 0
+    else:
+        base_dir = Path(args.queue).parent
+        queue_paths = [Path(args.queue)]
+        if not queue_paths[0].exists():
+            print(f"{queue_paths[0]}: nothing to apply (file doesn't exist yet).")
+            return 0
 
-    if not queue_path.exists():
-        print(f"{queue_path}: nothing to apply (file doesn't exist yet).")
-        return 0
+    run_files_dir = Path(args.run_files_dir) if args.run_files_dir else base_dir / "run_files"
 
-    data = yaml.safe_load(queue_path.read_text()) or {}
-    commands = data.get("commands", [])
-    if not commands:
-        print(f"{queue_path}: queue is empty.")
+    # Load every source file once, then build one combined, time-ordered
+    # work list across all of them -- so real submission order (queued_at)
+    # is preserved regardless of which person's file an entry lives in.
+    sources: dict[Path, dict] = {}
+    pending: list[tuple[Path, dict]] = []
+    for qp in queue_paths:
+        source_data = yaml.safe_load(qp.read_text()) or {}
+        sources[qp] = source_data
+        for entry in source_data.get("commands", []):
+            if entry.get("status") == "pending":
+                pending.append((qp, entry))
+    pending.sort(key=lambda item: item[1].get("queued_at", ""))
+
+    if not pending:
+        total = sum(len(d.get("commands", [])) for d in sources.values())
+        print(f"nothing pending across {len(queue_paths)} queue file(s) ({total} total entries).")
         return 0
 
     applied = 0
     failed = 0
-    for entry in commands:
-        if entry.get("status") != "pending":
-            continue
-
+    for qp, entry in pending:
         action = entry["action"]
         entry_args = entry.get("args", {})
         entry["applied_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -139,8 +176,9 @@ def main() -> int:
                 entry["status"] = "failed"
                 entry["note"] = stage_error
                 failed += 1
-                print(f"{entry['id']}: FAILED (add, staging files) -- {stage_error}", file=sys.stderr)
-                queue_path.write_text(yaml.safe_dump(data, sort_keys=False))
+                print(f"{entry['id']} ({qp.name}): FAILED (add, staging files) -- {stage_error}",
+                      file=sys.stderr)
+                _write_back(qp, sources[qp])
                 continue
 
         cli_args = _args_dict_to_cli(entry_args)
@@ -152,20 +190,23 @@ def main() -> int:
             entry["status"] = "applied"
             entry["note"] = result.stdout.strip() or None
             applied += 1
-            print(f"{entry['id']}: applied ({action})")
+            print(f"{entry['id']} ({qp.name}): applied ({action})")
         else:
             entry["status"] = "failed"
             entry["note"] = (result.stderr.strip() or result.stdout.strip() or "unknown error")[-2000:]
             failed += 1
-            print(f"{entry['id']}: FAILED ({action}) -- {entry['note']}", file=sys.stderr)
+            print(f"{entry['id']} ({qp.name}): FAILED ({action}) -- {entry['note']}", file=sys.stderr)
 
         # Write back after EACH command, not just at the end -- a crash
         # partway through a long queue must not lose already-applied
         # statuses or force re-applying everything from scratch.
-        queue_path.write_text(yaml.safe_dump(data, sort_keys=False))
+        _write_back(qp, sources[qp])
 
-    still_pending = sum(1 for e in commands if e.get("status") == "pending")
-    print(f"done: {applied} applied, {failed} failed, {still_pending} still pending.")
+    still_pending = sum(
+        1 for d in sources.values() for e in d.get("commands", []) if e.get("status") == "pending"
+    )
+    print(f"done: {applied} applied, {failed} failed, {still_pending} still pending "
+          f"(across {len(queue_paths)} queue file(s)).")
     return 1 if failed else 0
 
 
