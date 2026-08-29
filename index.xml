@@ -6,12 +6,12 @@
     <description>Recent content on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 27 Aug 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 29 Aug 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>NSe — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</link>
-      <pubDate>Thu, 27 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sat, 29 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</guid>
       <description>&lt;h1 id=&#34;nse-analysis-overview&#34;&gt;NSe Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NSe&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -535,14 +535,14 @@ The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;
     <item>
       <title>NSe</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</link>
-      <pubDate>Thu, 27 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sat, 29 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</guid>
       <description>NSe modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>NSe — Future Boundary Conditions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</link>
-      <pubDate>Thu, 27 Aug 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sat, 29 Aug 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</guid>
       <description>&lt;p&gt;Cross-model, cross-scenario summary of NSe&amp;rsquo;s future open-boundary conditions: delta-change temperature/salinity (CMIP6, bias-corrected against the CMEMS Northwest Shelf reanalysis) and tidal elevation/currents (TPXO9 plus the CMIP6 ensemble-mean sea-level trend). Biogeochemical boundaries are not yet included here &amp;ndash; CMIP6 ESM biogeochemistry is considerably simpler than the CMEMS regional product, and whether a delta-change approach is even appropriate for it is still under evaluation (see the feasibility-check section below for the evidence gathered so far).&lt;/p&gt;</description>
     </item>
