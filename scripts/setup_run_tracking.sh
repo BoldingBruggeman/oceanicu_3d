@@ -28,8 +28,12 @@ add_to_bashrc() {
 case "$role" in
     hpc)
         mkdir -p "$path/hpc_commands/run_files"
-        add_to_bashrc "export OCEANICU_RUN_DB=$path/run_registry.sqlite"
-        add_to_bashrc "export OCEANICU_RUN_ROOT_BASE=$path"
+        # -z guarded, not a plain export: if this var is already set when
+        # .bashrc runs (e.g. sbatch --export=OCEANICU_RUN_DB=... on THIS
+        # submission), that value wins -- these are only a fallback
+        # default, never allowed to clobber an explicit one.
+        add_to_bashrc "[ -z \"\${OCEANICU_RUN_DB:-}\" ] && export OCEANICU_RUN_DB=$path/run_registry.sqlite"
+        add_to_bashrc "[ -z \"\${OCEANICU_RUN_ROOT_BASE:-}\" ] && export OCEANICU_RUN_ROOT_BASE=$path"
         echo "HPC ready: registry + hpc_commands/ under $path."
         echo "Still needed here (not this script): scripts/ itself"
         echo "(run_tracking.py, oceanicu_runs.py, chunk_runner.py, run_chunk.slurm,"
