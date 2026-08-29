@@ -777,6 +777,47 @@ matches zero rows, no error) -- a typo'd `run_id` in a queued command
 will show as `applied`, not `failed`. Worth knowing when composing
 queue entries; not yet fixed.
 
+## Keeping bb-server1's copy of the registry up to date
+
+The command queue above covers requests flowing IN to the HPC (add a
+run, change a setting). The other direction -- status flowing OUT, so
+you can actually see progress from bb-server1/your workstation -- is a
+separate mechanism, `push_registry_snapshot.sh`. It doesn't take a new
+snapshot itself; it ships out whatever `run_tracking.py`'s own
+git-backup mechanism ("Accidental-deletion protection" above) already
+committed, `rsync`'d to bb-server1 with `--chmod=a-w` (read-only on
+arrival, so an accidental write against that copy fails loudly instead
+of silently diverging the mirror).
+
+Two ways to trigger it, not mutually exclusive:
+
+1. **A cron job on the login node** (needs outbound reach; compute nodes
+   don't have it) -- the always-on fallback, works regardless of
+   whether ssh from compute nodes to the login node is even possible:
+   ```bash
+   */10 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/push_registry_snapshot.sh
+   ```
+2. **Best-effort, from `run_chunk.slurm` itself**, right before each
+   self-resubmission -- fires only if `OCEANICU_LOGIN_NODE` is set (see
+   `setup_run_tracking.sh`'s optional 4th `hpc` argument) and only if
+   `ssh` from a compute node to that host actually works, which is
+   cluster-specific and unconfirmed in general -- see
+   `test_compute_to_login_ssh.sbatch` for a one-shot test to check on a
+   given cluster. Backgrounded and silenced either way: a slow or failed
+   push never delays or blocks the real resubmission that follows it.
+
+Since `$HOME` is commonly shared between login and compute nodes on HPC
+clusters, setting `OCEANICU_LOGIN_NODE` once (via `setup_run_tracking.sh`)
+is enough for `run_chunk.slurm`'s own `source ~/.bashrc` to see it on
+every compute node automatically -- no per-node setup, no threading it
+through `sbatch --export=` on every resubmission.
+
+For a chunk finishing specifically (the moment most worth syncing
+promptly): set `OCEANICU_DB_BACKUP_EVERY_N_WRITES=1` on the HPC so a
+fresh snapshot commit exists after every single write, including every
+`finish_chunk()` call -- otherwise the default (5) means a real snapshot
+might lag a few writes behind the latest chunk completion.
+
 ## What's not built yet
 
 - **No folder scanning.** `add`/`remove` are the only way runs enter or

@@ -140,6 +140,26 @@ with rt.connect() as conn:
     fi
 }
 
+# Best-effort, event-driven push of the registry out to bb-server1, right
+# before each self-resubmission -- only fires if OCEANICU_LOGIN_NODE is
+# set (see setup_run_tracking.sh; usually via ~/.bashrc, which this
+# script already sources above, and which is visible here unmodified
+# since $HOME is shared between login and compute nodes) AND ssh from
+# THIS compute node to it actually works (unconfirmed as of writing --
+# see test_compute_to_login_ssh.sbatch). Backgrounded and silenced: a
+# slow or failed push must never delay or block the real resubmission
+# that follows it, which proceeds identically either way. If this never
+# fires, or fails silently every time, the login node's own cron running
+# push_registry_snapshot.sh periodically is the fallback -- see
+# RUN_TRACKING.md "Command queue" / push_registry_snapshot.sh's own
+# header.
+_push_registry_snapshot_best_effort() {
+    if [ -n "${OCEANICU_LOGIN_NODE:-}" ]; then
+        ssh -o BatchMode=yes -o ConnectTimeout=5 "$OCEANICU_LOGIN_NODE" \
+            "$SCRIPT_DIR/push_registry_snapshot.sh" >/dev/null 2>&1 &
+    fi
+}
+
 # --- run the chunk -----------------------------------------------------
 # chunk_runner.py itself invokes the driver script (via srun -- the
 # preferred launcher, matching the real production SLURM scripts; see
@@ -230,6 +250,7 @@ with rt.connect() as conn:
     echo "Picking up next queued run: $NEXT_RUN_ID"
     _wait_for_delay_all
     _wait_for_run_chunk_delay "$NEXT_RUN_ID"
+    _push_registry_snapshot_best_effort
     sbatch --export=RUN_ID="$NEXT_RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
     exit 0
 fi
@@ -247,5 +268,6 @@ fi
 
 _wait_for_delay_all
 _wait_for_run_chunk_delay "$RUN_ID"
+_push_registry_snapshot_best_effort
 echo "$RUN_ID: submitting next chunk"
 sbatch --export=RUN_ID="$RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
