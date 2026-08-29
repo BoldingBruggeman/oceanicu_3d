@@ -38,8 +38,12 @@ has, so no path is safe to assume. Either `--db PATH` on the command, or
 Point at a scratch DB while testing (`OCEANICU_RUN_DB=/tmp/test.sqlite`)
 with zero risk of touching the real one just because a flag was
 forgotten. Without either, every command fails fast with a clear error
-rather than guessing -- **except** `oceanicu_runs.py --dry-run`, which is
-happy to run with no DB configured at all (see "Dry-run" below).
+rather than guessing -- **except** `oceanicu_runs.py --dry-run` (happy to
+run with no DB configured at all, see "Dry-run" below), and **except**
+`--queue`/`stage` (see "Command queue" below), which never open a real
+registry connection at all -- no `OCEANICU_RUN_DB` needed on a
+workstation that only ever queues commands and stages files; that
+variable only matters on whichever machine actually holds the registry.
 
 ## The core idea
 
@@ -57,6 +61,14 @@ happy to run with no DB configured at all (see "Dry-run" below).
   in *its* folder.
 
 ## Set up a run
+
+This is the direct form -- run it wherever you have an actual, live
+path to the registry (on the production machine itself, or from
+anywhere via the `ssh://` relay, see "Working across machines" below).
+If there's no live path at all (a network-isolated HPC), use
+`oceanicu_runs.py --queue ... add ...` instead -- see "Command queue"
+further down; same flags, same validation, it just gets there via files
+instead of a connection.
 
 ```bash
 python oceanicu_runs.py add \
@@ -513,10 +525,22 @@ RUN on another (the SLURM/production machine) -- and those two often
 can't reach each other directly at all. There's no multi-writer sync for
 this (SQLite doesn't do that safely -- periodically copying the DB file
 back and forth risks one side's writes silently clobbering the other's).
-Instead the registry lives in exactly ONE place, and a **third machine
-that both sides CAN reach acts as a relay** -- both the add-machine and
-the production machine operate on the exact same database, remotely,
-over SSH to that relay.
+
+Two different answers to that, depending on what's actually reachable:
+
+- **A live, two-way network path exists** (this section): the registry
+  lives in exactly ONE place, and a **third machine that both sides CAN
+  reach acts as a relay** -- both the add-machine and the production
+  machine operate on the exact same database, remotely, over SSH to that
+  relay.
+- **No live path exists at all** (e.g. a fully network-isolated HPC
+  reachable only via a human's own terminal login, whose login node can
+  at best only ever *initiate* an outbound connection): see "Command
+  queue" further down instead -- commands and new-run files cross the
+  boundary as plain files via whatever transport actually exists
+  (`rsync`, a human carrying a file), not a live connection.
+
+The rest of this section is about the relay case:
 
 **One-time setup on the relay:** copy `run_tracking.py` and
 `run_tracking_server.py` there together, in the same directory (nothing
