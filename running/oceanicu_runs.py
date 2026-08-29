@@ -331,7 +331,42 @@ def cmd_stage(args: argparse.Namespace) -> int:
     return 0
 
 
+def _refuse_direct_add_unless_hpc(args: argparse.Namespace) -> "str | None":
+    """A direct (non---queue) `add` against the real path is exactly the
+    footgun documented in "Set up a run": bb-server1's mirror copy sits
+    at the SAME path string as the authoritative registry on the HPC
+    (deliberately, so push_registry_snapshot.sh needs no path
+    translation), so a path-based check alone can't tell them apart --
+    only the machine differs. OCEANICU_HPC=1 (set only by
+    setup_run_tracking.sh's hpc role) is the actual signal. Returns an
+    error message to print and abort on, or None to proceed.
+
+    Exemptions, both legitimate and never the real mirror: --dry-run
+    (already redirected to a throwaway scratch copy before this ever
+    runs) and an obvious /tmp/ scratch path (this session's own, and
+    RUN_TRACKING.md's documented, testing convention -- the real
+    registry is never there)."""
+    if args.dry_run:
+        return None
+    db = args.db or os.environ.get("OCEANICU_RUN_DB") or ""
+    if db.startswith("/tmp/"):
+        return None
+    if os.environ.get("OCEANICU_HPC") == "1":
+        return None
+    return (
+        "refusing to add directly -- this doesn't look like the HPC "
+        "(OCEANICU_HPC is not set) and the target isn't an obvious scratch "
+        "path. Use --queue instead (the default, correct way -- see "
+        "RUN_TRACKING.md \"Set up a run\"), or export OCEANICU_HPC=1 if this "
+        "really is the machine that owns the authoritative registry."
+    )
+
+
 def cmd_add(args: argparse.Namespace) -> int:
+    refusal = _refuse_direct_add_unless_hpc(args)
+    if refusal:
+        print(f"ERROR: {refusal}", file=sys.stderr)
+        return 1
     with rt.connect(args.db) as conn:
         rt.add_run(
             conn, run_id=args.run_id, run_root=args.run_root, script=args.script,

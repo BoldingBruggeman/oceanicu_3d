@@ -46,11 +46,17 @@ case "$role" in
         # default, never allowed to clobber an explicit one.
         add_to_bashrc "[ -z \"\${OCEANICU_RUN_DB:-}\" ] && export OCEANICU_RUN_DB=$path/run_registry.sqlite"
         add_to_bashrc "[ -z \"\${OCEANICU_RUN_ROOT_BASE:-}\" ] && export OCEANICU_RUN_ROOT_BASE=$path"
+        # Marks this machine, and only this machine, as the real HPC --
+        # oceanicu_runs.py's direct (non---queue) `add` refuses to run
+        # anywhere this isn't set to "1" (see RUN_TRACKING.md "Set up a
+        # run"), since bb-server1's mirror sits at the exact same path
+        # string and a path-based check alone can't tell them apart.
+        add_to_bashrc "[ -z \"\${OCEANICU_HPC:-}\" ] && export OCEANICU_HPC=1"
         if [ -n "$login_node" ]; then
             add_to_bashrc "[ -z \"\${OCEANICU_LOGIN_NODE:-}\" ] && export OCEANICU_LOGIN_NODE=$login_node"
         fi
         echo "HPC ready: registry + hpc_commands/ under $path."
-        echo "Still needed here (not this script): scripts/ itself"
+        echo "Still needed here (not this script): running/ itself"
         echo "(run_tracking.py, oceanicu_runs.py, chunk_runner.py, run_chunk.slurm,"
         echo "apply_commands.py), rsync'd in from bb-server1 -- never git/GitHub."
         echo

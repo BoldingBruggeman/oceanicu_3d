@@ -22,28 +22,35 @@ machine use the same directory or even the same username:
 | `apply_commands.py` | replays queued commands (see "Command queue" below) against the local registry -- only needed wherever the registry actually lives, and only if a live relay to it isn't possible. |
 
 **First time on a new machine:** `setup_run_tracking.sh hpc|relay|workstation PATH`
-sets up the env vars (`OCEANICU_RUN_DB`/`OCEANICU_RUN_ROOT_BASE`) and
-directory scaffold (`hpc_commands/`) for that machine's role in one go --
+sets up the env vars (`OCEANICU_RUN_DB`/`OCEANICU_RUN_ROOT_BASE`/
+`OCEANICU_HPC`, `hpc` role only -- see "Set up a run" for what that last
+one actually gates) and directory scaffold (`hpc_commands/`) for that
+machine's role in one go --
 see the script's own header for exact usage. It's a single, standalone
 file with no dependency on this repo, so it's the one thing worth
 copying ahead of everything else onto a machine that has no git access
 at all (e.g. the HPC).
 
-**Every command needs a database path -- there is no default anywhere,
-not even a hardcoded production one.** This code runs on whatever
+**A database path is only needed on a machine that can actually reach
+the authoritative registry -- there is no default anywhere, not even a
+hardcoded production one, and most machines don't need one at all.**
+`--queue`/`stage` (see "Command queue" below -- the default, correct way
+for almost everybody) never open a real registry connection, so a
+workstation that only ever queues commands and stages files needs no
+`OCEANICU_RUN_DB` at all. `oceanicu_runs.py --dry-run` is the same way
+(happy to run with no DB configured, see "Dry-run" below). A database
+path is required for everything else -- `list`/`show` against a real or
+mirrored registry, and any direct write command run where a live path
+genuinely exists (the production machine itself, or the `ssh://` relay)
+-- either `--db PATH` on the command, or `export OCEANICU_RUN_DB=PATH`
+in the environment, including on the `sbatch` command line itself for
+`run_chunk.slurm` (see "Launch it"). This code runs on whatever
 machine/cluster a job lands on, with whatever folder layout that machine
-has, so no path is safe to assume. Either `--db PATH` on the command, or
-`export OCEANICU_RUN_DB=PATH` in the environment -- including on the
-`sbatch` command line itself for `run_chunk.slurm` (see "Launch it").
-Point at a scratch DB while testing (`OCEANICU_RUN_DB=/tmp/test.sqlite`)
-with zero risk of touching the real one just because a flag was
-forgotten. Without either, every command fails fast with a clear error
-rather than guessing -- **except** `oceanicu_runs.py --dry-run` (happy to
-run with no DB configured at all, see "Dry-run" below), and **except**
-`--queue`/`stage` (see "Command queue" below), which never open a real
-registry connection at all -- no `OCEANICU_RUN_DB` needed on a
-workstation that only ever queues commands and stages files; that
-variable only matters on whichever machine actually holds the registry.
+has, so no path is safe to assume there either. Point at a scratch DB
+while testing (`OCEANICU_RUN_DB=/tmp/test.sqlite`) with zero risk of
+touching the real one just because a flag was forgotten. Without a path
+where one actually is required, the command fails fast with a clear
+error rather than guessing.
 
 ## The core idea
 
@@ -103,6 +110,17 @@ time a real push overwrites it. **On this project's actual HPC, nobody
 ever runs this direct form by hand at all** -- every real write happens
 through `apply_commands.py` replaying a queued entry, which calls this
 exact same command internally, always against the real local path.
+
+Because bb-server1's mirror deliberately sits at the exact same path
+string as the authoritative registry (so `push_registry_snapshot.sh`
+needs no path translation), a path alone can't tell the two apart --
+only the machine can. So `add` specifically checks for that machine
+directly: it refuses to run unless `OCEANICU_HPC=1` is set (only by
+`setup_run_tracking.sh`'s `hpc` role) or the target is an obvious `/tmp/`
+scratch path (this project's own testing convention) or `--dry-run` is
+set (already redirected to a throwaway copy regardless). This guard is
+on `add` only for now, not the other direct write commands
+(`pause`/`set-*`/etc.) -- same footgun, not yet extended there.
 
 ```bash
 python oceanicu_runs.py add \

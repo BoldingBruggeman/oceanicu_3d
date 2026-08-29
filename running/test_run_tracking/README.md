@@ -130,7 +130,7 @@ Then, **on the SLURM machine**:
 
 ```bash
 sbatch --export=RUN_ID='fake/quick/run01',OCEANICU_RUN_DB='ssh://oceanicu-relay/abs/path/to/test_registry.sqlite' \
-    /path/to/scripts/run_chunk.slurm
+    /path/to/running/run_chunk.slurm
 ```
 
 Everything else -- `list`/`show`/`pause`/`resume`/`rerun`/etc. -- works
