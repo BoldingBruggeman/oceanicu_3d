@@ -62,36 +62,47 @@ variable only matters on whichever machine actually holds the registry.
 
 ## Set up a run
 
-This is the direct form -- run it wherever you have an actual, live
-path to the *authoritative* registry (on the production machine itself,
-or from anywhere via the `ssh://` relay, see "Working across machines"
-below). If there's no live path at all (a network-isolated HPC), use
-`oceanicu_runs.py --queue ... add ...` instead -- see "Command queue"
-further down; same flags, same validation, it just gets there via files
-instead of a connection.
+**Use `--queue` -- this is the default, correct way for almost
+everybody, not a fallback for the rare case.** It appends the exact same
+command, with the exact same flags and validation, to a local YAML file
+instead of touching a registry directly -- no network path to anything
+required, nothing to get wrong about which machine you're on:
 
-**A copy of the registry sitting somewhere reachable is not the same
-thing as a live path to it.** If bb-server1 (or anywhere else) only ever
-holds a read-only mirror of the HPC's own registry (see "Keeping
-bb-server1's copy of the registry up to date"), pointing `--db` straight
-at that file is not "the direct form" -- it's writing into a copy with
-no effect on the real thing. SQLite won't warn you: the command
-succeeds, a row appears, and it looks exactly like a real `add` until
-the next push from the HPC silently overwrites it, at which point the
-change is just gone and nothing was ever registered where chunks
-actually get picked up from. If the only live path you have is the
-command queue, that's not a fallback -- it's the only correct way to add
-or change anything, full stop.
+```bash
+python oceanicu_runs.py --queue ~/hpc_commands/queue_kb.yaml add \
+    --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
+    --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 \
+    --script generated_nse_cmip6.py \
+    --config generated_nse_cmip6_config.yaml \
+    --data-roots-file bb-server1_data_roots.yaml \
+    --initial-date 2015-01-01 --stop-date 2099-12-31 \
+    --chunk-kind annual --chunk-multiplier 5 \
+    --np 192 --launcher srun
+```
 
-**On this project's actual HPC specifically**, that's not a hypothetical
-edge case, it's the normal case: nobody ever runs this direct form by
-hand there at all. Every real write to the authoritative registry
-happens through `apply_commands.py` replaying a queued entry -- it calls
-this exact same command internally (see "Command queue"'s own
-docstring), but always against the real local path, never by a human
-typing `--db` themselves. If you find yourself about to run `add`/
-`pause`/`set-*` directly with a `--db` that points at anything other
-than that local path, stop and use `--queue` instead.
+That queues the request; it doesn't touch a real registry yet. `rsync`
+your queue directory to bb-server1, and it crosses from there to wherever
+the authoritative registry actually lives, applied by `apply_commands.py`
+-- see "Command queue" further down for the full flow (staging a new
+run's own files, multiple people's queue files, how it actually reaches
+the HPC). The flag reference below applies identically either way.
+
+<details>
+<summary>The direct form -- only if you have an actual, live path to
+the <em>authoritative</em> registry (rare; expand if that's you)</summary>
+
+Same command, without `--queue`, run wherever that live path actually
+is: on the production machine itself, or anywhere via the `ssh://` relay
+(see "Working across machines"). **A copy of the registry sitting
+somewhere reachable is not the same thing as a live path to it** -- if
+bb-server1 (or anywhere else) only ever holds a read-only mirror (see
+"Keeping bb-server1's copy of the registry up to date"), pointing `--db`
+straight at that file "succeeds" with no warning, writes into a copy
+with no effect on the real thing, and then silently vanishes the next
+time a real push overwrites it. **On this project's actual HPC, nobody
+ever runs this direct form by hand at all** -- every real write happens
+through `apply_commands.py` replaying a queued entry, which calls this
+exact same command internally, always against the real local path.
 
 ```bash
 python oceanicu_runs.py add \
@@ -104,6 +115,8 @@ python oceanicu_runs.py add \
     --chunk-kind annual --chunk-multiplier 5 \
     --np 192 --launcher srun
 ```
+
+</details>
 
 `run-id` is just a label -- use whatever's meaningful, but the
 `<experiment>/<source>/<model>/<scenario>/<run-name>` shape (matching the
@@ -131,7 +144,9 @@ keep working unchanged. If a relative `run-root` is used and
 touching the filesystem, that machine fails loudly rather than guessing.
 
 ```bash
-export OCEANICU_RUN_ROOT_BASE=/data/OceanICU/oceanicu_3d/experiments   # on the production machine
+# ONLY needed on the production machine (or wherever actually touches
+# this run's files) -- never on a workstation that only ever queues.
+export OCEANICU_RUN_ROOT_BASE=/data/OceanICU/oceanicu_3d/experiments
 ```
 
 `launcher` defaults to `srun` (matches the real production SLURM
@@ -151,6 +166,12 @@ without FABM. Mirrors the generated driver script's own `--fabm`/
 ```
 
 ## Launch it
+
+**This has to run on the production machine itself** -- `sbatch` submits
+to whatever SLURM cluster the current shell can reach, so this is never
+something a workstation/queue-only user does; on this project's actual
+HPC it's the one thing PML does by hand, per the run's own deliberate
+never-automatic-submission rule (see "Command queue").
 
 ```bash
 sbatch --export=RUN_ID='NSe/CMIP6/CNRM-ESM2-1/ssp126/run01',OCEANICU_RUN_DB='/path/to/run_registry.sqlite' run_chunk.slurm
