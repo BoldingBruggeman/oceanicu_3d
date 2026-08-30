@@ -277,6 +277,7 @@ def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
 
 _STAGE_DEFAULT_INCLUDES = ["*.py", "*.yaml", "*.yml"]
 _STAGE_DEFAULT_EXCLUDE_DIRS = ["__pycache__"]
+_STAGE_DEFAULT_EXCLUDE_PATTERNS = ["*.nc"]
 
 
 def cmd_stage(args: argparse.Namespace) -> int:
@@ -294,7 +295,18 @@ def cmd_stage(args: argparse.Namespace) -> int:
 
     rsync, not shutil: this is filtered by pattern, not by exact
     filename, so an include/exclude filter (rsync's own well-tested
-    syntax) is the right tool -- not reinventing it with fnmatch/glob."""
+    syntax) is the right tool -- not reinventing it with fnmatch/glob.
+
+    --exclude (default *.nc) is a belt-and-braces guard, not the actual
+    mechanism keeping output data out -- the default --include list is
+    already a whitelist (*.py/*.yaml/*.yml only), so *.nc never matches
+    it and is already excluded by the trailing catch-all below. This
+    exists for the case where --include is later widened (e.g. to *) and
+    someone's run_root happens to have real NetCDF output sitting right
+    next to its driver script -- rsync evaluates filter rules in order
+    and stops at the first match, so putting this exclude BEFORE the
+    include patterns means it always wins regardless of what --include
+    ends up being, not just under the current defaults."""
     source_dir = Path(args.source_dir)
     if not source_dir.is_dir():
         print(f"ERROR: {source_dir}: not a directory", file=sys.stderr)
@@ -307,6 +319,8 @@ def cmd_stage(args: argparse.Namespace) -> int:
     cmd = ["rsync", "-a", "--prune-empty-dirs"]
     for name in args.exclude_dir:
         cmd += ["--exclude", f"{name}/"]
+    for pattern in args.exclude:
+        cmd += ["--exclude", pattern]
     for pattern in includes:
         cmd += ["--include", pattern]
     # --include='*/' lets rsync descend into subdirectories to look for
@@ -595,6 +609,11 @@ def main() -> int:
     st.add_argument("--exclude-dir", action="append", default=list(_STAGE_DEFAULT_EXCLUDE_DIRS),
                     metavar="NAME", help="subdirectory name to exclude entirely, repeatable "
                                           "(default: __pycache__)")
+    st.add_argument("--exclude", action="append", default=list(_STAGE_DEFAULT_EXCLUDE_PATTERNS),
+                    metavar="PATTERN", help="rsync exclude pattern, repeatable, checked BEFORE "
+                                             "--include so it always wins (default: *.nc -- "
+                                             "never sweep real output data into hpc_commands/, "
+                                             "even if --include is later widened)")
     st.add_argument("--run-files-dir", required=True, metavar="PATH",
                     help="e.g. ~/hpc_commands/run_files -- no default on purpose: this is "
                          "plain data, deliberately NOT part of this git repo, so there's no "

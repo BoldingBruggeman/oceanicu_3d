@@ -846,13 +846,43 @@ run actually needs):
 oceanicu-runs stage --run-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 \
     --source-dir /wherever/you/generated/the/driver/script \
     --run-files-dir ~/hpc_commands/run_files
-    # --include defaults to *.py, *.yaml, *.yml; --exclude-dir defaults to __pycache__
+    # --include defaults to *.py, *.yaml, *.yml; --exclude-dir defaults to
+    # __pycache__; --exclude defaults to *.nc
 ```
 
-This `rsync`s (filtered by `--include`/`--exclude-dir`, so it's real
-rsync include/exclude syntax, not a reimplementation) into
+This `rsync`s (filtered by `--include`/`--exclude-dir`/`--exclude`, so
+it's real rsync include/exclude syntax, not a reimplementation) into
 `~/hpc_commands/run_files/NSe/CMIP6/CNRM-ESM2-1/ssp126/run02/` --
-mirroring the run's own `run_root` path.
+mirroring the run's own `run_root` path, not a flat `run_files/`.
+
+**This makes same-named generated files across different runs a
+non-issue, on purpose.** Every run's generated driver script is commonly
+named the same thing regardless of model/scenario (`generated_nse_cmip6.py`,
+same filename for CNRM-ESM2-1, GFDL-ESM4, MPI-ESM1-2-HR alike -- see this
+project's own real `experiments/NSe/CMIP6/<model>/<scenario>/<run>/`
+layout). `stage`'s destination is `<run-files-dir>/<run-root>/`, not
+`<run-files-dir>/<filename>` -- so three runs staged into the same
+`run_files/` tree land in three separate subdirectories keyed by their
+full `run_root`, never colliding, however identical their filenames are.
+Confirmed by testing: three source directories with identically-named
+`generated_nse_cmip6.py`/`_config.yaml` staged for three different
+`run_root`s produced three distinct files with distinct contents, no
+overwrite. `get_commands_and_update_registry.py`'s own `_stage_run_files`
+(the final copy into the real, resolved `run_root` on the HPC) keys off
+the same `run_root`, so the same guarantee holds all the way through.
+
+**`--exclude` (default `*.nc`) is a belt-and-braces guard, not the
+actual mechanism keeping real output data out of `hpc_commands/`.** The
+default `--include` list is already a whitelist (only `*.py`/`*.yaml`/
+`*.yml` ever match), so a stray NetCDF output file sitting next to a
+driver script -- e.g. a run that's already partially executed in that
+same folder -- is already excluded by the trailing catch-all regardless.
+`--exclude` exists for when `--include` is later widened for some other
+reason (e.g. `--include '*'` to grab everything): rsync evaluates filter
+rules in order and stops at the first match, and `--exclude` is placed
+BEFORE the `--include` patterns in the actual command built, so `*.nc`
+keeps losing to that rule no matter how broad `--include` gets.
+Confirmed by testing, including the `--include '*'` case specifically.
 
 **Then `rsync` your whole local staging directory to bb-server1**
 (every `queue_*.yaml` *and* `run_files/`):
