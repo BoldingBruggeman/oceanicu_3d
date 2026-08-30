@@ -1,0 +1,13 @@
+#!/bin/bash
+# Wrapper so `push-registry-snapshot` works from anywhere once
+# running/bin is on PATH -- see RUN_TRACKING.md and relay.env.example.
+# Just forwards to the real script, which lives one directory up from
+# this one. Mainly useful for a manual, immediate push on the login
+# node (RUN_TRACKING.md "Keeping bb-server1's copy of the registry up
+# to date") without waiting for its own cron interval or for
+# watch_registry_and_push.sh to notice a new snapshot -- the crontab
+# line itself still uses a full path, since cron doesn't source
+# ~/.bashrc and won't see PATH additions made there (same caveat as the
+# other cron-driven wrappers here).
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+exec "$(dirname "$SELF")/../push_registry_snapshot.sh" "$@"

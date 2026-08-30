@@ -39,14 +39,23 @@ export PATH="/abs/path/to/oceanicu_3d/running/bin:$PATH"
 
 Add that to `~/.bashrc` to make it permanent. `chunk-runner` (for
 `chunk_runner.py`), `watch-registry-and-push`, `restart-registry-watcher`,
-and `get-commands-and-update-registry` all come along the same way, for
-free -- one `PATH` addition covers everything in `running/bin`. (cron
-jobs are the one exception: cron doesn't source `~/.bashrc`, so a
-crontab line still needs either a full path or its own explicit `PATH=`
--- see "Keeping bb-server1's copy of the registry up to date" below.
-`get-commands-and-update-registry` is mainly useful for the *manual*
-invocation described in "Command queue" -- "Don't wait for the cron
-interval if something's urgent".)
+`get-commands-and-update-registry`, and `push-registry-snapshot` all come
+along the same way, for free -- one `PATH` addition covers everything in
+`running/bin`. (cron jobs are the one exception: cron doesn't source
+`~/.bashrc`, so a crontab line still needs either a full path or its own
+explicit `PATH=` -- see "Keeping bb-server1's copy of the registry up to
+date" below. `get-commands-and-update-registry` and
+`push-registry-snapshot` are mainly useful for *manual* invocation --
+see "Don't wait for the cron interval if something's urgent" in "Command
+queue" and the equivalent note in "Keeping bb-server1's copy up to
+date".)
+
+`setup_run_tracking.sh` deliberately has **no** `bin/` wrapper -- it's
+meant to be copied as a single standalone file to a machine with no
+`oceanicu_3d` checkout at all (see its own header comment), so tying it
+to `running/bin` being on `PATH`, or to the rest of `running/` being
+present one directory up, would work against the one thing it's
+designed for.
 
 **`oceanicu-runs` is never required -- it's purely convenience.**
 `python /abs/path/to/oceanicu_3d/running/oceanicu_runs.py` does exactly
@@ -1012,6 +1021,16 @@ mechanism that works here, not one option among several:**
 ```
 
 (needs outbound reach, which the login node has and compute nodes don't).
+
+**Same "don't wait for the interval" note as the command-queue side:**
+this is just the same command on a schedule -- nothing stops you running
+it by hand (`push-registry-snapshot`, once `running/bin` is on `PATH`,
+or the full path, same as cron uses) right after a chunk finishes if you
+want bb-server1 updated immediately rather than within the next 10
+minutes. Idempotent either way -- `push_registry_snapshot.sh` only ever
+ships whatever the latest git-backup snapshot already is, so running it
+twice in a row just re-sends (or, with `--checksum`, effectively no-ops
+on) the same file.
 
 There's also a best-effort, event-driven path built into `run_chunk.slurm`
 itself -- right before each self-resubmission, it tries to `ssh` a
