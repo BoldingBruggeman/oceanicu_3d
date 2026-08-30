@@ -2,7 +2,7 @@
 # restart_registry_watcher.sh -- cron watchdog for watch_registry_and_push.sh:
 # checks whether that watcher is actually running, (re)starts it if not.
 # Run on the LOGIN NODE ONLY, from cron:
-#   0 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/restart_registry_watcher.sh
+#   0 * * * * OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite /path/restart_registry_watcher.sh
 #
 # Once an hour is plenty -- the watcher is meant to stay running
 # indefinitely between checks; this only recovers from it having been
@@ -20,12 +20,12 @@
 # pidfile at all.
 set -eu
 
-: "${OCEANICU_RUN_DB:?OCEANICU_RUN_DB must be set}"
+: "${OCEANICU_EXPERIMENT_DB:?OCEANICU_EXPERIMENT_DB must be set}"
 # watch_registry_and_push.sh lives right here in running/bin, same as
 # this script -- plain dirname on BASH_SOURCE[0] is already correct.
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LOG="${OCEANICU_RUN_DB}.watcher.log"
-PIDFILE="${OCEANICU_RUN_DB}.watcher.pid"
+LOG="${OCEANICU_EXPERIMENT_DB}.watcher.log"
+PIDFILE="${OCEANICU_EXPERIMENT_DB}.watcher.pid"
 
 if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
     exit 0   # already running, nothing to do

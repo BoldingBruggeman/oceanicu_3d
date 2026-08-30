@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Create a scratch run-tracking registry and register a handful of FAKE
-simulations against it, for interactively testing oceanicu_runs.py's
+"""Create a scratch experiment-tracking registry and register a handful of FAKE
+simulations against it, for interactively testing oceanicu_experiments.py's
 command-line options (list/show/pause/resume/rerun/set-priority/
 set-stop-date/chunk-size/remove/--dry-run) without touching the real
 production registry and without running any real pyGETM simulation.
@@ -20,30 +20,30 @@ folder's README.md for the full walkthrough of both:
 **Remember the DB itself should live on the relay**, not on whichever
 machine happens to run this setup script, if the machine(s) actually
 executing chunks (in particular a separate SLURM cluster) can't reach
-this one directly -- see RUN_TRACKING.md's "Working across machines".
+this one directly -- see EXPERIMENT_TRACKING.md's "Working across machines".
 Pass --db explicitly for that, e.g.:
     --db ssh://oceanicu-relay/abs/path/to/test_registry.sqlite
-    --db ssh://bb-server1/data/OceanICU/oceanicu_3d/experiments/test_run_tracking/test_registry.sqlite
-run_tracking.connect() already handles ssh:// specs transparently
+    --db ssh://bb-server1/data/OceanICU/oceanicu_3d/experiments/test_experiment_tracking/test_registry.sqlite
+experiment_tracking.connect() already handles ssh:// specs transparently
 (RemoteConn) -- this script needs no special-casing for that itself.
 
-Everything this creates ON THIS machine (run_root dirs under runs/, the
+Everything this creates ON THIS machine (experiment_root dirs under experiments/, the
 local test_registry.sqlite if --db is left at its default) lives under
 THIS folder -- nothing outside it, and the real production registry is
 never opened.
 
 Usage
 -----
-    python setup_fake_runs.py                      # local DB, mpiexec (no SLURM here)
-    python setup_fake_runs.py --reset               # wipe and recreate from scratch
-    python setup_fake_runs.py --launcher srun \\
+    python setup_fake_experiments.py                      # local DB, mpiexec (no SLURM here)
+    python setup_fake_experiments.py --reset               # wipe and recreate from scratch
+    python setup_fake_experiments.py --launcher srun \\
         --db ssh://oceanicu-relay/abs/path/test_registry.sqlite
                                                      # for a real SLURM machine + relay DB
 
 Then, from this same folder:
-    export OCEANICU_RUN_DB=<same --db value as above>
-    python ../oceanicu_runs.py list
-    python run_chunk_local.py --db "$OCEANICU_RUN_DB" --run-id fake/quick/run01   # no-SLURM path
+    export OCEANICU_EXPERIMENT_DB=<same --db value as above>
+    python ../oceanicu_experiments.py list
+    python run_chunk_local.py --db "$OCEANICU_EXPERIMENT_DB" --experiment-id fake/quick/run01   # no-SLURM path
 """
 from __future__ import annotations
 
@@ -55,17 +55,17 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 SCRIPTS_DIR = HERE.parent
 sys.path.insert(0, str(SCRIPTS_DIR))
-import run_tracking as rt  # noqa: E402
+import experiment_tracking as rt  # noqa: E402
 
 DEFAULT_DB_PATH = HERE / "test_registry.sqlite"
-RUNS_DIR = HERE / "runs"
+EXPERIMENTS_DIR = HERE / "experiments"
 FAKE_DRIVER = HERE / "fake_driver.py"
 
-# (run_id, chunk_kind, chunk_multiplier, initial_date, stop_date, priority, notes)
-FAKE_RUNS = [
+# (experiment_id, chunk_kind, chunk_multiplier, initial_date, stop_date, priority, notes)
+FAKE_EXPERIMENTS = [
     ("fake/quick/run01", "daily", 1, "2015-01-01", "2015-01-02", 10,
      "Single ~1-day chunk -- reaches 'complete' after just one fake chunk; "
-     "good for watching the queue pick up the next not_started run."),
+     "good for watching the queue pick up the next not_started experiment."),
     ("fake/quick/run02", "daily", 1, "2015-01-01", "2015-01-02", 5,
      "Same shape as run01, lower priority -- demonstrates priority "
      "ordering in the not_started queue."),
@@ -73,7 +73,7 @@ FAKE_RUNS = [
      "Many 5-year chunks -- stays in_progress for a long time; good for "
      "pause/resume/set-stop-date/chunk-size/rerun testing."),
     ("fake/long/GFDL-ESM4/ssp370", "monthly", 6, "2015-01-01", "2100-01-01", 0,
-     "Many 6-month chunks -- different chunk-kind from the run above."),
+     "Many 6-month chunks -- different chunk-kind from the experiment above."),
     ("fake/notstarted/spare", "annual", 10, "2015-01-01", "2050-01-01", -5,
      "Registered but won't start in this session unless you launch a "
      "second run_chunk_local.py worker or point one at it directly -- "
@@ -86,7 +86,7 @@ def _is_remote(db: str) -> bool:
 
 
 def _running_chunks(db: str) -> list[str]:
-    """run_ids with a chunk currently marked 'running' in *db* -- i.e. some
+    """experiment_ids with a chunk currently marked 'running' in *db* -- i.e. some
     worker (yours, or someone else's in another terminal -- this folder's
     own README explicitly invites starting one there) is plausibly mid-
     sleep against files --reset is about to delete out from under it.
@@ -102,9 +102,9 @@ def _running_chunks(db: str) -> list[str]:
         return []
     running = []
     with rt.connect(db) as conn:
-        for run in rt.list_runs(conn):
-            if rt.get_running_chunk(conn, run["run_id"]) is not None:
-                running.append(run["run_id"])
+        for experiment in rt.list_experiments(conn):
+            if rt.get_running_chunk(conn, experiment["experiment_id"]) is not None:
+                running.append(experiment["experiment_id"])
     return running
 
 
@@ -112,7 +112,7 @@ def reset(db: str, force: bool = False) -> None:
     if not _is_remote(db) and not force:
         running = _running_chunks(db)
         if running:
-            print(f"Refusing to reset -- these run(s) have a chunk currently marked "
+            print(f"Refusing to reset -- these experiment(s) have a chunk currently marked "
                   f"'running' (a worker may still be asleep against files this would "
                   f"delete): {', '.join(running)}")
             print("Stop that worker first (Ctrl-C, or let it finish), or pass --force "
@@ -127,9 +127,9 @@ def reset(db: str, force: bool = False) -> None:
         for suffix in ("", "-wal", "-shm"):
             Path(db + suffix).unlink(missing_ok=True)
         print(f"Removed {db} (+ -wal/-shm)")
-    if RUNS_DIR.exists():
-        shutil.rmtree(RUNS_DIR)
-        print(f"Removed {RUNS_DIR}")
+    if EXPERIMENTS_DIR.exists():
+        shutil.rmtree(EXPERIMENTS_DIR)
+        print(f"Removed {EXPERIMENTS_DIR}")
 
 
 def main() -> int:
@@ -142,7 +142,7 @@ def main() -> int:
                     help="mpiexec (default): no SLURM needed, driven by this folder's own "
                          "run_chunk_local.py. srun: real production default, for a real SLURM "
                          "machine driven by the real ../run_chunk.slurm instead.")
-    p.add_argument("--reset", action="store_true", help="wipe any existing test DB/run dirs first")
+    p.add_argument("--reset", action="store_true", help="wipe any existing test DB/experiment dirs first")
     p.add_argument("--force", action="store_true",
                     help="with --reset: wipe even if a chunk is currently marked 'running' "
                          "(only after confirming yourself, e.g. via `ps`/pgrep, that nothing "
@@ -163,19 +163,19 @@ def main() -> int:
               f"Pass --reset to start over.")
         return 1
 
-    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    EXPERIMENTS_DIR.mkdir(parents=True, exist_ok=True)
 
     with rt.connect(args.db) as conn:
-        for run_id, chunk_kind, chunk_multiplier, initial_date, stop_date, priority, notes in FAKE_RUNS:
-            run_root = RUNS_DIR / run_id.replace("/", "_")
-            (run_root / "chunks").mkdir(parents=True, exist_ok=True)
-            config_path = run_root / "fake_config.yaml"
-            config_path.write_text(f"# fake config for {run_id}\nname: {run_id}\n")
+        for experiment_id, chunk_kind, chunk_multiplier, initial_date, stop_date, priority, notes in FAKE_EXPERIMENTS:
+            experiment_root = EXPERIMENTS_DIR / experiment_id.replace("/", "_")
+            (experiment_root / "chunks").mkdir(parents=True, exist_ok=True)
+            config_path = experiment_root / "fake_config.yaml"
+            config_path.write_text(f"# fake config for {experiment_id}\nname: {experiment_id}\n")
 
-            rt.add_run(
+            rt.add_experiment(
                 conn,
-                run_id=run_id,
-                run_root=str(run_root),
+                experiment_id=experiment_id,
+                experiment_root=str(experiment_root),
                 script=args.fake_driver_path,
                 config=str(config_path),
                 initial_date=initial_date,
@@ -187,23 +187,23 @@ def main() -> int:
                 priority=priority,
                 notes=notes,
             )
-            print(f"added {run_id!r} (priority={priority}, {chunk_multiplier} {chunk_kind} "
+            print(f"added {experiment_id!r} (priority={priority}, {chunk_multiplier} {chunk_kind} "
                   f"chunk(s) per step, {initial_date} -> {stop_date})")
 
     print()
     print(f"Registry created at {args.db}")
-    print("Point oceanicu_runs.py at it with:")
-    print(f"  export OCEANICU_RUN_DB={args.db}")
-    print(f"  python {SCRIPTS_DIR / 'oceanicu_runs.py'} list")
+    print("Point oceanicu_experiments.py at it with:")
+    print(f"  export OCEANICU_EXPERIMENT_DB={args.db}")
+    print(f"  python {SCRIPTS_DIR / 'oceanicu_experiments.py'} list")
     print()
     if args.launcher == "mpiexec":
         print("Nothing is actually executing yet -- start a local worker loop to make")
         print("chunks progress in real time (see README.md for the full walkthrough):")
-        print(f"  python {HERE / 'run_chunk_local.py'} --db {args.db} --run-id fake/quick/run01")
+        print(f"  python {HERE / 'run_chunk_local.py'} --db {args.db} --experiment-id fake/quick/run01")
     else:
         print("Nothing is actually executing yet -- launch the REAL run_chunk.slurm against")
-        print("one of these fake runs (see README.md for the full walkthrough):")
-        print(f"  sbatch --export=RUN_ID='fake/quick/run01',OCEANICU_RUN_DB='{args.db}' "
+        print("one of these fake experiments (see README.md for the full walkthrough):")
+        print(f"  sbatch --export=EXPERIMENT_ID='fake/quick/run01',OCEANICU_EXPERIMENT_DB='{args.db}' "
               f"{SCRIPTS_DIR / 'run_chunk.slurm'}")
     return 0
 

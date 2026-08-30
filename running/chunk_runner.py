@@ -4,7 +4,7 @@
 Two modes:
 
   Tracked (production):
-      chunk_runner.py --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
+      chunk_runner.py --experiment-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
 
   Standalone (testing -- NO database interaction at all, nothing looked
   up or written; for trying out a script/date-range by hand before it's
@@ -15,9 +15,9 @@ Two modes:
           --save-restart restart_setup_20160101.nc [--load-restart ...] \\
           [--chunk-dir DIR] [--np 4] [--launcher srun|mpiexec]
 
-In tracked mode, everything about the run (script, dates, chunk
-size) comes from its `runs` row in run_tracking.py's SQLite registry --
-looked up by --run-id. Intended to be called once per SLURM job (see
+In tracked mode, everything about the experiment (script, dates, chunk
+size) comes from its `experiments` row in experiment_tracking.py's SQLite registry --
+looked up by --experiment-id. Intended to be called once per SLURM job (see
 run_chunk.slurm), which self-resubmits for the next chunk after this one
 finishes; this script itself only ever does one.
 
@@ -25,7 +25,7 @@ Chunk boundary math (annual/monthly/daily x multiplier) is the same idea
 as the earlier run_chunks.py prototype, calendar-aware via cftime.
 
 Everything for a chunk lives together in ONE directory (logs, 2d/3d
-output, AND the restart file it saves) -- <run_root>/chunks/NNN_<start>_
+output, AND the restart file it saves) -- <experiment_root>/chunks/NNN_<start>_
 <stop>/. The next chunk's --load-restart simply points at the previous
 chunk's own save_restart path.
 
@@ -49,7 +49,7 @@ from typing import Optional
 
 def _sha256_of(path: Optional[str]) -> Optional[str]:
     """Content hash of *path*, or None if it's unset/unreadable -- used to
-    let run_tracking.start_chunk detect a real edit to the driver script/
+    let experiment_tracking.start_chunk detect a real edit to the driver script/
     config between chunk attempts (see its own docstring), rather than the
     DB only ever recording an unchanging path string. Failing quietly
     (missing file, permissions) rather than raising: this is a nice-to-
@@ -121,9 +121,9 @@ def _run_one(
     # pygetm_config.codegen's --dump-python have the config baked in as a
     # "literal, standalone reproduction" (see the generated script's own
     # docstring) -- they take zero positional args, only --start/--stop/
-    # --dry-run/--load-restart/--save-restart/--data-roots-file. The run's
+    # --dry-run/--load-restart/--save-restart/--data-roots-file. The experiment's
     # `config` field (still stored in the DB, still shown by
-    # oceanicu_runs.py show) is for reproducibility/regeneration record-
+    # oceanicu_experiments.py show) is for reproducibility/regeneration record-
     # keeping only, not a runtime input to the driver.
     cmd = [
         *_launch_prefix(launcher, np),
@@ -136,8 +136,8 @@ def _run_one(
         cmd.extend(["--load-restart", load_restart])
     if data_roots_file:
         cmd.extend(["--data-roots-file", data_roots_file])
-    # 'off'/'on'/None sentinels match run_tracking.add_run's own `fabm`
-    # column convention exactly -- see its docstring/oceanicu_runs.py's
+    # 'off'/'on'/None sentinels match experiment_tracking.add_experiment's own `fabm`
+    # column convention exactly -- see its docstring/oceanicu_experiments.py's
     # --fabm help. None: no override, script runs with its own baked-in
     # FABM setting untouched (no flag emitted at all).
     if fabm == "off":
@@ -184,14 +184,14 @@ def _main_standalone(args: argparse.Namespace) -> int:
 
 
 def _main_tracked(args: argparse.Namespace) -> int:
-    import run_tracking as rt
+    import experiment_tracking as rt
 
     # Whichever account is actually executing this chunk_runner.py process
     # (the SLURM job's own account on the production machine, normally) --
-    # not necessarily who originally ran `oceanicu_runs.py add`, which is
+    # not necessarily who originally ran `oceanicu_experiments.py add`, which is
     # exactly the point: the history log should show who/what did each
     # thing, and a chunk executing is a different actor from whoever
-    # registered the run.
+    # registered the experiment.
     user = rt._current_user()
     # Hostname of whichever machine is actually issuing this submission --
     # normally the production machine's own sbatch self-resubmission, but
@@ -200,37 +200,37 @@ def _main_tracked(args: argparse.Namespace) -> int:
     submitted_host = socket.gethostname()
 
     with rt.connect(args.db) as conn:
-        run = rt.get_run(conn, args.run_id)
-        if run is None:
-            print(f"ERROR: no such run_id in registry: {args.run_id!r}", file=sys.stderr)
+        experiment = rt.get_experiment(conn, args.experiment_id)
+        if experiment is None:
+            print(f"ERROR: no such experiment_id in registry: {args.experiment_id!r}", file=sys.stderr)
             return 2
-        run = dict(run)  # mutable regardless of Row (local) vs dict (RPC result)
+        experiment = dict(experiment)  # mutable regardless of Row (local) vs dict (RPC result)
 
-        # run_root itself may be relative (registered from a workstation
-        # that doesn't know exactly where this run's output will land on
+        # experiment_root itself may be relative (registered from a workstation
+        # that doesn't know exactly where this experiment's output will land on
         # THIS machine) -- resolve it against this machine's own
-        # OCEANICU_RUN_ROOT_BASE once, here, before anything below builds
-        # a path from it. See run_tracking.resolve_run_root.
-        run["run_root"] = rt.resolve_run_root(run["run_root"])
+        # OCEANICU_EXPERIMENT_ROOT_BASE once, here, before anything below builds
+        # a path from it. See experiment_tracking.resolve_experiment_root.
+        experiment["experiment_root"] = rt.resolve_experiment_root(experiment["experiment_root"])
 
         # script/config are commonly registered as bare filenames (living
-        # in the run's own folder, alongside its own generated driver
-        # script -- see RUN_TRACKING.md), but the actual chunk subprocess
-        # always runs with cwd=chunk_dir, several levels below run_root.
-        # Resolve them against run_root here, once, so a bare filename
+        # in the experiment's own folder, alongside its own generated driver
+        # script -- see EXPERIMENT_TRACKING.md), but the actual chunk subprocess
+        # always runs with cwd=chunk_dir, several levels below experiment_root.
+        # Resolve them against experiment_root here, once, so a bare filename
         # still works regardless of where this script itself lives or
         # what the process's cwd ends up being.
-        run_root_path = Path(run["run_root"])
+        experiment_root_path = Path(experiment["experiment_root"])
         for key in ("script", "config", "data_roots_file"):
-            if run.get(key) and not Path(run[key]).is_absolute():
-                run[key] = str(run_root_path / run[key])
+            if experiment.get(key) and not Path(experiment[key]).is_absolute():
+                experiment[key] = str(experiment_root_path / experiment[key])
 
-        if rt.is_paused(conn, args.run_id, run["run_root"]):
-            print(f"{args.run_id}: paused (control or PAUSE sentinel) -- not starting a new chunk.")
+        if rt.is_paused(conn, args.experiment_id, experiment["experiment_root"]):
+            print(f"{args.experiment_id}: paused (control or PAUSE sentinel) -- not starting a new chunk.")
             return 1
 
         # Lock: refuse to start a new chunk while one is already recorded
-        # as running for this run_id -- guards against an accidental
+        # as running for this experiment_id -- guards against an accidental
         # double-submit racing the currently-running chunk (two processes
         # both computing the same next chunk_index and colliding). If the
         # recorded chunk's SLURM job is confirmed gone (or old enough that
@@ -238,7 +238,7 @@ def _main_tracked(args: argparse.Namespace) -> int:
         # treated as crashed/orphaned rather than a live lock -- marked
         # failed and left for a human 'rerun' rather than silently
         # retried, same as any other failure.
-        running = rt.get_running_chunk(conn, args.run_id)
+        running = rt.get_running_chunk(conn, args.experiment_id)
         if running is not None:
             alive = _is_slurm_job_running(running["slurm_job_id"])
             stale_by_age = False
@@ -247,48 +247,48 @@ def _main_tracked(args: argparse.Namespace) -> int:
                 stale_by_age = (datetime.now(timezone.utc) - started) > timedelta(days=4)
 
             if alive:
-                print(f"{args.run_id}: chunk {running['chunk_index']} is already running "
+                print(f"{args.experiment_id}: chunk {running['chunk_index']} is already running "
                       f"(SLURM job {running['slurm_job_id']}) -- not starting another.",
                       file=sys.stderr)
                 return 1
             if alive is None and not stale_by_age:
-                print(f"{args.run_id}: chunk {running['chunk_index']} is marked running and "
+                print(f"{args.experiment_id}: chunk {running['chunk_index']} is marked running and "
                       f"its SLURM job status can't be confirmed (squeue unavailable) but it "
                       f"isn't old enough yet to treat as orphaned -- not starting another.",
                       file=sys.stderr)
                 return 1
 
-            print(f"{args.run_id}: chunk {running['chunk_index']} was marked running but its "
+            print(f"{args.experiment_id}: chunk {running['chunk_index']} was marked running but its "
                   f"SLURM job is no longer active -- treating as crashed/orphaned.",
                   file=sys.stderr)
-            rt.finish_chunk(conn, run_id=args.run_id, chunk_index=running["chunk_index"],
+            rt.finish_chunk(conn, experiment_id=args.experiment_id, chunk_index=running["chunk_index"],
                              exit_code=-1, nan_detected=False, user=user)
             print(f"Marked failed. Investigate, then "
-                  f"'oceanicu_runs.py rerun --run-id {args.run_id} --from-current' to redo it.",
+                  f"'oceanicu_experiments.py rerun --experiment-id {args.experiment_id} --from-current' to redo it.",
                   file=sys.stderr)
             return 2
 
-        calendar = "noleap" if "CMIP6" in run["script"] or "CMIP6" in run["config"] else "standard"
-        stop_date = _parse_date(run["stop_date"], calendar)
+        calendar = "noleap" if "CMIP6" in experiment["script"] or "CMIP6" in experiment["config"] else "standard"
+        stop_date = _parse_date(experiment["stop_date"], calendar)
 
-        start_str = rt.next_chunk_start(conn, args.run_id, run["initial_date"])
+        start_str = rt.next_chunk_start(conn, args.experiment_id, experiment["initial_date"])
         start = _parse_date(start_str, calendar)
         if start >= stop_date:
-            print(f"{args.run_id}: already reached stop_date ({run['stop_date']}) -- nothing to do.")
-            rt.recompute_run_status(conn, args.run_id)
+            print(f"{args.experiment_id}: already reached stop_date ({experiment['stop_date']}) -- nothing to do.")
+            rt.recompute_experiment_status(conn, args.experiment_id)
             return 1
 
-        stop = _advance_date(start, run["chunk_kind"], run["chunk_multiplier"])
+        stop = _advance_date(start, experiment["chunk_kind"], experiment["chunk_multiplier"])
         if stop > stop_date:
             stop = stop_date
 
-        chunk_index = rt.next_chunk_index(conn, args.run_id)
-        run_root = Path(run["run_root"])
+        chunk_index = rt.next_chunk_index(conn, args.experiment_id)
+        experiment_root = Path(experiment["experiment_root"])
         chunk_name = f"{chunk_index:03d}_{start.strftime('%Y%m%d')}_{stop.strftime('%Y%m%d')}"
-        chunk_dir = run_root / "chunks" / chunk_name
+        chunk_dir = experiment_root / "chunks" / chunk_name
 
         # Archive a pre-existing dir aside instead of silently overwriting
-        # it -- happens on a rerun (run_tracking.rerun_from only rewinds
+        # it -- happens on a rerun (experiment_tracking.rerun_from only rewinds
         # the DB, it never deletes files) or after a crash that never
         # reached finish_chunk(). A previous attempt's logs are worth
         # keeping for diagnosis, not clobbering.
@@ -301,50 +301,50 @@ def _main_tracked(args: argparse.Namespace) -> int:
 
         load_restart = None
         if chunk_index > 0:
-            load_restart = rt.get_done_chunk_restart(conn, args.run_id, chunk_index - 1)
+            load_restart = rt.get_done_chunk_restart(conn, args.experiment_id, chunk_index - 1)
             if load_restart is None:
                 print(f"ERROR: chunk {chunk_index} has no completed predecessor to load a restart from.",
                       file=sys.stderr)
                 return 2
 
-        setup_name = Path(run["config"]).stem
+        setup_name = Path(experiment["config"]).stem
         save_restart = str(chunk_dir / f"restart_{setup_name}_{stop.strftime('%Y%m%d')}.nc")
 
-        print(f"{args.run_id}  chunk {chunk_index:03d}  {start} -> {stop}")
+        print(f"{args.experiment_id}  chunk {chunk_index:03d}  {start} -> {stop}")
         if args.dry_run:
             _run_one(
-                script=run["script"],
+                script=experiment["script"],
                 start_iso=start.strftime("%Y-%m-%dT%H:%M:%S"), stop_iso=stop.strftime("%Y-%m-%dT%H:%M:%S"),
-                save_restart=save_restart, load_restart=load_restart, data_roots_file=run["data_roots_file"],
-                chunk_dir=chunk_dir, launcher=run["launcher"] or "srun", np=run["np"], dry_run=True,
-                fabm=run.get("fabm"),
+                save_restart=save_restart, load_restart=load_restart, data_roots_file=experiment["data_roots_file"],
+                chunk_dir=chunk_dir, launcher=experiment["launcher"] or "srun", np=experiment["np"], dry_run=True,
+                fabm=experiment.get("fabm"),
             )
-            chunk_dir.rmdir()  # dry-run shouldn't leave an empty dir behind
+            chunk_dir.rmdir()  # dry-experiment shouldn't leave an empty dir behind
             return 0
 
         # Pointer file so a wrapper (e.g. run_chunk.slurm) that needs this
         # chunk's log path to tail it live doesn't have to guess or parse
         # stdout -- it can just wait for this file and read it.
-        (run_root / ".current_chunk_dir").write_text(str(chunk_dir) + "\n")
+        (experiment_root / ".current_chunk_dir").write_text(str(chunk_dir) + "\n")
 
         # The running-chunk check above and this insert aren't wrapped in
         # one atomic transaction, so two processes starting at the exact
         # same instant could both pass the check and then collide here
-        # (run_id, chunk_index) is the primary key. Rare in practice (a
+        # (experiment_id, chunk_index) is the primary key. Rare in practice (a
         # new chunk only ever starts via one sbatch resubmission at a
         # time), but fail cleanly rather than crash if it ever happens --
         # whichever process loses just backs off, the winner proceeds.
         try:
             rt.start_chunk(
-                conn, run_id=args.run_id, chunk_index=chunk_index,
+                conn, experiment_id=args.experiment_id, chunk_index=chunk_index,
                 start=start.strftime("%Y-%m-%d"), stop=stop.strftime("%Y-%m-%d"),
                 chunk_dir=str(chunk_dir), load_restart=load_restart, save_restart=save_restart,
                 slurm_job_id=args.slurm_job_id, user=user,
-                script_sha256=_sha256_of(run["script"]), config_sha256=_sha256_of(run["config"]),
+                script_sha256=_sha256_of(experiment["script"]), config_sha256=_sha256_of(experiment["config"]),
                 submitted_host=submitted_host,
             )
         except sqlite3.IntegrityError:
-            print(f"{args.run_id}: chunk {chunk_index} was just claimed by another process "
+            print(f"{args.experiment_id}: chunk {chunk_index} was just claimed by another process "
                   f"-- backing off.", file=sys.stderr)
             chunk_dir.rmdir()
             return 1
@@ -352,17 +352,17 @@ def _main_tracked(args: argparse.Namespace) -> int:
     # DB connection closed while the (potentially long-running) simulation
     # executes, so it isn't held open across the whole chunk.
     result = _run_one(
-        script=run["script"],
+        script=experiment["script"],
         start_iso=start.strftime("%Y-%m-%dT%H:%M:%S"), stop_iso=stop.strftime("%Y-%m-%dT%H:%M:%S"),
-        save_restart=save_restart, load_restart=load_restart, data_roots_file=run["data_roots_file"],
-        chunk_dir=chunk_dir, launcher=run["launcher"] or "srun", np=run["np"], dry_run=False,
-        fabm=run.get("fabm"),
+        save_restart=save_restart, load_restart=load_restart, data_roots_file=experiment["data_roots_file"],
+        chunk_dir=chunk_dir, launcher=experiment["launcher"] or "srun", np=experiment["np"], dry_run=False,
+        fabm=experiment.get("fabm"),
     )
     assert result is not None  # dry_run=False above always returns a CompletedProcess
 
     with rt.connect(args.db) as conn:
         rt.finish_chunk(
-            conn, run_id=args.run_id, chunk_index=chunk_index,
+            conn, experiment_id=args.experiment_id, chunk_index=chunk_index,
             exit_code=result.returncode, nan_detected=False, user=user,
         )
 
@@ -371,13 +371,13 @@ def _main_tracked(args: argparse.Namespace) -> int:
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--run-id", default=None, help="tracked mode: look everything up from the registry")
+    p.add_argument("--experiment-id", default=None, help="tracked mode: look everything up from the registry")
     p.add_argument("--db", default=None, help="tracked mode: override the SQLite registry path")
     p.add_argument("--slurm-job-id", default=None)
     p.add_argument("--dry-run", action="store_true", help="print the command, don't execute")
 
     standalone = p.add_argument_group(
-        "standalone mode (no --run-id; NO database interaction at all)")
+        "standalone mode (no --experiment-id; NO database interaction at all)")
     standalone.add_argument("--script")
     standalone.add_argument("--start", metavar="ISO8601")
     standalone.add_argument("--stop", metavar="ISO8601")
@@ -399,7 +399,7 @@ def main() -> int:
 
     args = p.parse_args()
 
-    if args.run_id:
+    if args.experiment_id:
         try:
             return _main_tracked(args)
         except RuntimeError as exc:
@@ -409,7 +409,7 @@ def main() -> int:
     missing = [f"--{name.replace('_', '-')}" for name in ("script", "start", "stop", "save_restart")
                if getattr(args, name) is None]
     if missing:
-        p.error(f"standalone mode (no --run-id given) requires {', '.join(missing)}")
+        p.error(f"standalone mode (no --experiment-id given) requires {', '.join(missing)}")
     return _main_standalone(args)
 
 

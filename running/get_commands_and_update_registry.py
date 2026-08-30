@@ -5,10 +5,10 @@ registry. Renamed from apply_commands.py when the --pull-from step was
 added (2026-08-30) -- same file, same core logic, now also does the
 "get" half, not just the "apply" half.
 
-Deployed alongside oceanicu_runs.py/run_tracking.py/chunk_runner.py
-wherever the real run_registry.sqlite actually lives (see
-RUN_TRACKING.md "Command queue") -- for a registry with no network path
-reachable from wherever runs are actually defined/queued from (e.g. a
+Deployed alongside oceanicu_experiments.py/experiment_tracking.py/chunk_runner.py
+wherever the real experiment_registry.sqlite actually lives (see
+EXPERIMENT_TRACKING.md "Command queue") -- for a registry with no network path
+reachable from wherever experiments are actually defined/queued from (e.g. a
 fully network-isolated HPC whose login node can only ever INITIATE an
 outbound connection, never receive one).
 
@@ -17,34 +17,38 @@ bb-server1's `hpc_commands/`) into `--queue-dir` FIRST, before looking
 for anything pending -- so a single cron job covers both halves: get
 the latest commands, then apply whatever's new. Only makes sense on
 whatever machine actually has outbound network reach (the HPC's LOGIN
-node, not a compute node -- see RUN_TRACKING.md "Keeping bb-server1's
+node, not a compute node -- see EXPERIMENT_TRACKING.md "Keeping bb-server1's
 copy of the registry up to date" for the identical constraint on the
 push side, `push_registry_snapshot.sh`). Omit `--pull-from` to run
 exactly as before (`apply_commands.py`'s original behavior, unchanged) --
 e.g. for local testing, or if the local `hpc_commands/` copy is kept up
 to date some other way (a human rsyncing by hand).
 
-Each pending entry is replayed through oceanicu_runs.py's own CLI
+Each pending entry is replayed through oceanicu_experiments.py's own CLI
 (reconstructed from the stored args as real --flag values), so applying
 a queued command goes through IDENTICAL validation/behavior as running
 it directly -- no per-action logic is reimplemented here, and this file
-never needs updating when a new oceanicu_runs.py subcommand is added.
+never needs updating when a new oceanicu_experiments.py subcommand is added.
 
 Deliberately narrow: never accepts an ssh:// --db (this only ever makes
 sense run locally, where the registry's own machine is), and NEVER calls
-sbatch, for any run, new or resubmitting -- submitting a job is always a
+sbatch, for any experiment, new or resubmitting -- submitting a job is always a
 deliberate manual action on the HPC, whether that's the first chunk of a
-brand-new run or anything else. This script only ever touches the
-registry's `runs`/`history` rows via oceanicu_runs.py's own commands.
+brand-new experiment or anything else. This script only ever touches the
+registry's `experiments`/`history` rows via oceanicu_experiments.py's own commands.
 
-A brand-new run's `add` also needs its actual driver script/config
-physically present at `run_root` before any chunk can start -- the queue
-file alone only ever carries the DB row. Alongside `--queue`'s own file,
-a sibling `run_files/` directory (see --run-files-dir) mirrors run_root
-paths: `run_files/<run_root>/generated_foo.py`, etc. For every `add`
-being applied, whatever's staged there is copied into the REAL
-(resolved) run_root first, and only then is the run actually registered
--- a copy failure never leaves an orphan, file-less DB row behind.
+A brand-new experiment's `add` also needs its actual driver script/config
+physically present at `experiment_root` before any chunk can start -- the queue
+file alone only ever carries the DB row. Getting them there is `oceanicu-experiments
+stage`'s job (see its own docstring): it writes directly to the experiment's
+real, resolved `experiment_root` on whatever machine runs it -- there is no
+separate staging directory to copy from here. This file's own role is
+narrower: before applying an `add`, `_verify_experiment_files_present`
+confirms `script`/`config` are actually present at the resolved
+`experiment_root` on THIS machine (populated by `stage` directly if this
+machine IS where staging happened, or by `bin/pull_experiment_files.sh`'s
+filtered sync if not) and fails the command loudly if not -- never
+registering a file-less experiment, without copying anything itself.
 
 Multiple people can queue commands from different places -- rather than
 have them all write to one shared file (a real risk of one rsync
@@ -56,7 +60,7 @@ regardless of which file an entry lives in. `--queue PATH` (a single,
 exact file) still works too, for a quick one-off or testing.
 
 `hpc_commands/` itself is plain data, deliberately NOT part of the
-`oceanicu_3d` git repo -- see RUN_TRACKING.md "Command queue" for where
+`oceanicu_3d` git repo -- see EXPERIMENT_TRACKING.md "Command queue" for where
 it actually lives and how it physically gets here (rsync, at every hop,
 never git/GitHub).
 
@@ -69,17 +73,16 @@ entries' status back to `pending` (the upstream copy never learned they
 were applied -- there's no push-back channel for status, only a pull-in
 channel for new commands). Reapplying an already-applied entry is
 usually harmless -- most actions are idempotent (`set-stop-date`,
-`pause`, ...) -- except `add`, which fails loudly (`run_id` already
+`pause`, ...) -- except `add`, which fails loudly (`experiment_id` already
 exists, a real but noisy `IntegrityError`) rather than silently
 double-registering anything. No data corruption either way, just a
-confusing-looking `failed` entry for a run that's actually fine; check
-`oceanicu-runs show <run_id>` if one shows up unexpectedly.
+confusing-looking `failed` entry for an experiment that's actually fine; check
+`oceanicu-experiments show <experiment_id>` if one shows up unexpectedly.
 
 Usage:
-    python get_commands_and_update_registry.py --db /local/path/run_registry.sqlite \\
+    python get_commands_and_update_registry.py --db /local/path/experiment_registry.sqlite \\
         --queue-dir /local/path/hpc_commands/ \\
-        [--pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands] \\
-        [--run-files-dir /local/path/hpc_commands/run_files]   # default: <queue-dir>/run_files
+        [--pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands]
 
     # or a single exact file (never combined with --pull-from -- that's
     # a whole-directory sync, not a single-file one):
@@ -89,12 +92,11 @@ Typically run from a cron job (or by hand, or from run_chunk.slurm's own
 execution) on whichever machine physically holds both the registry and
 a local copy of the queue file(s) -- the LOGIN node specifically if
 `--pull-from` is used, since that's the only place with outbound network
-reach -- see RUN_TRACKING.md.
+reach -- see EXPERIMENT_TRACKING.md.
 """
 from __future__ import annotations
 
 import argparse
-import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -103,15 +105,15 @@ from pathlib import Path
 import yaml
 
 HERE = Path(__file__).resolve().parent
-OCEANICU_RUNS = HERE / "oceanicu_runs.py"
+OCEANICU_RUNS = HERE / "oceanicu_experiments.py"
 
 sys.path.insert(0, str(HERE))
-import run_tracking as rt  # noqa: E402
+import experiment_tracking as rt  # noqa: E402
 
 
 def _args_dict_to_cli(args_dict: dict) -> list[str]:
     """Turn a queued entry's stored args dict back into real --flag
-    values -- the inverse of oceanicu_runs.py's own _queue_command."""
+    values -- the inverse of oceanicu_experiments.py's own _queue_command."""
     cli: list[str] = []
     for key, value in args_dict.items():
         if value is None:
@@ -125,24 +127,31 @@ def _args_dict_to_cli(args_dict: dict) -> list[str]:
     return cli
 
 
-def _stage_run_files(run_root: str, run_files_dir: Path) -> "str | None":
-    """Copy whatever's staged at run_files_dir/<run_root>/ into the REAL
-    (resolved) run_root, before the run is registered. Returns an error
-    message on failure, None on success (including the legitimate
-    no-op case: nothing staged for this run, e.g. the files were already
-    placed there some other way)."""
-    staged = run_files_dir / run_root
-    if not staged.is_dir():
-        return None
+def _verify_experiment_files_present(experiment_root: str, script: str, config: str) -> "str | None":
+    """Confirm *script*/*config* actually exist at the REAL (resolved)
+    experiment_root before the experiment is registered -- doesn't copy
+    or stage anything itself. `oceanicu-experiments stage` (wherever it
+    was run) already writes an experiment's generated files directly to
+    this same real location; getting them onto THIS machine's own copy
+    of that location is a separate, filtered sync
+    (bin/pull_experiment_files.sh), not something this function does --
+    this is purely the safety check that used to be a side effect of the
+    old copy-based approach ("never register a file-less experiment"),
+    kept as an explicit check now that there's no copy step here to fail.
+    Returns an error message on failure, None on success."""
     try:
-        real_root = Path(rt.resolve_run_root(run_root))
+        real_root = Path(rt.resolve_experiment_root(experiment_root))
     except RuntimeError as exc:
-        return f"can't resolve run_root {run_root!r} to stage files into: {exc}"
-    try:
-        real_root.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(staged, real_root, dirs_exist_ok=True)
-    except OSError as exc:
-        return f"failed copying staged files {staged} -> {real_root}: {exc}"
+        return f"can't resolve experiment_root {experiment_root!r} to check for its files: {exc}"
+    missing = []
+    for label, name in (("script", script), ("config", config)):
+        path = Path(name) if Path(name).is_absolute() else real_root / name
+        if not path.is_file():
+            missing.append(f"{label} ({path})")
+    if missing:
+        return (f"{', '.join(missing)} not found -- expected the experiment's driver files to "
+                f"already be at {real_root} (via `stage` + bin/pull_experiment_files.sh) before "
+                f"registering it")
     return None
 
 
@@ -188,8 +197,6 @@ def main() -> int:
     g.add_argument("--queue-dir", metavar="DIR",
                     help="process every queue_*.yaml found here (one per person who queues "
                          "commands -- see this file's own docstring)")
-    p.add_argument("--run-files-dir", default=None, metavar="PATH",
-                    help="defaults to <queue-dir, or --queue's own directory>/run_files")
     p.add_argument("--pull-from", default=None, metavar="REMOTE",
                     help="rsync source to pull hpc_commands/ in from first, e.g. "
                          "bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands "
@@ -220,13 +227,10 @@ def main() -> int:
             print(f"{base_dir}: no queue_*.yaml files found -- nothing to apply.")
             return 0
     else:
-        base_dir = Path(args.queue).parent
         queue_paths = [Path(args.queue)]
         if not queue_paths[0].exists():
             print(f"{queue_paths[0]}: nothing to apply (file doesn't exist yet).")
             return 0
-
-    run_files_dir = Path(args.run_files_dir) if args.run_files_dir else base_dir / "run_files"
 
     # Load every source file once, then build one combined, time-ordered
     # work list across all of them -- so real submission order (queued_at)
@@ -254,12 +258,14 @@ def main() -> int:
         entry["applied_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
         if action == "add":
-            stage_error = _stage_run_files(entry_args["run_root"], run_files_dir)
-            if stage_error:
+            verify_error = _verify_experiment_files_present(
+                entry_args["experiment_root"], entry_args["script"], entry_args["config"],
+            )
+            if verify_error:
                 entry["status"] = "failed"
-                entry["note"] = stage_error
+                entry["note"] = verify_error
                 failed += 1
-                print(f"{entry['id']} ({qp.name}): FAILED (add, staging files) -- {stage_error}",
+                print(f"{entry['id']} ({qp.name}): FAILED (add, checking files) -- {verify_error}",
                       file=sys.stderr)
                 _write_back(qp, sources[qp])
                 continue

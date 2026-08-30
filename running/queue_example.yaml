@@ -1,18 +1,18 @@
-# Example of a real command-queue file -- see RUN_TRACKING.md "Command
+# Example of a real command-queue file -- see EXPERIMENT_TRACKING.md "Command
 # queue". This is a reference/illustration only (like relay.env.example),
 # not something to copy into place directly -- your own real queue file
 # (queue_<you>.yaml) is created and appended to automatically by
-# `oceanicu-runs --queue ...`, never hand-edited.
+# `oceanicu-experiments --queue ...`, never hand-edited.
 #
 # Three entries here, showing the full lifecycle: one already applied
-# successfully, one that failed (a typo'd run_id -- note it still shows
-# "applied", see RUN_TRACKING.md's "Known gap" -- and one still pending.
+# successfully, one that failed (a typo'd experiment_id -- note it still shows
+# "applied", see EXPERIMENT_TRACKING.md's "Known gap" -- and one still pending.
 commands:
   - id: cmd-20260829T090000Z-1a2b
     action: add
     args:
-      run_id: NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
-      run_root: NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
+      experiment_id: NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
+      experiment_root: NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
       script: generated_nse_cmip6.py
       config: generated_nse_cmip6_config.yaml
       data_roots_file: bb-server1_data_roots.yaml
@@ -35,7 +35,7 @@ commands:
   - id: cmd-20260829T091500Z-3c4d
     action: set-priority
     args:
-      run_id: NSe/CMIP6/CNRM-ESM2-1/ssp127/run01   # typo -- ssp127 doesn't exist
+      experiment_id: NSe/CMIP6/CNRM-ESM2-1/ssp127/run01   # typo -- ssp127 doesn't exist
       priority: 10
     queued_at: '2026-08-29T09:15:00+00:00'
     queued_by: kb
@@ -43,13 +43,13 @@ commands:
     applied_at: '2026-08-29T09:24:11+00:00'
     note: "NSe/CMIP6/CNRM-ESM2-1/ssp127/run01: priority set to 10"
     # ^ "applied" here is misleading -- the UPDATE matched zero rows
-    # (see RUN_TRACKING.md's documented gap for set-priority/etc.), so
-    # nothing actually happened. Worth double-checking run_id spelling.
+    # (see EXPERIMENT_TRACKING.md's documented gap for set-priority/etc.), so
+    # nothing actually happened. Worth double-checking experiment_id spelling.
 
   - id: cmd-20260829T100000Z-5e6f
     action: set-stop-date
     args:
-      run_id: NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
+      experiment_id: NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
       stop_date: '2060-12-31'
     queued_at: '2026-08-29T10:00:00+00:00'
     queued_by: kb

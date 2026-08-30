@@ -37,7 +37,7 @@ hosts:
     analyses_dir: /data/OceanICU/oceanicu_3d/analyses
     hugo_out: /data/OceanICU/oceanicu_3d
     conda_env: ocean-stack
-    db: /data/OceanICU/oceanicu_3d/experiments/run_registry.sqlite
+    db: /data/OceanICU/oceanicu_3d/experiments/experiment_registry.sqlite
 
   orca:
     analyses_dir: /data/kb/OceanICU/oceanicu_3d/analyses

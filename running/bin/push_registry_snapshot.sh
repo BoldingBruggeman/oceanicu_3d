@@ -6,28 +6,28 @@
 #
 #   1. A login-node cron job (always-on fallback, works regardless of
 #      whether ssh from compute nodes to here is even possible):
-#        */10 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/push_registry_snapshot.sh
+#        */10 * * * * OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite /path/push_registry_snapshot.sh
 #
 #   2. Best-effort, event-driven, from run_chunk.slurm itself right
 #      before each self-resubmission -- only if OCEANICU_LOGIN_NODE is
-#      set (see setup_run_tracking.sh) AND ssh from a compute node to
+#      set (see setup_experiment_tracking.sh) AND ssh from a compute node to
 #      here actually works (unconfirmed as of writing this --
 #      see test_compute_to_login_ssh.sbatch).
 #
-# Doesn't take a new snapshot itself -- reuses run_tracking.py's own
+# Doesn't take a new snapshot itself -- reuses experiment_tracking.py's own
 # git-backup mechanism (already WAL-safe, already committed after every
-# OCEANICU_DB_BACKUP_EVERY_N_WRITES writes, see RUN_TRACKING.md
+# OCEANICU_DB_BACKUP_EVERY_N_WRITES writes, see EXPERIMENT_TRACKING.md
 # "Accidental-deletion protection") as the source; just ships out
 # whatever's already there.
 #
-# Usage: OCEANICU_RUN_DB=/path/run_registry.sqlite push_registry_snapshot.sh [dest]
+# Usage: OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite push_registry_snapshot.sh [dest]
 # dest defaults to bb-server1:/data/OceanICU/oceanicu_3d/experiments/<same filename>
 set -eu
 
-: "${OCEANICU_RUN_DB:?OCEANICU_RUN_DB must be set (local path to the registry)}"
+: "${OCEANICU_EXPERIMENT_DB:?OCEANICU_EXPERIMENT_DB must be set (local path to the registry)}"
 
-snapshot="${OCEANICU_RUN_DB}.backups/$(basename "$OCEANICU_RUN_DB")"
-dest="${1:-bb-server1:/data/OceanICU/oceanicu_3d/experiments/$(basename "$OCEANICU_RUN_DB")}"
+snapshot="${OCEANICU_EXPERIMENT_DB}.backups/$(basename "$OCEANICU_EXPERIMENT_DB")"
+dest="${1:-bb-server1:/data/OceanICU/oceanicu_3d/experiments/$(basename "$OCEANICU_EXPERIMENT_DB")}"
 
 if [ ! -f "$snapshot" ]; then
     echo "$snapshot does not exist yet -- nothing to push (no writes have" >&2

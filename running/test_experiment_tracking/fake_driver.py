@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """Stand-in for a pygetm_config.codegen --dump-python driver script, for
-testing oceanicu_runs.py / chunk_runner.py's tracking machinery without a
+testing oceanicu_experiments.py / chunk_runner.py's tracking machinery without a
 real pyGETM simulation. Accepts the exact CLI surface chunk_runner.py
 builds for a real driver (--start/--stop/--save-restart/--load-restart/
 --data-roots-file/--fabm/--no-fabm/--dry-run) but instead of simulating
 anything, sleeps for a while (default: a random 5-10 minutes, long enough
-to interact with `oceanicu_runs.py list/show/pause/...` while a chunk is
+to interact with `oceanicu_experiments.py list/show/pause/...` while a chunk is
 "running") then writes a placeholder restart file and exits 0.
 
 Failure testing: if a `FAIL_NEXT_CHUNK` file exists in this chunk's own
-run_root (the directory one level above `chunks/`), it's deleted and this
+experiment_root (the directory one level above `chunks/`), it's deleted and this
 chunk exits 1 instead of succeeding -- lets you test `rerun` and
 `list --status failed` on demand, without waiting for a real failure:
 
-    touch <run_root>/FAIL_NEXT_CHUNK
+    touch <experiment_root>/FAIL_NEXT_CHUNK
 
 Speed override for developing/debugging the test harness itself (real
 interactive testing should leave this unset, for the true 5-10 min feel):
@@ -53,14 +53,14 @@ def main() -> int:
         return 0
 
     # chunk_runner.py always invokes the driver with cwd=chunk_dir, and
-    # chunk_dir is always run_root/"chunks"/<NNN_start_stop> in tracked
-    # mode -- so run_root is two levels up from here, when that shape is
+    # chunk_dir is always experiment_root/"chunks"/<NNN_start_stop> in tracked
+    # mode -- so experiment_root is two levels up from here, when that shape is
     # present. Standalone/ad-hoc invocations (no "chunks" parent) just
-    # treat the cwd itself as run_root for the sentinel check.
+    # treat the cwd itself as experiment_root for the sentinel check.
     chunk_dir = Path.cwd()
-    run_root = chunk_dir.parent.parent if chunk_dir.parent.name == "chunks" else chunk_dir
+    experiment_root = chunk_dir.parent.parent if chunk_dir.parent.name == "chunks" else chunk_dir
 
-    fail_sentinel = run_root / "FAIL_NEXT_CHUNK"
+    fail_sentinel = experiment_root / "FAIL_NEXT_CHUNK"
     if fail_sentinel.exists():
         fail_sentinel.unlink()
         print("[fake_driver] FAIL_NEXT_CHUNK sentinel found -- simulating a failed chunk.",

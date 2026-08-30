@@ -1,7 +1,7 @@
 #!/bin/bash
-# Wrapper so `chunk-runner ...` works from anywhere (e.g. from inside a
-# run's own chunk directory) once running/bin is on PATH -- see
-# RUN_TRACKING.md and relay.env.example. Just forwards to the real script,
+# Wrapper so `chunk-runner ...` works from anywhere (e.g. from inside an
+# experiment's own chunk directory) once running/bin is on PATH -- see
+# EXPERIMENT_TRACKING.md and relay.env.example. Just forwards to the real script,
 # which lives one directory up from this one; pure stdlib, no conda env
 # needed for this one -- pass --conda-env to it if the pyGETM driver
 # subprocess itself needs one activated.

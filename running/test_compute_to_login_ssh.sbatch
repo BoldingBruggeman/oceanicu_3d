@@ -1,10 +1,10 @@
 #!/bin/bash
 # test_compute_to_login_ssh.sbatch -- one-off test: can a compute node ssh
 # to the login node it was submitted from? Answers the open question for
-# the "push the registry out from a compute node" design (RUN_TRACKING.md).
+# the "push the registry out from a compute node" design (EXPERIMENT_TRACKING.md).
 #
 # On this project's actual production HPC: confirmed 2026-08-29, NO --
-# see RUN_TRACKING.md "Keeping bb-server1's copy of the registry up to
+# see EXPERIMENT_TRACKING.md "Keeping bb-server1's copy of the registry up to
 # date", use the login-node cron there instead. Kept here in case this
 # tooling is ever deployed to a different cluster, where the answer may
 # differ -- re-run it there rather than assuming either way.

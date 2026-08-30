@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Runs exactly ONE chunk of a registered simulation, then -- if the run
+# Runs exactly ONE chunk of a registered simulation, then -- if the experiment
 # isn't paused and hasn't reached its stop_date -- submits itself again
 # for the next chunk. Each submission gets a fresh walltime allocation,
 # so there's no need to track remaining walltime mid-job; the chunk that
@@ -8,18 +8,18 @@
 # size chosen sensibly relative to --time should make that a given).
 #
 # Usage (local registry):
-#   sbatch --export=RUN_ID='...',OCEANICU_RUN_DB='/abs/path/to/run_registry.sqlite' run_chunk.slurm
-# Usage (registry behind a relay -- see RUN_TRACKING.md's "Working across
+#   sbatch --export=EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='/abs/path/to/experiment_registry.sqlite' run_chunk.slurm
+# Usage (registry behind a relay -- see EXPERIMENT_TRACKING.md's "Working across
 # machines"; OCEANICU_RELAY_DIR is where run_tracking_server.py lives ON
 # the relay, not here):
-#   sbatch --export=RUN_ID='...',OCEANICU_RUN_DB='ssh://relay/abs/path/db.sqlite',OCEANICU_RELAY_DIR='/abs/path/on/relay' run_chunk.slurm
+#   sbatch --export=EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://relay/abs/path/db.sqlite',OCEANICU_RELAY_DIR='/abs/path/on/relay' run_chunk.slurm
 #
-# RUN_ID must already exist in the registry (oceanicu_runs.py add). This
+# EXPERIMENT_ID must already exist in the registry (oceanicu_experiments.py add). This
 # script finds its OWN location at runtime (see SELF/SCRIPT_DIR below) --
-# deploy it and chunk_runner.py/run_tracking.py together anywhere on the
+# deploy it and chunk_runner.py/experiment_tracking.py together anywhere on the
 # production machine, no path to hardcode or configure for that part.
 #
-# Pace the hand-off to the next chunk/run with `oceanicu_runs.py delay-all
+# Pace the hand-off to the next chunk/experiment with `oceanicu_experiments.py delay-all
 # --seconds N` (per user, 2026-08-28: "the HPC must be used for something
 # else for a while") -- a TIMED pause, checked LIVE right before EACH
 # self-resubmission, not a static env var baked in at the first `sbatch`
@@ -29,7 +29,7 @@
 # forget it, the system catches up on its own. Live-adjustable at any
 # time while jobs are already chaining: run `delay-all --seconds N` again
 # with a new value, or `delay-all --clear` to cancel early. Never
-# interrupts a chunk already running. See run_tracking.
+# interrupts a chunk already running. See experiment_tracking.
 # chunk_delay_sentinel_path/get_chunk_delay_remaining for the mechanism
 # (a DELAY_ALL file next to the registry DB, mirroring PAUSE_ALL's own
 # convention -- content is the delay in seconds, its own mtime marks when
@@ -46,26 +46,26 @@
 
 set -u
 
-if [ -z "${RUN_ID:-}" ]; then
-    echo "ERROR: RUN_ID must be set (sbatch --export=RUN_ID=... run_chunk.slurm)" >&2
+if [ -z "${EXPERIMENT_ID:-}" ]; then
+    echo "ERROR: EXPERIMENT_ID must be set (sbatch --export=EXPERIMENT_ID=... run_chunk.slurm)" >&2
     exit 1
 fi
 
-# run_tracking.py refuses to guess a DB path, deliberately -- this script
+# experiment_tracking.py refuses to guess a DB path, deliberately -- this script
 # runs on whatever machine/cluster the job lands on, with whatever folder
 # layout THAT machine has, so there is no path that's safe to assume as a
 # default here either. Must be set on the sbatch command line:
-#   sbatch --export=RUN_ID='...',OCEANICU_RUN_DB='...' run_chunk.slurm
+#   sbatch --export=EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='...' run_chunk.slurm
 # (SLURM's --export replaces the job's entire environment with just what's
 # listed, so it has to be given on every submission, not just exported in
 # the submitting shell -- every self-resubmission below already carries it
 # forward for you once it's set on this first one.)
-if [ -z "${OCEANICU_RUN_DB:-}" ]; then
-    echo "ERROR: OCEANICU_RUN_DB must be set (sbatch --export=RUN_ID=...,OCEANICU_RUN_DB=... run_chunk.slurm)" >&2
+if [ -z "${OCEANICU_EXPERIMENT_DB:-}" ]; then
+    echo "ERROR: OCEANICU_EXPERIMENT_DB must be set (sbatch --export=EXPERIMENT_ID=...,OCEANICU_EXPERIMENT_DB=... run_chunk.slurm)" >&2
     exit 1
 fi
 
-# Where THIS script (and chunk_runner.py/run_tracking.py alongside it)
+# Where THIS script (and chunk_runner.py/experiment_tracking.py alongside it)
 # actually live -- resolved at runtime, not hardcoded, since this script
 # is deployed independently on every production machine that runs it
 # (different user, different home directory, quite possibly a different
@@ -94,8 +94,8 @@ export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi2.so
 
 cd "$SCRIPT_DIR" || exit 1
 
-# Live-checks the DELAY_ALL sentinel (oceanicu_runs.py delay-all --
-# run_tracking.get_chunk_delay_remaining's own docstring has the full
+# Live-checks the DELAY_ALL sentinel (oceanicu_experiments.py delay-all --
+# experiment_tracking.get_chunk_delay_remaining's own docstring has the full
 # mechanism) and, if a delay is currently active, waits it out in short
 # polls rather than one fixed sleep -- so a delay that gets shortened,
 # extended, or cleared WHILE this is already waiting takes effect right
@@ -104,7 +104,7 @@ cd "$SCRIPT_DIR" || exit 1
 _wait_for_delay_all() {
     while true; do
         remaining=$(python -c "
-import run_tracking as rt
+import experiment_tracking as rt
 with rt.connect() as conn:
     print(int(rt.get_chunk_delay_remaining(conn)))
 ")
@@ -118,31 +118,31 @@ with rt.connect() as conn:
     done
 }
 
-# Persistent, per-run pacing (oceanicu_runs.py set-chunk-delay / the
-# run's own chunk_delay_seconds column, default 0) -- unlike DELAY_ALL
+# Persistent, per-experiment pacing (oceanicu_experiments.py set-chunk-delay / the
+# experiment's own chunk_delay_seconds column, default 0) -- unlike DELAY_ALL
 # above (a global, one-shot TIMED pause), this is an ongoing setting for
-# ONE specific run, read fresh each call so a change picks up on the very
-# next hand-off. $1 is the run_id about to be (re)submitted -- the NEXT
-# run's own delay applies when picking a new one up from the queue, not
-# the run that just finished.
-_wait_for_run_chunk_delay() {
-    local target_run_id="$1"
+# ONE specific experiment, read fresh each call so a change picks up on the very
+# next hand-off. $1 is the experiment_id about to be (re)submitted -- the NEXT
+# experiment's own delay applies when picking a new one up from the queue, not
+# the experiment that just finished.
+_wait_for_experiment_chunk_delay() {
+    local target_experiment_id="$1"
     local delay
     delay=$(python -c "
-import run_tracking as rt
+import experiment_tracking as rt
 with rt.connect() as conn:
-    run = rt.get_run(conn, '$target_run_id')
-    print(run['chunk_delay_seconds'] if run else 0)
+    experiment = rt.get_experiment(conn, '$target_experiment_id')
+    print(experiment['chunk_delay_seconds'] if experiment else 0)
 ")
     if [ "$delay" -gt 0 ]; then
-        echo "  $target_run_id: chunk_delay_seconds=$delay -- waiting before submitting..."
+        echo "  $target_experiment_id: chunk_delay_seconds=$delay -- waiting before submitting..."
         sleep "$delay"
     fi
 }
 
 # Best-effort, event-driven push of the registry out to bb-server1, right
 # before each self-resubmission -- only fires if OCEANICU_LOGIN_NODE is
-# set (see setup_run_tracking.sh; usually via ~/.bashrc, which this
+# set (see setup_experiment_tracking.sh; usually via ~/.bashrc, which this
 # script already sources above, and which is visible here unmodified
 # since $HOME is shared between login and compute nodes) AND ssh from
 # THIS compute node to it actually works (unconfirmed as of writing --
@@ -151,7 +151,7 @@ with rt.connect() as conn:
 # that follows it, which proceeds identically either way. If this never
 # fires, or fails silently every time, the login node's own cron running
 # push_registry_snapshot.sh periodically is the fallback -- see
-# RUN_TRACKING.md "Command queue" / push_registry_snapshot.sh's own
+# EXPERIMENT_TRACKING.md "Command queue" / push_registry_snapshot.sh's own
 # header.
 _push_registry_snapshot_best_effort() {
     if [ -n "${OCEANICU_LOGIN_NODE:-}" ]; then
@@ -163,26 +163,26 @@ _push_registry_snapshot_best_effort() {
 # --- run the chunk -----------------------------------------------------
 # chunk_runner.py itself invokes the driver script (via srun -- the
 # preferred launcher, matching the real production SLURM scripts; see
-# its own --launcher/the run's `launcher` column for the mpiexec
+# its own --launcher/the experiment's `launcher` column for the mpiexec
 # fallback) and waits for it (it does not background the srun the way
 # the old pml.slurm did) -- NaN monitoring runs alongside it here so this
 # script can still scancel a runaway job, and records the NaN on the
 # chunk's own DB row.
 
-# run_root may be relative (registered from a workstation that doesn't
-# know exactly where this run's output will land HERE) -- resolve it
-# against this machine's own OCEANICU_RUN_ROOT_BASE, same as
-# chunk_runner.py does internally. Absolute run_root passes through
+# experiment_root may be relative (registered from a workstation that doesn't
+# know exactly where this experiment's output will land HERE) -- resolve it
+# against this machine's own OCEANICU_EXPERIMENT_ROOT_BASE, same as
+# chunk_runner.py does internally. Absolute experiment_root passes through
 # unchanged.
-RUN_ROOT=$(python -c "
-import run_tracking as rt
+EXPERIMENT_ROOT=$(python -c "
+import experiment_tracking as rt
 with rt.connect() as conn:
-    print(rt.resolve_run_root(rt.get_run(conn, '$RUN_ID')['run_root']))
+    print(rt.resolve_experiment_root(rt.get_experiment(conn, '$EXPERIMENT_ID')['experiment_root']))
 ")
-POINTER_FILE="$RUN_ROOT/.current_chunk_dir"
+POINTER_FILE="$EXPERIMENT_ROOT/.current_chunk_dir"
 rm -f "$POINTER_FILE"
 
-python chunk_runner.py --run-id "$RUN_ID" --slurm-job-id "$SLURM_JOB_ID" &
+python chunk_runner.py --experiment-id "$EXPERIMENT_ID" --slurm-job-id "$SLURM_JOB_ID" &
 RUNNER_PID=$!
 
 # Wait for chunk_runner.py to tell us which directory it's using (written
@@ -218,56 +218,56 @@ kill "$MONITOR_PID" 2>/dev/null
 wait "$MONITOR_PID" 2>/dev/null
 
 if [ $EXIT_CODE -eq 1 ]; then
-    echo "$RUN_ID: nothing to do (already complete or paused) -- not resubmitting."
+    echo "$EXPERIMENT_ID: nothing to do (already complete or paused) -- not resubmitting."
     exit 0
 fi
 if [ $EXIT_CODE -ne 0 ]; then
-    echo "$RUN_ID: chunk failed (exit $EXIT_CODE) -- not resubmitting automatically."
-    echo "Investigate, then either 'oceanicu_runs.py rerun --run-id $RUN_ID' to redo it,"
+    echo "$EXPERIMENT_ID: chunk failed (exit $EXIT_CODE) -- not resubmitting automatically."
+    echo "Investigate, then either 'oceanicu_experiments.py rerun --experiment-id $EXPERIMENT_ID' to redo it,"
     echo "or resubmit this same script once fixed."
     exit $EXIT_CODE
 fi
 
 # --- self-chain for the next chunk --------------------------------------
 STATUS=$(python -c "
-import run_tracking as rt
+import experiment_tracking as rt
 with rt.connect() as conn:
-    print(rt.get_run(conn, '$RUN_ID')['status'])
+    print(rt.get_experiment(conn, '$EXPERIMENT_ID')['status'])
 ")
 
 if [ "$STATUS" = "complete" ] || [ "$STATUS" = "complete_with_warnings" ]; then
-    echo "$RUN_ID: reached stop_date (status=$STATUS)."
-    NEXT_RUN_ID=$(python -c "
-import run_tracking as rt
+    echo "$EXPERIMENT_ID: reached stop_date (status=$STATUS)."
+    NEXT_EXPERIMENT_ID=$(python -c "
+import experiment_tracking as rt
 with rt.connect() as conn:
-    r = rt.next_run_to_start(conn)
+    r = rt.next_experiment_to_start(conn)
     print(r if r else '')
 ")
-    if [ -z "$NEXT_RUN_ID" ]; then
-        echo "No queued (not_started, unpaused) run waiting -- nothing to pick up. Stopping."
+    if [ -z "$NEXT_EXPERIMENT_ID" ]; then
+        echo "No queued (not_started, unpaused) experiment waiting -- nothing to pick up. Stopping."
         exit 0
     fi
-    echo "Picking up next queued run: $NEXT_RUN_ID"
+    echo "Picking up next queued experiment: $NEXT_EXPERIMENT_ID"
     _wait_for_delay_all
-    _wait_for_run_chunk_delay "$NEXT_RUN_ID"
+    _wait_for_experiment_chunk_delay "$NEXT_EXPERIMENT_ID"
     _push_registry_snapshot_best_effort
-    sbatch --export=RUN_ID="$NEXT_RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
+    sbatch --export=EXPERIMENT_ID="$NEXT_EXPERIMENT_ID",OCEANICU_EXPERIMENT_DB="$OCEANICU_EXPERIMENT_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
     exit 0
 fi
 
 PAUSED=$(python -c "
-import run_tracking as rt
+import experiment_tracking as rt
 with rt.connect() as conn:
-    run = rt.get_run(conn, '$RUN_ID')
-    print(rt.is_paused(conn, '$RUN_ID', run['run_root']))
+    experiment = rt.get_experiment(conn, '$EXPERIMENT_ID')
+    print(rt.is_paused(conn, '$EXPERIMENT_ID', experiment['experiment_root']))
 ")
 if [ "$PAUSED" = "True" ]; then
-    echo "$RUN_ID: paused -- not resubmitting. 'oceanicu_runs.py resume --run-id $RUN_ID' to continue."
+    echo "$EXPERIMENT_ID: paused -- not resubmitting. 'oceanicu_experiments.py resume --experiment-id $EXPERIMENT_ID' to continue."
     exit 0
 fi
 
 _wait_for_delay_all
-_wait_for_run_chunk_delay "$RUN_ID"
+_wait_for_experiment_chunk_delay "$EXPERIMENT_ID"
 _push_registry_snapshot_best_effort
-echo "$RUN_ID: submitting next chunk"
-sbatch --export=RUN_ID="$RUN_ID",OCEANICU_RUN_DB="$OCEANICU_RUN_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
+echo "$EXPERIMENT_ID: submitting next chunk"
+sbatch --export=EXPERIMENT_ID="$EXPERIMENT_ID",OCEANICU_EXPERIMENT_DB="$OCEANICU_EXPERIMENT_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"

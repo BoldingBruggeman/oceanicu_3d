@@ -9,10 +9,10 @@
 # gets killed (e.g. by the login node's own idle/session-limit policy,
 # common on shared login nodes -- the same reason a bare background
 # polling loop was avoided for get_commands_and_update_registry.py, see
-# RUN_TRACKING.md),
+# EXPERIMENT_TRACKING.md),
 # the watchdog notices within its own interval and starts a fresh one.
 # The existing periodic push_registry_snapshot.sh cron (see
-# RUN_TRACKING.md "Keeping bb-server1's copy of the registry up to
+# EXPERIMENT_TRACKING.md "Keeping bb-server1's copy of the registry up to
 # date") is a further, coarser fallback if even the watchdog somehow
 # doesn't fire in time -- keep both, they're cheap and independent.
 #
@@ -24,8 +24,8 @@
 # testing -- a wrapping shell's own echoed command text was enough to
 # fool it).
 #
-# Watches the git-backup snapshot FILE itself (run_tracking.py's own
-# accidental-deletion-protection mechanism, see RUN_TRACKING.md), not
+# Watches the git-backup snapshot FILE itself (experiment_tracking.py's own
+# accidental-deletion-protection mechanism, see EXPERIMENT_TRACKING.md), not
 # the live registry -- that's the one thing that actually changes
 # exactly when there's something new worth pushing (every
 # OCEANICU_DB_BACKUP_EVERY_N_WRITES writes; set that to 1 on the HPC for
@@ -39,15 +39,15 @@
 # it actually fires as expected on the real login node before trusting
 # it exclusively; the periodic cron fallback above covers you either way.
 #
-# Usage: OCEANICU_RUN_DB=/path/run_registry.sqlite watch_registry_and_push.sh
+# Usage: OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite watch_registry_and_push.sh
 set -eu
 
-: "${OCEANICU_RUN_DB:?OCEANICU_RUN_DB must be set (local path to the registry)}"
+: "${OCEANICU_EXPERIMENT_DB:?OCEANICU_EXPERIMENT_DB must be set (local path to the registry)}"
 # push_registry_snapshot.sh lives right here in running/bin, same as
 # this script -- plain dirname on BASH_SOURCE[0] is already correct.
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SNAPSHOT="${OCEANICU_RUN_DB}.backups/$(basename "$OCEANICU_RUN_DB")"
-PIDFILE="${OCEANICU_RUN_DB}.watcher.pid"
+SNAPSHOT="${OCEANICU_EXPERIMENT_DB}.backups/$(basename "$OCEANICU_EXPERIMENT_DB")"
+PIDFILE="${OCEANICU_EXPERIMENT_DB}.watcher.pid"
 
 if ! command -v inotifywait >/dev/null 2>&1; then
     echo "ERROR: inotifywait not found (package inotify-tools) -- cannot watch." >&2
