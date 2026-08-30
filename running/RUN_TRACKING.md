@@ -38,12 +38,15 @@ export PATH="/abs/path/to/oceanicu_3d/running/bin:$PATH"
 ```
 
 Add that to `~/.bashrc` to make it permanent. `chunk-runner` (for
-`chunk_runner.py`), `watch-registry-and-push`, and
-`restart-registry-watcher` all come along the same way, for free -- one
-`PATH` addition covers everything in `running/bin`. (cron jobs are the
-one exception: cron doesn't source `~/.bashrc`, so a crontab line still
-needs either a full path or its own explicit `PATH=` -- see "Keeping
-bb-server1's copy of the registry up to date" below.)
+`chunk_runner.py`), `watch-registry-and-push`, `restart-registry-watcher`,
+and `get-commands-and-update-registry` all come along the same way, for
+free -- one `PATH` addition covers everything in `running/bin`. (cron
+jobs are the one exception: cron doesn't source `~/.bashrc`, so a
+crontab line still needs either a full path or its own explicit `PATH=`
+-- see "Keeping bb-server1's copy of the registry up to date" below.
+`get-commands-and-update-registry` is mainly useful for the *manual*
+invocation described in "Command queue" -- "Don't wait for the cron
+interval if something's urgent".)
 
 **`oceanicu-runs` is never required -- it's purely convenience.**
 `python /abs/path/to/oceanicu_3d/running/oceanicu_runs.py` does exactly
@@ -882,7 +885,9 @@ HPC's login node, just run the same command by hand:
 
 ```bash
 # on the login node, any time -- not just when cron happens to fire
-python get_commands_and_update_registry.py --db /local/path/run_registry.sqlite \
+# (get-commands-and-update-registry once running/bin is on PATH, see
+# "Use `oceanicu-runs`" at the top -- or the full path, same as cron uses)
+get-commands-and-update-registry --db /local/path/run_registry.sqlite \
     --queue-dir /local/path/hpc_commands/ \
     --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands
 ```

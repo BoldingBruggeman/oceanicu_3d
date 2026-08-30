@@ -1,0 +1,12 @@
+#!/bin/bash
+# Wrapper so `get-commands-and-update-registry ...` works from anywhere
+# once running/bin is on PATH -- see RUN_TRACKING.md and
+# relay.env.example. Just forwards to the real script, which lives one
+# directory up from this one; pure stdlib, no conda env needed for this
+# one. Mainly useful for the manual/urgent invocation on the HPC's login
+# node (see RUN_TRACKING.md "Command queue" -- "Don't wait for the cron
+# interval if something's urgent") -- the crontab line itself still uses
+# a full path, since cron doesn't source ~/.bashrc and won't see PATH
+# additions made there (same caveat as restart-registry-watcher).
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+exec python3 "$(dirname "$SELF")/../get_commands_and_update_registry.py" "$@"
