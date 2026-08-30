@@ -795,8 +795,18 @@ oceanicu-runs --queue ~/hpc_commands/queue_kb.yaml add \
 No registry access needed at all -- this never touches a real DB. Any
 write subcommand works this way (`add`, `set-stop-date`, `set-priority`,
 `pause`, `rerun`, ...) -- `list`/`show`/`stage` don't touch a registry
-and refuse to queue, since there's nothing to apply later. Each call
-appends one entry to the YAML file, e.g.:
+and refuse to queue, since there's nothing to apply later. `--queue`
+isn't an `add`-only special case; it's a flag on every write subcommand
+(`_add_common` wires it up once, generically), so this works exactly the
+same way for, say, `chunk-size` on a run that's already registered:
+
+```bash
+oceanicu-runs --queue ~/hpc_commands/queue_kb.yaml chunk-size \
+    --run-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 --chunk-kind monthly --chunk-multiplier 3
+```
+
+Each call appends one entry to the same YAML file, e.g. (this one from
+the `add` above):
 
 ```yaml
 commands:
