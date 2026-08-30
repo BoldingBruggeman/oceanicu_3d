@@ -88,6 +88,12 @@ Usage:
     # a whole-directory sync, not a single-file one):
     python get_commands_and_update_registry.py --db ... --queue /local/path/hpc_commands/queue_kb.yaml
 
+    # --db and --queue-dir both fall back to an env var if omitted
+    # (OCEANICU_EXPERIMENT_DB, OCEANICU_HPC_COMMANDS_DIR respectively) --
+    # handy for manual invocation once those are already exported, same
+    # convention as oceanicu-experiments' own --db:
+    OCEANICU_EXPERIMENT_DB=... OCEANICU_HPC_COMMANDS_DIR=... python get_commands_and_update_registry.py
+
 Typically run from a cron job (or by hand, or from run_chunk.slurm's own
 execution) on whichever machine physically holds both the registry and
 a local copy of the queue file(s) -- the LOGIN node specifically if
@@ -97,6 +103,7 @@ reach -- see EXPERIMENT_TRACKING.md.
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -105,7 +112,7 @@ from pathlib import Path
 import yaml
 
 HERE = Path(__file__).resolve().parent
-OCEANICU_RUNS = HERE / "oceanicu_experiments.py"
+OCEANICU_EXPERIMENTS_SCRIPT = HERE / "oceanicu_experiments.py"
 
 sys.path.insert(0, str(HERE))
 import experiment_tracking as rt  # noqa: E402
@@ -189,14 +196,17 @@ def _pull(remote: str, queue_dir: Path) -> "int | None":
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--db", required=True,
+    p.add_argument("--db", default=None,
                     help="LOCAL registry path -- never an ssh:// URL, this only ever runs "
-                         "where the registry's own machine is")
-    g = p.add_mutually_exclusive_group(required=True)
+                         "where the registry's own machine is. Falls back to "
+                         "OCEANICU_EXPERIMENT_DB if not given, same convention as "
+                         "oceanicu-experiments' own --db.")
+    g = p.add_mutually_exclusive_group(required=False)
     g.add_argument("--queue", metavar="PATH", help="a single, exact queue file")
     g.add_argument("--queue-dir", metavar="DIR",
                     help="process every queue_*.yaml found here (one per person who queues "
-                         "commands -- see this file's own docstring)")
+                         "commands -- see this file's own docstring). If neither --queue nor "
+                         "--queue-dir is given, falls back to OCEANICU_HPC_COMMANDS_DIR.")
     p.add_argument("--pull-from", default=None, metavar="REMOTE",
                     help="rsync source to pull hpc_commands/ in from first, e.g. "
                          "bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands "
@@ -204,6 +214,18 @@ def main() -> int:
                          "makes sense run from a machine with outbound network reach "
                          "(the HPC's login node, not a compute node).")
     args = p.parse_args()
+
+    args.db = args.db or os.environ.get("OCEANICU_EXPERIMENT_DB")
+    if not args.db:
+        print("ERROR: --db not given and OCEANICU_EXPERIMENT_DB not set.", file=sys.stderr)
+        return 1
+
+    if not args.queue and not args.queue_dir:
+        args.queue_dir = os.environ.get("OCEANICU_HPC_COMMANDS_DIR")
+        if not args.queue_dir:
+            print("ERROR: one of --queue/--queue-dir is required (or set "
+                  "OCEANICU_HPC_COMMANDS_DIR).", file=sys.stderr)
+            return 1
 
     if args.db.startswith("ssh://"):
         print("ERROR: --db must be a local path -- get_commands_and_update_registry.py only "
@@ -272,7 +294,7 @@ def main() -> int:
 
         cli_args = _args_dict_to_cli(entry_args)
         result = subprocess.run(
-            [sys.executable, str(OCEANICU_RUNS), "--db", args.db, action, *cli_args],
+            [sys.executable, str(OCEANICU_EXPERIMENTS_SCRIPT), "--db", args.db, action, *cli_args],
             capture_output=True, text=True,
         )
         if result.returncode == 0:

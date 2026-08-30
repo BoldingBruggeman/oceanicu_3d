@@ -113,6 +113,14 @@ case "$role" in
         echo "EXPERIMENT_TRACKING.md 'Keeping bb-server1's copy up to date'):"
         echo "  crontab -e   # on the login node -- then add a line like:"
         echo "  0 * * * * OCEANICU_EXPERIMENT_DB=$path/experiment_registry.sqlite $scripts_dir/bin/restart_registry_watcher.sh"
+        echo "  Needs inotify-tools (inotifywait) -- no root here to apt/yum install it,"
+        echo "  but it's on conda-forge (confirmed available), so it can go into an"
+        echo "  existing env with no root needed. That env's bin/ isn't on PATH in a"
+        echo "  cron context though, so point at the exact binary instead:"
+        echo "    OCEANICU_INOTIFYWAIT=/path/to/envs/pygetm/bin/inotifywait \\"
+        echo "    OCEANICU_EXPERIMENT_DB=$path/experiment_registry.sqlite $scripts_dir/bin/restart_registry_watcher.sh"
+        echo "  If it's missing entirely, the watchdog logs one clear message and gives"
+        echo "  up gracefully (not a retry-forever loop) -- the cron above still covers you."
         ;;
     relay)
         mkdir -p "$path/hpc_commands"

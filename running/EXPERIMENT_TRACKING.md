@@ -976,6 +976,12 @@ HPC's login node, just run the same command by hand:
 get-commands-and-update-registry --db /local/path/experiment_registry.sqlite \
     --queue-dir /local/path/hpc_commands/ \
     --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands
+
+# --db/--queue-dir both fall back to an env var if omitted
+# (OCEANICU_EXPERIMENT_DB/OCEANICU_HPC_COMMANDS_DIR) -- if those are
+# already exported (they usually are, in an interactive login-node
+# shell), the equivalent shortcut is just:
+get-commands-and-update-registry --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands
 ```
 
 Fine to run this even with the cron job also active -- applying is
@@ -1135,14 +1141,38 @@ restarts with a fresh PID after the watcher is killed and its pidfile
 cleaned up by its own `trap EXIT`.
 
 This needs `inotify-tools` (`inotifywait`) installed on the login node --
-a standard package, but not guaranteed present (`command -v inotifywait`
-to check). The actual `inotifywait` invocation itself was not testable
-in the sandbox this was written in (no `inotify-tools`, no passwordless
-`sudo` to install it) -- verify it actually fires as expected on the
-real login node before relying on it exclusively. Run this *alongside*,
-not instead of, the plain cron above -- if the watcher or `inotifywait`
-itself turns out not to work as expected, the periodic push still
-covers you.
+a standard package, but not guaranteed present, and this project's HPC
+has no root access to install one the normal way (`apt`/`yum`). It's
+also available via conda-forge (confirmed 2026-08-30: `conda search -c
+conda-forge inotify-tools` finds it, versions up to 3.20.2) --
+installable into an existing env with no root needed at all. That env's
+own `bin/` isn't on `PATH` in a cron context, though (cron doesn't
+activate conda, same reason it doesn't source `~/.bashrc`), so both
+scripts accept an optional override pointing at the exact binary
+instead of relying on `PATH`:
+
+```bash
+OCEANICU_INOTIFYWAIT=/path/to/envs/pygetm/bin/inotifywait
+```
+
+Set once in the crontab line for `restart_registry_watcher.sh`; the
+watcher it starts inherits it automatically (plain env-var inheritance,
+nothing extra needed). Falls back to a bare `inotifywait` search on
+`PATH` if unset -- for a system install, or an interactive shell where
+the right conda env is already active.
+
+If `inotifywait` (with or without the override) is missing entirely,
+the watchdog doesn't retry every interval forever -- it logs one clear
+message the first time (a sentinel file suppresses repeats) and exits
+without attempting to start anything, self-healing automatically if it
+becomes available later. Verified: the message prints exactly once
+across repeated runs while missing, and disappears (silently, no
+special handling needed) once the binary -- real or overridden -- is
+found.
+
+Run this *alongside*, not instead of, the plain cron above -- if the
+watcher or `inotifywait` itself turns out not to work as expected, the
+periodic push still covers you.
 
 ## What's not built yet
 

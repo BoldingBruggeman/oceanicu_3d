@@ -32,12 +32,19 @@
 # "every single write" granularity), not on every WAL-internal write to
 # the live database file, most of which aren't yet a real change to ship.
 #
-# Requires inotify-tools (inotifywait) -- a standard package, but not
-# guaranteed present; check with `command -v inotifywait` before relying
-# on this. Not tested against a real inotifywait binary in the session
-# that wrote this (unavailable in that sandbox without sudo) -- verify
-# it actually fires as expected on the real login node before trusting
-# it exclusively; the periodic cron fallback above covers you either way.
+# Requires inotify-tools (inotifywait) -- a standard system package, but
+# not guaranteed present, and this project's HPC has no root access to
+# install one (see EXPERIMENT_TRACKING.md). It's also available via
+# conda-forge (confirmed 2026-08-30: `conda search -c conda-forge
+# inotify-tools` finds it), installable into an existing env with no
+# root needed -- but that env's own bin/ is NOT on PATH in a cron
+# context (cron doesn't activate conda, same reason it doesn't source
+# ~/.bashrc), so OCEANICU_INOTIFYWAIT lets the crontab line point at
+# that env's exact binary directly instead of relying on PATH:
+#   OCEANICU_INOTIFYWAIT=/path/to/envs/pygetm/bin/inotifywait
+# Falls back to plain `inotifywait` (searched on PATH as normal) if
+# unset -- for a system install, or an interactive shell where the
+# right conda env is already activated.
 #
 # Usage: OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite watch_registry_and_push.sh
 set -eu
@@ -48,9 +55,10 @@ set -eu
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SNAPSHOT="${OCEANICU_EXPERIMENT_DB}.backups/$(basename "$OCEANICU_EXPERIMENT_DB")"
 PIDFILE="${OCEANICU_EXPERIMENT_DB}.watcher.pid"
+INOTIFYWAIT="${OCEANICU_INOTIFYWAIT:-inotifywait}"
 
-if ! command -v inotifywait >/dev/null 2>&1; then
-    echo "ERROR: inotifywait not found (package inotify-tools) -- cannot watch." >&2
+if ! command -v "$INOTIFYWAIT" >/dev/null 2>&1; then
+    echo "ERROR: $INOTIFYWAIT not found (package inotify-tools) -- cannot watch." >&2
     exit 1
 fi
 
@@ -61,7 +69,7 @@ mkdir -p "$(dirname "$SNAPSHOT")"
 touch "$SNAPSHOT"   # inotifywait needs the path to already exist
 
 echo "$(date -Is): watching $SNAPSHOT for changes (pid $$)"
-inotifywait -m -q -e close_write -e create --format '%w%f' "$SNAPSHOT" | while read -r _changed; do
+"$INOTIFYWAIT" -m -q -e close_write -e create --format '%w%f' "$SNAPSHOT" | while read -r _changed; do
     echo "$(date -Is): change detected -- pushing"
     "$HERE/push_registry_snapshot.sh" || echo "$(date -Is): push failed, will retry on next change" >&2
 done
