@@ -8,7 +8,8 @@
 # watchdog, not started by hand and left unsupervised -- if this process
 # gets killed (e.g. by the login node's own idle/session-limit policy,
 # common on shared login nodes -- the same reason a bare background
-# polling loop was avoided for apply_commands.py, see RUN_TRACKING.md),
+# polling loop was avoided for get_commands_and_update_registry.py, see
+# RUN_TRACKING.md),
 # the watchdog notices within its own interval and starts a fresh one.
 # The existing periodic push_registry_snapshot.sh cron (see
 # RUN_TRACKING.md "Keeping bb-server1's copy of the registry up to

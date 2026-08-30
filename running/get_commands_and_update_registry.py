@@ -1,6 +1,9 @@
 #!/usr/bin/env python
-"""apply_commands.py -- replay pending command-queue entries against the
-LOCAL registry.
+"""get_commands_and_update_registry.py -- pull queued commands in from
+bb-server1 (optional), then replay whatever's pending against the LOCAL
+registry. Renamed from apply_commands.py when the --pull-from step was
+added (2026-08-30) -- same file, same core logic, now also does the
+"get" half, not just the "apply" half.
 
 Deployed alongside oceanicu_runs.py/run_tracking.py/chunk_runner.py
 wherever the real run_registry.sqlite actually lives (see
@@ -8,6 +11,18 @@ RUN_TRACKING.md "Command queue") -- for a registry with no network path
 reachable from wherever runs are actually defined/queued from (e.g. a
 fully network-isolated HPC whose login node can only ever INITIATE an
 outbound connection, never receive one).
+
+**If `--pull-from` is given**, this rsyncs that remote directory (e.g.
+bb-server1's `hpc_commands/`) into `--queue-dir` FIRST, before looking
+for anything pending -- so a single cron job covers both halves: get
+the latest commands, then apply whatever's new. Only makes sense on
+whatever machine actually has outbound network reach (the HPC's LOGIN
+node, not a compute node -- see RUN_TRACKING.md "Keeping bb-server1's
+copy of the registry up to date" for the identical constraint on the
+push side, `push_registry_snapshot.sh`). Omit `--pull-from` to run
+exactly as before (`apply_commands.py`'s original behavior, unchanged) --
+e.g. for local testing, or if the local `hpc_commands/` copy is kept up
+to date some other way (a human rsyncing by hand).
 
 Each pending entry is replayed through oceanicu_runs.py's own CLI
 (reconstructed from the stored args as real --flag values), so applying
@@ -45,17 +60,36 @@ exact file) still works too, for a quick one-off or testing.
 it actually lives and how it physically gets here (rsync, at every hop,
 never git/GitHub).
 
+**Known limitation of `--pull-from`:** it's a plain directory rsync
+(`-au`, i.e. skip anything newer on the receiver), not a merge -- if a
+queue file gets a NEW entry appended upstream (workstation) after this
+machine already applied and status-stamped some of its earlier entries,
+the next pull overwrites the whole file, reverting those earlier
+entries' status back to `pending` (the upstream copy never learned they
+were applied -- there's no push-back channel for status, only a pull-in
+channel for new commands). Reapplying an already-applied entry is
+usually harmless -- most actions are idempotent (`set-stop-date`,
+`pause`, ...) -- except `add`, which fails loudly (`run_id` already
+exists, a real but noisy `IntegrityError`) rather than silently
+double-registering anything. No data corruption either way, just a
+confusing-looking `failed` entry for a run that's actually fine; check
+`oceanicu-runs show <run_id>` if one shows up unexpectedly.
+
 Usage:
-    python apply_commands.py --db /local/path/run_registry.sqlite \\
+    python get_commands_and_update_registry.py --db /local/path/run_registry.sqlite \\
         --queue-dir /local/path/hpc_commands/ \\
+        [--pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands] \\
         [--run-files-dir /local/path/hpc_commands/run_files]   # default: <queue-dir>/run_files
 
-    # or a single exact file:
-    python apply_commands.py --db ... --queue /local/path/hpc_commands/queue_kb.yaml
+    # or a single exact file (never combined with --pull-from -- that's
+    # a whole-directory sync, not a single-file one):
+    python get_commands_and_update_registry.py --db ... --queue /local/path/hpc_commands/queue_kb.yaml
 
 Typically run from a cron job (or by hand, or from run_chunk.slurm's own
 execution) on whichever machine physically holds both the registry and
-a local copy of the queue file(s) -- see RUN_TRACKING.md.
+a local copy of the queue file(s) -- the LOGIN node specifically if
+`--pull-from` is used, since that's the only place with outbound network
+reach -- see RUN_TRACKING.md.
 """
 from __future__ import annotations
 
@@ -116,6 +150,34 @@ def _write_back(path: Path, data: dict) -> None:
     path.write_text(yaml.safe_dump(data, sort_keys=False))
 
 
+def _pull(remote: str, queue_dir: Path) -> "int | None":
+    """rsync remote (bb-server1's hpc_commands/) into queue_dir. Returns
+    None on success, an exit code on failure. -u (skip anything newer on
+    the receiver) so a since-applied local file's status stamps aren't
+    blindly clobbered by an unchanged remote copy on every single run --
+    see this module's own docstring for the residual limitation that
+    remains regardless (a real append upstream still overwrites the
+    whole file, status stamps included)."""
+    queue_dir.mkdir(parents=True, exist_ok=True)
+    src = remote.rstrip("/") + "/"
+    dst = str(queue_dir).rstrip("/") + "/"
+    result = subprocess.run(
+        ["rsync", "-au", "-i", src, dst], capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        print(f"ERROR: rsync --pull-from {remote} failed (rc={result.returncode}): "
+              f"{result.stderr.strip()}", file=sys.stderr)
+        return 1
+    changed = [line for line in result.stdout.splitlines() if line.strip()]
+    if changed:
+        print(f"pulled {len(changed)} new/changed file(s) from {remote}:")
+        for line in changed:
+            print(f"  {line}")
+    else:
+        print(f"{remote}: up to date, nothing new.")
+    return None
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--db", required=True,
@@ -128,12 +190,28 @@ def main() -> int:
                          "commands -- see this file's own docstring)")
     p.add_argument("--run-files-dir", default=None, metavar="PATH",
                     help="defaults to <queue-dir, or --queue's own directory>/run_files")
+    p.add_argument("--pull-from", default=None, metavar="REMOTE",
+                    help="rsync source to pull hpc_commands/ in from first, e.g. "
+                         "bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands "
+                         "-- only valid with --queue-dir (a whole-directory sync). Only "
+                         "makes sense run from a machine with outbound network reach "
+                         "(the HPC's login node, not a compute node).")
     args = p.parse_args()
 
     if args.db.startswith("ssh://"):
-        print("ERROR: --db must be a local path -- apply_commands.py only ever runs "
-              "where the registry actually lives, never over the relay.", file=sys.stderr)
+        print("ERROR: --db must be a local path -- get_commands_and_update_registry.py only "
+              "ever runs where the registry actually lives, never over the relay.", file=sys.stderr)
         return 1
+
+    if args.pull_from and not args.queue_dir:
+        print("ERROR: --pull-from needs --queue-dir (it syncs a whole directory, "
+              "not a single --queue file).", file=sys.stderr)
+        return 1
+
+    if args.pull_from:
+        pull_error = _pull(args.pull_from, Path(args.queue_dir))
+        if pull_error is not None:
+            return pull_error
 
     if args.queue_dir:
         base_dir = Path(args.queue_dir)

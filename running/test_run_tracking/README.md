@@ -111,10 +111,10 @@ call, and it picks up the change within its poll interval (60s).
 
 ## Trying the command queue risk-free
 
-The queue/`apply_commands.py` mechanism (see `../RUN_TRACKING.md`
-"Command queue") works against this same scratch registry, entirely
-locally, no second machine or real network isolation needed to see it
-work end to end:
+The queue/`get_commands_and_update_registry.py` mechanism (see
+`../RUN_TRACKING.md` "Command queue") works against this same scratch
+registry, entirely locally, no second machine or real network isolation
+needed to see it work end to end:
 
 ```bash
 mkdir -p hpc_commands
@@ -122,10 +122,12 @@ oceanicu-runs --queue hpc_commands/queue_kb.yaml set-priority \
     --run-id fake/notstarted/spare --priority 42
 # nothing applied yet -- inspect hpc_commands/queue_kb.yaml, it's just a YAML file
 
-python ../apply_commands.py --db "$OCEANICU_RUN_DB" --queue-dir hpc_commands
-# OCEANICU_HPC=1 not needed here -- apply_commands.py doesn't gate itself,
-# only oceanicu_runs.py's own direct `add` does (see RUN_TRACKING.md "Set
-# up a run")
+python ../get_commands_and_update_registry.py --db "$OCEANICU_RUN_DB" --queue-dir hpc_commands
+# no --pull-from here -- that only matters once a real remote (bb-server1)
+# is involved; omitting it just applies whatever's already local, same as
+# the old apply_commands.py always did. OCEANICU_HPC=1 not needed either --
+# this script doesn't gate itself, only oceanicu_runs.py's own direct
+# `add` does (see RUN_TRACKING.md "Set up a run")
 
 oceanicu-runs show --run-id fake/notstarted/spare   # priority is now 42
 ```

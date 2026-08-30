@@ -19,7 +19,7 @@ machine use the same directory or even the same username:
 | `chunk_runner.py` | runs exactly one chunk. Called by `run_chunk.slurm`; you don't normally invoke it by hand except when testing (see below). |
 | `run_chunk.slurm` | the SLURM job. Runs one chunk, then resubmits itself for the next one -- or, once a run reaches its `stop_date`, for the next queued run (see "The queue" below). |
 | `run_tracking_server.py` | RPC entrypoint for accessing the registry across machines with no direct network path between them -- see "Working across machines" below. Only needed on the relay machine, and only if you need that at all. |
-| `apply_commands.py` | replays queued commands (see "Command queue" below) against the local registry -- only needed wherever the registry actually lives, and only if a live relay to it isn't possible. |
+| `get_commands_and_update_registry.py` | pulls queued commands in from bb-server1 (optional, `--pull-from`) and replays whatever's pending (see "Command queue" below) against the local registry -- only needed wherever the registry actually lives, and only if a live relay to it isn't possible. Renamed from `apply_commands.py` when the pull step was added. |
 | `setup_run_tracking.sh` | one-shot env/directory setup per machine role (see below) -- standalone, no dependency on anything else here. |
 | `push_registry_snapshot.sh` | pushes the registry out to bb-server1 (see "Keeping bb-server1's copy of the registry up to date") -- only needed wherever the registry actually lives. |
 | `watch_registry_and_push.sh` | persistent watcher: calls `push_registry_snapshot.sh` the moment a fresh backup snapshot appears, instead of waiting for the next cron interval. Login node only; meant to be kept alive by `restart_registry_watcher.sh`, not run by hand. |
@@ -120,10 +120,11 @@ oceanicu-runs --queue ~/hpc_commands/queue_kb.yaml add \
 
 That queues the request; it doesn't touch a real registry yet. `rsync`
 your queue directory to bb-server1, and it crosses from there to wherever
-the authoritative registry actually lives, applied by `apply_commands.py`
--- see "Command queue" further down for the full flow (staging a new
-run's own files, multiple people's queue files, how it actually reaches
-the HPC). The flag reference below applies identically either way.
+the authoritative registry actually lives, applied by
+`get_commands_and_update_registry.py` -- see "Command queue" further
+down for the full flow (staging a new run's own files, multiple people's
+queue files, how it actually reaches the HPC). The flag reference below
+applies identically either way.
 
 <details>
 <summary>The direct form -- only if you have an actual, live path to
@@ -139,8 +140,9 @@ straight at that file "succeeds" with no warning, writes into a copy
 with no effect on the real thing, and then silently vanishes the next
 time a real push overwrites it. **On this project's actual HPC, nobody
 ever runs this direct form by hand at all** -- every real write happens
-through `apply_commands.py` replaying a queued entry, which calls this
-exact same command internally, always against the real local path.
+through `get_commands_and_update_registry.py` replaying a queued entry,
+which calls this exact same command internally, always against the real
+local path.
 
 Because bb-server1's mirror deliberately sits at the exact same path
 string as the authoritative registry (so `push_registry_snapshot.sh`
@@ -825,26 +827,29 @@ mirroring the run's own `run_root` path.
 rsync -a ~/hpc_commands/ bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands/
 ```
 
-**From bb-server1 to the HPC and back** is the one remaining hop that
-needs whatever transport actually exists there (a human -- PML for this
-project -- running `rsync` by hand, or a cron job if outbound access
-from that side makes one possible -- see the topology discussion this
-was designed around). Same directory, same files, `rsync` both ways --
-nothing about `hpc_commands/` itself changes depending on how that hop
-is actually carried out.
-
-**On the machine where the registry actually lives** (the HPC, using
-its own *local* copy of `hpc_commands/` after the last hop above), run
-`apply_commands.py` against local copies of both:
+**From bb-server1 to the HPC** is automated by `get_commands_and_update_registry.py`
+itself, via its own `--pull-from` -- run on the HPC's **login node**
+specifically (the only place with outbound reach; symmetric to
+`push_registry_snapshot.sh` going the other direction, see "Keeping
+bb-server1's copy of the registry up to date"):
 
 ```bash
-python apply_commands.py --db /local/path/run_registry.sqlite \
-    --queue-dir /local/path/hpc_commands/
-    # processes every queue_*.yaml found there, combined and applied in
-    # queued_at order across all of them, regardless of whose file an
-    # entry lives in. --run-files-dir defaults to <queue-dir>/run_files.
-    # (--queue PATH still works too, for a single exact file.)
+python get_commands_and_update_registry.py --db /local/path/run_registry.sqlite \
+    --queue-dir /local/path/hpc_commands/ \
+    --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands
+    # rsyncs bb-server1's hpc_commands/ in first (reports what changed,
+    # or "up to date, nothing new"), THEN processes every queue_*.yaml
+    # found there, combined and applied in queued_at order across all of
+    # them, regardless of whose file an entry lives in. --run-files-dir
+    # defaults to <queue-dir>/run_files. (--queue PATH still works too,
+    # for a single exact file -- but never combined with --pull-from,
+    # which syncs a whole directory.)
 ```
+
+Omit `--pull-from` to fall back to the older behavior (`apply_commands.py`'s
+original, before this script was renamed): apply whatever's already
+local, however it got there -- a human running `rsync` by hand, for
+instance, if that's ever preferred over the automated pull.
 
 For each `pending` entry: an `add` first copies whatever's staged for
 that `run_root` into the real (resolved) `run_root` -- a copy failure
@@ -852,23 +857,37 @@ marks the command `failed` and never registers a file-less run -- then
 every action replays through `oceanicu_runs.py`'s own CLI (reconstructed
 from the stored args as real `--flag` values), so applying a queued
 command goes through identical validation to running it directly.
-Already-`applied`/`failed` entries are skipped, so re-running
-`apply_commands.py` on a queue that hasn't changed is always a safe
-no-op. The file is rewritten after *each* command, not just at the end,
-so a crash partway through never loses already-applied statuses.
+Already-`applied`/`failed` entries are skipped, so re-running this
+script on a queue that hasn't changed is always a safe no-op. The file
+is rewritten after *each* command, not just at the end, so a crash
+partway through never loses already-applied statuses.
 
-**`apply_commands.py` never calls `sbatch`, for any run, new or
-resubmitting.** Submitting a job is always a deliberate manual action on
-whoever's machine actually runs SLURM -- this only ever touches the
-registry's `runs`/`history` rows. Once a run is registered (and its
-files are in place), starting it is the same manual `sbatch
---export=RUN_ID=...,OCEANICU_RUN_DB=... run_chunk.slurm` as always;
-after that, self-resubmission for future chunks is unaffected and
-automatic as already documented above.
+**Known limitation of `--pull-from`:** it's a plain directory rsync
+(`-au`), not a merge. If a queue file gets a genuinely new entry
+appended upstream (someone's workstation) after the HPC already applied
+and status-stamped some of that same file's earlier entries, the next
+pull overwrites the whole file, reverting those earlier entries' status
+back to `pending` -- there's no channel carrying status back upstream,
+only new commands flowing down. Confirmed by testing: reapplying an
+already-applied entry is usually harmless (most actions are idempotent
+-- `set-stop-date`, `pause`, ...) except `add`, which fails loudly
+(`run_id` already exists, a real but noisy `IntegrityError`) rather than
+silently double-registering anything. No data corruption either way,
+just a confusing-looking `failed` entry for a run that's actually fine
+-- check `oceanicu-runs show <run_id>` if one shows up unexpectedly.
 
-`apply_commands.py` refuses an `ssh://` `--db` outright -- it only ever
-makes sense run locally, on the machine that actually holds the
-registry.
+**`get_commands_and_update_registry.py` never calls `sbatch`, for any
+run, new or resubmitting.** Submitting a job is always a deliberate
+manual action on whoever's machine actually runs SLURM -- this only
+ever touches the registry's `runs`/`history` rows. Once a run is
+registered (and its files are in place), starting it is the same manual
+`sbatch --export=RUN_ID=...,OCEANICU_RUN_DB=... run_chunk.slurm` as
+always; after that, self-resubmission for future chunks is unaffected
+and automatic as already documented above.
+
+`get_commands_and_update_registry.py` refuses an `ssh://` `--db`
+outright -- it only ever makes sense run locally, on the machine that
+actually holds the registry.
 
 **Known gap, not introduced by this mechanism:** `set-priority`/
 `set-chunk-delay`/`set-stop-date`/etc. silently succeed even for a
@@ -934,13 +953,14 @@ not the live registry, since that file changes exactly when there's
 something new worth pushing). A persistent process on a shared login
 node risks getting killed by idle/session-limit policies (the same
 concern that ruled out a bare background polling loop for
-`apply_commands.py`), so it's meant to be kept alive by its own cron
+`get_commands_and_update_registry.py`), so it's meant to be kept alive by its own cron
 watchdog, `restart_registry_watcher.sh`, rather than started once by
 hand and left unsupervised. Both also have wrappers in `running/bin`
 (see "Use `oceanicu-runs`" at the top) -- handy for a one-off manual
 restart from anywhere once that's on PATH, e.g. `restart-registry-watcher`
 from an interactive login-node shell. **cron itself doesn't source
-`~/.bashrc`**, though (same caveat as the `apply_commands.py` cron
+`~/.bashrc`**, though (same caveat as the
+`get_commands_and_update_registry.py` cron
 above), so PATH isn't populated there unless the crontab line sets it
 explicitly -- the crontab entry itself uses the full path instead:
 

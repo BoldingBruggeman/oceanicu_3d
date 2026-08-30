@@ -93,7 +93,7 @@ import run_tracking as rt
 
 # Keys on the parsed argparse.Namespace that are about HOW the command
 # runs, never part of the command's own meaning -- never serialized into
-# a queued command (see _queue_command/apply_commands.py).
+# a queued command (see _queue_command/get_commands_and_update_registry.py).
 _QUEUE_EXCLUDE_KEYS = {"db", "dry_run", "queue", "cmd", "func"}
 
 _RUN_COLUMNS = [
@@ -237,8 +237,9 @@ def _preview_chunk_runner(scratch_db: Path, run_id: str) -> None:
 def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
     """Append this command to a command-queue YAML file instead of
     touching a real registry at all -- for a registry with no network
-    path to it (see RUN_TRACKING.md "Command queue"). apply_commands.py,
-    run wherever the registry actually lives, later replays each pending
+    path to it (see RUN_TRACKING.md "Command queue").
+    get_commands_and_update_registry.py, run wherever the registry actually
+    lives, later replays each pending
     entry through this exact same CLI (reconstructed from the stored
     args, as real --flag values) -- so queuing and running directly go
     through identical validation/behavior, nothing duplicated here."""
@@ -287,9 +288,9 @@ def cmd_stage(args: argparse.Namespace) -> int:
     output folder commonly has __pycache__/ and other clutter alongside
     the 2-3 files a run actually needs (see this project's own NSe/
     experiments tree). For a later queued `add` to pick up and
-    apply_commands.py to copy into the real run_root on the registry's
-    own machine. Doesn't touch any registry -- pure local file staging,
-    --db/--dry-run/--queue don't apply here.
+    get_commands_and_update_registry.py to copy into the real run_root
+    on the registry's own machine. Doesn't touch any registry -- pure
+    local file staging, --db/--dry-run/--queue don't apply here.
 
     rsync, not shutil: this is filtered by pattern, not by exact
     filename, so an include/exclude filter (rsync's own well-tested
