@@ -200,6 +200,27 @@ touching the filesystem, that machine fails loudly rather than guessing.
 export OCEANICU_RUN_ROOT_BASE=/data/OceanICU/oceanicu_3d/experiments
 ```
 
+**Spelled out, since it's the whole point of `--queue`:** nothing about
+a relative path is resolved when you queue it, and nothing is baked in
+at any point while it's in transit (`hpc_commands/`, `rsync`, the
+`--pull-from` step). `run_tracking.py`'s `resolve_run_root` does the
+resolving -- and only the resolving, never the storing -- fresh, every
+single time something needs an actual filesystem path, against
+`OCEANICU_RUN_ROOT_BASE` **as set on the machine asking at that
+instant**. Concretely, for a run queued from a workstation that has
+never seen the HPC's directory layout: the DB row keeps the relative
+`run-root` you typed; `get_commands_and_update_registry.py`'s own `add`
+handling resolves it once (against the HPC's `OCEANICU_RUN_ROOT_BASE`,
+from `setup_run_tracking.sh hpc`) just to know where to copy the staged
+`run_files/` into; `chunk_runner.py`/`run_chunk.slurm` resolve it again,
+independently, every chunk. Three different resolutions of the same
+stored string, all landing on the same path because they're all reading
+the same HPC-side env var -- never the workstation's (which typically
+doesn't even have `OCEANICU_RUN_ROOT_BASE` set, and doesn't need to).
+An absolute `--run-root` sidesteps all of this identically everywhere,
+which is exactly why it's the escape hatch when a run's output needs to
+live somewhere outside the normal base path.
+
 `launcher` defaults to `srun` (matches the real production SLURM
 scripts); pass `--launcher mpiexec` if a particular setup needs it
 instead.
@@ -850,6 +871,36 @@ Omit `--pull-from` to fall back to the older behavior (`apply_commands.py`'s
 original, before this script was renamed): apply whatever's already
 local, however it got there -- a human running `rsync` by hand, for
 instance, if that's ever preferred over the automated pull.
+
+**Don't wait for the cron interval if something's urgent.** The cron
+line is just this exact same command run on a schedule -- nothing about
+it is special or exclusive. If a batch of commands needs to land right
+away (several urgent `pause`s, a `set-stop-date` that has to beat an
+already-running chunk's next resubmission, whatever), `rsync` the queue
+up to bb-server1 as usual and then, from an interactive shell on the
+HPC's login node, just run the same command by hand:
+
+```bash
+# on the login node, any time -- not just when cron happens to fire
+python get_commands_and_update_registry.py --db /local/path/run_registry.sqlite \
+    --queue-dir /local/path/hpc_commands/ \
+    --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands
+```
+
+Fine to run this even with the cron job also active -- applying is
+idempotent (an already-`applied`/`failed` entry is never touched again),
+so running it twice in reasonably quick succession just means the
+second run reports "up to date, nothing new" / "nothing pending", no
+double-apply. The one thing NOT covered by that idempotency: two
+instances writing to the exact same queue file at the *literal same
+instant* (this manual run landing mid-write of a cron-triggered one)
+could in principle corrupt that file -- each write is "open, truncate,
+write the whole thing," not an atomic rename, and nothing else backs
+`hpc_commands/` up the way `push_registry_snapshot.sh` backs up the
+registry. Vanishingly unlikely for a one-off manual run (write-back is
+near-instant), and never a risk to the registry itself either way
+(SQLite's own locking handles that) -- just don't make a habit of firing
+this from two different terminals at once as a matter of course.
 
 For each `pending` entry: an `add` first copies whatever's staged for
 that `run_root` into the real (resolved) `run_root` -- a copy failure
