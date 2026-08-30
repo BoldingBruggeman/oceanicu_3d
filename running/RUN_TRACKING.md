@@ -22,6 +22,8 @@ machine use the same directory or even the same username:
 | `apply_commands.py` | replays queued commands (see "Command queue" below) against the local registry -- only needed wherever the registry actually lives, and only if a live relay to it isn't possible. |
 | `setup_run_tracking.sh` | one-shot env/directory setup per machine role (see below) -- standalone, no dependency on anything else here. |
 | `push_registry_snapshot.sh` | pushes the registry out to bb-server1 (see "Keeping bb-server1's copy of the registry up to date") -- only needed wherever the registry actually lives. |
+| `watch_registry_and_push.sh` | persistent watcher: calls `push_registry_snapshot.sh` the moment a fresh backup snapshot appears, instead of waiting for the next cron interval. Login node only; meant to be kept alive by `restart_registry_watcher.sh`, not run by hand. |
+| `restart_registry_watcher.sh` | cron watchdog: (re)starts `watch_registry_and_push.sh` if it's not already running. Login node only. |
 | `test_compute_to_login_ssh.sbatch` | one-shot test for whether a compute node can reach its own login node -- see "Keeping bb-server1's copy up to date". Not part of normal operation. |
 
 ## Use `oceanicu-runs`, not `python oceanicu_runs.py`
@@ -918,6 +920,43 @@ promptly): set `OCEANICU_DB_BACKUP_EVERY_N_WRITES=1` on the HPC so a
 fresh snapshot commit exists after every single write, including every
 `finish_chunk()` call -- otherwise the default (5) means a real snapshot
 might lag a few writes behind the latest chunk completion.
+
+**A third option, for near-immediate pushes without the compute-node-ssh
+dependency:** `watch_registry_and_push.sh` -- a persistent `inotifywait`
+watcher, run on the LOGIN NODE, that pushes the moment a new snapshot
+commit actually exists (watches the `.backups/` snapshot file itself,
+not the live registry, since that file changes exactly when there's
+something new worth pushing). A persistent process on a shared login
+node risks getting killed by idle/session-limit policies (the same
+concern that ruled out a bare background polling loop for
+`apply_commands.py`), so it's meant to be kept alive by its own cron
+watchdog, `restart_registry_watcher.sh`, rather than started once by
+hand and left unsupervised:
+
+```bash
+# on the login node
+0 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/restart_registry_watcher.sh
+```
+
+The watchdog checks a pidfile (`kill -0` on the recorded PID), not
+`pgrep -f` on the script name -- `pgrep -f` matches a process's *entire*
+command line, and testing this during development confirmed it
+false-positives on anything else that happens to mention the filename
+(a wrapping shell's own echoed command text was enough to fool it).
+Verified end-to-end with a stand-in process: starts when nothing's
+running, is a correct no-op when the watcher is alive, and correctly
+restarts with a fresh PID after the watcher is killed and its pidfile
+cleaned up by its own `trap EXIT`.
+
+This needs `inotify-tools` (`inotifywait`) installed on the login node --
+a standard package, but not guaranteed present (`command -v inotifywait`
+to check). The actual `inotifywait` invocation itself was not testable
+in the sandbox this was written in (no `inotify-tools`, no passwordless
+`sudo` to install it) -- verify it actually fires as expected on the
+real login node before relying on it exclusively. Run this *alongside*,
+not instead of, the plain cron above -- if the watcher or `inotifywait`
+itself turns out not to work as expected, the periodic push still
+covers you.
 
 ## What's not built yet
 
