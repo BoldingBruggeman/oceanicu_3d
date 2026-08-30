@@ -1,18 +1,29 @@
 #!/bin/bash
 # push_registry_snapshot.sh -- push the latest registry snapshot out to
 # bb-server1, read-only on arrival. Run this on the LOGIN NODE ONLY (it
-# needs outbound reach -- compute nodes don't have it). Two ways to
+# needs outbound reach -- compute nodes don't have it). Three ways to
 # trigger it, not mutually exclusive:
 #
 #   1. A login-node cron job (always-on fallback, works regardless of
 #      whether ssh from compute nodes to here is even possible):
 #        */10 * * * * OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite /path/push_registry_snapshot.sh
 #
-#   2. Best-effort, event-driven, from run_chunk.slurm itself right
+#   2. watch_registry_and_push.sh -- a persistent inotify watcher, run on
+#      the LOGIN NODE itself (nothing to do with run_chunk.slurm or any
+#      compute node), that calls this script the instant a fresh
+#      snapshot commit appears. This is the near-immediate path on this
+#      project's actual HPC -- see EXPERIMENT_TRACKING.md "Keeping
+#      bb-server1's copy of the registry up to date".
+#
+#   3. Best-effort, event-driven, from run_chunk.slurm itself right
 #      before each self-resubmission -- only if OCEANICU_LOGIN_NODE is
-#      set (see setup_experiment_tracking.sh) AND ssh from a compute node to
-#      here actually works (unconfirmed as of writing this --
-#      see test_compute_to_login_ssh.sbatch).
+#      set (see setup_experiment_tracking.sh) AND ssh from a compute
+#      node to here actually works. **Confirmed 2026-08-29, directly by
+#      PML: compute nodes on this project's HPC cannot ssh to their own
+#      login node at all** (see test_compute_to_login_ssh.sbatch) -- so
+#      on THIS cluster this path never fires, silently and harmlessly.
+#      Kept in the code only for a different cluster where compute-to-
+#      login ssh might actually work; never set OCEANICU_LOGIN_NODE here.
 #
 # Doesn't take a new snapshot itself -- reuses experiment_tracking.py's own
 # git-backup mechanism (already WAL-safe, already committed after every
