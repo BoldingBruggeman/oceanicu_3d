@@ -21,6 +21,11 @@
 set -eu
 
 : "${OCEANICU_RUN_DB:?OCEANICU_RUN_DB must be set}"
+# Plain dirname is enough: watch_registry_and_push.sh lives right here
+# in running/bin, same as this script, whether invoked by its own name
+# or via the restart-registry-watcher symlink next to it (same
+# directory either way, so BASH_SOURCE[0]'s own dirname is already
+# correct).
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG="${OCEANICU_RUN_DB}.watcher.log"
 PIDFILE="${OCEANICU_RUN_DB}.watcher.pid"

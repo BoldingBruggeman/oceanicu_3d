@@ -21,9 +21,9 @@ machine use the same directory or even the same username:
 | `run_tracking_server.py` | RPC entrypoint for accessing the registry across machines with no direct network path between them -- see "Working across machines" below. Only needed on the relay machine, and only if you need that at all. |
 | `get_commands_and_update_registry.py` | pulls queued commands in from bb-server1 (optional, `--pull-from`) and replays whatever's pending (see "Command queue" below) against the local registry -- only needed wherever the registry actually lives, and only if a live relay to it isn't possible. Renamed from `apply_commands.py` when the pull step was added. |
 | `setup_run_tracking.sh` | one-shot env/directory setup per machine role (see below) -- standalone, no dependency on anything else here. |
-| `push_registry_snapshot.sh` | pushes the registry out to bb-server1 (see "Keeping bb-server1's copy of the registry up to date") -- only needed wherever the registry actually lives. |
-| `watch_registry_and_push.sh` | persistent watcher: calls `push_registry_snapshot.sh` the moment a fresh backup snapshot appears, instead of waiting for the next cron interval. Login node only; meant to be kept alive by `restart_registry_watcher.sh`, not run by hand. |
-| `restart_registry_watcher.sh` | cron watchdog: (re)starts `watch_registry_and_push.sh` if it's not already running. Login node only. |
+| `bin/push_registry_snapshot.sh` | pushes the registry out to bb-server1 (see "Keeping bb-server1's copy of the registry up to date") -- only needed wherever the registry actually lives. |
+| `bin/watch_registry_and_push.sh` | persistent watcher: calls `push_registry_snapshot.sh` the moment a fresh backup snapshot appears, instead of waiting for the next cron interval. Login node only; meant to be kept alive by `restart_registry_watcher.sh`, not run by hand. |
+| `bin/restart_registry_watcher.sh` | cron watchdog: (re)starts `watch_registry_and_push.sh` if it's not already running. Login node only. |
 | `test_compute_to_login_ssh.sbatch` | one-shot test for whether a compute node can reach its own login node -- see "Keeping bb-server1's copy up to date". Not part of normal operation. |
 
 ## Use `oceanicu-runs`, not `python oceanicu_runs.py`
@@ -1017,7 +1017,7 @@ of silently diverging the mirror).
 mechanism that works here, not one option among several:**
 
 ```bash
-*/10 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/push_registry_snapshot.sh
+*/10 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/to/oceanicu_3d/running/bin/push_registry_snapshot.sh
 ```
 
 (needs outbound reach, which the login node has and compute nodes don't).
@@ -1081,7 +1081,7 @@ explicitly -- the crontab entry itself uses the full path instead:
 
 ```bash
 # on the login node
-0 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/to/oceanicu_3d/running/restart_registry_watcher.sh
+0 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/to/oceanicu_3d/running/bin/restart_registry_watcher.sh
 ```
 
 The watchdog checks a pidfile (`kill -0` on the recorded PID), not

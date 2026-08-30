@@ -43,6 +43,10 @@
 set -eu
 
 : "${OCEANICU_RUN_DB:?OCEANICU_RUN_DB must be set (local path to the registry)}"
+# Plain dirname is enough: push_registry_snapshot.sh lives right here in
+# running/bin, same as this script, whether invoked by its own name or
+# via the watch-registry-and-push symlink next to it (same directory
+# either way, so BASH_SOURCE[0]'s own dirname is already correct).
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SNAPSHOT="${OCEANICU_RUN_DB}.backups/$(basename "$OCEANICU_RUN_DB")"
 PIDFILE="${OCEANICU_RUN_DB}.watcher.pid"

@@ -156,7 +156,7 @@ with rt.connect() as conn:
 _push_registry_snapshot_best_effort() {
     if [ -n "${OCEANICU_LOGIN_NODE:-}" ]; then
         ssh -o BatchMode=yes -o ConnectTimeout=5 "$OCEANICU_LOGIN_NODE" \
-            "$SCRIPT_DIR/push_registry_snapshot.sh" >/dev/null 2>&1 &
+            "$SCRIPT_DIR/bin/push_registry_snapshot.sh" >/dev/null 2>&1 &
     fi
 }
 

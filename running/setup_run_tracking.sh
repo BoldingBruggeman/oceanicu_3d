@@ -88,7 +88,7 @@ case "$role" in
         echo "bb-server1 on a schedule, regardless of whether run_chunk.slurm's own"
         echo "best-effort per-chunk push (see OCEANICU_LOGIN_NODE above) ever works:"
         echo "  crontab -e   # on the login node -- then add a line like:"
-        echo "  */10 * * * * OCEANICU_RUN_DB=$path/run_registry.sqlite $scripts_dir/push_registry_snapshot.sh"
+        echo "  */10 * * * * OCEANICU_RUN_DB=$path/run_registry.sqlite $scripts_dir/bin/push_registry_snapshot.sh"
         ;;
     relay)
         mkdir -p "$path/hpc_commands/run_files"
