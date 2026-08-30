@@ -38,17 +38,19 @@ export PATH="/abs/path/to/oceanicu_3d/running/bin:$PATH"
 ```
 
 Add that to `~/.bashrc` to make it permanent. `chunk-runner` (for
-`chunk_runner.py`), `watch-registry-and-push`, `restart-registry-watcher`,
-`get-commands-and-update-registry`, and `push-registry-snapshot` all come
-along the same way, for free -- one `PATH` addition covers everything in
-`running/bin`. (cron jobs are the one exception: cron doesn't source
-`~/.bashrc`, so a crontab line still needs either a full path or its own
-explicit `PATH=` -- see "Keeping bb-server1's copy of the registry up to
-date" below. `get-commands-and-update-registry` and
-`push-registry-snapshot` are mainly useful for *manual* invocation --
-see "Don't wait for the cron interval if something's urgent" in "Command
-queue" and the equivalent note in "Keeping bb-server1's copy up to
-date".)
+`chunk_runner.py`) and `get-commands-and-update-registry` come along the
+same way, for free -- one `PATH` addition covers everything in
+`running/bin`. `watch_registry_and_push.sh`, `restart_registry_watcher.sh`,
+and `push_registry_snapshot.sh` are plain executable bash living in the
+same directory -- no wrapper needed, they just work by their own name
+once `running/bin` is on `PATH` too, `.sh` and all. (cron jobs are the
+one exception: cron doesn't source `~/.bashrc`, so a crontab line still
+needs either a full path or its own explicit `PATH=` -- see "Keeping
+bb-server1's copy of the registry up to date" below.
+`get-commands-and-update-registry` and `push_registry_snapshot.sh` are
+mainly useful for *manual* invocation -- see "Don't wait for the cron
+interval if something's urgent" in "Command queue" and the equivalent
+note in "Keeping bb-server1's copy up to date".)
 
 `setup_run_tracking.sh` deliberately has **no** `bin/` wrapper -- it's
 meant to be copied as a single standalone file to a machine with no
@@ -1024,7 +1026,7 @@ mechanism that works here, not one option among several:**
 
 **Same "don't wait for the interval" note as the command-queue side:**
 this is just the same command on a schedule -- nothing stops you running
-it by hand (`push-registry-snapshot`, once `running/bin` is on `PATH`,
+it by hand (`push_registry_snapshot.sh`, once `running/bin` is on `PATH`,
 or the full path, same as cron uses) right after a chunk finishes if you
 want bb-server1 updated immediately rather than within the next 10
 minutes. Idempotent either way -- `push_registry_snapshot.sh` only ever
@@ -1070,14 +1072,14 @@ node risks getting killed by idle/session-limit policies (the same
 concern that ruled out a bare background polling loop for
 `get_commands_and_update_registry.py`), so it's meant to be kept alive by its own cron
 watchdog, `restart_registry_watcher.sh`, rather than started once by
-hand and left unsupervised. Both also have wrappers in `running/bin`
-(see "Use `oceanicu-runs`" at the top) -- handy for a one-off manual
-restart from anywhere once that's on PATH, e.g. `restart-registry-watcher`
-from an interactive login-node shell. **cron itself doesn't source
-`~/.bashrc`**, though (same caveat as the
-`get_commands_and_update_registry.py` cron
-above), so PATH isn't populated there unless the crontab line sets it
-explicitly -- the crontab entry itself uses the full path instead:
+hand and left unsupervised. Both live in `running/bin` (see "Use
+`oceanicu-runs`" at the top) -- handy for a one-off manual restart from
+anywhere once that's on `PATH`, by their own name (e.g.
+`restart_registry_watcher.sh`) from an interactive login-node shell.
+**cron itself doesn't source `~/.bashrc`**, though (same caveat as the
+`get_commands_and_update_registry.py` cron above), so PATH isn't
+populated there unless the crontab line sets it explicitly -- the
+crontab entry itself uses the full path instead:
 
 ```bash
 # on the login node
