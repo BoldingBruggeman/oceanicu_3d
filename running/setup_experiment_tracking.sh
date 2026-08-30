@@ -20,10 +20,12 @@
 # test_compute_to_login_ssh.sbatch). On THIS project's actual HPC, DO NOT
 # pass this -- confirmed 2026-08-29 that compute nodes here can't ssh to
 # their own login node at all, so it would just silently never fire. Use
-# the login-node cron (see EXPERIMENT_TRACKING.md "Keeping bb-server1's copy of
-# the registry up to date") as the only real mechanism here; this 4th
-# arg only matters if this tooling is ever deployed to a different
-# cluster where compute-to-login ssh actually works.
+# the login-node cron and/or watch_registry_and_push.sh's inotify
+# watcher instead (see EXPERIMENT_TRACKING.md "Keeping bb-server1's copy
+# of the registry up to date") -- the only real mechanisms here, both
+# running entirely on the login node; this 4th arg only matters if this
+# tooling is ever deployed to a different cluster where compute-to-login
+# ssh actually works.
 # Since $HOME is shared between login and compute nodes on this cluster,
 # setting this once here makes it visible everywhere run_chunk.slurm's
 # own `source ~/.bashrc` runs, no separate per-node setup needed.
@@ -104,6 +106,13 @@ case "$role" in
         echo "the presence-check on a queued 'add' actually reliable here:"
         echo "  crontab -e   # on the login node -- then add a line like:"
         echo "  */15 * * * * OCEANICU_EXPERIMENT_ROOT_BASE=$path $scripts_dir/bin/pull_experiment_files.sh bb-server1:/data/OceanICU/oceanicu_3d/experiments"
+        echo
+        echo "Optional FOURTH cron, on the LOGIN NODE specifically -- watchdog for"
+        echo "watch_registry_and_push.sh's persistent inotify watcher (near-immediate"
+        echo "pushes on top of the periodic push cron above, see its own header and"
+        echo "EXPERIMENT_TRACKING.md 'Keeping bb-server1's copy up to date'):"
+        echo "  crontab -e   # on the login node -- then add a line like:"
+        echo "  0 * * * * OCEANICU_EXPERIMENT_DB=$path/experiment_registry.sqlite $scripts_dir/bin/restart_registry_watcher.sh"
         ;;
     relay)
         mkdir -p "$path/hpc_commands"

@@ -145,14 +145,20 @@ with rt.connect() as conn:
 # set (see setup_experiment_tracking.sh; usually via ~/.bashrc, which this
 # script already sources above, and which is visible here unmodified
 # since $HOME is shared between login and compute nodes) AND ssh from
-# THIS compute node to it actually works (unconfirmed as of writing --
-# see test_compute_to_login_ssh.sbatch). Backgrounded and silenced: a
+# THIS compute node to it actually works. **Confirmed 2026-08-29,
+# directly by PML: compute nodes on this project's HPC cannot ssh to
+# their own login node at all** (see test_compute_to_login_ssh.sbatch)
+# -- so on THIS cluster this never fires, silently and harmlessly; never
+# set OCEANICU_LOGIN_NODE here. Kept only for a different cluster where
+# compute-to-login ssh might actually work. Backgrounded and silenced: a
 # slow or failed push must never delay or block the real resubmission
-# that follows it, which proceeds identically either way. If this never
-# fires, or fails silently every time, the login node's own cron running
-# push_registry_snapshot.sh periodically is the fallback -- see
-# EXPERIMENT_TRACKING.md "Command queue" / push_registry_snapshot.sh's own
-# header.
+# that follows it, which proceeds identically either way. On THIS
+# cluster the real mechanisms are both on the login node itself, neither
+# touching this script at all: a periodic cron running
+# push_registry_snapshot.sh, and/or watch_registry_and_push.sh's
+# persistent inotify watcher for near-immediate pushes -- see
+# EXPERIMENT_TRACKING.md "Keeping bb-server1's copy of the registry up
+# to date" / push_registry_snapshot.sh's own header.
 _push_registry_snapshot_best_effort() {
     if [ -n "${OCEANICU_LOGIN_NODE:-}" ]; then
         ssh -o BatchMode=yes -o ConnectTimeout=5 "$OCEANICU_LOGIN_NODE" \
