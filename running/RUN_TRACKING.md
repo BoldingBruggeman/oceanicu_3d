@@ -38,7 +38,12 @@ export PATH="/abs/path/to/oceanicu_3d/running/bin:$PATH"
 ```
 
 Add that to `~/.bashrc` to make it permanent. `chunk-runner` (for
-`chunk_runner.py`) comes along the same way, for free.
+`chunk_runner.py`), `watch-registry-and-push`, and
+`restart-registry-watcher` all come along the same way, for free -- one
+`PATH` addition covers everything in `running/bin`. (cron jobs are the
+one exception: cron doesn't source `~/.bashrc`, so a crontab line still
+needs either a full path or its own explicit `PATH=` -- see "Keeping
+bb-server1's copy of the registry up to date" below.)
 
 **`oceanicu-runs` is never required -- it's purely convenience.**
 `python /abs/path/to/oceanicu_3d/running/oceanicu_runs.py` does exactly
@@ -931,11 +936,17 @@ node risks getting killed by idle/session-limit policies (the same
 concern that ruled out a bare background polling loop for
 `apply_commands.py`), so it's meant to be kept alive by its own cron
 watchdog, `restart_registry_watcher.sh`, rather than started once by
-hand and left unsupervised:
+hand and left unsupervised. Both also have wrappers in `running/bin`
+(see "Use `oceanicu-runs`" at the top) -- handy for a one-off manual
+restart from anywhere once that's on PATH, e.g. `restart-registry-watcher`
+from an interactive login-node shell. **cron itself doesn't source
+`~/.bashrc`**, though (same caveat as the `apply_commands.py` cron
+above), so PATH isn't populated there unless the crontab line sets it
+explicitly -- the crontab entry itself uses the full path instead:
 
 ```bash
 # on the login node
-0 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/restart_registry_watcher.sh
+0 * * * * OCEANICU_RUN_DB=/path/run_registry.sqlite /path/to/oceanicu_3d/running/restart_registry_watcher.sh
 ```
 
 The watchdog checks a pidfile (`kill -0` on the recorded PID), not

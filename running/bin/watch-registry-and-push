@@ -1,0 +1,10 @@
+#!/bin/bash
+# Wrapper so `watch-registry-and-push` works from anywhere once
+# running/bin is on PATH -- see RUN_TRACKING.md and relay.env.example.
+# Just forwards to the real script, which lives one directory up from
+# this one. Uses exec (not source), so the real script's own
+# BASH_SOURCE[0] resolves to ITS path, not this wrapper's -- its
+# internal $HERE (used to find push_registry_snapshot.sh next to it)
+# still resolves to running/, not running/bin/.
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+exec "$(dirname "$SELF")/../watch_registry_and_push.sh" "$@"
