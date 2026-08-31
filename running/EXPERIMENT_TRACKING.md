@@ -273,18 +273,29 @@ HPC it's the one thing PML does by hand, per the experiment's own deliberate
 never-automatic-submission rule (see "Command queue").
 
 ```bash
-sbatch --export=EXPERIMENT_ID='NSe/CMIP6/CNRM-ESM2-1/ssp126/run01',OCEANICU_EXPERIMENT_DB='/path/to/submission_registry.sqlite' run_chunk.slurm
+cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='NSe/CMIP6/CNRM-ESM2-1/ssp126/run01',OCEANICU_EXPERIMENT_DB='/path/to/submission_registry.sqlite' run_chunk.slurm
 ```
 
-Both variables are required on this first submission -- `run_chunk.slurm`
-refuses to guess either, same as the Python layer, since there's no path
-that's safe to assume on a machine whose folder layout isn't known in
-advance. SLURM's `--export` replaces the job's entire environment with
-just what's listed, so both have to be given here, not just exported in
-the submitting shell; every self-resubmission after that (next chunk, or
-next experiment) carries both forward automatically (`OCEANICU_RELAY_DIR` too,
-if it was set -- see "Working across machines" below for when that
-applies).
+**Both `cd`-first and the leading `ALL,` are load-bearing, not style --
+both were found broken in production (job 11233), see run_chunk.slurm's
+own header comment for the full story:**
+- `cd` first: `run_chunk.slurm` locates chunk_runner.py/experiment_tracking.py
+  via `$SLURM_SUBMIT_DIR`, not its own script path -- SLURM copies the
+  submitted script into a per-job spool directory and runs that copy, so
+  the script can't reliably find its own real location any other way.
+- `ALL,`: without it, `--export` replaces the job's ENTIRE environment
+  with just the listed vars -- `HOME` included, which broke `source
+  ~/.bashrc` (and everything downstream of it: conda, `module load`)
+  in production. `ALL,` inherits the submitting shell's full environment,
+  then adds/overrides `EXPERIMENT_ID` etc. on top.
+
+Both `EXPERIMENT_ID`/`OCEANICU_EXPERIMENT_DB` are required on this first
+submission regardless -- `run_chunk.slurm` refuses to guess either, same
+as the Python layer, since there's no path that's safe to assume on a
+machine whose folder layout isn't known in advance; every self-
+resubmission after that (next chunk, or next experiment) carries both
+forward automatically (`OCEANICU_RELAY_DIR` too, if it was set -- see
+"Working across machines" below for when that applies).
 
 **`OCEANICU_RELAY_DIR` is NOT needed here** -- only relevant when
 `OCEANICU_EXPERIMENT_DB` is an `ssh://` relay URL (see "Working across
@@ -297,7 +308,7 @@ instead of retyping the path -- one less place for the two to drift out
 of sync:
 
 ```bash
-sbatch --export=EXPERIMENT_ID='NSe/CMIP6/CNRM-ESM2-1/ssp126/run01',OCEANICU_EXPERIMENT_DB=$OCEANICU_EXPERIMENT_DB run_chunk.slurm
+cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='NSe/CMIP6/CNRM-ESM2-1/ssp126/run01',OCEANICU_EXPERIMENT_DB=$OCEANICU_EXPERIMENT_DB run_chunk.slurm
 ```
 
 Note the lack of single quotes around `$OCEANICU_EXPERIMENT_DB` -- unlike
@@ -800,7 +811,7 @@ listed, so both have to be given on the first submission (every
 self-resubmission after that carries both forward for you):
 
 ```bash
-sbatch --export=EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://...',OCEANICU_RELAY_DIR='...' run_chunk.slurm
+cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://...',OCEANICU_RELAY_DIR='...' run_chunk.slurm
 ```
 
 **One real limitation:** the per-experiment `<experiment_root>/PAUSE` sentinel file
@@ -1093,7 +1104,7 @@ experiment, new or resubmitting.** Submitting a job is always a deliberate
 manual action on whoever's machine actually runs SLURM -- this only
 ever touches the registry's `experiments`/`history` rows. Once an experiment is
 registered (and its files are in place), starting it is the same manual
-`sbatch --export=EXPERIMENT_ID=...,OCEANICU_EXPERIMENT_DB=... run_chunk.slurm` as
+`cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID=...,OCEANICU_EXPERIMENT_DB=... run_chunk.slurm` as
 always; after that, self-resubmission for future chunks is unaffected
 and automatic as already documented above.
 

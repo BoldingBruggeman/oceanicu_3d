@@ -7,17 +7,32 @@
 # just ran either finished within one allocation or it didn't (a chunk
 # size chosen sensibly relative to --time should make that a given).
 #
+# MUST be submitted from INSIDE the directory this script (and
+# chunk_runner.py/experiment_tracking.py) actually live in -- SCRIPT_DIR below
+# is resolved from $SLURM_SUBMIT_DIR, not this script's own path (see why
+# below), so `cd` there first, every time:
+#
 # Usage (local registry):
-#   sbatch --export=EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='/abs/path/to/experiment_registry.sqlite' run_chunk.slurm
+#   cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='/abs/path/to/experiment_registry.sqlite' run_chunk.slurm
 # Usage (registry behind a relay -- see EXPERIMENT_TRACKING.md's "Working across
 # machines"; OCEANICU_RELAY_DIR is where run_tracking_server.py lives ON
 # the relay, not here):
-#   sbatch --export=EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://relay/abs/path/db.sqlite',OCEANICU_RELAY_DIR='/abs/path/on/relay' run_chunk.slurm
+#   cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://relay/abs/path/db.sqlite',OCEANICU_RELAY_DIR='/abs/path/on/relay' run_chunk.slurm
 #
-# EXPERIMENT_ID must already exist in the registry (oceanicu_experiments.py add). This
-# script finds its OWN location at runtime (see SELF/SCRIPT_DIR below) --
-# deploy it and chunk_runner.py/experiment_tracking.py together anywhere on the
-# production machine, no path to hardcode or configure for that part.
+# The leading `ALL,` matters -- without it, --export replaces the job's
+# ENTIRE environment with just the listed vars, including dropping HOME
+# (confirmed in production, job 11233: HOME ended up as bare "/", so
+# `source ~/.bashrc` tried to open "//.bashrc" and failed, cascading into
+# "conda: command not found" and every `module load` failing too, since
+# .bashrc/PATH setup never ran). `ALL,` inherits the submitting shell's
+# full environment first, then adds/overrides EXPERIMENT_ID etc. on top.
+#
+# EXPERIMENT_ID must already exist in the registry (oceanicu_experiments.py add).
+# This script locates chunk_runner.py/experiment_tracking.py via
+# $SLURM_SUBMIT_DIR (see SELF/SCRIPT_DIR below), NOT its own path -- deploy
+# all three together anywhere on the production machine, no path to
+# hardcode or configure for that part, but DO always submit from inside
+# that directory (see above).
 #
 # Pace the hand-off to the next chunk/experiment with `oceanicu_experiments.py delay-all
 # --seconds N` (per user, 2026-08-28: "the HPC must be used for something
@@ -47,7 +62,7 @@
 set -u
 
 if [ -z "${EXPERIMENT_ID:-}" ]; then
-    echo "ERROR: EXPERIMENT_ID must be set (sbatch --export=EXPERIMENT_ID=... run_chunk.slurm)" >&2
+    echo "ERROR: EXPERIMENT_ID must be set (sbatch --export=ALL,EXPERIMENT_ID=... run_chunk.slurm)" >&2
     exit 1
 fi
 
@@ -55,13 +70,13 @@ fi
 # runs on whatever machine/cluster the job lands on, with whatever folder
 # layout THAT machine has, so there is no path that's safe to assume as a
 # default here either. Must be set on the sbatch command line:
-#   sbatch --export=EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='...' run_chunk.slurm
+#   sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='...' run_chunk.slurm
 # (SLURM's --export replaces the job's entire environment with just what's
 # listed, so it has to be given on every submission, not just exported in
 # the submitting shell -- every self-resubmission below already carries it
 # forward for you once it's set on this first one.)
 if [ -z "${OCEANICU_EXPERIMENT_DB:-}" ]; then
-    echo "ERROR: OCEANICU_EXPERIMENT_DB must be set (sbatch --export=EXPERIMENT_ID=...,OCEANICU_EXPERIMENT_DB=... run_chunk.slurm)" >&2
+    echo "ERROR: OCEANICU_EXPERIMENT_DB must be set (sbatch --export=ALL,EXPERIMENT_ID=...,OCEANICU_EXPERIMENT_DB=... run_chunk.slurm)" >&2
     exit 1
 fi
 
@@ -70,11 +85,25 @@ fi
 # is deployed independently on every production machine that runs it
 # (different user, different home directory, quite possibly a different
 # checkout location entirely -- a fixed path here would only ever be
-# right for the one machine it was written on). SELF is also used below
-# for self-resubmission instead of bare "$0", which SLURM doesn't
-# guarantee stays a reliable absolute path across every configuration.
-SELF="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
-SCRIPT_DIR="$(dirname "$SELF")"
+# right for the one machine it was written on).
+#
+# Deliberately NOT ${BASH_SOURCE[0]} -- SLURM copies the submitted script's
+# CONTENT into a per-job spool directory (/var/spool/slurmd/job<ID>/
+# slurm_script) and runs THAT copy, so ${BASH_SOURCE[0]} always resolves to
+# the spool copy, never this script's real deployment location (confirmed
+# in production, job 11233: "python: can't open file '/var/spool/slurmd/
+# job11233/chunk_runner.py'" -- cd "$SCRIPT_DIR" had "succeeded" into the
+# spool dir, which exists but never had chunk_runner.py deployed in it).
+# $SLURM_SUBMIT_DIR is SLURM's own synthesized var for wherever `sbatch`
+# was actually invoked FROM -- unaffected by both the spool-copy behavior
+# above and by --export= filtering (it's not part of "the submitting
+# shell's environment" that --export controls, same category as
+# $SLURM_JOB_ID). Requires `sbatch` to be invoked from INSIDE this
+# directory every time (see the header comment above) -- self-resubmission
+# below satisfies this automatically, since it runs `sbatch ... "$SELF"`
+# only after the `cd "$SCRIPT_DIR"` a few lines down has already happened.
+SCRIPT_DIR="${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR not set -- sbatch must be invoked from inside the directory run_chunk.slurm/chunk_runner.py/experiment_tracking.py actually live in}"
+SELF="$SCRIPT_DIR/run_chunk.slurm"
 
 source ~/.bashrc
 conda activate pygetm
@@ -257,7 +286,7 @@ with rt.connect() as conn:
     _wait_for_delay_all
     _wait_for_experiment_chunk_delay "$NEXT_EXPERIMENT_ID"
     _push_registry_snapshot_best_effort
-    sbatch --export=EXPERIMENT_ID="$NEXT_EXPERIMENT_ID",OCEANICU_EXPERIMENT_DB="$OCEANICU_EXPERIMENT_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
+    sbatch --export=ALL,EXPERIMENT_ID="$NEXT_EXPERIMENT_ID",OCEANICU_EXPERIMENT_DB="$OCEANICU_EXPERIMENT_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
     exit 0
 fi
 
@@ -276,4 +305,4 @@ _wait_for_delay_all
 _wait_for_experiment_chunk_delay "$EXPERIMENT_ID"
 _push_registry_snapshot_best_effort
 echo "$EXPERIMENT_ID: submitting next chunk"
-sbatch --export=EXPERIMENT_ID="$EXPERIMENT_ID",OCEANICU_EXPERIMENT_DB="$OCEANICU_EXPERIMENT_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
+sbatch --export=ALL,EXPERIMENT_ID="$EXPERIMENT_ID",OCEANICU_EXPERIMENT_DB="$OCEANICU_EXPERIMENT_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
