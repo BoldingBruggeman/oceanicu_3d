@@ -49,6 +49,7 @@ these without --queue:
     oceanicu_experiments.py set-chunk-delay --experiment-id ... --seconds N   # persistent, per-experiment pacing
     oceanicu_experiments.py set-data-roots-file --experiment-id ... --path ...
     oceanicu_experiments.py set-np --experiment-id ... --np ...
+    oceanicu_experiments.py set-launcher --experiment-id ... --launcher srun|mpiexec
     oceanicu_experiments.py pause  --experiment-id ... | --all
     oceanicu_experiments.py resume --experiment-id ... | --all
     oceanicu_experiments.py delay-all --seconds N | --clear
@@ -294,6 +295,9 @@ _EXPERIMENT_DEFAULTS_FALLBACK = {
     "launcher": "srun",
     "priority": 0,
     "chunk_delay_seconds": 0,
+    "data_roots_file": None,
+    "notes": None,
+    "fabm": None,
 }
 
 
@@ -516,6 +520,13 @@ def cmd_set_np(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_set_launcher(args: argparse.Namespace) -> int:
+    with rt.connect(args.db) as conn:
+        rt.set_launcher(conn, args.experiment_id, args.launcher, user=rt._current_user())
+    print(f"{args.experiment_id}: launcher set to {args.launcher!r}")
+    return 0
+
+
 def cmd_set_chunk_delay(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         rt.set_chunk_delay(conn, args.experiment_id, args.seconds, user=rt._current_user())
@@ -673,7 +684,7 @@ def main() -> int:
     a.add_argument("--config", required=True)
     a.add_argument("--initial-date", required=True, metavar="YYYY-MM-DD")
     a.add_argument("--stop-date", required=True, metavar="YYYY-MM-DD")
-    a.add_argument("--data-roots-file", default=None)
+    a.add_argument("--data-roots-file", default=_EXPERIMENT_DEFAULTS["data_roots_file"])
     a.add_argument("--chunk-kind", default=_EXPERIMENT_DEFAULTS["chunk_kind"], choices=["annual", "monthly", "daily"])
     a.add_argument("--chunk-multiplier", type=int, default=_EXPERIMENT_DEFAULTS["chunk_multiplier"])
     a.add_argument("--np", type=int, default=_EXPERIMENT_DEFAULTS["np"])
@@ -686,14 +697,14 @@ def main() -> int:
                          "see experiment_defaults.yaml). Persistent, not one-shot -- "
                          "changeable later with set-chunk-delay. Different from delay-all, "
                          "which is a global, one-shot TIMED pause, not tied to one experiment.")
-    a.add_argument("--notes", default=None)
+    a.add_argument("--notes", default=_EXPERIMENT_DEFAULTS["notes"])
     # Mirrors the generated driver script's own --fabm/--no-fabm exactly
     # (see pygetm_config.codegen's _emit_argparse) -- None here means "no
     # override, run the script's own baked-in FABM setting unchanged";
     # 'off'/'on' are sentinels for bare --no-fabm/--fabm; anything else is
     # an explicit fabm.yaml path. chunk_runner.py passes this straight
     # through to the driver's own --fabm/--no-fabm.
-    a.add_argument("--fabm", nargs="?", const="on", default=None, metavar="PATH",
+    a.add_argument("--fabm", nargs="?", const="on", default=_EXPERIMENT_DEFAULTS["fabm"], metavar="PATH",
                     help="override the experiment's FABM state at chunk-run time (bare --fabm "
                          "reuses the script's configured path; --fabm PATH forces a "
                          "specific one; default: don't override, use whatever the "
@@ -755,6 +766,16 @@ def main() -> int:
     _add_common(snp); snp.set_defaults(func=cmd_set_np)
     snp.add_argument("--experiment-id", required=True)
     snp.add_argument("--np", type=int, required=True)
+
+    sl = sub.add_parser(
+        "set-launcher",
+        help="change this experiment's launcher (srun/mpiexec) -- e.g. after registering it "
+             "with the wrong one for the machine it's actually going to run on. Takes effect on "
+             "the next chunk, never retroactively (never affects a chunk already running).",
+    )
+    _add_common(sl); sl.set_defaults(func=cmd_set_launcher)
+    sl.add_argument("--experiment-id", required=True)
+    sl.add_argument("--launcher", required=True, choices=["srun", "mpiexec"])
 
     pa = sub.add_parser("pause"); _add_common(pa); pa.set_defaults(func=cmd_pause)
     g1 = pa.add_mutually_exclusive_group(required=True)

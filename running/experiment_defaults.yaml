@@ -16,3 +16,31 @@ np: 1
 launcher: srun
 priority: 0
 chunk_delay_seconds: 0
+
+# null (the default here) means "no default -- --data-roots-file is
+# required per-experiment, same as before this file existed". If most/all
+# experiments on this machine actually share ONE data-roots file, set an
+# ABSOLUTE path here instead (see chunk_runner.py's own resolution rules:
+# relative paths are resolved against EACH experiment's own
+# experiment_root, so only an absolute path here is genuinely shared
+# across experiments) -- then `add` never needs --data-roots-file typed
+# at all unless a specific experiment needs a different one, which the
+# explicit flag still overrides on a case-by-case basis.
+data_roots_file: null
+
+# Free-text notes attached at registration time -- null means "none",
+# same as before this file existed. Set a string here if most/all new
+# experiments should start with some shared boilerplate note (e.g. which
+# batch/campaign they're part of); --notes on the command line still
+# overrides per experiment.
+notes: null
+
+# FABM override at chunk-run time -- null means "no override, use
+# whatever the driver script's own --fabm/--no-fabm is baked in with",
+# which is almost certainly what you want; this is NOT the same kind of
+# "shared value, saves typing" default as data_roots_file above. Only
+# change this if EVERY new experiment on this machine should actually
+# override FABM the same way regardless of what its own driver script
+# says -- 'on' (bare --fabm), 'off' (--no-fabm), or an explicit fabm.yaml
+# path. --fabm on the command line still overrides per experiment.
+fabm: null

@@ -698,6 +698,24 @@ def set_np(conn: sqlite3.Connection, experiment_id: str, np: int, user: Optional
 
 
 @_rpc_or_local
+def set_launcher(conn: sqlite3.Connection, experiment_id: str, launcher: str, user: Optional[str] = None) -> None:
+    """Change an experiment's launcher (srun/mpiexec), e.g. after registering
+    it with the wrong one for the machine it's actually going to run on.
+    Same next-hand-off-only semantics as set_np/set_priority/
+    set_chunk_delay -- never affects a chunk already running."""
+    if launcher not in ("srun", "mpiexec"):
+        raise ValueError(f"launcher must be 'srun' or 'mpiexec', got {launcher!r}")
+    old = get_experiment(conn, experiment_id)
+    conn.execute(
+        "UPDATE experiments SET launcher = ?, updated_at = ? WHERE experiment_id = ?",
+        (launcher, _now(), experiment_id),
+    )
+    if old is not None:
+        _log_history(conn, experiment_id, "launcher_changed", f"{old['launcher']} -> {launcher}", user=user)
+    conn.commit()
+
+
+@_rpc_or_local
 def set_chunk_delay(
     conn: sqlite3.Connection, experiment_id: str, chunk_delay_seconds: int, user: Optional[str] = None,
 ) -> None:
