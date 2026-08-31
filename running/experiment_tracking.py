@@ -463,16 +463,26 @@ def _ensure_group_writable(db_path: Path) -> None:
 # botched edit) is otherwise unrecoverable -- the DB doesn't live in a repo
 # of its own, and SQLite has no snapshot/undo concept beyond "the current
 # database" (checkpointing just folds the WAL into the main file, it isn't
-# a backup -- see EXPERIMENT_TRACKING.md). Every N writes (default 5, see
+# a backup -- see EXPERIMENT_TRACKING.md). Every N writes (default 1, see
 # OCEANICU_DB_BACKUP_EVERY_N_WRITES), take a WAL-safe snapshot via
 # sqlite3's own backup API (NOT a raw file copy, which can catch the main
 # file mid-checkpoint and miss pending WAL content) and commit it. Hooked
 # into connect()'s local-mode teardown -- the one chokepoint every write
 # passes through either directly or, via experiment_tracking_server.py's own
 # connect() call, on the relay side of an RPC dispatch.
+#
+# Default is 1, not some larger batching value, DELIBERATELY -- this
+# system's whole point is a remote production machine nobody is watching
+# directly; a snapshot (and the near-real-time push it enables, see
+# watch_registry_and_push.sh) per write is what makes "what just happened
+# on the HPC" actually visible from bb-server1 without a delay for however
+# many writes happen to accumulate first. Writes here are registrations,
+# chunk start/finish, pause/resume -- rare enough that a snapshot+commit
+# per write is unmeasurably cheap; raise OCEANICU_DB_BACKUP_EVERY_N_WRITES
+# if that ever stops being true at some future write volume.
 # ---------------------------------------------------------------------------
 
-_DEFAULT_BACKUP_EVERY_N_WRITES = 5
+_DEFAULT_BACKUP_EVERY_N_WRITES = 1
 
 
 def _backup_repo_dir(db_path: Path) -> Path:
