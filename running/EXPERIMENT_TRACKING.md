@@ -286,6 +286,29 @@ next experiment) carries both forward automatically (`OCEANICU_RELAY_DIR` too,
 if it was set -- see "Working across machines" below for when that
 applies).
 
+**`OCEANICU_RELAY_DIR` is NOT needed here** -- only relevant when
+`OCEANICU_EXPERIMENT_DB` is an `ssh://` relay URL (see "Working across
+machines"). On this project's actual HPC the registry is a plain local
+file, so that code path never triggers; leave it out entirely.
+
+**If `OCEANICU_EXPERIMENT_DB` is already set in your own shell** (e.g.
+via `setup_experiment_tracking.sh hpc`'s `.bashrc` export), reference it
+instead of retyping the path -- one less place for the two to drift out
+of sync:
+
+```bash
+sbatch --export=EXPERIMENT_ID='NSe/CMIP6/CNRM-ESM2-1/ssp126/run01',OCEANICU_EXPERIMENT_DB=$OCEANICU_EXPERIMENT_DB run_chunk.slurm
+```
+
+Note the lack of single quotes around `$OCEANICU_EXPERIMENT_DB` -- unlike
+`EXPERIMENT_ID` (a literal string typed fresh each time), this one needs
+to actually expand. Single quotes suppress ALL variable expansion in
+bash, so `'$OCEANICU_EXPERIMENT_DB'` would pass that literal string, not
+its value, straight into `--export` -- silently wrong, not an error.
+Double-quoting (`"$OCEANICU_EXPERIMENT_DB"`) also works and is the safer
+habit in general. `EXPERIMENT_ID` still needs quotes (single or double)
+since it's a fresh literal, not something already in your environment.
+
 `run_chunk.slurm` locates chunk_runner.py/experiment_tracking.py at its own
 runtime location, not a hardcoded path -- `sbatch path/to/run_chunk.slurm`
 works from wherever it's actually deployed on that machine, whoever's
