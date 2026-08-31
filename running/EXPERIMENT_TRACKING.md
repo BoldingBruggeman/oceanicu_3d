@@ -963,6 +963,13 @@ HPC's **login node** specifically (the only place with outbound reach;
 see "Keeping bb-server1's copy of the registry up to date"):
 
 ```bash
+OCEANICU_EXPERIMENT_ROOT_BASE=/local/path/experiments \
+    bin/pull_experiment_files.sh bb-server1:/data/OceanICU/oceanicu_3d/experiments
+    # same generated*.py/generated*.yaml filter as `stage` itself, no
+    # --delete, so nothing already present (including the registry DB and
+    # real chunk output sitting in this same tree) is ever touched beyond
+    # what it pulls in.
+
 python get_commands_and_update_registry.py --db /local/path/submission_registry.sqlite \
     --queue-dir /local/path/hpc_commands/ \
     --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands
@@ -972,16 +979,20 @@ python get_commands_and_update_registry.py --db /local/path/submission_registry.
     # them, regardless of whose file an entry lives in. (--queue PATH
     # still works too, for a single exact file -- but never combined
     # with --pull-from, which syncs a whole directory.)
-
-OCEANICU_EXPERIMENT_ROOT_BASE=/local/path/experiments \
-    bin/pull_experiment_files.sh bb-server1:/data/OceanICU/oceanicu_3d/experiments
-    # separate script, separate cron line -- same generated*.py/
-    # generated*.yaml filter as `stage` itself, no --delete, so nothing
-    # already present (including the registry DB and real chunk output
-    # sitting in this same tree) is ever touched beyond what it pulls
-    # in. This is what makes get_commands_and_update_registry.py's own
-    # presence-check on `add` (below) actually reliable here.
 ```
+
+**These two run chained (`pull_experiment_files.sh && get-commands-and-
+update-registry`), NOT as two independent cron lines -- this matters,
+not just tidiness.** They used to be separate crons at `*/15` and hourly
+respectively, which land on the exact same minute every hour (`:00`) with
+no guaranteed ordering between them: a real race, since the presence-check
+on a queued `add` (below) depends on the file-pull having already
+happened. Chaining with `&&` makes the dependency explicit and
+deterministic -- if the file-pull fails, the apply step correctly never
+runs at all, rather than maybe winning the race anyway. See the actual
+crontab line `setup_experiment_tracking.sh hpc` prints (further down) for
+the exact chained form, including why it needs `export` statements rather
+than bare `VAR=val` prefixes once more than one command is involved.
 
 Omit `--pull-from` to fall back to the older behavior (`apply_commands.py`'s
 original, before this script was renamed): apply whatever's already
