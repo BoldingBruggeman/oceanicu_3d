@@ -118,7 +118,7 @@ case "$role" in
         echo "bb-server1's hpc_commands/ in, then applies whatever's pending. NEVER"
         echo "calls sbatch, for any experiment, new or resubmitting:"
         echo "  crontab -e   # on the login node -- then add a line like:"
-        echo "  0 * * * * cd $scripts_dir && OCEANICU_EXPERIMENT_DB=$path/submission_registry.sqlite OCEANICU_EXPERIMENT_ROOT_BASE=$path OCEANICU_HPC_COMMANDS_DIR=$queue_dir python3 get_commands_and_update_registry.py --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands >> $queue_dir/get_commands_and_update_registry.log 2>&1"
+        echo "  0 * * * * OCEANICU_EXPERIMENT_DB=$path/submission_registry.sqlite OCEANICU_EXPERIMENT_ROOT_BASE=$path OCEANICU_HPC_COMMANDS_DIR=$queue_dir $scripts_dir/bin/get-commands-and-update-registry --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands >> $queue_dir/get_commands_and_update_registry.log 2>&1"
         echo "  cron does NOT source ~/.bashrc -- all three env vars are set inline on"
         echo "  the line itself, not relied on from the exports above. Replace"
         echo "  $scripts_dir if it was left as a placeholder. Omit --pull-from entirely"
