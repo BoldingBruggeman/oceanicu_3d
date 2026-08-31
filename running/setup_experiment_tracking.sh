@@ -5,20 +5,26 @@
 # HPC, which never needs the oceanicu_3d repo at all) and run it there.
 #
 # Usage:
-#   ./setup_experiment_tracking.sh hpc EXPERIMENT_ROOT_PATH HPC_COMMANDS_PATH [/path/to/scripts] [login-node-hostname]
-#   ./setup_experiment_tracking.sh relay       /data/OceanICU/oceanicu_3d/experiments   # bb-server1
-#   ./setup_experiment_tracking.sh workstation ~/hpc_commands
+#   ./setup_experiment_tracking.sh hpc         EXPERIMENT_ROOT_PATH HPC_COMMANDS_PATH [/path/to/scripts] [login-node-hostname]
+#   ./setup_experiment_tracking.sh relay       EXPERIMENT_ROOT_PATH HPC_COMMANDS_PATH   # bb-server1
+#   ./setup_experiment_tracking.sh workstation EXPERIMENT_ROOT_PATH QUEUE_PATH
 #
-# hpc takes TWO separate paths now, not one -- they have different
-# lifecycles (see the comment inside the hpc case below) and no required
-# relationship to each other:
-#   EXPERIMENT_ROOT_PATH -- the real experiment tree: registry DB, staged
-#     driver/config files, and (once running) chunk output/logs/restarts.
-#     Sets OCEANICU_EXPERIMENT_ROOT_BASE.
-#   HPC_COMMANDS_PATH    -- the small, transient command-queue directory
-#     (only ever queue_*.yaml files). Sets OCEANICU_HPC_COMMANDS_DIR. Can
-#     live anywhere -- pick any local directory, does not need to nest
-#     under or near EXPERIMENT_ROOT_PATH.
+# ALL THREE roles take the same two independent paths, in the same order
+# -- they have different lifecycles (see the comment inside the hpc case
+# below) and no required relationship to each other, on any machine:
+#   EXPERIMENT_ROOT_PATH -- the real experiment tree: registry DB (hpc/
+#     relay only), staged driver/config files, and (once running) chunk
+#     output/logs/restarts. Sets OCEANICU_EXPERIMENT_ROOT_BASE everywhere.
+#   HPC_COMMANDS_PATH / QUEUE_PATH -- the small, transient command-queue
+#     directory (only ever queue_*.yaml files; workstation's copy holds
+#     just its own queue file(s) before they're rsync'd onward, hence the
+#     different name for the same role). Sets OCEANICU_HPC_COMMANDS_DIR
+#     on hpc/relay. Can live anywhere -- pick any local directory, does
+#     not need to nest under or near EXPERIMENT_ROOT_PATH. If you stage
+#     files AND queue a command from a workstation, you end up with two
+#     genuinely separate local directories to rsync onward, into relay's
+#     own two independently-configured paths -- never one folder with
+#     the other nested inside it.
 #
 # hpc's 4th arg (optional) is where experiment_tracking.py/apply_commands.py
 # etc. actually live on THIS machine -- only used to print ready-to-use
@@ -140,34 +146,52 @@ case "$role" in
         echo "  up gracefully (not a retry-forever loop) -- the cron above still covers you."
         ;;
     relay)
-        path="${2:?usage: $0 relay PATH}"
-        mkdir -p "$path/hpc_commands"
-        echo "Relay ready: hpc_commands/ scaffold under $path (could live anywhere --"
-        echo "this is just a default). Staged experiment files (from workstations"
-        echo "running 'oceanicu-experiments stage') land directly under $path too,"
-        echo "at their real relative path -- rsync'd there the same way hpc_commands/"
-        echo "itself is, no separate setup needed on this machine for that."
+        # Same two independent paths as hpc, same reasoning: hpc_commands/
+        # is small/transient (queue_*.yaml only), the experiment tree holds
+        # staged driver/config files and has no required relationship to it.
+        path="${2:?usage: $0 relay EXPERIMENT_ROOT_PATH HPC_COMMANDS_PATH}"
+        queue_dir="${3:?usage: $0 relay EXPERIMENT_ROOT_PATH HPC_COMMANDS_PATH}"
+        mkdir -p "$path" "$queue_dir"
+        echo "Relay ready: experiment tree at $path, hpc_commands/ queue at"
+        echo "$queue_dir (independent paths -- no relationship to each other"
+        echo "required, same as hpc). Staged experiment files (from workstations"
+        echo "running 'oceanicu-experiments stage') land directly under $path,"
+        echo "at their real relative path -- no separate setup needed here for that."
         echo "Make sure experiment_tracking.py + experiment_tracking_server.py are deployed here"
         echo "too, for the ssh:// relay (workstation <-> bb-server1)."
+        echo
+        echo "Workstations should rsync onward into exactly these two paths --"
+        echo "e.g. (adjust bb-server1/paths to match this machine's real hostname"
+        echo "and whatever was actually passed above):"
+        echo "  rsync -a <local-queue-dir>/ bb-server1:$queue_dir/"
+        echo "  rsync -a --include 'generated*.py' --include 'generated*.yaml' \\"
+        echo "      --include '*/' --exclude '*' <local-experiment-root>/ \\"
+        echo "      bb-server1:$path/"
         ;;
     workstation)
-        path="${2:?usage: $0 workstation PATH}"
-        mkdir -p "$path"
-        echo "Workstation ready: local queue staging dir at $path."
+        # Same two independent paths as hpc/relay: EXPERIMENT_ROOT_PATH for
+        # 'stage' output (sets OCEANICU_EXPERIMENT_ROOT_BASE, persisted here
+        # instead of leaving it to a manual per-shell export), QUEUE_PATH
+        # for '--queue' files -- never nested inside each other, so staging
+        # files AND queuing a command produces two genuinely separate local
+        # directories to rsync onward, matching relay's own two paths.
+        path="${2:?usage: $0 workstation EXPERIMENT_ROOT_PATH QUEUE_PATH}"
+        queue_dir="${3:?usage: $0 workstation EXPERIMENT_ROOT_PATH QUEUE_PATH}"
+        mkdir -p "$path" "$queue_dir"
+        add_to_bashrc "[ -z \"\${OCEANICU_EXPERIMENT_ROOT_BASE:-}\" ] && export OCEANICU_EXPERIMENT_ROOT_BASE=$path"
+        echo "Workstation ready: local experiment tree at $path (exported as"
+        echo "OCEANICU_EXPERIMENT_ROOT_BASE), local queue staging dir at $queue_dir."
         echo "Use:"
-        echo "  oceanicu_experiments.py --queue $path/queue_\$USER.yaml <command>"
-        echo
-        echo "'stage' writes a new experiment's generated files directly into a real"
-        echo "experiment tree -- a SEPARATE, independently-configured location, not"
-        echo "nested under $path (hpc_commands/ only ever holds queue_*.yaml). Pick"
-        echo "any local directory to mirror that tree (e.g. ~/experiments) and export:"
-        echo "  export OCEANICU_EXPERIMENT_ROOT_BASE=~/experiments"
+        echo "  oceanicu_experiments.py --queue $queue_dir/queue_\$USER.yaml <command>"
         echo "  oceanicu_experiments.py stage --experiment-root ... --source-dir ..."
-        echo "Then rsync BOTH trees onward (same filter oceanicu-experiments stage"
-        echo "itself uses for the experiment tree -- see bin/pull_experiment_files.sh):"
-        echo "  rsync -a $path/ bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands/"
+        echo
+        echo "Copy BOTH pieces onward to relay (bb-server1) -- into ITS OWN two"
+        echo "independently-configured paths (see setup_experiment_tracking.sh relay"
+        echo "on that machine for what those actually are; the paths below are only"
+        echo "this project's current convention, ask whoever set up relay if unsure):"
+        echo "  rsync -a $queue_dir/ bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands/"
         echo "  rsync -a --include 'generated*.py' --include 'generated*.yaml' \\"
-        echo "      --include '*/' --exclude '*' ~/experiments/ \\"
+        echo "      --include '*/' --exclude '*' $path/ \\"
         echo "      bb-server1:/data/OceanICU/oceanicu_3d/experiments/"
         ;;
     *)
