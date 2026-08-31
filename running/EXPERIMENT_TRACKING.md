@@ -853,18 +853,18 @@ independently-configured directory, since the two have very different
 lifecycles (the queue goes void once applied; an experiment's files
 persist for as long as the experiment does).
 
-**This is deliberately NOT part of the `oceanicu_3d` git repo.**
-`hpc_commands/` is a plain data directory -- same category as
-`experiments/` itself, not source -- living at a fixed, agreed location
-that every machine in the chain can reach one hop of:
-`bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands/`. The
-HPC never needs to `git pull`/clone anything from GitHub to run --
-`oceanicu_3d`'s `running/` are deployed there as plain files (however
-that already happens), and `hpc_commands/` moves the exact same way, via
-`rsync`, never git. Keeping it out of git also sidesteps the earlier
-worry about it looking like a second, git-tracked copy of the real
-(large, definitely-not-in-git) `experiments/` output tree -- it isn't
-one; it's a small, disposable relay directory, not a repo.
+**This is deliberately NOT part of the `oceanicu_3d` git repo, regardless
+of how `running/` itself gets onto the HPC.** `hpc_commands/` is a plain
+data directory -- same category as `experiments/` itself, not source --
+living at a fixed, agreed location that every machine in the chain can
+reach one hop of: `bb-server1:/data/OceanICU/oceanicu_3d/experiments/
+hpc_commands/`, moved via `rsync`, never git. This is true independent of
+whether `running/` on the HPC is a `git pull`-able clone (confirmed
+working on at least one real deployment -- don't assume no GitHub access
+without checking) or rsync'd in as plain files: either way,
+`hpc_commands/` stays a small, disposable relay directory, not a repo,
+never a second git-tracked copy of the real (large, definitely-not-in-git)
+`experiments/` output tree.
 
 **On your own workstation**, compose commands and stage files into a
 local staging directory (anywhere -- outside the git repo):
