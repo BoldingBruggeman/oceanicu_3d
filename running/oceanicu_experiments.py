@@ -256,7 +256,11 @@ def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
 
     call_args = {k: v for k, v in vars(args).items() if k not in _QUEUE_EXCLUDE_KEYS}
     cmd_id = f"cmd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{secrets.token_hex(2)}"
-    commands.append({
+    # Prepended, not appended -- newest entry on top for anyone eyeballing
+    # the file by hand. Purely cosmetic: get_commands_and_update_registry.py
+    # explicitly sorts by queued_at before applying anything, so this has
+    # zero effect on actual processing order.
+    commands.insert(0, {
         "id": cmd_id,
         "action": args.cmd,
         "args": call_args,
