@@ -156,9 +156,13 @@ per-experiment per `EXPERIMENT_TRACKING.md`.)
 Then, **on the SLURM machine**:
 
 ```bash
-sbatch --export=EXPERIMENT_ID='fake/quick/run01',OCEANICU_EXPERIMENT_DB='ssh://oceanicu-relay/abs/path/to/test_registry.sqlite' \
-    /path/to/running/run_chunk.slurm
+cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='fake/quick/run01',OCEANICU_EXPERIMENT_DB='ssh://oceanicu-relay/abs/path/to/test_registry.sqlite' \
+    run_chunk.slurm
 ```
+
+(`cd` first and the leading `ALL,` are both load-bearing, not style -- see
+`run_chunk.slurm`'s own header comment / `../EXPERIMENT_TRACKING.md` "Launch
+it" for why.)
 
 Everything else -- `list`/`show`/`pause`/`resume`/`rerun`/etc. -- works
 exactly as in Option A, just with `--db`/`OCEANICU_EXPERIMENT_DB` set to the

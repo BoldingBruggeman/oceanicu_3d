@@ -9,9 +9,10 @@ to interact with `oceanicu_experiments.py list/show/pause/...` while a chunk is
 "running") then writes a placeholder restart file and exits 0.
 
 Failure testing: if a `FAIL_NEXT_CHUNK` file exists in this chunk's own
-experiment_root (the directory one level above `chunks/`), it's deleted and this
-chunk exits 1 instead of succeeding -- lets you test `rerun` and
-`list --status failed` on demand, without waiting for a real failure:
+experiment_root (the directory directly above the chunk's own), it's
+deleted and this chunk exits 1 instead of succeeding -- lets you test
+`rerun` and `list --status failed` on demand, without waiting for a real
+failure:
 
     touch <experiment_root>/FAIL_NEXT_CHUNK
 
@@ -25,9 +26,18 @@ from __future__ import annotations
 import argparse
 import os
 import random
+import re
 import sys
 import time
 from pathlib import Path
+
+# chunk_runner.py names each chunk directory NNN_<start>_<stop> (e.g.
+# 000_20200101_20200102), directly under experiment_root -- no "chunks/"
+# parent anymore. Matching this pattern is how we tell a real tracked
+# invocation (cwd = a genuine chunk dir, one level below experiment_root)
+# apart from a standalone/ad-hoc one (cwd = anything else, treated as
+# experiment_root itself for the sentinel check below).
+_CHUNK_DIR_RE = re.compile(r"^\d{3}_\d{8}_\d{8}$")
 
 
 def main() -> int:
@@ -53,12 +63,14 @@ def main() -> int:
         return 0
 
     # chunk_runner.py always invokes the driver with cwd=chunk_dir, and
-    # chunk_dir is always experiment_root/"chunks"/<NNN_start_stop> in tracked
-    # mode -- so experiment_root is two levels up from here, when that shape is
-    # present. Standalone/ad-hoc invocations (no "chunks" parent) just
-    # treat the cwd itself as experiment_root for the sentinel check.
+    # chunk_dir is always experiment_root/<NNN_start_stop> in tracked mode --
+    # so experiment_root is one level up from here, when that shape is
+    # present (detected via _CHUNK_DIR_RE, not a fixed parent name).
+    # Standalone/ad-hoc invocations (cwd doesn't look like a real chunk
+    # dir) just treat the cwd itself as experiment_root for the sentinel
+    # check.
     chunk_dir = Path.cwd()
-    experiment_root = chunk_dir.parent.parent if chunk_dir.parent.name == "chunks" else chunk_dir
+    experiment_root = chunk_dir.parent if _CHUNK_DIR_RE.match(chunk_dir.name) else chunk_dir
 
     fail_sentinel = experiment_root / "FAIL_NEXT_CHUNK"
     if fail_sentinel.exists():

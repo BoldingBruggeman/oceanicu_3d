@@ -25,7 +25,7 @@ Chunk boundary math (annual/monthly/daily x multiplier) is the same idea
 as the earlier run_chunks.py prototype, calendar-aware via cftime.
 
 Everything for a chunk lives together in ONE directory (logs, 2d/3d
-output, AND the restart file it saves) -- <experiment_root>/chunks/NNN_<start>_
+output, AND the restart file it saves) -- <experiment_root>/NNN_<start>_
 <stop>/. The next chunk's --load-restart simply points at the previous
 chunk's own save_restart path.
 
@@ -285,7 +285,7 @@ def _main_tracked(args: argparse.Namespace) -> int:
         chunk_index = rt.next_chunk_index(conn, args.experiment_id)
         experiment_root = Path(experiment["experiment_root"])
         chunk_name = f"{chunk_index:03d}_{start.strftime('%Y%m%d')}_{stop.strftime('%Y%m%d')}"
-        chunk_dir = experiment_root / "chunks" / chunk_name
+        chunk_dir = experiment_root / chunk_name
 
         # Archive a pre-existing dir aside instead of silently overwriting
         # it -- happens on a rerun (experiment_tracking.rerun_from only rewinds

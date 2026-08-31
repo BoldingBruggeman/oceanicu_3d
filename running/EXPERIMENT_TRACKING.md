@@ -115,7 +115,7 @@ error rather than guessing.
   mid-experiment (see below) just works.
 - Everything for one chunk -- its logs, its 2d/3d output, **and** the
   restart file it saves -- lives together in one directory:
-  `<experiment_root>/chunks/<NNN>_<start>_<stop>/`. The next chunk's
+  `<experiment_root>/<NNN>_<start>_<stop>/`. The next chunk's
   `--load-restart` just points at the previous chunk's own restart file
   in *its* folder.
 

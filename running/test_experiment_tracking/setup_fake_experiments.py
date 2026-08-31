@@ -168,7 +168,7 @@ def main() -> int:
     with rt.connect(args.db) as conn:
         for experiment_id, chunk_kind, chunk_multiplier, initial_date, stop_date, priority, notes in FAKE_EXPERIMENTS:
             experiment_root = EXPERIMENTS_DIR / experiment_id.replace("/", "_")
-            (experiment_root / "chunks").mkdir(parents=True, exist_ok=True)
+            experiment_root.mkdir(parents=True, exist_ok=True)
             config_path = experiment_root / "fake_config.yaml"
             config_path.write_text(f"# fake config for {experiment_id}\nname: {experiment_id}\n")
 
