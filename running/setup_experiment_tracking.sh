@@ -152,13 +152,32 @@ case "$role" in
         path="${2:?usage: $0 relay EXPERIMENT_ROOT_PATH HPC_COMMANDS_PATH}"
         queue_dir="${3:?usage: $0 relay EXPERIMENT_ROOT_PATH HPC_COMMANDS_PATH}"
         mkdir -p "$path" "$queue_dir"
+        # Registry filename is submission_registry.sqlite, NOT
+        # experiment_registry.sqlite -- this same directory may also host a
+        # completely separate reporting/scenario-catalog DB (e.g.
+        # ocean-post's cli.reporting) that's already claimed that other
+        # name for itself. See EXPERIMENT_TRACKING.md "Working across
+        # machines" for the full story (found the hard way once already).
+        add_to_bashrc "[ -z \"\${OCEANICU_EXPERIMENT_DB:-}\" ] && export OCEANICU_EXPERIMENT_DB=$path/submission_registry.sqlite"
+        add_to_bashrc "export PATH=\"\$HOME/source/repos/OceanICU/oceanicu_3d/running/bin:\$PATH\""
         echo "Relay ready: experiment tree at $path, hpc_commands/ queue at"
         echo "$queue_dir (independent paths -- no relationship to each other"
         echo "required, same as hpc). Staged experiment files (from workstations"
         echo "running 'oceanicu-experiments stage') land directly under $path,"
         echo "at their real relative path -- no separate setup needed here for that."
-        echo "Make sure experiment_tracking.py + experiment_tracking_server.py are deployed here"
-        echo "too, for the ssh:// relay (workstation <-> bb-server1)."
+        echo "OCEANICU_EXPERIMENT_DB set to the LOCAL path above (this machine IS"
+        echo "the relay, so it never needs its own ssh:// URL back to itself),"
+        echo "running/bin added to PATH -- both for direct interactive use here."
+        echo
+        echo "For the ssh:// relay itself (workstation <-> bb-server1), point"
+        echo "OCEANICU_RELAY_DIR (on EVERY machine that connects through here) at"
+        echo "a git checkout of oceanicu_3d/running on THIS machine -- e.g.:"
+        echo "  export OCEANICU_RELAY_DIR=$HOME/source/repos/OceanICU/oceanicu_3d/running"
+        echo "Do NOT hand-deploy a separate copy of experiment_tracking.py/"
+        echo "experiment_tracking_server.py elsewhere -- that copy has no way to"
+        echo "ever pick up future fixes and WILL silently drift out of sync (this"
+        echo "happened for real once already, see EXPERIMENT_TRACKING.md). A plain"
+        echo "git pull here is the only thing that should ever need to happen."
         echo
         echo "Workstations should rsync onward into exactly these two paths --"
         echo "e.g. (adjust bb-server1/paths to match this machine's real hostname"
