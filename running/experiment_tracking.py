@@ -217,7 +217,7 @@ def _current_user() -> str:
     threaded through as an explicit `user` argument -- NOT derived lazily
     inside _log_history itself, because a @_rpc_or_local-decorated
     function's body can end up executing on the RELAY's own process (see
-    RemoteConn/run_tracking_server.py) under a shared service account
+    RemoteConn/experiment_tracking_server.py) under a shared service account
     that has nothing to do with which human actually typed the command on
     their own machine. os.environ checks first (USER/LOGNAME cover the
     common cases cheaply); getpass.getuser() as a last resort (it itself
@@ -260,7 +260,7 @@ def _log_history(
 
 class RemoteSpec:
     """Parsed ssh://user@host/abs/path/to/db.sqlite. *relay_dir* (where
-    run_tracking_server.py lives on the relay) always comes from
+    experiment_tracking_server.py lives on the relay) always comes from
     OCEANICU_RELAY_DIR -- never encoded in the URI itself, since it's a
     property of the relay's own deployment, not of any one database."""
 
@@ -288,7 +288,7 @@ def _parse_db_spec(spec: Union[str, Path, "RemoteSpec"]) -> Union[Path, "RemoteS
     if not relay_dir:
         raise RuntimeError(
             f"{s!r} is a remote (ssh://) DB path, but OCEANICU_RELAY_DIR is not set -- "
-            f"it must point at the directory on {host!r} where run_tracking_server.py lives."
+            f"it must point at the directory on {host!r} where experiment_tracking_server.py lives."
         )
     return RemoteSpec(host, db_path, relay_dir)
 
@@ -297,7 +297,7 @@ class RemoteConn:
     """Stands in for a real sqlite3.Connection when the registry lives
     behind a relay. Every @_rpc_or_local-decorated function, called with
     one of these as *conn*, turns into exactly one `ssh host python
-    run_tracking_server.py` round trip carrying its name + arguments as
+    experiment_tracking_server.py` round trip carrying its name + arguments as
     JSON and getting the (JSON-decoded) return value back -- the function
     body itself never runs locally in this case. Plain functions that
     aren't decorated (is_paused, next_experiment_to_start) call .call() directly
@@ -312,7 +312,7 @@ class RemoteConn:
         payload = json.dumps({"db": self.spec.db_path, "func": func_name, "kwargs": kwargs})
         remote_cmd = (
             f"cd {shlex.quote(self.spec.relay_dir)} && "
-            f"python3 run_tracking_server.py"
+            f"python3 experiment_tracking_server.py"
         )
         try:
             result = subprocess.run(
@@ -345,7 +345,7 @@ def _rpc_or_local(func):
     RemoteConn, forwards (func's own name, its bound kwargs minus conn)
     to conn.call() instead of running the function body; when *conn* is a
     real sqlite3.Connection (including on the relay's OWN side, inside
-    run_tracking_server.py's dispatch -- nested calls between decorated
+    experiment_tracking_server.py's dispatch -- nested calls between decorated
     functions Just Work, no double-dispatch, since conn there is real),
     runs the body exactly as before."""
     sig = inspect.signature(func)
@@ -360,7 +360,7 @@ def _rpc_or_local(func):
         return func(conn, *args, **kwargs)
 
     # Marks this specific function as safe to dispatch by name over RPC --
-    # run_tracking_server.py's allow-list checks for this attribute, not a
+    # experiment_tracking_server.py's allow-list checks for this attribute, not a
     # naming convention, so it stays correct as functions are added/
     # renamed and isn't fooled by a leading underscore on an internal
     # helper (_control_or_pause_all, _not_started_candidates) that still
@@ -468,7 +468,7 @@ def _ensure_group_writable(db_path: Path) -> None:
 # sqlite3's own backup API (NOT a raw file copy, which can catch the main
 # file mid-checkpoint and miss pending WAL content) and commit it. Hooked
 # into connect()'s local-mode teardown -- the one chokepoint every write
-# passes through either directly or, via run_tracking_server.py's own
+# passes through either directly or, via experiment_tracking_server.py's own
 # connect() call, on the relay side of an RPC dispatch.
 # ---------------------------------------------------------------------------
 
@@ -542,8 +542,8 @@ def _write_backup_snapshot_and_commit(conn: sqlite3.Connection, db_path: Path, w
         dest.close()
 
     git_env_args = [
-        "-c", "user.email=run_tracking_backup@localhost",
-        "-c", "user.name=run_tracking_backup",
+        "-c", "user.email=experiment_tracking_backup@localhost",
+        "-c", "user.name=experiment_tracking_backup",
     ]
     subprocess.run(["git", *git_env_args, "add", db_path.name], cwd=repo_dir, check=True)
     # Nothing to commit if this snapshot is byte-identical to the last one

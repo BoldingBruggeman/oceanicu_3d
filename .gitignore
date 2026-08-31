@@ -36,3 +36,10 @@ driver/dist/
 # secret by itself, just genuinely per-machine -- nothing to gain from
 # committing one machine's copy as if it were canonical.
 running/relay.env
+
+# /experiments/ -- the real experiment tree some machines point
+# OCEANICU_EXPERIMENT_ROOT_BASE at directly under the repo checkout for
+# convenience (see setup_experiment_tracking.sh workstation). Real staged
+# driver/config files and, once running, chunk output/logs/restarts --
+# never meant to be committed, same category as validation-data/ above.
+/experiments/
