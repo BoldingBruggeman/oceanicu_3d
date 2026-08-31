@@ -25,7 +25,7 @@ machine use the same directory or even the same username:
 | `bin/push_registry_snapshot.sh` | pushes the registry out to bb-server1 (see "Keeping bb-server1's copy of the registry up to date") -- only needed wherever the registry actually lives. |
 | `bin/watch_registry_and_push.sh` | persistent watcher: calls `push_registry_snapshot.sh` the moment a fresh backup snapshot appears, instead of waiting for the next cron interval. Login node only; meant to be kept alive by `restart_registry_watcher.sh`, not run by hand. |
 | `bin/restart_registry_watcher.sh` | cron watchdog: (re)starts `watch_registry_and_push.sh` if it's not already running. Login node only. |
-| `bin/pull_experiment_files.sh` | pulls freshly staged experiment files (driver script/config) in from bb-server1, filtered the same way `stage` writes them -- see "Command queue". Login node only. |
+| `bin/pull_experiment_files.sh` | pulls freshly staged experiment files (driver script/config) in from bb-server1, filtered the same way `stage` writes them -- see "Command queue". Login node only. `rsync -u`: never overwrites a file that's newer on this machine than on bb-server1, so a driver-script fix hand-edited directly here (e.g. after a chunk failure) survives the next routine pull instead of being silently clobbered by bb-server1's older copy. |
 | `test_compute_to_login_ssh.sbatch` | one-shot test for whether a compute node can reach its own login node -- see "Keeping bb-server1's copy up to date". Not part of normal operation. |
 
 ## Use `oceanicu-experiments`, not `python oceanicu_experiments.py`

@@ -18,6 +18,23 @@
 # also live directly under OCEANICU_EXPERIMENT_ROOT_BASE) is ever
 # touched by this beyond the whitelisted files it pulls in.
 #
+# -u (update): skip any file that's NEWER on the receiver (this
+# machine) than on bb-server1 -- same protection
+# get_commands_and_update_registry.py --pull-from already has (-au) for
+# hpc_commands/, applied here too. Without it, a real incident: someone
+# hand-edits a driver script directly on the HPC (a normal, documented
+# workflow -- fix a bug after a chunk failed, see run_chunk.slurm's own
+# "chunk failed ... fix a bug in the script" note), then the next
+# routine periodic pull silently overwrites that edit with bb-server1's
+# older copy, since plain -a overwrites whenever source and destination
+# differ, regardless of which side is actually newer. -u alone doesn't
+# solve every possible conflict (if bb-server1's own copy gets
+# re-staged AFTER the local edit, that's a genuine, unresolvable race --
+# same category as the queued-vs-direct-change caveat in
+# EXPERIMENT_TRACKING.md), but it fixes the concrete, common case: a
+# local fix surviving the very next routine pull instead of being
+# silently destroyed by it.
+#
 # This is what makes get_commands_and_update_registry.py's own
 # presence-check on `add` (_verify_experiment_files_present) actually
 # reliable on the HPC: by the time a queued `add` is applied there,
@@ -34,7 +51,7 @@ remote="${1:-bb-server1:/data/OceanICU/oceanicu_3d/experiments}"
 
 mkdir -p "$OCEANICU_EXPERIMENT_ROOT_BASE"
 
-result=$(rsync -a -i --prune-empty-dirs \
+result=$(rsync -au -i --prune-empty-dirs \
     --include 'generated*.py' --include 'generated*.yaml' \
     --include '*/' --exclude '*' \
     "${remote%/}/" "${OCEANICU_EXPERIMENT_ROOT_BASE%/}/")
