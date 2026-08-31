@@ -16,6 +16,7 @@ machine use the same directory or even the same username:
 |---|---|
 | `experiment_tracking.py` | the SQLite schema + data-access functions. Not usually called directly. |
 | `oceanicu_experiments.py` | the CLI you use day to day: register experiments, check status, pause/resume, rerun. |
+| `experiment_defaults.yaml` | single source of truth for `add`'s optional-flag defaults (`chunk_kind`, `chunk_multiplier`, `np`, `launcher`, `priority`, `chunk_delay_seconds`) -- edit this, not scattered argparse literals. Lives here so it travels with `oceanicu_experiments.py` via whatever already deploys `running/`; falls back to hardcoded values if ever missing rather than crashing. |
 | `chunk_runner.py` | runs exactly one chunk. Called by `run_chunk.slurm`; you don't normally invoke it by hand except when testing (see below). |
 | `run_chunk.slurm` | the SLURM job. Runs one chunk, then resubmits itself for the next one -- or, once an experiment reaches its `stop_date`, for the next queued experiment (see "The queue" below). |
 | `experiment_tracking_server.py` | RPC entrypoint for accessing the registry across machines with no direct network path between them -- see "Working across machines" below. Only needed on the relay machine, and only if you need that at all. |

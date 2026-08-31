@@ -283,6 +283,32 @@ _STAGE_DEFAULT_INCLUDES = ["generated*.py", "generated*.yaml"]
 _STAGE_DEFAULT_EXCLUDE_DIRS = ["__pycache__"]
 _STAGE_DEFAULT_EXCLUDE_PATTERNS = ["*.nc"]
 
+_EXPERIMENT_DEFAULTS_PATH = Path(__file__).resolve().parent / "experiment_defaults.yaml"
+# Fallback if experiment_defaults.yaml is ever missing (a partial/old
+# deployment) -- must match that file's own values exactly. Never a hard
+# crash just because this one file didn't make the trip; best-effort.
+_EXPERIMENT_DEFAULTS_FALLBACK = {
+    "chunk_kind": "annual",
+    "chunk_multiplier": 1,
+    "np": 1,
+    "launcher": "srun",
+    "priority": 0,
+    "chunk_delay_seconds": 0,
+}
+
+
+def _load_experiment_defaults() -> dict:
+    """Single source of truth for `add`'s optional-flag defaults -- see
+    experiment_defaults.yaml's own header for why it lives where it does."""
+    try:
+        loaded = yaml.safe_load(_EXPERIMENT_DEFAULTS_PATH.read_text()) or {}
+    except OSError:
+        loaded = {}
+    return {**_EXPERIMENT_DEFAULTS_FALLBACK, **loaded}
+
+
+_EXPERIMENT_DEFAULTS = _load_experiment_defaults()
+
 
 def cmd_stage(args: argparse.Namespace) -> int:
     """rsync --source-dir directly into the experiment's REAL destination --
@@ -648,15 +674,16 @@ def main() -> int:
     a.add_argument("--initial-date", required=True, metavar="YYYY-MM-DD")
     a.add_argument("--stop-date", required=True, metavar="YYYY-MM-DD")
     a.add_argument("--data-roots-file", default=None)
-    a.add_argument("--chunk-kind", default="annual", choices=["annual", "monthly", "daily"])
-    a.add_argument("--chunk-multiplier", type=int, default=1)
-    a.add_argument("--np", type=int, default=1)
-    a.add_argument("--launcher", default="srun", choices=["srun", "mpiexec"])
-    a.add_argument("--priority", type=int, default=0)
-    a.add_argument("--chunk-delay-seconds", type=int, default=0,
+    a.add_argument("--chunk-kind", default=_EXPERIMENT_DEFAULTS["chunk_kind"], choices=["annual", "monthly", "daily"])
+    a.add_argument("--chunk-multiplier", type=int, default=_EXPERIMENT_DEFAULTS["chunk_multiplier"])
+    a.add_argument("--np", type=int, default=_EXPERIMENT_DEFAULTS["np"])
+    a.add_argument("--launcher", default=_EXPERIMENT_DEFAULTS["launcher"], choices=["srun", "mpiexec"])
+    a.add_argument("--priority", type=int, default=_EXPERIMENT_DEFAULTS["priority"])
+    a.add_argument("--chunk-delay-seconds", type=int, default=_EXPERIMENT_DEFAULTS["chunk_delay_seconds"],
                     help="wait this many seconds before EACH future resubmission of this "
                          "experiment's own chunks, or before it's picked up as the next queued "
-                         "experiment (default: 0, no delay). Persistent, not one-shot -- "
+                         f"experiment (default: {_EXPERIMENT_DEFAULTS['chunk_delay_seconds']}, "
+                         "see experiment_defaults.yaml). Persistent, not one-shot -- "
                          "changeable later with set-chunk-delay. Different from delay-all, "
                          "which is a global, one-shot TIMED pause, not tied to one experiment.")
     a.add_argument("--notes", default=None)

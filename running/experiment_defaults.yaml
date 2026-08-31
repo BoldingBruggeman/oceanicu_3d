@@ -1,0 +1,18 @@
+# Default values for `oceanicu_experiments.py add`'s optional flags --
+# single source of truth. Change a default here, not in scattered
+# argparse literals. Lives right next to oceanicu_experiments.py on
+# purpose: it travels wherever running/ gets deployed (git clone/pull,
+# rsync -- whatever mechanism already moves the rest of running/ to a
+# given machine), no separate sync step of its own needed.
+#
+# If this file is ever missing (a partial/old deployment), oceanicu_experiments.py
+# falls back to these exact same values hardcoded in _load_experiment_defaults --
+# best-effort, never a hard crash just because this one file didn't make
+# the trip.
+
+chunk_kind: annual
+chunk_multiplier: 1
+np: 1
+launcher: srun
+priority: 0
+chunk_delay_seconds: 0
