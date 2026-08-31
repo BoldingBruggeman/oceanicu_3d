@@ -102,6 +102,17 @@ case "$role" in
         echo "  git-backup snapshots of the registry (EXPERIMENT_TRACKING.md 'Accidental-"
         echo "  deletion protection'); set to 0 to disable."
         echo
+        echo "The \$path/\$queue_dir/\$scripts_dir showing up in the cron lines below are"
+        echo "NOT left for cron to resolve -- they're THIS SCRIPT's own bash variables,"
+        echo "already substituted with the real values you passed above, at the moment"
+        echo "this script printed them. What you actually see below (and should paste"
+        echo "into crontab -e as-is) is already a literal absolute path, e.g."
+        echo "'cd /real/path && ...', never a literal '\$scripts_dir' string -- cron"
+        echo "never needs to resolve anything, since there's no variable left by the"
+        echo "time you see it. If a line below still literally says <path-to-scripts-dir>,"
+        echo "that means the 4th argument (scripts_dir) was left off this script's own"
+        echo "invocation -- re-run with it set, or hand-edit that one placeholder."
+        echo
         echo "Optional cron, on the LOGIN NODE specifically (it needs outbound reach"
         echo "for --pull-from; compute nodes don't have it) -- pulls whatever's new in"
         echo "bb-server1's hpc_commands/ in, then applies whatever's pending. NEVER"
