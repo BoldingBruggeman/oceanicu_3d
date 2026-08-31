@@ -68,12 +68,17 @@ anywhere `oceanicu-experiments` appears below if `PATH` isn't set up yet, or
 never will be on a given machine. `PATH` is the preferred way once it's
 in place, purely because there's less to type.
 
-**First time on a new machine:** `setup_experiment_tracking.sh hpc|relay|workstation PATH`
+**First time on a new machine:** `setup_experiment_tracking.sh hpc|relay|workstation ...`
 sets up the env vars (`OCEANICU_EXPERIMENT_DB`/`OCEANICU_EXPERIMENT_ROOT_BASE`/
-`OCEANICU_HPC`, `hpc` role only -- see "Set up an experiment" for what that last
-one actually gates) and directory scaffold (`hpc_commands/`) for that
-machine's role in one go --
-see the script's own header for exact usage. It's a single, standalone
+`OCEANICU_HPC_COMMANDS_DIR`/`OCEANICU_HPC`, `hpc` role only -- see "Set up an
+experiment" for what that last one actually gates) and directory scaffold
+(`hpc_commands/`) for that machine's role in one go -- see the script's own
+header for exact usage. The `hpc` role takes **two independent paths**, not
+one: the real experiment tree (`OCEANICU_EXPERIMENT_ROOT_BASE`, where the
+registry DB and staged/running experiment files live) and `hpc_commands/`
+(`OCEANICU_HPC_COMMANDS_DIR`, the small transient command-queue directory)
+-- they have different lifecycles and no required relationship to each
+other, so neither has to nest inside the other. It's a single, standalone
 file with no dependency on this repo, so it's the one thing worth
 copying ahead of everything else onto a machine that has no git access
 at all (e.g. the HPC).

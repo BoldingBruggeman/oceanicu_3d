@@ -5,15 +5,27 @@
 # HPC, which never needs the oceanicu_3d repo at all) and run it there.
 #
 # Usage:
-#   ./setup_experiment_tracking.sh hpc         /data/OceanICU/oceanicu_3d/experiments  [/path/to/scripts] [login-node-hostname]
+#   ./setup_experiment_tracking.sh hpc EXPERIMENT_ROOT_PATH HPC_COMMANDS_PATH [/path/to/scripts] [login-node-hostname]
 #   ./setup_experiment_tracking.sh relay       /data/OceanICU/oceanicu_3d/experiments   # bb-server1
 #   ./setup_experiment_tracking.sh workstation ~/hpc_commands
 #
-# hpc's 3rd arg (optional) is where experiment_tracking.py/apply_commands.py
+# hpc takes TWO separate paths now, not one -- they have different
+# lifecycles (see the comment inside the hpc case below) and no required
+# relationship to each other:
+#   EXPERIMENT_ROOT_PATH -- the real experiment tree: registry DB, staged
+#     driver/config files, and (once running) chunk output/logs/restarts.
+#     Sets OCEANICU_EXPERIMENT_ROOT_BASE.
+#   HPC_COMMANDS_PATH    -- the small, transient command-queue directory
+#     (only ever queue_*.yaml files). Sets OCEANICU_HPC_COMMANDS_DIR. Can
+#     live anywhere -- pick any local directory, does not need to nest
+#     under or near EXPERIMENT_ROOT_PATH.
+#
+# hpc's 4th arg (optional) is where experiment_tracking.py/apply_commands.py
 # etc. actually live on THIS machine -- only used to print ready-to-use
 # cron lines; defaults to a placeholder if omitted.
 #
-# hpc's 4th arg (optional) is the login node's own hostname -- if given,
+# hpc's 5th arg (optional, shifted from 4th now that hpc takes two required
+# paths) is the login node's own hostname -- if given,
 # sets OCEANICU_LOGIN_NODE so run_chunk.slurm can try pushing a fresh
 # registry snapshot out from a compute node right before each
 # self-resubmission (best-effort; see push_registry_snapshot.sh and
@@ -23,7 +35,7 @@
 # the login-node cron and/or watch_registry_and_push.sh's inotify
 # watcher instead (see EXPERIMENT_TRACKING.md "Keeping bb-server1's copy
 # of the registry up to date") -- the only real mechanisms here, both
-# running entirely on the login node; this 4th arg only matters if this
+# running entirely on the login node; this 5th arg only matters if this
 # tooling is ever deployed to a different cluster where compute-to-login
 # ssh actually works.
 # Since $HOME is shared between login and compute nodes on this cluster,
@@ -34,10 +46,7 @@
 # what each of these env vars/directories is actually for.
 set -eu
 
-role="${1:?usage: $0 hpc|relay|workstation PATH}"
-path="${2:?usage: $0 hpc|relay|workstation PATH}"
-scripts_dir="${3:-<path-to-scripts-dir>}"
-login_node="${4:-}"
+role="${1:?usage: $0 hpc|relay|workstation ...}"
 
 add_to_bashrc() {
     grep -qxF "$1" ~/.bashrc 2>/dev/null || echo "$1" >> ~/.bashrc
@@ -45,19 +54,27 @@ add_to_bashrc() {
 
 case "$role" in
     hpc)
-        # hpc_commands/ lives anywhere, independent of the experiment tree
-        # (its own contract is trivial: ONLY ever queue_*.yaml files) --
-        # nested under $path here purely as a convenient default, not a
-        # requirement. The experiment tree itself (real chunk output,
-        # the registry DB, and the generated files this cron pulls in
-        # below) lives directly at $path == OCEANICU_EXPERIMENT_ROOT_BASE.
-        mkdir -p "$path/hpc_commands"
+        # Two independent paths -- different lifecycles, no required
+        # relationship. hpc_commands/ (queue_dir) is small and transient,
+        # meant to go back to empty once everything in it is applied;
+        # ONLY ever contains queue_*.yaml. path (the experiment tree) is
+        # where the registry DB, staged driver/config files, and (once
+        # running) real chunk output/logs/restarts/results all live --
+        # that output can get large, which is exactly why it must NOT be
+        # nested inside the small thing that gets synced on its own
+        # lightweight schedule.
+        path="${2:?usage: $0 hpc EXPERIMENT_ROOT_PATH HPC_COMMANDS_PATH [scripts_dir] [login_node]}"
+        queue_dir="${3:?usage: $0 hpc EXPERIMENT_ROOT_PATH HPC_COMMANDS_PATH [scripts_dir] [login_node]}"
+        scripts_dir="${4:-<path-to-scripts-dir>}"
+        login_node="${5:-}"
+        mkdir -p "$queue_dir"
         # -z guarded, not a plain export: if this var is already set when
         # .bashrc runs (e.g. sbatch --export=OCEANICU_EXPERIMENT_DB=... on THIS
         # submission), that value wins -- these are only a fallback
         # default, never allowed to clobber an explicit one.
         add_to_bashrc "[ -z \"\${OCEANICU_EXPERIMENT_DB:-}\" ] && export OCEANICU_EXPERIMENT_DB=$path/experiment_registry.sqlite"
         add_to_bashrc "[ -z \"\${OCEANICU_EXPERIMENT_ROOT_BASE:-}\" ] && export OCEANICU_EXPERIMENT_ROOT_BASE=$path"
+        add_to_bashrc "[ -z \"\${OCEANICU_HPC_COMMANDS_DIR:-}\" ] && export OCEANICU_HPC_COMMANDS_DIR=$queue_dir"
         # Marks this machine, and only this machine, as the real HPC --
         # oceanicu_experiments.py's direct (non---queue) `add` refuses to run
         # anywhere this isn't set to "1" (see EXPERIMENT_TRACKING.md "Set up an
@@ -68,7 +85,7 @@ case "$role" in
             add_to_bashrc "[ -z \"\${OCEANICU_LOGIN_NODE:-}\" ] && export OCEANICU_LOGIN_NODE=$login_node"
         fi
         echo "HPC ready: registry + experiment tree under $path, hpc_commands/ scaffold"
-        echo "under $path/hpc_commands (could live anywhere -- this is just a default)."
+        echo "at $queue_dir (an independent path -- no relationship to $path required)."
         echo "Still needed here (not this script): running/ itself"
         echo "(experiment_tracking.py, oceanicu_experiments.py, chunk_runner.py, run_chunk.slurm,"
         echo "get_commands_and_update_registry.py), rsync'd in from bb-server1 -- never"
@@ -84,9 +101,9 @@ case "$role" in
         echo "bb-server1's hpc_commands/ in, then applies whatever's pending. NEVER"
         echo "calls sbatch, for any experiment, new or resubmitting:"
         echo "  crontab -e   # on the login node -- then add a line like:"
-        echo "  0 * * * * cd $scripts_dir && OCEANICU_EXPERIMENT_DB=$path/experiment_registry.sqlite OCEANICU_EXPERIMENT_ROOT_BASE=$path python3 get_commands_and_update_registry.py --db $path/experiment_registry.sqlite --queue-dir $path/hpc_commands --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands >> $path/hpc_commands/get_commands_and_update_registry.log 2>&1"
-        echo "  cron does NOT source ~/.bashrc -- both env vars are set inline on the"
-        echo "  line itself, not relied on from the exports above. Replace"
+        echo "  0 * * * * cd $scripts_dir && OCEANICU_EXPERIMENT_DB=$path/experiment_registry.sqlite OCEANICU_EXPERIMENT_ROOT_BASE=$path OCEANICU_HPC_COMMANDS_DIR=$queue_dir python3 get_commands_and_update_registry.py --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands >> $queue_dir/get_commands_and_update_registry.log 2>&1"
+        echo "  cron does NOT source ~/.bashrc -- all three env vars are set inline on"
+        echo "  the line itself, not relied on from the exports above. Replace"
         echo "  $scripts_dir if it was left as a placeholder. Omit --pull-from entirely"
         echo "  if hpc_commands/ is kept in sync some other way (e.g. a human running"
         echo "  rsync by hand) -- it then behaves exactly as the old apply_commands.py"
@@ -123,6 +140,7 @@ case "$role" in
         echo "  up gracefully (not a retry-forever loop) -- the cron above still covers you."
         ;;
     relay)
+        path="${2:?usage: $0 relay PATH}"
         mkdir -p "$path/hpc_commands"
         echo "Relay ready: hpc_commands/ scaffold under $path (could live anywhere --"
         echo "this is just a default). Staged experiment files (from workstations"
@@ -133,6 +151,7 @@ case "$role" in
         echo "too, for the ssh:// relay (workstation <-> bb-server1)."
         ;;
     workstation)
+        path="${2:?usage: $0 workstation PATH}"
         mkdir -p "$path"
         echo "Workstation ready: local queue staging dir at $path."
         echo "Use:"
