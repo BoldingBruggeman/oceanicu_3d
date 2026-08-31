@@ -273,7 +273,7 @@ HPC it's the one thing PML does by hand, per the experiment's own deliberate
 never-automatic-submission rule (see "Command queue").
 
 ```bash
-sbatch --export=EXPERIMENT_ID='NSe/CMIP6/CNRM-ESM2-1/ssp126/run01',OCEANICU_EXPERIMENT_DB='/path/to/experiment_registry.sqlite' run_chunk.slurm
+sbatch --export=EXPERIMENT_ID='NSe/CMIP6/CNRM-ESM2-1/ssp126/run01',OCEANICU_EXPERIMENT_DB='/path/to/submission_registry.sqlite' run_chunk.slurm
 ```
 
 Both variables are required on this first submission -- `run_chunk.slurm`
@@ -656,9 +656,9 @@ failure just retries at the next write instead of going quiet for a
 whole N-write cycle). To recover a deleted/corrupted registry:
 
 ```bash
-cd /abs/path/to/experiment_registry.sqlite.backups
+cd /abs/path/to/submission_registry.sqlite.backups
 git log --oneline                      # find the snapshot you want
-git show <sha>:experiment_registry.sqlite > /abs/path/to/experiment_registry.sqlite
+git show <sha>:submission_registry.sqlite > /abs/path/to/submission_registry.sqlite
 ```
 
 The backup repo has no automatic pruning -- for a DB this small, unlimited
@@ -688,19 +688,41 @@ Two different answers to that, depending on what's actually reachable:
 
 The rest of this section is about the relay case:
 
-**One-time setup on the relay:** copy `experiment_tracking.py` and
-`experiment_tracking_server.py` there together, in the same directory (nothing
-else needed -- no packaging, same as everywhere else in this system).
+**One-time setup on the relay:** a plain `git clone`/`git pull` of this repo
+is enough -- point `OCEANICU_RELAY_DIR` (below) directly at its `running/`
+directory. Do **not** hand-copy `experiment_tracking.py`/
+`experiment_tracking_server.py` out to some other directory instead: a
+manually-deployed copy has no mechanism to ever pick up later fixes/
+renames, and *will* silently drift out of sync with the client side (this
+happened for real once already -- a stale copy under `/data/.../experiments/`
+kept using the pre-rename `run_id`/`list_runs` names long after the client
+side had moved on, breaking every relay call until someone noticed and
+manually diffed the two copies). A `git pull` on the relay is the only
+thing that should ever need to happen to keep this current.
 
 **Then, from any machine that can SSH to the relay** (add-machine or
 production machine alike), point at the registry with an `ssh://` DB path
 instead of a local one:
 
 ```bash
-export OCEANICU_EXPERIMENT_DB=ssh://oceanicu-relay/abs/path/to/experiment_registry.sqlite
-export OCEANICU_RELAY_DIR=/abs/path/to/running   # where experiment_tracking_server.py lives, ON the relay
+export OCEANICU_EXPERIMENT_DB=ssh://oceanicu-relay/abs/path/to/submission_registry.sqlite
+export OCEANICU_RELAY_DIR=/abs/path/to/oceanicu_3d/running   # the git checkout's running/ dir, ON the relay
 oceanicu-experiments add --experiment-id ...          # exactly the same as local use from here on
 ```
+
+**Filename is `submission_registry.sqlite`, deliberately not
+`experiment_registry.sqlite`.** The relay's own experiment-tree directory
+(wherever `OCEANICU_EXPERIMENT_ROOT_BASE` points, `/data/OceanICU/oceanicu_3d/
+experiments/` in this project's real deployment) legitimately holds more
+than just this system's files: staged driver/config scripts, real chunk
+output once running, AND -- entirely separately -- a reporting/scenario-
+catalog database maintained by the Hugo site pipeline (`ocean-post`'s
+`cli.reporting`, tracking which runs have been post-processed with plots/
+results after completion; unrelated schema, unrelated code, just sharing
+the same directory by design). That other system's own DB already claimed
+the name `experiment_registry.sqlite` for itself (see `regen_hosts.yaml`'s
+`db:` field) -- this system's registry uses a distinct name specifically to
+never collide with it.
 
 A copy-pasteable starting point for both lines lives in
 `relay.env.example` -- copy it to `relay.env` (gitignored) and source it,
@@ -941,7 +963,7 @@ HPC's **login node** specifically (the only place with outbound reach;
 see "Keeping bb-server1's copy of the registry up to date"):
 
 ```bash
-python get_commands_and_update_registry.py --db /local/path/experiment_registry.sqlite \
+python get_commands_and_update_registry.py --db /local/path/submission_registry.sqlite \
     --queue-dir /local/path/hpc_commands/ \
     --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands
     # rsyncs bb-server1's hpc_commands/ in first (reports what changed,
@@ -978,7 +1000,7 @@ HPC's login node, just run the same command by hand:
 # on the login node, any time -- not just when cron happens to fire
 # (get-commands-and-update-registry once running/bin is on PATH, see
 # "Use `oceanicu-experiments`" at the top -- or the full path, same as cron uses)
-get-commands-and-update-registry --db /local/path/experiment_registry.sqlite \
+get-commands-and-update-registry --db /local/path/submission_registry.sqlite \
     --queue-dir /local/path/hpc_commands/ \
     --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands
 
@@ -1068,7 +1090,7 @@ of silently diverging the mirror).
 mechanism that works here, not one option among several:**
 
 ```bash
-*/10 * * * * OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite /path/to/oceanicu_3d/running/bin/push_registry_snapshot.sh
+*/10 * * * * OCEANICU_EXPERIMENT_DB=/path/submission_registry.sqlite /path/to/oceanicu_3d/running/bin/push_registry_snapshot.sh
 ```
 
 (needs outbound reach, which the login node has and compute nodes don't).
@@ -1132,7 +1154,7 @@ crontab entry itself uses the full path instead:
 
 ```bash
 # on the login node
-0 * * * * OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite /path/to/oceanicu_3d/running/bin/restart_registry_watcher.sh
+0 * * * * OCEANICU_EXPERIMENT_DB=/path/submission_registry.sqlite /path/to/oceanicu_3d/running/bin/restart_registry_watcher.sh
 ```
 
 The watchdog checks a pidfile (`kill -0` on the recorded PID), not

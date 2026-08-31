@@ -46,7 +46,7 @@
 # unset -- for a system install, or an interactive shell where the
 # right conda env is already activated.
 #
-# Usage: OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite watch_registry_and_push.sh
+# Usage: OCEANICU_EXPERIMENT_DB=/path/submission_registry.sqlite watch_registry_and_push.sh
 set -eu
 
 : "${OCEANICU_EXPERIMENT_DB:?OCEANICU_EXPERIMENT_DB must be set (local path to the registry)}"

@@ -6,7 +6,7 @@ added (2026-08-30) -- same file, same core logic, now also does the
 "get" half, not just the "apply" half.
 
 Deployed alongside oceanicu_experiments.py/experiment_tracking.py/chunk_runner.py
-wherever the real experiment_registry.sqlite actually lives (see
+wherever the real submission_registry.sqlite actually lives (see
 EXPERIMENT_TRACKING.md "Command queue") -- for a registry with no network path
 reachable from wherever experiments are actually defined/queued from (e.g. a
 fully network-isolated HPC whose login node can only ever INITIATE an
@@ -80,7 +80,7 @@ confusing-looking `failed` entry for an experiment that's actually fine; check
 `oceanicu-experiments show <experiment_id>` if one shows up unexpectedly.
 
 Usage:
-    python get_commands_and_update_registry.py --db /local/path/experiment_registry.sqlite \\
+    python get_commands_and_update_registry.py --db /local/path/submission_registry.sqlite \\
         --queue-dir /local/path/hpc_commands/ \\
         [--pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands]
 

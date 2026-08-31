@@ -37,8 +37,8 @@ production machine operate on the SAME database, remotely, over SSH to
 that relay, via experiment_tracking_server.py (deployed there once).
 
 Point at a relay instead of a local file by using an `ssh://` DB path:
-    OCEANICU_EXPERIMENT_DB=ssh://user@relay-host/abs/path/to/experiment_registry.sqlite
-    OCEANICU_RELAY_DIR=/abs/path/to/oceanicu_3d   # where *_server.py lives on the relay
+    OCEANICU_EXPERIMENT_DB=ssh://user@relay-host/abs/path/to/submission_registry.sqlite
+    OCEANICU_RELAY_DIR=/abs/path/to/oceanicu_3d/running   # where *_server.py lives on the relay
 connect() below detects the ssh:// prefix and transparently switches to
 RemoteConn (an RPC proxy: each call is one `ssh relay-host python
 experiment_tracking_server.py` round trip carrying one JSON request/response) --
@@ -459,7 +459,7 @@ def _ensure_group_writable(db_path: Path) -> None:
 
 # ---------------------------------------------------------------------------
 # Accidental-deletion protection: an append-only git history of the DB
-# itself, in a small local repo next to it. `rm experiment_registry.sqlite` (or a
+# itself, in a small local repo next to it. `rm submission_registry.sqlite` (or a
 # botched edit) is otherwise unrecoverable -- the DB doesn't live in a repo
 # of its own, and SQLite has no snapshot/undo concept beyond "the current
 # database" (checkpointing just folds the WAL into the main file, it isn't

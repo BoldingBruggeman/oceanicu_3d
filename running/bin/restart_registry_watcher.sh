@@ -2,7 +2,7 @@
 # restart_registry_watcher.sh -- cron watchdog for watch_registry_and_push.sh:
 # checks whether that watcher is actually running, (re)starts it if not.
 # Run on the LOGIN NODE ONLY, from cron:
-#   0 * * * * OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite /path/restart_registry_watcher.sh
+#   0 * * * * OCEANICU_EXPERIMENT_DB=/path/submission_registry.sqlite /path/restart_registry_watcher.sh
 #
 # Once an hour is plenty -- the watcher is meant to stay running
 # indefinitely between checks; this only recovers from it having been

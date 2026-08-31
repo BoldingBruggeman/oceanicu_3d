@@ -6,7 +6,7 @@
 #
 #   1. A login-node cron job (always-on fallback, works regardless of
 #      whether ssh from compute nodes to here is even possible):
-#        */10 * * * * OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite /path/push_registry_snapshot.sh
+#        */10 * * * * OCEANICU_EXPERIMENT_DB=/path/submission_registry.sqlite /path/push_registry_snapshot.sh
 #
 #   2. watch_registry_and_push.sh -- a persistent inotify watcher, run on
 #      the LOGIN NODE itself (nothing to do with run_chunk.slurm or any
@@ -31,7 +31,7 @@
 # "Accidental-deletion protection") as the source; just ships out
 # whatever's already there.
 #
-# Usage: OCEANICU_EXPERIMENT_DB=/path/experiment_registry.sqlite push_registry_snapshot.sh [dest]
+# Usage: OCEANICU_EXPERIMENT_DB=/path/submission_registry.sqlite push_registry_snapshot.sh [dest]
 # dest defaults to bb-server1:/data/OceanICU/oceanicu_3d/experiments/<same filename>
 set -eu
 

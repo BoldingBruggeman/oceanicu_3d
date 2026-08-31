@@ -78,7 +78,7 @@ case "$role" in
         # .bashrc runs (e.g. sbatch --export=OCEANICU_EXPERIMENT_DB=... on THIS
         # submission), that value wins -- these are only a fallback
         # default, never allowed to clobber an explicit one.
-        add_to_bashrc "[ -z \"\${OCEANICU_EXPERIMENT_DB:-}\" ] && export OCEANICU_EXPERIMENT_DB=$path/experiment_registry.sqlite"
+        add_to_bashrc "[ -z \"\${OCEANICU_EXPERIMENT_DB:-}\" ] && export OCEANICU_EXPERIMENT_DB=$path/submission_registry.sqlite"
         add_to_bashrc "[ -z \"\${OCEANICU_EXPERIMENT_ROOT_BASE:-}\" ] && export OCEANICU_EXPERIMENT_ROOT_BASE=$path"
         add_to_bashrc "[ -z \"\${OCEANICU_HPC_COMMANDS_DIR:-}\" ] && export OCEANICU_HPC_COMMANDS_DIR=$queue_dir"
         # Marks this machine, and only this machine, as the real HPC --
@@ -107,7 +107,7 @@ case "$role" in
         echo "bb-server1's hpc_commands/ in, then applies whatever's pending. NEVER"
         echo "calls sbatch, for any experiment, new or resubmitting:"
         echo "  crontab -e   # on the login node -- then add a line like:"
-        echo "  0 * * * * cd $scripts_dir && OCEANICU_EXPERIMENT_DB=$path/experiment_registry.sqlite OCEANICU_EXPERIMENT_ROOT_BASE=$path OCEANICU_HPC_COMMANDS_DIR=$queue_dir python3 get_commands_and_update_registry.py --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands >> $queue_dir/get_commands_and_update_registry.log 2>&1"
+        echo "  0 * * * * cd $scripts_dir && OCEANICU_EXPERIMENT_DB=$path/submission_registry.sqlite OCEANICU_EXPERIMENT_ROOT_BASE=$path OCEANICU_HPC_COMMANDS_DIR=$queue_dir python3 get_commands_and_update_registry.py --pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands >> $queue_dir/get_commands_and_update_registry.log 2>&1"
         echo "  cron does NOT source ~/.bashrc -- all three env vars are set inline on"
         echo "  the line itself, not relied on from the exports above. Replace"
         echo "  $scripts_dir if it was left as a placeholder. Omit --pull-from entirely"
@@ -120,7 +120,7 @@ case "$role" in
         echo "bb-server1 on a schedule, regardless of whether run_chunk.slurm's own"
         echo "best-effort per-chunk push (see OCEANICU_LOGIN_NODE above) ever works:"
         echo "  crontab -e   # on the login node -- then add a line like:"
-        echo "  */10 * * * * OCEANICU_EXPERIMENT_DB=$path/experiment_registry.sqlite $scripts_dir/bin/push_registry_snapshot.sh"
+        echo "  */10 * * * * OCEANICU_EXPERIMENT_DB=$path/submission_registry.sqlite $scripts_dir/bin/push_registry_snapshot.sh"
         echo
         echo "Optional THIRD cron, on the LOGIN NODE specifically -- pulls freshly"
         echo "staged experiment files (driver script/config, see 'oceanicu-experiments"
@@ -135,13 +135,13 @@ case "$role" in
         echo "pushes on top of the periodic push cron above, see its own header and"
         echo "EXPERIMENT_TRACKING.md 'Keeping bb-server1's copy up to date'):"
         echo "  crontab -e   # on the login node -- then add a line like:"
-        echo "  0 * * * * OCEANICU_EXPERIMENT_DB=$path/experiment_registry.sqlite $scripts_dir/bin/restart_registry_watcher.sh"
+        echo "  0 * * * * OCEANICU_EXPERIMENT_DB=$path/submission_registry.sqlite $scripts_dir/bin/restart_registry_watcher.sh"
         echo "  Needs inotify-tools (inotifywait) -- no root here to apt/yum install it,"
         echo "  but it's on conda-forge (confirmed available), so it can go into an"
         echo "  existing env with no root needed. That env's bin/ isn't on PATH in a"
         echo "  cron context though, so point at the exact binary instead:"
         echo "    OCEANICU_INOTIFYWAIT=/path/to/envs/pygetm/bin/inotifywait \\"
-        echo "    OCEANICU_EXPERIMENT_DB=$path/experiment_registry.sqlite $scripts_dir/bin/restart_registry_watcher.sh"
+        echo "    OCEANICU_EXPERIMENT_DB=$path/submission_registry.sqlite $scripts_dir/bin/restart_registry_watcher.sh"
         echo "  If it's missing entirely, the watchdog logs one clear message and gives"
         echo "  up gracefully (not a retry-forever loop) -- the cron above still covers you."
         ;;
