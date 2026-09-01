@@ -270,6 +270,11 @@ def main() -> int:
     pending: list[tuple[Path, dict]] = []
     for qp in queue_paths:
         source_data = yaml.safe_load(qp.read_text()) or {}
+        # Tolerate a bare list (the pre-wrapper format some older/hand-made
+        # queue files still use) instead of crashing on .get -- matching
+        # normalization lives in oceanicu_experiments.py's _queue_command.
+        if isinstance(source_data, list):
+            source_data = {"commands": source_data}
         sources[qp] = source_data
         for entry in source_data.get("commands", []):
             if entry.get("status") == "pending":

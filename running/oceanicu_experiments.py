@@ -254,6 +254,11 @@ def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
         data = yaml.safe_load(queue_path.read_text()) or {}
     else:
         data = {}
+    # Tolerate a bare list (the pre-wrapper format some older/hand-made
+    # queue files still use) instead of crashing on .setdefault -- see
+    # the matching normalization in get_commands_and_update_registry.py.
+    if isinstance(data, list):
+        data = {"commands": data}
     commands = data.setdefault("commands", [])
 
     call_args = {k: v for k, v in vars(args).items() if k not in _QUEUE_EXCLUDE_KEYS}
