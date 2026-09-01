@@ -716,6 +716,23 @@ def set_launcher(conn: sqlite3.Connection, experiment_id: str, launcher: str, us
 
 
 @_rpc_or_local
+def set_notes(conn: sqlite3.Connection, experiment_id: str, notes: Optional[str], user: Optional[str] = None) -> None:
+    """Change an experiment's free-text notes, e.g. to record why it was
+    paused or what a rerun fixed, without needing direct DB access. Same
+    next-hand-off-only semantics as set_np/set_launcher/set_priority for
+    consistency, though notes itself has no runtime effect on chunk
+    execution -- it's purely a human-facing record."""
+    old = get_experiment(conn, experiment_id)
+    conn.execute(
+        "UPDATE experiments SET notes = ?, updated_at = ? WHERE experiment_id = ?",
+        (notes, _now(), experiment_id),
+    )
+    if old is not None:
+        _log_history(conn, experiment_id, "notes_changed", f"{old['notes']!r} -> {notes!r}", user=user)
+    conn.commit()
+
+
+@_rpc_or_local
 def set_chunk_delay(
     conn: sqlite3.Connection, experiment_id: str, chunk_delay_seconds: int, user: Optional[str] = None,
 ) -> None:

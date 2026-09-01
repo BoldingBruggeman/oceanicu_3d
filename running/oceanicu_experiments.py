@@ -50,6 +50,7 @@ these without --queue:
     oceanicu_experiments.py set-data-roots-file --experiment-id ... --path ...
     oceanicu_experiments.py set-np --experiment-id ... --np ...
     oceanicu_experiments.py set-launcher --experiment-id ... --launcher srun|mpiexec
+    oceanicu_experiments.py set-notes --experiment-id ... --notes ...
     oceanicu_experiments.py pause  --experiment-id ... | --all
     oceanicu_experiments.py resume --experiment-id ... | --all
     oceanicu_experiments.py delay-all --seconds N | --clear
@@ -527,6 +528,13 @@ def cmd_set_launcher(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_set_notes(args: argparse.Namespace) -> int:
+    with rt.connect(args.db) as conn:
+        rt.set_notes(conn, args.experiment_id, args.notes, user=rt._current_user())
+    print(f"{args.experiment_id}: notes set to {args.notes!r}")
+    return 0
+
+
 def cmd_set_chunk_delay(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         rt.set_chunk_delay(conn, args.experiment_id, args.seconds, user=rt._current_user())
@@ -776,6 +784,15 @@ def main() -> int:
     _add_common(sl); sl.set_defaults(func=cmd_set_launcher)
     sl.add_argument("--experiment-id", required=True)
     sl.add_argument("--launcher", required=True, choices=["srun", "mpiexec"])
+
+    sn = sub.add_parser(
+        "set-notes",
+        help="change this experiment's free-text notes -- e.g. to record why it was paused "
+             "or what a rerun fixed, without needing direct DB access.",
+    )
+    _add_common(sn); sn.set_defaults(func=cmd_set_notes)
+    sn.add_argument("--experiment-id", required=True)
+    sn.add_argument("--notes", required=True)
 
     pa = sub.add_parser("pause"); _add_common(pa); pa.set_defaults(func=cmd_pause)
     g1 = pa.add_mutually_exclusive_group(required=True)
