@@ -57,8 +57,8 @@ result=$(rsync -au -i --prune-empty-dirs \
     "${remote%/}/" "${OCEANICU_EXPERIMENT_ROOT_BASE%/}/")
 
 if [ -n "$result" ]; then
-    echo "pulled from $remote:"
+    echo "$(date -Is): pulled from $remote:"
     echo "$result" | sed 's/^/  /'
 else
-    echo "$remote: up to date, nothing new."
+    echo "$(date -Is): $remote: up to date, nothing new."
 fi

@@ -112,6 +112,15 @@ from pathlib import Path
 import yaml
 
 HERE = Path(__file__).resolve().parent
+
+
+def _ts() -> str:
+    """Local time with UTC offset, matching the `$(date -Is)` convention
+    already used in bin/restart_registry_watcher.sh and
+    bin/watch_registry_and_push.sh -- so all three log files this system
+    produces (this script's own, and the two watcher scripts') show
+    directly-comparable timestamps when read side by side."""
+    return datetime.now().astimezone().isoformat(timespec="seconds")
 OCEANICU_EXPERIMENTS_SCRIPT = HERE / "oceanicu_experiments.py"
 
 sys.path.insert(0, str(HERE))
@@ -186,11 +195,11 @@ def _pull(remote: str, queue_dir: Path) -> "int | None":
         return 1
     changed = [line for line in result.stdout.splitlines() if line.strip()]
     if changed:
-        print(f"pulled {len(changed)} new/changed file(s) from {remote}:")
+        print(f"{_ts()}: pulled {len(changed)} new/changed file(s) from {remote}:")
         for line in changed:
             print(f"  {line}")
     else:
-        print(f"{remote}: up to date, nothing new.")
+        print(f"{_ts()}: {remote}: up to date, nothing new.")
     return None
 
 
@@ -246,12 +255,12 @@ def main() -> int:
         base_dir = Path(args.queue_dir)
         queue_paths = sorted(base_dir.glob("queue_*.yaml"))
         if not queue_paths:
-            print(f"{base_dir}: no queue_*.yaml files found -- nothing to apply.")
+            print(f"{_ts()}: {base_dir}: no queue_*.yaml files found -- nothing to apply.")
             return 0
     else:
         queue_paths = [Path(args.queue)]
         if not queue_paths[0].exists():
-            print(f"{queue_paths[0]}: nothing to apply (file doesn't exist yet).")
+            print(f"{_ts()}: {queue_paths[0]}: nothing to apply (file doesn't exist yet).")
             return 0
 
     # Load every source file once, then build one combined, time-ordered
@@ -269,7 +278,7 @@ def main() -> int:
 
     if not pending:
         total = sum(len(d.get("commands", [])) for d in sources.values())
-        print(f"nothing pending across {len(queue_paths)} queue file(s) ({total} total entries).")
+        print(f"{_ts()}: nothing pending across {len(queue_paths)} queue file(s) ({total} total entries).")
         return 0
 
     applied = 0
@@ -287,7 +296,7 @@ def main() -> int:
                 entry["status"] = "failed"
                 entry["note"] = verify_error
                 failed += 1
-                print(f"{entry['id']} ({qp.name}): FAILED (add, checking files) -- {verify_error}",
+                print(f"{_ts()}: {entry['id']} ({qp.name}): FAILED (add, checking files) -- {verify_error}",
                       file=sys.stderr)
                 _write_back(qp, sources[qp])
                 continue
@@ -301,12 +310,12 @@ def main() -> int:
             entry["status"] = "applied"
             entry["note"] = result.stdout.strip() or None
             applied += 1
-            print(f"{entry['id']} ({qp.name}): applied ({action})")
+            print(f"{_ts()}: {entry['id']} ({qp.name}): applied ({action})")
         else:
             entry["status"] = "failed"
             entry["note"] = (result.stderr.strip() or result.stdout.strip() or "unknown error")[-2000:]
             failed += 1
-            print(f"{entry['id']} ({qp.name}): FAILED ({action}) -- {entry['note']}", file=sys.stderr)
+            print(f"{_ts()}: {entry['id']} ({qp.name}): FAILED ({action}) -- {entry['note']}", file=sys.stderr)
 
         # Write back after EACH command, not just at the end -- a crash
         # partway through a long queue must not lose already-applied
@@ -316,7 +325,7 @@ def main() -> int:
     still_pending = sum(
         1 for d in sources.values() for e in d.get("commands", []) if e.get("status") == "pending"
     )
-    print(f"done: {applied} applied, {failed} failed, {still_pending} still pending "
+    print(f"{_ts()}: done: {applied} applied, {failed} failed, {still_pending} still pending "
           f"(across {len(queue_paths)} queue file(s)).")
     return 1 if failed else 0
 

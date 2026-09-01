@@ -41,8 +41,8 @@ snapshot="${OCEANICU_EXPERIMENT_DB}.backups/$(basename "$OCEANICU_EXPERIMENT_DB"
 dest="${1:-bb-server1:/data/OceanICU/oceanicu_3d/experiments/$(basename "$OCEANICU_EXPERIMENT_DB")}"
 
 if [ ! -f "$snapshot" ]; then
-    echo "$snapshot does not exist yet -- nothing to push (no writes have" >&2
-    echo "happened yet, or OCEANICU_DB_BACKUP_EVERY_N_WRITES hasn't been reached once)." >&2
+    echo "$(date -Is): $snapshot does not exist yet -- nothing to push (no writes have" >&2
+    echo "  happened yet, or OCEANICU_DB_BACKUP_EVERY_N_WRITES hasn't been reached once)." >&2
     exit 0
 fi
 
@@ -81,13 +81,13 @@ if [ -z "${OCEANICU_ALLOW_EMPTY_PUSH:-}" ] && command -v python3 >/dev/null 2>&1
         remote_count=$(ssh -o BatchMode=yes -o ConnectTimeout=5 "$dest_host" \
             "python3 -c '$_count_experiments_py' '$dest_path'" 2>/dev/null || echo "")
         if [ -n "$remote_count" ] && [ "$remote_count" != "0" ]; then
-            echo "REFUSING to push: local snapshot $snapshot has 0 experiments, but" >&2
-            echo "$dest already has $remote_count -- this looks like the local registry" >&2
-            echo "was emptied by something, not a real remove-everything. Pushing would" >&2
-            echo "destroy the only other good copy. Investigate the local DB first (its" >&2
-            echo "own git-backup history at ${OCEANICU_EXPERIMENT_DB}.backups/ may still" >&2
-            echo "have the last good state). Set OCEANICU_ALLOW_EMPTY_PUSH=1 to push" >&2
-            echo "anyway if every experiment really has been removed on purpose." >&2
+            echo "$(date -Is): REFUSING to push: local snapshot $snapshot has 0 experiments, but" >&2
+            echo "  $dest already has $remote_count -- this looks like the local registry" >&2
+            echo "  was emptied by something, not a real remove-everything. Pushing would" >&2
+            echo "  destroy the only other good copy. Investigate the local DB first (its" >&2
+            echo "  own git-backup history at ${OCEANICU_EXPERIMENT_DB}.backups/ may still" >&2
+            echo "  have the last good state). Set OCEANICU_ALLOW_EMPTY_PUSH=1 to push" >&2
+            echo "  anyway if every experiment really has been removed on purpose." >&2
             exit 1
         fi
     fi
@@ -103,4 +103,4 @@ fi
 # is the only way to guarantee a real content diff always gets copied.
 # Cheap enough for a registry this size.
 rsync -a --checksum --chmod=a-w "$snapshot" "$dest"
-echo "pushed $snapshot -> $dest (read-only)"
+echo "$(date -Is): pushed $snapshot -> $dest (read-only)"
