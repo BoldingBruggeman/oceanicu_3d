@@ -229,13 +229,34 @@ for _ in $(seq 1 60); do
 done
 LOGFILE="$(cat "$POINTER_FILE" 2>/dev/null)/getm-0000.log"
 
-( tail -n 0 -F "$LOGFILE" 2>/dev/null |
+( shopt -s nocasematch
+  # Portable POSIX-ERE word-boundary equivalent -- bash's own [[ =~ ]]
+  # (glibc regex via regcomp, no PCRE) does NOT support \b as a word-
+  # boundary anchor the way grep -P or Perl do; confirmed by direct
+  # testing (\bnan\b silently matched nothing at all, every time,
+  # rather than erroring). "nan" must be preceded and followed by
+  # either the string boundary or a non-alphanumeric character, so a
+  # standalone "nan" token matches (any case, via nocasematch above)
+  # but "banana"/"nanometer" don't.
+  nan_pattern='(^|[^a-zA-Z0-9])nan($|[^a-zA-Z0-9])'
+  tail -n 0 -F "$LOGFILE" 2>/dev/null |
   while IFS= read -r line; do
-      # \bnan\b, not a fixed 'salt:' prefix -- NaN can show up in any
-      # logged variable (temp, u, v, elevation, ...), not just salinity;
-      # word-boundaried so it only matches a standalone "nan" token, not
-      # a substring inside some unrelated word.
-      if echo "$line" | grep -qiE '\bnan\b'; then
+      # NOT a fixed 'salt:' prefix -- NaN can show up in any logged
+      # variable (temp, u, v, elevation, ...), not just salinity.
+      #
+      # bash's own [[ =~ ]], NOT `echo "$line" | grep -qiE` -- that
+      # forked two new processes (echo, grep) for EVERY single line
+      # GETM writes, for the entire chunk's runtime. Confirmed causing
+      # a real production slowdown (fine for the first ~15 simulated
+      # days, then degrading to minutes/day): this script runs with
+      # --exclusive --ntasks-per-node=64, so there is zero spare CPU on
+      # the node for that forking overhead to absorb -- every fork
+      # directly steals cycles from the MPI ranks -- made worse by
+      # running on a parallel filesystem (scyllapfs), where process
+      # startup (dynamic linking, etc.) is markedly slower than on
+      # local disk. [[ =~ ]] does the identical case-insensitive,
+      # word-boundaried check with zero process creation.
+      if [[ "$line" =~ $nan_pattern ]]; then
           echo "========================================"
           echo "NaN detected! Cancelling SLURM job $SLURM_JOB_ID"
           echo "  offending line: $line"
