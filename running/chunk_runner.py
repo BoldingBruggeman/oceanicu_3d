@@ -86,23 +86,6 @@ def _advance_date(start, kind: str, multiplier: int):
     return stop
 
 
-def _is_slurm_job_running(job_id: Optional[str]) -> Optional[bool]:
-    """True/False if squeue can tell us the job is still active; None if
-    it can't be determined (no job_id recorded, squeue unavailable, or it
-    errored) -- callers fall back to a time-based staleness check."""
-    if not job_id:
-        return None
-    try:
-        result = subprocess.run(
-            ["squeue", "-h", "-j", str(job_id)], capture_output=True, text=True, timeout=15,
-        )
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        return None
-    if result.returncode != 0:
-        return None
-    return bool(result.stdout.strip())
-
-
 def _launch_prefix(launcher: str, np: int) -> list[str]:
     if launcher == "srun":
         return ["srun", "--mpi=pmi2", "-n", str(np)]
@@ -240,7 +223,7 @@ def _main_tracked(args: argparse.Namespace) -> int:
         # retried, same as any other failure.
         running = rt.get_running_chunk(conn, args.experiment_id)
         if running is not None:
-            alive = _is_slurm_job_running(running["slurm_job_id"])
+            alive = rt.is_slurm_job_running(running["slurm_job_id"])
             stale_by_age = False
             if running["start_time"]:
                 started = datetime.fromisoformat(running["start_time"])

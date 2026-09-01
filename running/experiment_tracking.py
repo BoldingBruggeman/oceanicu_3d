@@ -1115,6 +1115,49 @@ def finish_chunk(
         conn.commit()
 
 
+def is_slurm_job_running(job_id: Optional[str]) -> Optional[bool]:
+    """True/False if squeue can tell us the job is still active; None if
+    it can't be determined (no job_id recorded, squeue unavailable, or it
+    errored) -- callers fall back to a time-based staleness check.
+
+    Deliberately NOT a filesystem/DB operation, so NOT @_rpc_or_local --
+    squeue only exists on the machine that's actually part of the SLURM
+    cluster (the HPC), never on the relay, so this always runs locally on
+    the caller, same category as is_paused's own per-experiment PAUSE-
+    file check. Shared by chunk_runner.py's own start-of-chunk lock/
+    orphan check and reap_orphaned_chunks.py's periodic watchdog sweep --
+    single source of truth for "is this recorded job actually still
+    alive," not duplicated logic that could quietly drift apart."""
+    if not job_id:
+        return None
+    try:
+        result = subprocess.run(
+            ["squeue", "-h", "-j", str(job_id)], capture_output=True, text=True, timeout=15,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return None
+    if result.returncode != 0:
+        return None
+    return bool(result.stdout.strip())
+
+
+@_rpc_or_local
+def list_running_chunks(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    """Every chunk currently marked 'running', across ALL experiments --
+    the cross-experiment counterpart to get_running_chunk (which is
+    scoped to one experiment_id, used as chunk_runner.py's own start-of-
+    chunk lock). Used by reap_orphaned_chunks.py's periodic watchdog
+    sweep to find every experiment that might have a stale 'running'
+    chunk left behind by a job that died without chunk_runner.py itself
+    getting the chance to record the failure (e.g. the whole job's
+    cgroup OOM-killed at once, taking out chunk_runner.py along with the
+    MPI ranks it was waiting on -- confirmed happening in production,
+    2026-09-01)."""
+    return conn.execute(
+        "SELECT * FROM chunks WHERE status = 'running' ORDER BY experiment_id, chunk_index",
+    ).fetchall()
+
+
 @_rpc_or_local
 def get_running_chunk(conn: sqlite3.Connection, experiment_id: str) -> Optional[sqlite3.Row]:
     """The chunk currently marked 'running' for this experiment, if any -- used

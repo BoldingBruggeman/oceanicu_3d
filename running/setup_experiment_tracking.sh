@@ -180,6 +180,24 @@ case "$role" in
         echo "    OCEANICU_EXPERIMENT_DB=$path/submission_registry.sqlite $scripts_dir/bin/restart_registry_watcher.sh"
         echo "  If it's missing entirely, the watchdog logs one clear message and gives"
         echo "  up gracefully (not a retry-forever loop) -- the cron above still covers you."
+        echo
+        echo "Optional FOURTH cron, on the LOGIN NODE specifically (needs squeue, same"
+        echo "requirement as chunk_runner.py's own liveness check -- never on the relay)"
+        echo "-- proactively reaps chunks left stuck at status=running by a job that died"
+        echo "without chunk_runner.py itself getting the chance to record the failure"
+        echo "(e.g. the whole job's cgroup OOM-killed at once, taking chunk_runner.py out"
+        echo "along with the MPI ranks it was waiting on -- confirmed happening in"
+        echo "production, 2026-09-01). Without this, that stale 'running' status just"
+        echo "sits there indefinitely, with zero new history entries, until a human"
+        echo "happens to notice and manually retry something -- the existing lock/orphan"
+        echo "check in chunk_runner.py only ever runs the next time someone tries to"
+        echo "start a NEW chunk for that same experiment, it's lazy, not proactive:"
+        echo "  crontab -e   # on the login node -- then add a line like:"
+        echo "  */30 * * * * OCEANICU_EXPERIMENT_DB=$path/submission_registry.sqlite $scripts_dir/bin/reap-orphaned-chunks >> $queue_dir/reap_orphaned_chunks.log 2>&1"
+        echo "  Same conservative fallback as chunk_runner.py's own check: if squeue"
+        echo "  can't confirm a job is dead (unavailable, or ambiguous), a chunk is only"
+        echo "  ever reaped once its start_time is >4 days old -- never a false positive"
+        echo "  from a merely-slow squeue or a brief network blip."
         ;;
     relay)
         # Same two independent paths as hpc, same reasoning: hpc_commands/
