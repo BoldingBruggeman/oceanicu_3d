@@ -18,6 +18,7 @@ machine use the same directory or even the same username:
 | `oceanicu_experiments.py` | the CLI you use day to day: register experiments, check status, pause/resume, rerun. |
 | `experiment_defaults.yaml` | single source of truth for `add`'s optional-flag defaults (`chunk_kind`, `chunk_multiplier`, `np`, `launcher`, `priority`, `chunk_delay_seconds`) -- edit this, not scattered argparse literals. Lives here so it travels with `oceanicu_experiments.py` via whatever already deploys `running/`; falls back to hardcoded values if ever missing rather than crashing. |
 | `chunk_runner.py` | runs exactly one chunk. Called by `run_chunk.slurm`; you don't normally invoke it by hand except when testing (see below). |
+| `health_check.py` | periodic CPU-stall watchdog for whichever chunk is currently running -- called every ~10 min from `run_chunk.slurm`'s own background loop (ON by default, `OCEANICU_SKIP_HEALTH_CHECK=1` to disable). Replaced the old GETM-log NaN scan entirely, 2026-09-02. See "Monitoring a running chunk" below. |
 | `reap_orphaned_chunks.py` | cron watchdog: proactively marks chunks stuck at `status=running` as failed once their SLURM job is confirmed dead (or old enough that it's assumed dead) -- catches a job whose whole cgroup got killed before `chunk_runner.py` itself could record the failure. Login node only (needs `squeue`). See `setup_experiment_tracking.sh`'s own printed cron guidance (`hpc` role, "Optional FOURTH cron") for the crontab line. |
 | `run_chunk.slurm` | the SLURM job. Runs one chunk, then resubmits itself for the next one -- or, once an experiment reaches its `stop_date`, for the next queued experiment (see "The queue" below). |
 | `experiment_tracking_server.py` | RPC entrypoint for accessing the registry across machines with no direct network path between them -- see "Working across machines" below. Only needed on the relay machine, and only if you need that at all. |
@@ -466,6 +467,42 @@ Must be run on a machine that's actually part of the SLURM cluster (the
 HPC) -- same constraint as `squeue`/`scancel` themselves, not runnable
 from bb-server1 or a workstation. Once killed, `rerun --from-current`
 (or `--from-chunk`/`--from-scratch`) redoes it.
+
+## Monitoring a running chunk (auto-kill on a real stall)
+
+`run_chunk.slurm` runs `health_check.py` roughly every 10 min (`OCEANICU_
+HEALTH_CHECK_INTERVAL_SECONDS` to change; `OCEANICU_SKIP_HEALTH_CHECK=1`
+to disable entirely) for as long as a chunk is actually running.
+Replaced the old GETM-log NaN scan entirely -- SLURM's own `sstat`
+instead of log content, so it works regardless of how much output GETM
+produces and catches a DIFFERENT, arguably more common failure mode: an
+MPI job that's silently HUNG (one rank diverged/crashed on a NaN
+internally, the others stuck forever in a blocking collective waiting
+for it) rather than one that actually prints "nan" anywhere.
+
+Each cycle checks the job's own cumulative CPU time (`sstat`'s
+`TotalCPU`). Two consecutive checks with no increase (a real, sustained
+stall, not just one slow interval doing something legitimately
+CPU-light like a big I/O flush) -- `scancel`, then the chunk is marked
+`failed` same as any other failure. One non-increasing reading alone is
+only ever a warning, never fatal.
+
+**Known limitation:** not every real MPI hang shows up as near-zero CPU
+-- some MPI implementations/collectives busy-poll while "waiting"
+(spinning at ~100% CPU doing no useful work), which this can't tell
+apart from genuine progress. Catches the blocking-wait style of hang,
+not every conceivable one.
+
+Every check -- healthy or a not-yet-fatal warning -- OVERWRITES
+`chunks.last_health_check` (visible in `oceanicu-experiments show`) rather
+than adding a history row each time; a multi-day chunk checked every 10
+min would otherwise flood history with hundreds of routine entries. The
+one time it DOES matter -- the watchdog actually killing a stalled job
+-- gets a real, permanent `history` entry explaining why, right next to
+the `chunk_failed`/`run_failed` entries `finish_chunk` logs for it.
+
+Must run on a machine that's actually part of the SLURM cluster (needs
+`sstat`/`scancel`) -- same constraint as `kill`/`reap_orphaned_chunks.py`.
 
 ## Change chunk size mid-experiment
 

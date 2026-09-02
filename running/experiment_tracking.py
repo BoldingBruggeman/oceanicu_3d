@@ -145,6 +145,17 @@ CREATE TABLE IF NOT EXISTS chunks (
     -- but chunk_runner.py can also be invoked by hand for testing, so
     -- this records reality per chunk rather than assuming.
     submitted_host TEXT,
+    -- last_health_check added 2026-09-02 (see _migrate_schema). OVERWRITTEN
+    -- on every health_check.py cycle (roughly every 10 min while a chunk
+    -- is actually running) -- deliberately NOT one history row per check
+    -- (a multi-day chunk checked every 10 min would flood the audit log
+    -- with hundreds of routine "still OK" entries for no benefit; only
+    -- the LATEST status matters day-to-day). A genuine state change (the
+    -- watchdog actually killing the job) still gets a real history entry
+    -- via record_health_check, on top of finish_chunk's own
+    -- chunk_failed/run_failed -- this column is a live heartbeat, not
+    -- the audit trail.
+    last_health_check TEXT,
     PRIMARY KEY (experiment_id, chunk_index),
     FOREIGN KEY (experiment_id) REFERENCES experiments(experiment_id)
 );
@@ -197,6 +208,9 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         conn.commit()
     if "submitted_host" not in chunk_cols:
         conn.execute("ALTER TABLE chunks ADD COLUMN submitted_host TEXT")
+        conn.commit()
+    if "last_health_check" not in chunk_cols:
+        conn.execute("ALTER TABLE chunks ADD COLUMN last_health_check TEXT")
         conn.commit()
 
     run_cols = {row["name"] for row in conn.execute("PRAGMA table_info(experiments)")}
@@ -1161,6 +1175,42 @@ def cancel_slurm_job(job_id: str) -> tuple[bool, str]:
     if result.returncode != 0:
         return False, (result.stderr.strip() or result.stdout.strip() or f"scancel exited {result.returncode}")
     return True, "scancel issued"
+
+
+@_rpc_or_local
+def update_chunk_health_check(conn: sqlite3.Connection, experiment_id: str, chunk_index: int, detail: str) -> None:
+    """OVERWRITE chunks.last_health_check for one routine health_check.py
+    cycle (OK or a not-yet-fatal stall warning) -- called roughly every
+    10 min while a chunk is actually running. Deliberately NOT a history
+    row per check (see the column's own comment in the schema) -- just
+    the live heartbeat, so "is this run still making progress, and when
+    was that last confirmed" is directly answerable from
+    `oceanicu-experiments show` without needing to check squeue or tail
+    a log by hand. A genuine state change (the watchdog actually killing
+    the job) goes through record_health_check instead, a real history
+    entry."""
+    conn.execute(
+        "UPDATE chunks SET last_health_check = ? WHERE experiment_id = ? AND chunk_index = ?",
+        (detail, experiment_id, chunk_index),
+    )
+    conn.commit()
+
+
+@_rpc_or_local
+def record_health_check(
+    conn: sqlite3.Connection, experiment_id: str, chunk_index: int, detail: str,
+    user: Optional[str] = None,
+) -> None:
+    """Log a genuine health-check STATE CHANGE (the watchdog deciding to
+    kill a stalled job) to history -- a real, permanent audit entry,
+    unlike update_chunk_health_check's routine overwritten heartbeat.
+    Explains WHY the chunk_failed/run_failed entries finish_chunk logs
+    right after this happened (a bare exit_code=-1 alone doesn't say
+    "CPU stalled for 20 min", this does). Paired with health_check.py's
+    own CPU-stall detection -- this function just records the result,
+    it doesn't decide anything itself."""
+    _log_history(conn, experiment_id, "health_check", f"chunk {chunk_index}: {detail}", user=user)
+    conn.commit()
 
 
 @_rpc_or_local

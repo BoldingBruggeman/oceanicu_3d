@@ -19,10 +19,10 @@
 # the relay, not here):
 #   cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://relay/abs/path/db.sqlite',OCEANICU_RELAY_DIR='/abs/path/on/relay' run_chunk.slurm
 #
-# OCEANICU_NAN_CHECK=1 (optional): the NaN-watching background loop is
-# OFF by default -- set OCEANICU_NAN_CHECK=1 (any non-empty value) to
-# turn it on. See its own comment further down for what it does and why
-# you might want to enable it.
+# OCEANICU_SKIP_HEALTH_CHECK=1 (optional): the CPU-stall health-check
+# watchdog (health_check.py, via sstat -- ON by default) is skipped if
+# set. See its own comment further down for what it does and why you
+# might want to disable it.
 #
 # The leading `ALL,` matters -- without it, --export replaces the job's
 # ENTIRE environment with just the listed vars, including dropping HOME
@@ -234,55 +234,29 @@ for _ in $(seq 1 60); do
 done
 LOGFILE="$(cat "$POINTER_FILE" 2>/dev/null)/getm-0000.log"
 
-# OCEANICU_NAN_CHECK (optional): the NaN watchdog is OFF by default --
-# set (any non-empty value) to turn it on, e.g. while diagnosing a run
-# that's actually suspected of producing NaN. Off by default because
-# "nan" can legitimately show up in log lines that aren't real errors,
-# and the watchdog isn't free (see the fork-per-line slowdown this
-# tail/while loop itself was rewritten to avoid, below). MONITOR_PID is
-# still defined either way (empty when off), since the cleanup below
-# (kill/wait "$MONITOR_PID") runs unconditionally and this script has
-# `set -u` -- an empty value is a safe no-op there, an unset one would
-# abort the script.
-if [ -z "${OCEANICU_NAN_CHECK:-}" ]; then
-    echo "OCEANICU_NAN_CHECK not set -- not watching $LOGFILE for NaN (default)."
+# OCEANICU_SKIP_HEALTH_CHECK (optional): the CPU-stall health-check
+# watchdog is ON by default -- set (any non-empty value) to turn it OFF
+# for this run. Replaces the old GETM-log NaN scan entirely (2026-09-02,
+# per user: "the DB do not reflect if e.g. there has been a blow up") --
+# see health_check.py's own docstring for what it actually checks
+# (sstat's own TotalCPU for this job, not log content) and its known
+# limitation (a busy-polling MPI hang looks like healthy CPU usage, not
+# a stall). ON by default because, unlike the old NaN scan, this is
+# cheap regardless of how much log output GETM produces -- one sstat
+# call every ~10 min, not a per-log-line operation.
+if [ -n "${OCEANICU_SKIP_HEALTH_CHECK:-}" ]; then
+    echo "OCEANICU_SKIP_HEALTH_CHECK set -- not health-checking this job."
     MONITOR_PID=""
 else
-( shopt -s nocasematch
-  # Portable POSIX-ERE word-boundary equivalent -- bash's own [[ =~ ]]
-  # (glibc regex via regcomp, no PCRE) does NOT support \b as a word-
-  # boundary anchor the way grep -P or Perl do; confirmed by direct
-  # testing (\bnan\b silently matched nothing at all, every time,
-  # rather than erroring). "nan" must be preceded and followed by
-  # either the string boundary or a non-alphanumeric character, so a
-  # standalone "nan" token matches (any case, via nocasematch above)
-  # but "banana"/"nanometer" don't.
-  nan_pattern='(^|[^a-zA-Z0-9])nan($|[^a-zA-Z0-9])'
-  tail -n 0 -F "$LOGFILE" 2>/dev/null |
-  while IFS= read -r line; do
-      # NOT a fixed 'salt:' prefix -- NaN can show up in any logged
-      # variable (temp, u, v, elevation, ...), not just salinity.
-      #
-      # bash's own [[ =~ ]], NOT `echo "$line" | grep -qiE` -- that
-      # forked two new processes (echo, grep) for EVERY single line
-      # GETM writes, for the entire chunk's runtime. Confirmed causing
-      # a real production slowdown (fine for the first ~15 simulated
-      # days, then degrading to minutes/day): this script runs with
-      # --exclusive --ntasks-per-node=64, so there is zero spare CPU on
-      # the node for that forking overhead to absorb -- every fork
-      # directly steals cycles from the MPI ranks -- made worse by
-      # running on a parallel filesystem (scyllapfs), where process
-      # startup (dynamic linking, etc.) is markedly slower than on
-      # local disk. [[ =~ ]] does the identical case-insensitive,
-      # word-boundaried check with zero process creation.
-      if [[ "$line" =~ $nan_pattern ]]; then
-          echo "========================================"
-          echo "NaN detected! Cancelling SLURM job $SLURM_JOB_ID"
-          echo "  offending line: $line"
-          echo "========================================"
-          scancel "$SLURM_JOB_ID"
-          exit 1
-      fi
+( HEALTH_CHECK_INTERVAL_SECONDS="${OCEANICU_HEALTH_CHECK_INTERVAL_SECONDS:-600}"
+  while kill -0 "$RUNNER_PID" 2>/dev/null; do
+      sleep "$HEALTH_CHECK_INTERVAL_SECONDS" &
+      wait $! 2>/dev/null
+      # chunk_runner.py may have finished (and RUNNER_PID exited) during
+      # that sleep -- don't bother running a cycle for a chunk that's
+      # already done.
+      kill -0 "$RUNNER_PID" 2>/dev/null || break
+      python3 "$SCRIPT_DIR/health_check.py" --experiment-id "$EXPERIMENT_ID"
   done ) &
 MONITOR_PID=$!
 fi

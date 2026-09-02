@@ -532,7 +532,7 @@ def cmd_show(args: argparse.Namespace) -> int:
             chunks_display,
             ["chunk_index", "start", "stop", "status", "exit_code", "nan_detected",
              "script_sha256", "config_sha256", "slurm_job_id", "submitted_host",
-             "start_time", "end_time"],
+             "start_time", "end_time", "last_health_check"],
         )
         print()
         print("history:")
