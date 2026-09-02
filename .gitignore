@@ -1,5 +1,6 @@
 *.log
 *.nc
+!NSe/Bathymetry/bathymetry_nse.nc
 *.prof
 *.prof.stats
 __pycache__
