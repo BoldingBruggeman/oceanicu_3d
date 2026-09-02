@@ -1123,6 +1123,17 @@ silently double-registering anything. No data corruption either way,
 just a confusing-looking `failed` entry for an experiment that's actually fine
 -- check `oceanicu-experiments show <experiment_id>` if one shows up unexpectedly.
 
+**Push-back (paper trail, not a fix for the above):** after applying,
+every queue file that had at least one entry change status this run
+gets pushed BACK to the same `--pull-from` remote directory -- under a
+renamed, non-`queue_*.yaml` name (e.g. `queue_kb.yaml` ->
+`applied-queue_kb-20260902T120000Z.yaml`), never overwriting the live
+file. Lets whoever's on bb-server1 see what got applied/failed and its
+real result note without logging into the HPC. This does NOT fix the
+limitation above -- the live `queue_kb.yaml` still never learns an
+entry was applied, so a fresh append there still reverts everything to
+pending on the next pull; it's a separate, additive breadcrumb.
+
 **`get_commands_and_update_registry.py` never calls `sbatch`, for any
 experiment, new or resubmitting.** Submitting a job is always a deliberate
 manual action on whoever's machine actually runs SLURM -- this only

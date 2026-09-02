@@ -79,6 +79,14 @@ double-registering anything. No data corruption either way, just a
 confusing-looking `failed` entry for an experiment that's actually fine; check
 `oceanicu-experiments show <experiment_id>` if one shows up unexpectedly.
 
+After applying, each queue file that had at least one entry change status
+this run is pushed BACK to the same `--pull-from` remote directory, under
+a renamed, non-`queue_*.yaml` archival name (see `_push_back_applied`'s
+own docstring) -- a paper trail of what got applied/failed and when,
+visible from bb-server1 without needing to log into the HPC. This is
+purely additive and does NOT fix the limitation above: the live
+`queue_kb.yaml` itself still never learns an entry was applied.
+
 Usage:
     python get_commands_and_update_registry.py --db /local/path/submission_registry.sqlite \\
         --queue-dir /local/path/hpc_commands/ \\
@@ -173,6 +181,44 @@ def _verify_experiment_files_present(experiment_root: str, script: str, config: 
 
 def _write_back(path: Path, data: dict) -> None:
     path.write_text(yaml.safe_dump(data, sort_keys=False))
+
+
+def _push_back_applied(remote: str, touched: list[Path]) -> None:
+    """rsync each queue file that had at least one entry applied/failed
+    this run back to the SAME remote directory --pull-from pulled it
+    from, under a renamed, non-`queue_*.yaml` archival name -- e.g.
+    `queue_kb.yaml` -> `applied-queue_kb-20260902T120000Z.yaml`.
+
+    Deliberately a NEW name, never overwriting the original: the real
+    `queue_kb.yaml` on bb-server1 is a live, still-being-appended-to file
+    (people keep queuing new commands into it via `oceanicu-experiments
+    --queue`), so blindly overwriting it with this machine's post-apply
+    copy would race with -- and could silently drop -- anything queued
+    there since this run's own --pull-from pull. The renamed copy also
+    deliberately does NOT match the `queue_*.yaml` glob, so it can never
+    be mistaken for a live queue file by _pull's own --include filter or
+    by the applier's own queue_dir.glob("queue_*.yaml") on either side.
+
+    Purely an archival record for whoever's on bb-server1 to glance at
+    ("did my command actually go through, and what did it say") --
+    does NOT fix this module's own documented "Known limitation" above
+    (the live queue_kb.yaml itself still has no way to learn an entry
+    was applied, so a fresh append there still gets the whole file
+    reverted to pending-for-everything on the next pull); this is a
+    separate, additive breadcrumb, not a fix for that."""
+    remote_dir = remote.rstrip("/")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    for qp in touched:
+        archival_name = f"applied-{qp.stem}-{ts}{qp.suffix}"
+        dest = f"{remote_dir}/{archival_name}"
+        result = subprocess.run(
+            ["rsync", "-a", str(qp), dest], capture_output=True, text=True,
+        )
+        if result.returncode != 0:
+            print(f"{_ts()}: WARNING: failed to push {qp.name} back to {dest} "
+                  f"(rc={result.returncode}): {result.stderr.strip()}", file=sys.stderr)
+        else:
+            print(f"{_ts()}: pushed {qp.name} -> {dest}")
 
 
 def _pull(remote: str, queue_dir: Path) -> "int | None":
@@ -349,6 +395,11 @@ def main() -> int:
     )
     print(f"{_ts()}: done: {applied} applied, {failed} failed, {still_pending} still pending "
           f"(across {len(queue_paths)} queue file(s)).")
+
+    if args.pull_from:
+        touched = sorted({qp for qp, _ in pending})
+        _push_back_applied(args.pull_from, touched)
+
     return 1 if failed else 0
 
 
