@@ -19,9 +19,10 @@
 # the relay, not here):
 #   cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://relay/abs/path/db.sqlite',OCEANICU_RELAY_DIR='/abs/path/on/relay' run_chunk.slurm
 #
-# OCEANICU_SKIP_NAN_CHECK=1 (optional): skip the NaN-watching background
-# loop entirely -- see its own comment further down for what it does and
-# why you might want to disable it.
+# OCEANICU_NAN_CHECK=1 (optional): the NaN-watching background loop is
+# OFF by default -- set OCEANICU_NAN_CHECK=1 (any non-empty value) to
+# turn it on. See its own comment further down for what it does and why
+# you might want to enable it.
 #
 # The leading `ALL,` matters -- without it, --export replaces the job's
 # ENTIRE environment with just the listed vars, including dropping HOME
@@ -233,16 +234,18 @@ for _ in $(seq 1 60); do
 done
 LOGFILE="$(cat "$POINTER_FILE" 2>/dev/null)/getm-0000.log"
 
-# OCEANICU_SKIP_NAN_CHECK (optional): set (any non-empty value) to skip
-# starting the NaN watchdog entirely -- e.g. to isolate/rule it out while
-# diagnosing an unrelated slowdown, or for a model/config where "nan"
-# legitimately shows up in log lines that aren't real errors. MONITOR_PID
-# is still defined either way (empty when skipped), since the cleanup
-# below (kill/wait "$MONITOR_PID") runs unconditionally and this script
-# has `set -u` -- an empty value is a safe no-op there, an unset one
-# would abort the script.
-if [ -n "${OCEANICU_SKIP_NAN_CHECK:-}" ]; then
-    echo "OCEANICU_SKIP_NAN_CHECK set -- not watching $LOGFILE for NaN."
+# OCEANICU_NAN_CHECK (optional): the NaN watchdog is OFF by default --
+# set (any non-empty value) to turn it on, e.g. while diagnosing a run
+# that's actually suspected of producing NaN. Off by default because
+# "nan" can legitimately show up in log lines that aren't real errors,
+# and the watchdog isn't free (see the fork-per-line slowdown this
+# tail/while loop itself was rewritten to avoid, below). MONITOR_PID is
+# still defined either way (empty when off), since the cleanup below
+# (kill/wait "$MONITOR_PID") runs unconditionally and this script has
+# `set -u` -- an empty value is a safe no-op there, an unset one would
+# abort the script.
+if [ -z "${OCEANICU_NAN_CHECK:-}" ]; then
+    echo "OCEANICU_NAN_CHECK not set -- not watching $LOGFILE for NaN (default)."
     MONITOR_PID=""
 else
 ( shopt -s nocasematch
