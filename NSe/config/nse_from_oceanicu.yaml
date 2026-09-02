@@ -155,21 +155,11 @@ data_assignments:
 - target: simulation.radiation.kc2
   kind: constant
   constant_value: 3.23
-- target: open_boundaries.z
-  kind: tpxo
-  tpxo_folder: ${TPXO_FOLDER}
-  tpxo_variable: h
-  on_grid: true
-- target: open_boundaries.u
-  kind: tpxo
-  tpxo_folder: ${TPXO_FOLDER}
-  tpxo_variable: u
-  on_grid: true
-- target: open_boundaries.v
-  kind: tpxo
-  tpxo_folder: ${TPXO_FOLDER}
-  tpxo_variable: v
-  on_grid: true
+# open_boundaries.z/u/v (2D barotropic boundary values) are no longer
+# static entries here -- derive_data_assignments (driver/
+# oceanicu_providers.py) now derives them dynamically from
+# boundaries.barotropic.source above (TPXO/CMEMS/CMIP6), same as
+# open_boundary.temp/salt.values already is from boundaries.baroclinic.
 - target: open_boundary.temp
   kind: boundary_type
   boundary_condition_type: SPONGE

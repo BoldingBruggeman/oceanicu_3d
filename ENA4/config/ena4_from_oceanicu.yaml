@@ -4,43 +4,38 @@
 #
 #   python driver/oceanicu_driver.py ENA4/config/ena4_from_oceanicu.yaml --start ... --stop ...
 #
-# One real, flagged deviation from the old ena4_model_config.yaml: meteo.
-# source is ERA5 here, NOT the old config's own real CMIP6 choice --
-# /data/BiasCorrected (${CMIP6_FOLDER}) has NO real data on this machine at
-# all (confirmed directly: the directory exists but is empty), so CMIP6
-# can't be verified end-to-end here. Real CMIP6 values are present below as
-# an inactive alternative, unverified. Unlike AMM7's barotropic-CMEMS gap,
-# this isn't a driver code gap -- meteo.source: CMIP6 IS wired up
-# (oceanicu_driver.py has a real CMIP6 branch); there's just no real data
-# to verify it against on this machine.
+# meteo.source is ERA5 here, not the old config's own CMIP6 choice --
+# CMIP6 meteo.source IS wired up (oceanicu_driver.py has a real CMIP6
+# branch); this domain's own bias-corrected data just isn't available on
+# this machine. Real CMIP6 values are present below as an inactive
+# alternative, ready once that data is.
 #
-# boundaries.barotropic/baroclinic use TPXO/WOA here, matching the OLD
-# config's own real active choices exactly (no gap/deviation, unlike AMM7).
+# boundaries.barotropic/baroclinic use TPXO/WOA here, matching the old
+# config's own active choices exactly (no deviation, unlike AMM7).
 
 # ----------------------------------------------------------------------
 # Domain -- unlike AMM7/NSe (a plain bathymetry NetCDF, BathymetryFile),
-# this file is a real pygetm Domain.to_xarray() snapshot -- confirmed
-# directly: H.shape is a supergrid (2*ny+1, 2*nx+1), T/U/V/X points
-# interleaved by index parity, not a plain (ny, nx) array. Confirmed
-# against OceanICU's own Bathymetry/create_bathymetry.py (builds via
-# create_spherical(lon, lat) then domain.to_xarray().to_netcdf(...)) and
-# run_model.py's own create_domain() (every setup except amm7/nse routes
-# through pygetm.domain.from_xarray() for exactly this reason). Needed a
-# real pygetm-config core fix -- see that repo's own TODO item 38
-# (method: DomainSnapshot). z0 here overrides the file's own z0 variable
-# (confirmed a 0.0 placeholder, not meant to be used as-is), matching
-# run_model.py's own real post-build override.
+# this file is a real pygetm Domain.to_xarray() snapshot: H.shape is a
+# supergrid (2*ny+1, 2*nx+1), T/U/V/X points interleaved by index parity,
+# not a plain (ny, nx) array -- matches OceanICU's own
+# Bathymetry/create_bathymetry.py (builds via create_spherical(lon, lat)
+# then domain.to_xarray().to_netcdf(...)) and run_model.py's own
+# create_domain() (every setup except amm7/nse routes through
+# pygetm.domain.from_xarray() for exactly this reason), read via
+# pygetm-config's own DomainSnapshot domain choice. z0 here overrides the
+# file's own z0 variable (a 0.0 placeholder, not meant to be used as-is),
+# matching run_model.py's own post-build override.
 domain:
   method: DomainSnapshot
   path: ${BATHYMETRY_FOLDER}/bathymetry_ena4.nc
   z0: 0.01
 
 # ----------------------------------------------------------------------
-# Open boundaries -- straight from lib/cfg_boundaries.py's own real,
-# hardcoded `if cfg.setup == "ena4":` block (4 segments; note the file's
-# own `+ 1` on each mstop -- add_by_index's stop is exclusive, already
-# accounted for below). type_3d intentionally omitted, same reasoning as
-# NSe/AMM7 (SPONGE forced unconditionally via data_assignments below).
+# Open boundaries -- straight from lib/cfg_boundaries.py's own hardcoded
+# `if cfg.setup == "ena4":` block (4 segments; note the file's own `+ 1`
+# on each mstop -- add_by_index's stop is exclusive, already accounted for
+# below). type_3d intentionally omitted, same reasoning as NSe/AMM7
+# (SPONGE forced unconditionally via data_assignments below).
 open_boundaries:
   - side: WEST
     l: 0
@@ -66,12 +61,13 @@ open_boundaries:
 # ----------------------------------------------------------------------
 simulation:
   runtype: BAROCLINIC
+  gotm: ${GOTM_FOLDER}/gotm.yaml
   Dcrit: 0.5
   Dmin: 0.1
   advection_scheme: SUPERBEE
 
-  # Real difference from NSe/AMM7: ddl=0.05, not 0.75 (confirmed directly
-  # against the real old config -- ENA4/ENA8 share this value, NS doesn't).
+  # Differs from NSe/AMM7: ddl=0.05, not 0.75 -- ENA4/ENA8 share this
+  # value, NS doesn't.
   vertical_coordinates:
     type: GVC
     Sigma:
@@ -122,6 +118,21 @@ simulation:
     BlumbergMellor: {}
     ShchepetkinMcwilliams: {}
 
+  airsea:
+    type: FluxesFromMeteo
+    Fluxes:
+      taux: 0.0
+      tauy: 0.0
+      sp: 101325.0
+      shf: 0.0
+      swr: 0.0
+      pe: 0.0
+    FluxesFromMeteo:
+      shortwave_method: NET_FLUX
+      longwave_method: DOWNWARD_FLUX
+      humidity_measure: DEW_POINT_TEMPERATURE
+      calculate_evaporation: true
+
   radiation:
     type: TwoBand
     Radiation: {}
@@ -129,7 +140,7 @@ simulation:
       reflect_at_bottom: false
 
   momentum:
-    # Real difference from NSe/AMM7 (An=25): ENA4/ENA8 both use An=100.
+    # Differs from NSe/AMM7 (An=25): ENA4/ENA8 both use An=100.
     An: 100
     Am: 0
     cnpar: 1
@@ -157,29 +168,71 @@ data_assignments:
   - target: simulation.radiation.kc1
     kind: constant
     constant_value: 0.54
-  # ObsKd: True (real old value, same as AMM7) -- real KD490 climatology
-  # for kc2 instead of a fixed constant.
+  # ObsKd: True (same as AMM7) -- space-varying KD490 climatology for kc2
+  # instead of a fixed constant.
   - target: simulation.radiation.kc2
     kind: file
     file: ${KD490_FOLDER}/KD490_clim.nc
     variable: KD490_filled
     climatology: true
 
-  - target: open_boundaries.z
-    kind: tpxo
-    tpxo_folder: ${TPXO_FOLDER}
-    tpxo_variable: h
-    on_grid: true
-  - target: open_boundaries.u
-    kind: tpxo
-    tpxo_folder: ${TPXO_FOLDER}
-    tpxo_variable: u
-    on_grid: true
-  - target: open_boundaries.v
-    kind: tpxo
-    tpxo_folder: ${TPXO_FOLDER}
-    tpxo_variable: v
-    on_grid: true
+  - target: simulation.airsea.t2m
+    kind: file
+    file: ${ERA5_FOLDER}/era5_t2m_????.nc
+    variable: t2m
+    pre_transform_offset: -273.15
+  - target: simulation.airsea.d2m
+    kind: file
+    file: ${ERA5_FOLDER}/era5_d2m_????.nc
+    variable: d2m
+    pre_transform_offset: -273.15
+  - target: simulation.airsea.u10
+    kind: file
+    file: ${ERA5_FOLDER}/era5_u10_????.nc
+    variable: u10
+  - target: simulation.airsea.v10
+    kind: file
+    file: ${ERA5_FOLDER}/era5_v10_????.nc
+    variable: v10
+  - target: simulation.airsea.sp
+    kind: file
+    file: ${ERA5_FOLDER}/era5_sp_????.nc
+    variable: sp
+  - target: simulation.airsea.tp
+    kind: file
+    file: ${ERA5_FOLDER}/era5_tp_????.nc
+    variable: tp
+    pre_transform_scale: 0.0002777777777777778
+  - target: simulation.airsea.tcc
+    kind: file
+    file: ${ERA5_FOLDER}/era5_tcc_????.nc
+    variable: tcc
+  - target: simulation.airsea.swr
+    kind: file
+    file: ${ERA5_FOLDER}/era5_ssr_????.nc
+    variable: ssr
+    pre_transform_scale: 0.0002777777777777778
+  - target: simulation.airsea.swr_downwards
+    kind: file
+    file: ${ERA5_FOLDER}/era5_ssrd_????.nc
+    variable: ssrd
+    pre_transform_scale: 0.0002777777777777778
+  - target: simulation.airsea.ql
+    kind: file
+    file: ${ERA5_FOLDER}/era5_str_????.nc
+    variable: str
+    pre_transform_scale: 0.0002777777777777778
+  - target: simulation.airsea.ql_downwards
+    kind: file
+    file: ${ERA5_FOLDER}/era5_strd_????.nc
+    variable: strd
+    pre_transform_scale: 0.0002777777777777778
+
+  # open_boundaries.z/u/v (2D barotropic boundary values) are no longer
+  # static entries here -- derive_data_assignments (driver/
+  # oceanicu_providers.py) now derives them dynamically from
+  # boundaries.barotropic.source above (TPXO/CMEMS/CMIP6), same as
+  # open_boundary.temp/salt.values already is from boundaries.baroclinic.
 
   - target: open_boundary.temp
     kind: boundary_type
@@ -189,9 +242,14 @@ data_assignments:
     boundary_condition_type: SPONGE
 
 # ----------------------------------------------------------------------
-# Output. Real old shape: meteo=True (unlike AMM7's False), tides=False,
-# barotropic default_2d/3d=False, baroclinic daily surface/bottom=True +
-# monthly=True (same z_index shape as AMM7, TODO item 37).
+# Output shape: meteo=True (unlike AMM7's False), tides=False, barotropic
+# default_2d/3d=False, baroclinic daily surface/bottom=True + monthly=True
+# (same z_index shape as AMM7).
+# save_initial deliberately omitted on every file below: defaults to true
+# on a fresh start (from hydrography -- the real t=0 state is worth
+# keeping) and false on a restart (--load-restart -- it's already the
+# previous run's own last saved step, would be a duplicate). Give a file
+# its own explicit save_initial: true/false to override this.
 output:
   folder: ${OUTPUT_FOLDER}
   variable_groups:
@@ -206,7 +264,6 @@ output:
       interval_units: HOURS
       sync_interval: null
       default_dtype: float32
-      save_initial: false
       variable_requests:
         - groups: [airsea_standard, airsea_fluxes]
 
@@ -216,7 +273,6 @@ output:
       interval_units: HOURS
       sync_interval: null
       default_dtype: float32
-      save_initial: false
       variable_requests:
         - fields: [temp]
           z_index: -1
@@ -229,7 +285,6 @@ output:
       interval_units: DAYS
       sync_interval: null
       default_dtype: float32
-      save_initial: false
       variable_requests:
         - fields: [temp]
           z_index: 0
@@ -242,7 +297,6 @@ output:
       interval_units: MONTHS
       sync_interval: null
       default_dtype: float32
-      save_initial: false
       variable_requests:
         - groups: [barotropic_3d, baroclinic_3d]
           time_average: true
@@ -254,6 +308,7 @@ hydrography:
     folder: ${HYDROGRAPHY_FOLDER_CMEMS}
   WOA:
     folder: ${HYDROGRAPHY_FOLDER_WOA}
+    data_script: ${SCRIPT_FOLDER}/hydrography.py:set_hydrography_ic
   constant:
     temp: 15
     salt: 34
@@ -264,7 +319,7 @@ boundaries:
       tpxo_folder: ${TPXO_FOLDER}
     CMEMS:
       folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMEMS}
-      folder_template: "ena4/CMEMS"
+      folder_template: "ena4/hourly"
       filename_template: "hourly_{start_date}_to_{end_date}.nc"
       start_date: "2015-01-01"
       end_date: "2025-01-01"
@@ -297,15 +352,16 @@ boundaries:
 meteo:
   source: ERA5
   ERA5:
+    # folder is the FULL real path to this extraction's own .nc files (no
+    # more folder_template/model indirection).
     folder: ${ERA5_FOLDER}
-    folder_template: "{model}"
-    model: "NA"
     evaporation: true
     shortwave_method: -1
     longwave_method: -2
+    data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
   CMIP6:
-    # Real old values -- the ACTUAL old active choice, kept as an inactive
-    # alternative here (see module docstring above for why it's not active).
+    # The old config's own active choice, kept as an inactive alternative
+    # here (see module docstring above).
     folder: ${CMIP6_FOLDER}
     folder_template: "{model}/{scenario}/meteo"
     model: "MPI-ESM1-2-HR"
@@ -319,3 +375,5 @@ river_discharge:
     folder: ${RIVER_FOLDER}
     file: EMORID_1990_2024.nc
     threshold: 0
+    script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
+    data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data

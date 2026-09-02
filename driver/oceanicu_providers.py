@@ -633,6 +633,56 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "open_boundary.salt.values", "kind": "file", "file": str(_salt_file), "variable": "so", "on_grid": True, "climatology": False},
         ]
 
+    # boundaries.barotropic 2D z/u/v boundary VALUES differ by source too --
+    # TPXO: a harmonic tidal-constituent lookup (kind="tpxo", keyed by the
+    # open boundary's own lon/lat, no file+variable pair) vs CMEMS/CMIP6: a
+    # real time series already sitting at the boundary points, read directly
+    # (kind="file", zos/uo/vo) -- mirrors cfg_boundaries.py::data_2d exactly,
+    # same TPXO-vs-generic-else split. Used to be three STATIC `kind: tpxo`
+    # entries baked into every nse_*.yaml's own data_assignments -- harmless
+    # only because every domain happened to also set source: TPXO; silently
+    # wrong the moment one didn't (confirmed 2026-09-02: nse_cmems.yaml sets
+    # boundaries.barotropic.source: CMEMS but the generated script still
+    # called pygetm.input.tpxo.get, because nothing ever read that source
+    # flag). Made dynamic here instead, matching boundaries.baroclinic's own
+    # already-dynamic branch above -- this is also what makes a TUI-only
+    # switch of boundaries.barotropic.source (no direct YAML edit) "just
+    # work", same as it already does for boundaries.baroclinic.source.
+    barotropic = config.get("boundaries", {}).get("barotropic", {})
+    barotropic_source = barotropic.get("source")
+    if barotropic_source == "TPXO":
+        _tpxo_folder = barotropic.get("tpxo_folder", "")
+        entries += [
+            {"target": "open_boundaries.z", "kind": "tpxo", "tpxo_folder": _tpxo_folder, "tpxo_variable": "h", "on_grid": True},
+            {"target": "open_boundaries.u", "kind": "tpxo", "tpxo_folder": _tpxo_folder, "tpxo_variable": "u", "on_grid": True},
+            {"target": "open_boundaries.v", "kind": "tpxo", "tpxo_folder": _tpxo_folder, "tpxo_variable": "v", "on_grid": True},
+        ]
+    elif barotropic_source in ("CMEMS", "CMIP6"):
+        # Single file holding zos/uo/vo together (unlike baroclinic's CMIP6
+        # branch above, which needs one file PER variable) -- matches
+        # cfg_boundaries.py::data_2d's own generic branch, which reads all
+        # three off one resolved `fn` regardless of which non-TPXO source is
+        # active. barotropic.CMIP6.folder_template (nse_cmems.yaml's own
+        # unused '{setup}/CMIP6/{model}/{scenario}') is the only field here
+        # that isn't already covered elsewhere in this config dict -- no
+        # domain actually uses source: CMIP6 for barotropic today, so
+        # config.get("setup", "") staying empty in that case is harmless.
+        _folder = Path(barotropic.get("folder", ""))
+        if barotropic.get("folder_template"):
+            _folder = _folder / barotropic["folder_template"].format(
+                setup=config.get("setup", ""),
+                model=barotropic.get("model", ""),
+                scenario=barotropic.get("scenario", ""),
+            )
+        _file = _folder / barotropic.get("filename_template", "").format(
+            start_date=barotropic.get("start_date", ""), end_date=barotropic.get("end_date", "")
+        )
+        entries += [
+            {"target": "open_boundaries.z", "kind": "file", "file": str(_file), "variable": "zos", "on_grid": True},
+            {"target": "open_boundaries.u", "kind": "file", "file": str(_file), "variable": "uo", "on_grid": True},
+            {"target": "open_boundaries.v", "kind": "file", "file": str(_file), "variable": "vo", "on_grid": True},
+        ]
+
     # meteo's straightforward 1:1 file-read fields -- differ by SOURCE (ERA5
     # vs CMIP6 use different target fields entirely: d2m/DEW_POINT_
     # TEMPERATURE vs qa/SPECIFIC_HUMIDITY), so still can't be one single
