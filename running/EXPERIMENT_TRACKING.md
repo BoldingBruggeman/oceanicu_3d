@@ -1206,30 +1206,41 @@ changed is always a safe no-op. The file is rewritten after *each*
 command, not just at the end, so a crash partway through never loses
 already-applied statuses.
 
-**Known limitation of `--pull-from`:** it's a plain directory rsync
-(`-au`), not a merge. If a queue file gets a genuinely new entry
-appended upstream (someone's workstation) after the HPC already applied
-and status-stamped some of that same file's earlier entries, the next
-pull overwrites the whole file, reverting those earlier entries' status
-back to `pending` -- there's no channel carrying status back upstream,
-only new commands flowing down. Confirmed by testing: reapplying an
-already-applied entry is usually harmless (most actions are idempotent
--- `set-stop-date`, `pause`, ...) except `add`, which fails loudly
-(`experiment_id` already exists, a real but noisy `IntegrityError`) rather than
-silently double-registering anything. No data corruption either way,
-just a confusing-looking `failed` entry for an experiment that's actually fine
--- check `oceanicu-experiments show <experiment_id>` if one shows up unexpectedly.
+**`--pull-from` merges by id, it does not overwrite (fixed 2026-09-02):**
+`_pull` rsyncs the remote directory into a throwaway staging area, then
+merges each staged file into this machine's own local copy keyed by
+each entry's own unique `id` -- an id this machine has already resolved
+(`status != pending`, from actually applying it) keeps that resolution
+no matter what the upstream copy still says (upstream has no push-back
+channel of its own, so its copy of an already-applied id can sit at
+`pending` forever); only genuinely NEW ids get added. This is the
+actual reason the `id` field exists.
 
-**Push-back (paper trail, not a fix for the above):** after applying,
-every queue file that had at least one entry change status this run
-gets pushed BACK to the same `--pull-from` remote directory -- under a
-renamed, non-`queue_*.yaml` name (e.g. `queue_kb.yaml` ->
+This used to be a plain directory rsync (`-au`), not a merge -- every
+pull would silently revert already-resolved entries back to `pending`.
+Usually harmless (most actions are idempotent) except for two real
+incidents that prompted this fix: `add` failing loudly on a duplicate
+`experiment_id` (`IntegrityError`, noisy but not data-corrupting), and
+-- the actually dangerous one, confirmed in production 2026-09-02 -- a
+`submit-chunk` entry re-arming itself and firing a second, real
+`sbatch` call for an experiment that was already running, a genuine
+double-submission risk, not just cosmetic noise.
+
+**Push-back (paper trail, separate from the merge fix above):** after
+applying, a queue file containing ONLY the entries that actually
+changed status THIS round (not this machine's whole accumulated local
+copy, which also holds every entry resolved in earlier rounds) gets
+written and pushed BACK to the same `--pull-from` remote directory --
+under a renamed, non-`queue_*.yaml` name (e.g. `queue_kb.yaml` ->
 `applied-queue_kb-20260902T120000Z.yaml`), never overwriting the live
-file. Lets whoever's on bb-server1 see what got applied/failed and its
-real result note without logging into the HPC. This does NOT fix the
-limitation above -- the live `queue_kb.yaml` still never learns an
-entry was applied, so a fresh append there still reverts everything to
-pending on the next pull; it's a separate, additive breadcrumb.
+file. Lets whoever's on bb-server1 see exactly what happened in a given
+round -- what got applied/failed and its real result note -- without
+logging into the HPC, and without wading through everything ever
+resolved to find it. Purely additive on top of the merge fix, not a
+substitute for it -- this is what let us actually diagnose the
+2026-09-02 incident (the archival file showed the real "Submitted batch
+job NNNNNN" applied status even though the live queue file upstream
+still showed it pending).
 
 **`get_commands_and_update_registry.py` never calls `sbatch`, for any
 experiment, new or resubmitting.** Submitting a job is always a deliberate

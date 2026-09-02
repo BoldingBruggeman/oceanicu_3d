@@ -64,28 +64,32 @@ exact file) still works too, for a quick one-off or testing.
 it actually lives and how it physically gets here (rsync, at every hop,
 never git/GitHub).
 
-**Known limitation of `--pull-from`:** it's a plain directory rsync
-(`-au`, i.e. skip anything newer on the receiver), not a merge -- if a
-queue file gets a NEW entry appended upstream (workstation) after this
-machine already applied and status-stamped some of its earlier entries,
-the next pull overwrites the whole file, reverting those earlier
-entries' status back to `pending` (the upstream copy never learned they
-were applied -- there's no push-back channel for status, only a pull-in
-channel for new commands). Reapplying an already-applied entry is
-usually harmless -- most actions are idempotent (`set-stop-date`,
-`pause`, ...) -- except `add`, which fails loudly (`experiment_id` already
-exists, a real but noisy `IntegrityError`) rather than silently
-double-registering anything. No data corruption either way, just a
-confusing-looking `failed` entry for an experiment that's actually fine; check
-`oceanicu-experiments show <experiment_id>` if one shows up unexpectedly.
+**`--pull-from` merges by id, it does NOT overwrite (fixed 2026-09-02):**
+`_pull` rsyncs the remote directory into a throwaway staging area, then
+`_merge_queue_file` folds each staged file into this machine's own
+local copy keyed by each entry's own unique `id` -- an id this machine
+has already resolved (status != `pending`, from actually applying it)
+keeps its local resolution no matter what the upstream copy still says
+about it (upstream has no push-back channel of its own, so its copy of
+a since-applied id can sit at `pending` forever); only genuinely NEW
+ids get added. This is the actual reason the `id` field exists.
+
+**Why this matters, concretely:** the OLD behavior here was a plain
+directory rsync (`-au`), not a merge -- a fresh pull would silently
+revert every already-resolved entry back to `pending`, and a `submit-
+chunk` entry re-arming itself this way meant a real second `sbatch`
+call, an actually-dangerous double-submission, not just a cosmetic
+inconsistency. Confirmed happening in production, 2026-09-02, which is
+what prompted this fix (previously this section documented it as a
+"known limitation" -- it no longer is one).
 
 After applying, each queue file that had at least one entry change status
-this run is pushed BACK to the same `--pull-from` remote directory, under
-a renamed, non-`queue_*.yaml` archival name (see `_push_back_applied`'s
-own docstring) -- a paper trail of what got applied/failed and when,
-visible from bb-server1 without needing to log into the HPC. This is
-purely additive and does NOT fix the limitation above: the live
-`queue_kb.yaml` itself still never learns an entry was applied.
+this run is ALSO pushed BACK to the same `--pull-from` remote directory,
+under a renamed, non-`queue_*.yaml` archival name (see
+`_push_back_applied`'s own docstring) -- a human-readable paper trail of
+what got applied/failed and when, visible from bb-server1 without
+needing to log into the HPC. Purely additive on top of the merge fix
+above, not a substitute for it.
 
 Usage:
     python get_commands_and_update_registry.py --db /local/path/submission_registry.sqlite \\
@@ -112,6 +116,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -183,11 +188,14 @@ def _write_back(path: Path, data: dict) -> None:
     path.write_text(yaml.safe_dump(data, sort_keys=False))
 
 
-def _push_back_applied(remote: str, touched: list[Path]) -> None:
-    """rsync each queue file that had at least one entry applied/failed
-    this run back to the SAME remote directory --pull-from pulled it
-    from, under a renamed, non-`queue_*.yaml` archival name -- e.g.
-    `queue_kb.yaml` -> `applied-queue_kb-20260902T120000Z.yaml`.
+def _push_back_applied(remote: str, entries_by_file: dict[Path, list[dict]]) -> None:
+    """Write and push back a queue file containing ONLY the entries that
+    were actually resolved (changed status away from pending) THIS
+    apply round -- not this machine's full accumulated local queue file
+    (which also holds every entry resolved in EARLIER rounds too).
+    Pushed to the SAME remote directory --pull-from pulled from, under
+    a renamed, non-`queue_*.yaml` archival name -- e.g. `queue_kb.yaml`
+    -> `applied-queue_kb-20260902T120000Z.yaml`.
 
     Deliberately a NEW name, never overwriting the original: the real
     `queue_kb.yaml` on bb-server1 is a live, still-being-appended-to file
@@ -200,20 +208,24 @@ def _push_back_applied(remote: str, touched: list[Path]) -> None:
     by the applier's own queue_dir.glob("queue_*.yaml") on either side.
 
     Purely an archival record for whoever's on bb-server1 to glance at
-    ("did my command actually go through, and what did it say") --
-    does NOT fix this module's own documented "Known limitation" above
-    (the live queue_kb.yaml itself still has no way to learn an entry
-    was applied, so a fresh append there still gets the whole file
-    reverted to pending-for-everything on the next pull); this is a
-    separate, additive breadcrumb, not a fix for that."""
+    ("did my command actually go through, and what did it say, THIS
+    round") -- separate from, and additive on top of, _merge_queue_file's
+    own id-based merge (which is what actually keeps an already-resolved
+    entry from being re-applied; this function alone would NOT
+    accomplish that -- it only ever writes a differently-named archival
+    copy, never the live queue_kb.yaml upstream itself still reads
+    from)."""
     remote_dir = remote.rstrip("/")
     ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    for qp in touched:
+    for qp, entries in entries_by_file.items():
         archival_name = f"applied-{qp.stem}-{ts}{qp.suffix}"
+        tmp_path = qp.parent / f".{archival_name}.tmp"
+        _write_back(tmp_path, {"commands": entries})
         dest = f"{remote_dir}/{archival_name}"
         result = subprocess.run(
-            ["rsync", "-a", str(qp), dest], capture_output=True, text=True,
+            ["rsync", "-a", str(tmp_path), dest], capture_output=True, text=True,
         )
+        tmp_path.unlink(missing_ok=True)
         if result.returncode != 0:
             print(f"{_ts()}: WARNING: failed to push {qp.name} back to {dest} "
                   f"(rc={result.returncode}): {result.stderr.strip()}", file=sys.stderr)
@@ -221,46 +233,103 @@ def _push_back_applied(remote: str, touched: list[Path]) -> None:
             print(f"{_ts()}: pushed {qp.name} -> {dest}")
 
 
-def _pull(remote: str, queue_dir: Path) -> "int | None":
-    """rsync remote (bb-server1's hpc_commands/) into queue_dir. Returns
-    None on success, an exit code on failure. -u (skip anything newer on
-    the receiver) so a since-applied local file's status stamps aren't
-    blindly clobbered by an unchanged remote copy on every single run --
-    see this module's own docstring for the residual limitation that
-    remains regardless (a real append upstream still overwrites the
-    whole file, status stamps included).
+def _load_queue_data(path: Path) -> dict:
+    if not path.is_file():
+        return {"commands": []}
+    data = yaml.safe_load(path.read_text()) or {}
+    if isinstance(data, list):
+        data = {"commands": data}
+    return data
 
-    --include/--exclude restricts this to queue_*.yaml only, matching
-    this module's own docstring contract ("hpc_commands/ ... deliberately
-    NOT part of git ... only ever contains queue_*.yaml files"). Without
-    this, a stray editor artifact left behind on the SOURCE side (e.g.
-    someone's vim .queue_kb.yaml.swp from having the file open) gets
-    pulled in too -- confirmed 2026-09-02. That file itself is harmless
-    here (the applier's own queue_dir.glob("queue_*.yaml") never matches
-    it), but its presence is the tell for the actual failure mode: a
-    live vim buffer on bb-server1 doesn't see writes _queue_command makes
-    directly to the file on disk, so a later unrelated `:w` in that vim
-    session silently overwrites -- and loses -- any commands appended
-    since vim opened it, before this pull ever runs. Filtering the swap
-    file out of the sync doesn't fix that underlying risk (only closing/
-    reloading the vim session does), but it does stop the confusing
-    artifact from showing up on the HPC side at all."""
+
+def _merge_queue_file(local_path: Path, incoming_path: Path) -> bool:
+    """Merge a freshly-pulled queue file into the existing LOCAL one,
+    keyed by each entry's own unique `id` -- this is the actual
+    mechanism the id field was created for (a design decision from
+    earlier in this project, predating this specific fix): once THIS
+    machine has recorded a given command id as resolved (status !=
+    pending, from actually applying it), a later pull must NEVER
+    revert that id back to pending, no matter what the incoming copy
+    still says about it.
+
+    Why this matters: the UPSTREAM copy (bb-server1's queue_kb.yaml)
+    has no push-back channel of its own (see this module's docstring's
+    "Known limitation") -- it can sit there showing status: pending for
+    an id FOREVER, even long after this machine actually applied it.
+    A plain rsync overwrite (the old behavior) would blindly replace
+    this machine's own resolved copy with that stale pending one on
+    EVERY pull, causing the same command to be re-applied on every
+    single cron cycle indefinitely. Confirmed happening in production,
+    2026-09-02: a `submit-chunk` entry re-armed itself and resubmitted
+    a real SLURM job on a later cron cycle purely because of this.
+
+    Only genuinely NEW ids (never seen in the local copy before) are
+    ever added, as-is, from the incoming copy -- any id the local copy
+    already knows about (pending OR resolved) keeps exactly what the
+    local copy already says, full stop; the incoming copy is never
+    trusted over local history for an id this machine has already seen.
+    Returns True if anything was actually added (local file changed on
+    disk), False if there was nothing new (local file left untouched)."""
+    incoming_data = _load_queue_data(incoming_path)
+    local_data = _load_queue_data(local_path)
+
+    known_ids = {c["id"] for c in local_data.get("commands", []) if c.get("id")}
+    new_entries = [c for c in incoming_data.get("commands", []) if c.get("id") not in known_ids]
+    if not new_entries:
+        return False
+
+    local_data["commands"] = new_entries + local_data.get("commands", [])
+    _write_back(local_path, local_data)
+    return True
+
+
+def _pull(remote: str, queue_dir: Path) -> "int | None":
+    """rsync remote (bb-server1's hpc_commands/) into a throwaway staging
+    directory, then MERGE each staged file into queue_dir's own copy by
+    id (see _merge_queue_file's own docstring for why a plain overwrite
+    -- the old behavior here -- is actively dangerous: it silently
+    reverts this machine's own already-resolved statuses back to
+    pending on every pull, causing indefinite re-application). Returns
+    None on success, an exit code on failure.
+
+    --include/--exclude restricts the rsync to queue_*.yaml only,
+    matching this module's own docstring contract ("hpc_commands/ ...
+    deliberately NOT part of git ... only ever contains queue_*.yaml
+    files"). Without this, a stray editor artifact left behind on the
+    SOURCE side (e.g. someone's vim .queue_kb.yaml.swp from having the
+    file open) gets pulled in too -- confirmed 2026-09-02. That file
+    itself is harmless here (the applier's own queue_dir.glob("queue_*.yaml")
+    never matches it), but its presence is the tell for the actual
+    failure mode: a live vim buffer on bb-server1 doesn't see writes
+    _queue_command makes directly to the file on disk, so a later
+    unrelated `:w` in that vim session silently overwrites -- and loses
+    -- any commands appended since vim opened it, before this pull ever
+    runs. Filtering the swap file out of the sync doesn't fix that
+    underlying risk (only closing/reloading the vim session does), but
+    it does stop the confusing artifact from showing up on the HPC side
+    at all."""
     queue_dir.mkdir(parents=True, exist_ok=True)
+    staging_dir = queue_dir / ".pull_staging"
+    staging_dir.mkdir(parents=True, exist_ok=True)
     src = remote.rstrip("/") + "/"
-    dst = str(queue_dir).rstrip("/") + "/"
+    dst = str(staging_dir).rstrip("/") + "/"
     result = subprocess.run(
-        ["rsync", "-au", "-i", "--include=queue_*.yaml", "--exclude=*", src, dst],
+        ["rsync", "-a", "-i", "--include=queue_*.yaml", "--exclude=*", src, dst],
         capture_output=True, text=True,
     )
     if result.returncode != 0:
+        shutil.rmtree(staging_dir, ignore_errors=True)
         print(f"ERROR: rsync --pull-from {remote} failed (rc={result.returncode}): "
               f"{result.stderr.strip()}", file=sys.stderr)
         return 1
-    changed = [line for line in result.stdout.splitlines() if line.strip()]
-    if changed:
-        print(f"{_ts()}: pulled {len(changed)} new/changed file(s) from {remote}:")
-        for line in changed:
-            print(f"  {line}")
+    merged_files = []
+    for staged_file in sorted(staging_dir.glob("queue_*.yaml")):
+        local_file = queue_dir / staged_file.name
+        if _merge_queue_file(local_file, staged_file):
+            merged_files.append(staged_file.name)
+    shutil.rmtree(staging_dir, ignore_errors=True)
+    if merged_files:
+        print(f"{_ts()}: merged new command(s) in from {remote}, into: {', '.join(merged_files)}")
     else:
         print(f"{_ts()}: {remote}: up to date, nothing new.")
     return None
@@ -332,14 +401,12 @@ def main() -> int:
     sources: dict[Path, dict] = {}
     pending: list[tuple[Path, dict]] = []
     for qp in queue_paths:
-        source_data = yaml.safe_load(qp.read_text()) or {}
-        # Tolerate a bare list (the pre-wrapper format some older/hand-made
-        # queue files still use) instead of crashing on .get -- matching
-        # normalization lives in oceanicu_experiments.py's _queue_command.
-        if isinstance(source_data, list):
-            source_data = {"commands": source_data}
-        sources[qp] = source_data
-        for entry in source_data.get("commands", []):
+        # _load_queue_data also tolerates a bare list (the pre-wrapper
+        # format some older/hand-made queue files still use) instead of
+        # crashing on .get -- matching normalization lives in
+        # oceanicu_experiments.py's _queue_command.
+        sources[qp] = _load_queue_data(qp)
+        for entry in sources[qp].get("commands", []):
             if entry.get("status") == "pending":
                 pending.append((qp, entry))
     pending.sort(key=lambda item: item[1].get("queued_at", ""))
@@ -397,8 +464,16 @@ def main() -> int:
           f"(across {len(queue_paths)} queue file(s)).")
 
     if args.pull_from:
-        touched = sorted({qp for qp, _ in pending})
-        _push_back_applied(args.pull_from, touched)
+        # pending's entries are the SAME dict objects mutated in-place by
+        # the apply loop above, so this already reflects each entry's
+        # real post-apply status/applied_at/note -- just grouped by which
+        # local file it came from, for _push_back_applied's own per-file
+        # archival write (see its own docstring for why this must be ONLY
+        # what changed this round, not the whole accumulated local file).
+        entries_by_file: dict[Path, list[dict]] = {}
+        for qp, entry in pending:
+            entries_by_file.setdefault(qp, []).append(entry)
+        _push_back_applied(args.pull_from, entries_by_file)
 
     return 1 if failed else 0
 
