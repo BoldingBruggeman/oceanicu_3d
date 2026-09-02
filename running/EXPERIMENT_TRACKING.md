@@ -468,6 +468,34 @@ HPC) -- same constraint as `squeue`/`scancel` themselves, not runnable
 from bb-server1 or a workstation. Once killed, `rerun --from-current`
 (or `--from-chunk`/`--from-scratch`) redoes it.
 
+## Submitting a chunk manually, from orca/bb-server1
+
+The routine chunk chain is entirely self-resubmitting (`run_chunk.slurm`
+`sbatch`s itself for the next chunk) -- no manual submission needed for
+normal operation. For the occasional exception (nobody's logged into
+HPC directly, an already-registered experiment needs a submission
+right now):
+
+```bash
+oceanicu-experiments --queue hpc_commands/queue_kb.yaml submit-chunk --experiment-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
+```
+
+queues a plain `sbatch --export=ALL,EXPERIMENT_ID=... run_chunk.slurm`
+for `get_commands_and_update_registry.py` to run on HPC, next pull --
+the one deliberate exception to that script's own rule ("never calls
+sbatch"). Deliberately **never touches the registry at all** -- no
+`--db`/`--dry-run` (a dry-run doesn't make sense here: there's no DB to
+safely redirect at a scratch copy the way every other command's
+`--dry-run` works, so it's refused outright rather than silently
+submitting a real job while claiming not to). The experiment must
+already be registered (`add`) with its files already staged --
+`submit-chunk` only ever does the one `sbatch` call, nothing else.
+
+Only actually runs on a machine that's part of the SLURM cluster (same
+constraint as `kill`/`squeue`/`scancel`) -- queueing it from orca/
+bb-server1 works fine (it's just a YAML entry until applied), running
+it directly there does not (`sbatch` itself doesn't exist there).
+
 ## Monitoring a running chunk (ON HOLD as of 2026-09-02)
 
 `health_check.py` (auto-kill a chunk on a real stall, checked every ~10

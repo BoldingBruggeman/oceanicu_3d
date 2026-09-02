@@ -54,6 +54,7 @@ these without --queue:
     oceanicu_experiments.py pause  --experiment-id ... | --all
     oceanicu_experiments.py resume --experiment-id ... | --all
     oceanicu_experiments.py kill   --experiment-id ...   # scancel the running chunk now, unlike pause
+    oceanicu_experiments.py submit-chunk --experiment-id ...   # sbatch run_chunk.slurm now; HPC only, never touches the registry
     oceanicu_experiments.py delay-all --seconds N | --clear
     oceanicu_experiments.py rerun  --experiment-id ... [--from-chunk N | --from-current | --from-scratch] [--note ...]
 
@@ -510,6 +511,59 @@ def cmd_kill(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_submit_chunk(args: argparse.Namespace) -> int:
+    """Directly `sbatch run_chunk.slurm` for an ALREADY-REGISTERED
+    experiment -- the one deliberate exception to get_commands_and_
+    update_registry.py's own rule ("never calls sbatch, submitting a
+    job is always a deliberate manual action"). For occasional manual
+    use (e.g. queued from orca/bb-server1 via --queue when nobody's
+    logged into HPC directly to run sbatch by hand) -- NOT a replacement
+    for the routine self-resubmission chain, which stays exactly as
+    automatic as before.
+
+    Deliberately never touches the registry at all -- no rt.connect(),
+    no DB read/write of any kind. Just `cd running/ && sbatch
+    --export=ALL,EXPERIMENT_ID=...`, mirroring run_chunk.slurm's own
+    self-resubmission call exactly (same ALL, prefix for the same
+    reason -- see its own comment on job 11233's HOME-dropping
+    incident). This means it's safe to run from ANY machine's own
+    oceanicu-experiments (including via --queue, where get_commands_and_
+    update_registry.py's generic subprocess dispatch already handles
+    any subcommand uniformly -- no special-casing needed there), not
+    just the one that holds the real DB -- but the ACTUAL sbatch call
+    only ever succeeds on a machine that's actually part of the SLURM
+    cluster (the HPC) with run_chunk.slurm physically deployed there,
+    same as every other SLURM-only command in this file.
+
+    Does NOT accept --db / doesn't override OCEANICU_EXPERIMENT_DB --
+    the submitted job inherits whatever's already in ITS OWN
+    environment (ALL, prefix), exactly matching how run_chunk.slurm's
+    own self-resubmission never re-specifies it either. Set up once via
+    the HPC's own cron/shell environment, not re-plumbed per
+    submission."""
+    script_dir = Path(__file__).resolve().parent
+    run_chunk = script_dir / "run_chunk.slurm"
+    if not run_chunk.is_file():
+        print(f"ERROR: {run_chunk} not found -- submit-chunk only works on a machine with "
+              f"run_chunk.slurm actually deployed (the HPC).", file=sys.stderr)
+        return 1
+    try:
+        result = subprocess.run(
+            ["sbatch", f"--export=ALL,EXPERIMENT_ID={args.experiment_id}", str(run_chunk)],
+            cwd=script_dir, capture_output=True, text=True,
+        )
+    except FileNotFoundError:
+        print("ERROR: sbatch not found -- submit-chunk only works on a machine that's actually "
+              "part of the SLURM cluster (the HPC), not orca/bb-server1. Queue it with --queue "
+              "instead, for get_commands_and_update_registry.py to apply on HPC.", file=sys.stderr)
+        return 1
+    if result.returncode != 0:
+        print(f"ERROR: sbatch failed (rc={result.returncode}): {result.stderr.strip()}", file=sys.stderr)
+        return 1
+    print(result.stdout.strip())
+    return 0
+
+
 def cmd_list(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         rows = rt.list_experiments(conn, status=args.status)
@@ -786,6 +840,16 @@ def main() -> int:
                          "failed -- unlike pause, takes effect immediately rather than at the next "
                          "chunk boundary; unlike remove, the experiment stays in the registry")
 
+    sc = sub.add_parser("submit-chunk"); _add_common(sc); sc.set_defaults(func=cmd_submit_chunk)
+    sc.add_argument("--experiment-id", required=True,
+                     help="sbatch run_chunk.slurm for this ALREADY-REGISTERED experiment, right "
+                          "now -- for occasional manual use (e.g. via --queue from orca/bb-server1 "
+                          "when nobody's on HPC directly), not the routine self-resubmission chain "
+                          "(unaffected either way). Never touches the registry at all -- --db/"
+                          "--dry-run don't apply. Only actually works run on the HPC itself, with "
+                          "run_chunk.slurm deployed alongside this script, same as every other "
+                          "SLURM-only command here.")
+
     l = sub.add_parser("list"); _add_common(l); l.set_defaults(func=cmd_list)
     l.add_argument("--status", default=None, choices=list(rt.EXPERIMENT_STATUSES))
     l.add_argument("--like", default=None, help="substring filter on experiment_id")
@@ -904,6 +968,13 @@ def main() -> int:
                   "real registry to begin with.", file=sys.stderr)
             return 1
         return _queue_command(Path(args.queue), args)
+
+    if args.cmd == "submit-chunk" and args.dry_run:
+        print("ERROR: --dry-run doesn't work for submit-chunk -- it calls sbatch directly, "
+              "with no registry involved to safely redirect at a scratch copy the way every "
+              "other command's --dry-run does. Running this WOULD submit a real job.",
+              file=sys.stderr)
+        return 1
 
     if not args.dry_run:
         try:
