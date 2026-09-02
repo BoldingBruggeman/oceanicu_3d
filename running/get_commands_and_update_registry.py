@@ -182,12 +182,29 @@ def _pull(remote: str, queue_dir: Path) -> "int | None":
     blindly clobbered by an unchanged remote copy on every single run --
     see this module's own docstring for the residual limitation that
     remains regardless (a real append upstream still overwrites the
-    whole file, status stamps included)."""
+    whole file, status stamps included).
+
+    --include/--exclude restricts this to queue_*.yaml only, matching
+    this module's own docstring contract ("hpc_commands/ ... deliberately
+    NOT part of git ... only ever contains queue_*.yaml files"). Without
+    this, a stray editor artifact left behind on the SOURCE side (e.g.
+    someone's vim .queue_kb.yaml.swp from having the file open) gets
+    pulled in too -- confirmed 2026-09-02. That file itself is harmless
+    here (the applier's own queue_dir.glob("queue_*.yaml") never matches
+    it), but its presence is the tell for the actual failure mode: a
+    live vim buffer on bb-server1 doesn't see writes _queue_command makes
+    directly to the file on disk, so a later unrelated `:w` in that vim
+    session silently overwrites -- and loses -- any commands appended
+    since vim opened it, before this pull ever runs. Filtering the swap
+    file out of the sync doesn't fix that underlying risk (only closing/
+    reloading the vim session does), but it does stop the confusing
+    artifact from showing up on the HPC side at all."""
     queue_dir.mkdir(parents=True, exist_ok=True)
     src = remote.rstrip("/") + "/"
     dst = str(queue_dir).rstrip("/") + "/"
     result = subprocess.run(
-        ["rsync", "-au", "-i", src, dst], capture_output=True, text=True,
+        ["rsync", "-au", "-i", "--include=queue_*.yaml", "--exclude=*", src, dst],
+        capture_output=True, text=True,
     )
     if result.returncode != 0:
         print(f"ERROR: rsync --pull-from {remote} failed (rc={result.returncode}): "
