@@ -445,6 +445,28 @@ rm    <the path printed above>  # resume everything
 Use the `PAUSE_ALL` sentinel if the HPC is overloaded and you need
 everything to stop cleanly without touching the database at all.
 
+## Kill a running chunk right now (hard-kill)
+
+Pause/PAUSE_ALL above are both soft -- they only stop the *next* chunk
+from starting, never the currently-running one. If a chunk is already
+running and you need it stopped immediately (not "after it finishes"),
+and you're not ready to `remove` the experiment from the registry
+entirely:
+
+```bash
+oceanicu-experiments kill --experiment-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
+```
+
+Looks up the chunk currently marked `running` for that experiment, runs
+`scancel` on its recorded `slurm_job_id`, and marks the chunk `failed`
+regardless of whether the scancel itself succeeded (a job that's
+already gone is not an error -- the point is the DB no longer claims
+something is running that isn't, or that you no longer want running).
+Must be run on a machine that's actually part of the SLURM cluster (the
+HPC) -- same constraint as `squeue`/`scancel` themselves, not runnable
+from bb-server1 or a workstation. Once killed, `rerun --from-current`
+(or `--from-chunk`/`--from-scratch`) redoes it.
+
 ## Change chunk size mid-experiment
 
 ```bash

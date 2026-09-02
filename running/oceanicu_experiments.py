@@ -53,6 +53,7 @@ these without --queue:
     oceanicu_experiments.py set-notes --experiment-id ... --notes ...
     oceanicu_experiments.py pause  --experiment-id ... | --all
     oceanicu_experiments.py resume --experiment-id ... | --all
+    oceanicu_experiments.py kill   --experiment-id ...   # scancel the running chunk now, unlike pause
     oceanicu_experiments.py delay-all --seconds N | --clear
     oceanicu_experiments.py rerun  --experiment-id ... [--from-chunk N | --from-current | --from-scratch] [--note ...]
 
@@ -459,6 +460,41 @@ def cmd_remove(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_kill(args: argparse.Namespace) -> int:
+    """scancel the actually-running SLURM job for an experiment's current
+    chunk, then mark that chunk failed -- for exactly the case `pause`
+    doesn't cover: pause only takes effect at the NEXT chunk boundary, it
+    never interrupts a chunk already running, so a paused experiment can
+    still show status=running (correctly!) for a long time. This is the
+    tool for "no, stop it now" without removing the experiment from the
+    registry the way `remove` does."""
+    user = rt._current_user()
+    with rt.connect(args.db) as conn:
+        running = rt.get_running_chunk(conn, args.experiment_id)
+        if running is None:
+            print(f"ERROR: no chunk currently marked running for {args.experiment_id!r} -- nothing to kill.",
+                  file=sys.stderr)
+            return 1
+        chunk_index = running["chunk_index"]
+        job_id = running["slurm_job_id"]
+        if not job_id:
+            print(f"ERROR: chunk {chunk_index} for {args.experiment_id!r} has no recorded slurm_job_id -- "
+                  f"can't scancel it. (Use 'remove --force' instead if you just want the DB row gone.)",
+                  file=sys.stderr)
+            return 1
+        ok, msg = rt.cancel_slurm_job(job_id)
+        if ok:
+            print(f"scancel {job_id}: {msg}")
+        else:
+            print(f"WARNING: scancel {job_id} failed ({msg}) -- job may already be gone; "
+                  f"marking the chunk failed in the DB anyway.", file=sys.stderr)
+        rt.finish_chunk(conn, experiment_id=args.experiment_id, chunk_index=chunk_index,
+                         exit_code=-1, nan_detected=False, user=user)
+    print(f"{args.experiment_id}: chunk {chunk_index} (SLURM job {job_id}) killed and marked failed. "
+          f"Use 'rerun --from-current' (or --from-chunk/--from-scratch) to redo it once ready.")
+    return 0
+
+
 def cmd_list(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         rows = rt.list_experiments(conn, status=args.status)
@@ -728,6 +764,12 @@ def main() -> int:
     r = sub.add_parser("remove"); _add_common(r); r.set_defaults(func=cmd_remove)
     r.add_argument("--experiment-id", required=True)
     r.add_argument("--force", action="store_true")
+
+    k = sub.add_parser("kill"); _add_common(k); k.set_defaults(func=cmd_kill)
+    k.add_argument("--experiment-id", required=True,
+                    help="scancel this experiment's currently-running chunk (if any) and mark it "
+                         "failed -- unlike pause, takes effect immediately rather than at the next "
+                         "chunk boundary; unlike remove, the experiment stays in the registry")
 
     l = sub.add_parser("list"); _add_common(l); l.set_defaults(func=cmd_list)
     l.add_argument("--status", default=None, choices=list(rt.EXPERIMENT_STATUSES))

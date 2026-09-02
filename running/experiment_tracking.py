@@ -1141,6 +1141,28 @@ def is_slurm_job_running(job_id: Optional[str]) -> Optional[bool]:
     return bool(result.stdout.strip())
 
 
+def cancel_slurm_job(job_id: str) -> tuple[bool, str]:
+    """Best-effort `scancel <job_id>`. Returns (success, message).
+
+    Deliberately NOT @_rpc_or_local, same reasoning as is_slurm_job_running
+    right above -- scancel only exists on a machine that's actually part
+    of the SLURM cluster, so this always runs locally on the caller (the
+    HPC), never proxied over the relay. A failure here (job already gone,
+    scancel unavailable, timeout) is reported but not fatal to the
+    caller -- cmd_kill still marks the chunk failed in the DB regardless,
+    since "no longer tracked as running" is the actual intent either way.
+    """
+    try:
+        result = subprocess.run(
+            ["scancel", str(job_id)], capture_output=True, text=True, timeout=15,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+        return False, f"scancel unavailable/timed out: {exc}"
+    if result.returncode != 0:
+        return False, (result.stderr.strip() or result.stdout.strip() or f"scancel exited {result.returncode}")
+    return True, "scancel issued"
+
+
 @_rpc_or_local
 def list_running_chunks(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     """Every chunk currently marked 'running', across ALL experiments --
