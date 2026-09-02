@@ -1,0 +1,96 @@
+# TRIMMED config -- only the keys a script-hook function actually reads
+# at runtime (see the generated .py script alongside this file). Everything
+# else (domain, simulation, output, ...) is already baked into literal
+# Python calls in that script -- editing it here has NO effect. runtime's
+# own time/check_finite/dump_on_error/timestep/split_factor/report/
+# report_totals ARE read live (see the script's _emit_start/
+# _emit_run_loop_and_finish-generated code); debug_output is NOT (a
+# generation-time structural choice, not a runtime one).
+hydrography:
+  folder: ${HYDROGRAPHY_FOLDER_WOA}
+  data_script: ${SCRIPT_FOLDER}/hydrography.py:set_hydrography_ic
+  source: WOA
+river_discharge:
+  folder: ${RIVER_FOLDER}
+  file: EMORID_1990_2024.nc
+  threshold: 0.0
+  script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
+  data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
+  source: emorid
+meteo:
+  folder: ${ERA5_FOLDER}
+  evaporation: true
+  shortwave_method: 1
+  longwave_method: 1
+  data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
+  source: ERA5
+runtime:
+  timestep: 20.0
+  split_factor: 30
+  report:
+    days: 1
+  report_totals:
+    days: 7
+  profile: null
+  dump_on_error: false
+  check_finite: false
+  debug_output: false
+fabm:
+  folder: ${FABM_ERSEM_FOLDER}
+  data_script: ${SCRIPT_FOLDER}/fabm.py:configure_fabm
+  source: ERSEM
+boundaries:
+  barotropic:
+    tpxo_folder: ${TPXO_FOLDER}
+    source: TPXO
+    CMIP6:
+      folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}
+      folder_template: '{setup}/CMIP6/{model}/{scenario}'
+      filename_template: '{start_date}_to_{end_date}.nc'
+      model: MPI-ESM1-2-HR
+      scenario: ssp585
+      start_date: '2024-03-01'
+      end_date: '2026-01-01'
+    CMEMS:
+      folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMEMS}
+      folder_template: nse/hourly
+      filename_template: hourly_{start_date}_to_{end_date}.nc
+      start_date: '2024-03-02'
+      end_date: '2026-01-01'
+  baroclinic:
+    folder: ${BOUNDARY_FOLDER_BAROCLINIC_WOA}
+    source: WOA
+    CMIP6:
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}
+      folder_template: '{model}/{scenario}/bdy'
+      filename_template: bdy_3d_{variable}_{start_date}_{end_date}.nc
+      model: MPI-ESM1-2-HR
+      scenario: ssp126
+      start_date: '20150101'
+      end_date: '21001231'
+    CMEMS:
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMEMS}
+      folder_template: null
+      filename_template: daily_{start_date}_to_{end_date}.nc
+      start_date: '2010-01-01'
+      end_date: '2026-08-17'
+  fabm:
+    folder: ${BOUNDARY_FOLDER_FABM_WOA}
+    tracers:
+      N3_n:
+        file: woa_n.nc
+        variable: n_an
+        boundary_condition_type: SPONGE
+      N1_p:
+        file: woa_p.nc
+        variable: p_an
+        boundary_condition_type: SPONGE
+      N5_s:
+        file: woa_i.nc
+        variable: i_an
+        boundary_condition_type: SPONGE
+      O2_o:
+        file: woa_o.nc
+        variable: o_an
+        boundary_condition_type: SPONGE
+    source: WOA

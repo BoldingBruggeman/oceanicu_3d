@@ -40,7 +40,22 @@ running/relay.env
 
 # /experiments/ -- the real experiment tree some machines point
 # OCEANICU_EXPERIMENT_ROOT_BASE at directly under the repo checkout for
-# convenience (see setup_experiment_tracking.sh workstation). Real staged
-# driver/config files and, once running, chunk output/logs/restarts --
-# never meant to be committed, same category as validation-data/ above.
-/experiments/
+# convenience (see setup_experiment_tracking.sh workstation). Ignore
+# everything under it EXCEPT the small staged driver/config files
+# (generated*.py/generated*.yaml -- same whitelist `stage`/
+# pull_experiment_files.sh already use, oceanicu_experiments.py's own
+# _STAGE_DEFAULT_INCLUDES -- currently a few 100 KB total, worth having
+# on GitHub) -- once running, chunk output/logs/restarts land in this
+# same tree too and CAN be multi-GB/TB (see /work/shared/oceanICU/ on
+# production, a genuinely separate mount for exactly that data on those
+# machines -- but nothing stops OCEANICU_EXPERIMENT_ROOT_BASE from
+# pointing here on some other machine), so this stays a narrow allow-
+# list, not a blanket un-ignore. The `**/` un-ignore is required for git
+# to even descend into subdirectories to check the file-level rules
+# below it -- a bare `/experiments/` (no wildcard) ignore, like this
+# used to be, blocks descending entirely, so per-file negation
+# patterns wouldn't work without it.
+/experiments/**
+!/experiments/**/
+!/experiments/**/generated*.py
+!/experiments/**/generated*.yaml
