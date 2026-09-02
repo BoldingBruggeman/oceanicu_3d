@@ -1292,7 +1292,7 @@ def list_chunks(conn: sqlite3.Connection, experiment_id: str) -> list[sqlite3.Ro
 @_rpc_or_local
 def rerun_from(
     conn: sqlite3.Connection, experiment_id: str, *, chunk_index: Optional[int] = None,
-    user: Optional[str] = None, note: Optional[str] = None,
+    user: Optional[str] = None, note: Optional[str] = None, force: bool = False,
 ) -> int:
     """Rewind an experiment's tracked history so its NEXT execution redoes chunk
     *chunk_index* onward (dropping any record of it and everything after).
@@ -1304,13 +1304,49 @@ def rerun_from(
                          record (whether it failed or you just want it
                          redone), keep everything before it.
       chunk_index=N      "from a set chunk" -- redo chunk N onward.
-      chunk_index=0      "from scratch" -- drops every chunk; the next experiment
-                         starts at initial_date with no load_restart.
+      chunk_index=0      "from scratch" / "reset" -- drops every chunk; the
+                         next experiment starts at initial_date with no
+                         load_restart -- same state as right after `add`
+                         (see cmd_reset). Never starts anything itself
+                         either way, same as `add` doesn't -- only touches
+                         DB rows, chunk_index=0 included.
+
+    force=True guard, mirroring remove_experiment's own: refuses to drop
+    a chunk row still marked running (status == 'in_progress') unless
+    forced -- deleting that row out from under a job that's actually
+    still writing to it is real data loss (the row, not the files -- see
+    below), not just a cosmetic inconsistency. Applies to all three
+    cases, not just chunk_index=0 -- a from-current/from-chunk rerun can
+    just as easily target the currently-live chunk's own row.
 
     Does NOT touch files on disk (no chunk_dir is deleted) -- run_chunks.py
     archives a pre-existing chunk_dir aside before reusing it, so a
     previous attempt's logs/output are never silently overwritten.
     """
+    row = get_experiment(conn, experiment_id)
+    if row is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
+    scancel_note = None
+    if row["status"] == "in_progress":
+        if not force:
+            raise ValueError(
+                f"{experiment_id!r} is in_progress -- pause it first (and wait for the running "
+                f"chunk to actually finish -- pause never interrupts mid-chunk), kill it "
+                f"(oceanicu-experiments kill), or pass force=True if you're sure (force also "
+                f"scancels the live job first, same as kill does -- it never just drops the "
+                f"chunk row out from under a job that's still actually running and writing to "
+                f"its own chunk_dir)."
+            )
+        # force=True and genuinely in_progress: scancel the live job FIRST,
+        # same as kill -- otherwise this would drop the row(s) out from
+        # under a job still actually running, an orphaned-job situation
+        # (job alive, DB no longer tracking it) this should never create
+        # on purpose, only reap_orphaned_chunks.py cleaning up after one
+        # that happened by accident.
+        running = get_running_chunk(conn, experiment_id)
+        if running is not None and running["slurm_job_id"]:
+            ok, msg = cancel_slurm_job(running["slurm_job_id"])
+            scancel_note = f"scancel {running['slurm_job_id']}: {'ok' if ok else 'FAILED'} ({msg})"
     if chunk_index is None:
         row = conn.execute(
             "SELECT MAX(chunk_index) AS n FROM chunks WHERE experiment_id = ?", (experiment_id,)
@@ -1346,6 +1382,8 @@ def rerun_from(
     if dropped is not None and (dropped["script_sha256"] or dropped["config_sha256"]):
         detail += (f" (chunk {chunk_index} was script={(dropped['script_sha256'] or '?')[:12]} "
                    f"config={(dropped['config_sha256'] or '?')[:12]})")
+    if scancel_note:
+        detail += f" -- forced while in_progress, {scancel_note}"
     if note:
         detail += f" -- {note}"
     _log_history(conn, experiment_id, "rerun", detail, user=user)

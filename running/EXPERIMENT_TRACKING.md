@@ -468,6 +468,31 @@ HPC) -- same constraint as `squeue`/`scancel` themselves, not runnable
 from bb-server1 or a workstation. Once killed, `rerun --from-current`
 (or `--from-chunk`/`--from-scratch`) redoes it.
 
+## Resetting an experiment back to just-added
+
+```bash
+oceanicu-experiments reset --experiment-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01 [--note '...'] [--force]
+```
+
+Drops every chunk record -- back to exactly the state right after
+`add` (`status=not_started`, `control=run`, same as a fresh `add`
+produces). Never starts anything itself, same as `add` doesn't -- a
+human (or `submit-chunk`) still has to actually `sbatch` it. Files
+already on disk are untouched (`chunk_runner.py` archives a
+pre-existing `chunk_dir` aside rather than overwriting it). Same
+primitive as `rerun --from-scratch`, under a clearer name.
+
+Refuses outright while the experiment is `in_progress` (a chunk is
+actually recorded running) unless `--force` is given -- `--force`
+**does `scancel` the live job first** (same as `kill`), then proceeds;
+it does not just drop the DB row out from under a job that's still
+genuinely running and writing to its own `chunk_dir`, which would
+leave an orphaned job SLURM still thinks is alive with nothing in the
+registry tracking it. Same guard/force semantics now also apply to
+plain `rerun` (`--from-chunk`/`--from-current`/`--from-scratch`), not
+just `reset` -- dropping a live chunk's own row was always the same
+risk regardless of which chunk index was targeted.
+
 ## Submitting a chunk manually, from orca/bb-server1
 
 The routine chunk chain is entirely self-resubmitting (`run_chunk.slurm`

@@ -56,7 +56,8 @@ these without --queue:
     oceanicu_experiments.py kill   --experiment-id ...   # scancel the running chunk now, unlike pause
     oceanicu_experiments.py submit-chunk --experiment-id ...   # sbatch run_chunk.slurm now; HPC only, never touches the registry
     oceanicu_experiments.py delay-all --seconds N | --clear
-    oceanicu_experiments.py rerun  --experiment-id ... [--from-chunk N | --from-current | --from-scratch] [--note ...]
+    oceanicu_experiments.py rerun  --experiment-id ... [--from-chunk N | --from-current | --from-scratch] [--note ...] [--force]
+    oceanicu_experiments.py reset  --experiment-id ... [--note ...] [--force]   # = rerun --from-scratch, clearer name: back to just-added state
 
     # preview ANY of the above for real, against a scratch copy in /tmp,
     # without ever writing to the configured registry:
@@ -720,8 +721,35 @@ def cmd_rerun(args: argparse.Namespace) -> int:
     else:
         chunk_index = None  # "from the present chunk"
     with rt.connect(args.db) as conn:
-        n = rt.rerun_from(conn, args.experiment_id, chunk_index=chunk_index, user=rt._current_user(), note=args.note)
+        try:
+            n = rt.rerun_from(conn, args.experiment_id, chunk_index=chunk_index, user=rt._current_user(),
+                               note=args.note, force=args.force)
+        except (KeyError, ValueError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     print(f"{args.experiment_id}: dropped {n} chunk record(s) -- next submission redoes from there")
+    return 0
+
+
+def cmd_reset(args: argparse.Namespace) -> int:
+    """rerun --from-scratch under a clearer, more discoverable name --
+    same primitive (rerun_from(chunk_index=0)), same in-progress guard.
+    Returns an experiment to exactly the state right after `add`: every
+    chunk record dropped, next submission starts fresh at initial_date
+    with no load_restart. Never starts anything itself, same as `add`
+    doesn't -- a human (or submit-chunk) still has to actually sbatch
+    it. Files already on disk are untouched (chunk_runner.py archives a
+    pre-existing chunk_dir aside rather than overwriting, same
+    protection rerun --from-scratch already had)."""
+    with rt.connect(args.db) as conn:
+        try:
+            n = rt.rerun_from(conn, args.experiment_id, chunk_index=0, user=rt._current_user(),
+                               note=args.note, force=args.force)
+        except (KeyError, ValueError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
+    print(f"{args.experiment_id}: reset -- dropped {n} chunk record(s), back to the state right "
+          f"after 'add' (nothing started; sbatch/submit-chunk it when ready)")
     return 0
 
 
@@ -959,6 +987,22 @@ def main() -> int:
     g3.add_argument("--from-chunk", type=int, default=None, metavar="N")
     g3.add_argument("--from-current", action="store_true")
     g3.add_argument("--from-scratch", action="store_true")
+    rr.add_argument("--force", action="store_true",
+                     help="allow dropping a chunk row that's still marked running -- scancels "
+                          "the live job first (same as kill), then proceeds. Without this, "
+                          "rerun refuses outright while the experiment is in_progress.")
+
+    rs = sub.add_parser("reset"); _add_common(rs); rs.set_defaults(func=cmd_reset)
+    rs.add_argument("--experiment-id", required=True,
+                     help="drop EVERY chunk record -- back to exactly the state right after "
+                          "'add' (nothing started; sbatch/submit-chunk it when ready). Same "
+                          "primitive as 'rerun --from-scratch', under a clearer name.")
+    rs.add_argument("--note", default=None,
+                     help="optional free-text reason, recorded in the history log")
+    rs.add_argument("--force", action="store_true",
+                     help="allow resetting while a chunk is still marked running -- scancels "
+                          "the live job first (same as kill), then proceeds. Without this, "
+                          "reset refuses outright while the experiment is in_progress.")
 
     args = p.parse_args()
 
