@@ -193,30 +193,53 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
     """Additive, idempotent schema fixups that CREATE TABLE IF NOT EXISTS
     alone can't express -- new columns on a table that may already exist
     from before the column was added. Safe to run on every connect(): each
-    check is cheap and a no-op once already applied."""
-    history_cols = {row["name"] for row in conn.execute("PRAGMA table_info(history)")}
-    if "user" not in history_cols:
-        conn.execute("ALTER TABLE history ADD COLUMN user TEXT")
-        conn.commit()
+    check is cheap and a no-op once already applied.
 
-    chunk_cols = {row["name"] for row in conn.execute("PRAGMA table_info(chunks)")}
-    if "script_sha256" not in chunk_cols:
-        conn.execute("ALTER TABLE chunks ADD COLUMN script_sha256 TEXT")
-        conn.commit()
-    if "config_sha256" not in chunk_cols:
-        conn.execute("ALTER TABLE chunks ADD COLUMN config_sha256 TEXT")
-        conn.commit()
-    if "submitted_host" not in chunk_cols:
-        conn.execute("ALTER TABLE chunks ADD COLUMN submitted_host TEXT")
-        conn.commit()
-    if "last_health_check" not in chunk_cols:
-        conn.execute("ALTER TABLE chunks ADD COLUMN last_health_check TEXT")
-        conn.commit()
+    Tolerates a READ-ONLY registry -- e.g. bb-server1's own copy of
+    submission_registry.sqlite, a periodically-pushed MIRROR of the
+    authoritative HPC copy, deliberately not writable there (pushed via
+    push_registry_snapshot.sh, arrives owned by a different user with
+    mode 444). If an ALTER TABLE fails because the connection can't
+    write, this stops trying further migrations and returns quietly
+    rather than raising: a read-only mirror missing a brand-new column
+    is still perfectly usable for anything that doesn't touch that
+    column specifically (i.e. everything except the few functions that
+    actually read/write it) -- letting the exception propagate would
+    break EVERY query through this connection, including pure reads
+    like `show`/`list` that never needed the new column at all.
+    Confirmed happening in production, 2026-09-02: `oceanicu-experiments
+    show` (a pure read) started failing with "attempt to write a
+    readonly database" purely because THIS function tried to add
+    chunks.last_health_check to bb-server1's read-only mirror. A
+    genuinely unexpected DB error (not a readonly one) still re-raises
+    -- only this specific, known-benign case is swallowed."""
+    try:
+        history_cols = {row["name"] for row in conn.execute("PRAGMA table_info(history)")}
+        if "user" not in history_cols:
+            conn.execute("ALTER TABLE history ADD COLUMN user TEXT")
+            conn.commit()
 
-    run_cols = {row["name"] for row in conn.execute("PRAGMA table_info(experiments)")}
-    if "chunk_delay_seconds" not in run_cols:
-        conn.execute("ALTER TABLE experiments ADD COLUMN chunk_delay_seconds INTEGER NOT NULL DEFAULT 0")
-        conn.commit()
+        chunk_cols = {row["name"] for row in conn.execute("PRAGMA table_info(chunks)")}
+        if "script_sha256" not in chunk_cols:
+            conn.execute("ALTER TABLE chunks ADD COLUMN script_sha256 TEXT")
+            conn.commit()
+        if "config_sha256" not in chunk_cols:
+            conn.execute("ALTER TABLE chunks ADD COLUMN config_sha256 TEXT")
+            conn.commit()
+        if "submitted_host" not in chunk_cols:
+            conn.execute("ALTER TABLE chunks ADD COLUMN submitted_host TEXT")
+            conn.commit()
+        if "last_health_check" not in chunk_cols:
+            conn.execute("ALTER TABLE chunks ADD COLUMN last_health_check TEXT")
+            conn.commit()
+
+        run_cols = {row["name"] for row in conn.execute("PRAGMA table_info(experiments)")}
+        if "chunk_delay_seconds" not in run_cols:
+            conn.execute("ALTER TABLE experiments ADD COLUMN chunk_delay_seconds INTEGER NOT NULL DEFAULT 0")
+            conn.commit()
+    except sqlite3.OperationalError as exc:
+        if "readonly" not in str(exc).lower() and "read-only" not in str(exc).lower():
+            raise
 
 
 def _now() -> str:
