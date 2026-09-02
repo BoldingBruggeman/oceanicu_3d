@@ -105,16 +105,31 @@ _EXPERIMENT_COLUMNS = [
 ]
 
 
+def _cell(r, c: str):
+    """r[c], tolerating a column that genuinely doesn't exist on this
+    particular row -- e.g. a chunk fetched from an as-yet-unmigrated
+    (read-only mirror) registry that predates a newer column like
+    last_health_check. dict raises KeyError for a missing key,
+    sqlite3.Row raises IndexError for the same thing -- catch both
+    rather than assuming which container type r is. '' (not None) so
+    the column still renders as an empty cell, not the literal string
+    'None'."""
+    try:
+        return r[c]
+    except (KeyError, IndexError):
+        return ""
+
+
 def _print_table(rows: list, columns: list[str]) -> None:
     if not rows:
         print("(none)")
         return
-    widths = {c: max(len(c), *(len(str(r[c])) for r in rows)) for c in columns}
+    widths = {c: max(len(c), *(len(str(_cell(r, c))) for r in rows)) for c in columns}
     header = "  ".join(c.ljust(widths[c]) for c in columns)
     print(header)
     print("  ".join("-" * widths[c] for c in columns))
     for r in rows:
-        print("  ".join(str(r[c]).ljust(widths[c]) for c in columns))
+        print("  ".join(str(_cell(r, c)).ljust(widths[c]) for c in columns))
 
 
 def _resolve_real_db_path(args: argparse.Namespace):
