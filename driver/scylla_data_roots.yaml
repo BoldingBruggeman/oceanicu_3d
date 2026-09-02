@@ -1,0 +1,51 @@
+# See README.md ("data_roots.yaml.example") for what this is and how it's used.
+# Every *_CMIP6 variable below (boundaries.barotropic/baroclinic, meteo,
+# river_discharge) is a real parent folder -- the matching domain config's own
+# CMIP6.folder_template appends {model}/{scenario} onto it, unlike e.g. ERA5_FOLDER.
+
+# domain
+BATHYMETRY_FOLDER: /work/rict/run/oceanicu_3d/NSe/Bathymetry
+
+# hydrography
+HYDROGRAPHY_FOLDER_WOA: /work/shared/oceanICU/WOA
+HYDROGRAPHY_FOLDER_CMEMS: /work/shared/oceanICU/NSe/CMEMS/init
+
+# boundaries.barotropic
+TPXO_FOLDER: /work/shared/oceanICU/TPXO9
+BOUNDARY_FOLDER_BAROTROPIC_CMEMS: /work/shared/oceanICU/NSe/CMEMS/bdy
+BOUNDARY_FOLDER_BAROTROPIC_CMIP6: /work/shared/oceanICU/CMIP6
+
+# boundaries.baroclinic
+BOUNDARY_FOLDER_BAROCLINIC_WOA: /work/shared/oceanICU/WOA
+BOUNDARY_FOLDER_BAROCLINIC_CMEMS: /work/shared/oceanICU/NSe/CMEMS/bdy
+BOUNDARY_FOLDER_BAROCLINIC_CMIP6: /work/shared/oceanICU/CMIP6
+
+# meteo
+ERA5_FOLDER: /work/shared/oceanICU/ERA5/NA
+CMIP6_FOLDER: /work/shared/oceanICU/BiasCorrected
+
+# river_discharge
+RIVER_FOLDER: /work/shared/oceanICU/EMORID
+RIVER_FOLDER_CMIP6: /work/shared/oceanICU/BiasCorrected
+
+# boundaries.fabm / fabm -- FABM is off by default in every nse_*.yaml
+# (fabm.ERSEM.file commented out), and neither of these has a confirmed
+# real path yet: no NSe-domain mesh_mask.nc/EMEP-N-deposition/gelbstoff
+# product or WOA-equivalent BGC tracer files exist to point at. Placeholder
+# values only, unlike every other entry in this file (which are all
+# verified against bb-server1's real layout) -- update once real files
+# exist.
+FABM_ERSEM_FOLDER: /work/shared/oceanICU/FABM/
+BOUNDARY_FOLDER_FABM_WOA: /work/shared/oceanICU/FABM/
+
+# data_assignments (radiation.kc2, when ObsKd/space-varying is active)
+KD490_FOLDER: /work/shared/oceanICU/Kd490
+
+# output
+OUTPUT_FOLDER: .
+
+# driver plumbing -- oceanicu_driver.py already defaults these via
+# os.environ.setdefault when run from source; only needed for a
+# --dump-python'd script run from elsewhere.
+GOTM_FOLDER: /work/rict/run/oceanicu_3d
+SCRIPT_FOLDER: /work/rict/run/oceanicu_3d/driver/scripts
