@@ -19,10 +19,10 @@
 # the relay, not here):
 #   cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://relay/abs/path/db.sqlite',OCEANICU_RELAY_DIR='/abs/path/on/relay' run_chunk.slurm
 #
-# OCEANICU_SKIP_HEALTH_CHECK=1 (optional): the CPU-stall health-check
-# watchdog (health_check.py, via sstat -- ON by default) is skipped if
-# set. See its own comment further down for what it does and why you
-# might want to disable it.
+# OCEANICU_HEALTH_CHECK=1 (optional): the CPU-stall health-check
+# watchdog (health_check.py, via sstat) is ON HOLD, OFF by default --
+# sstat's job accounting proved unreliable on the real cluster. See its
+# own comment further down for the full story.
 #
 # The leading `ALL,` matters -- without it, --export replaces the job's
 # ENTIRE environment with just the listed vars, including dropping HOME
@@ -234,18 +234,25 @@ for _ in $(seq 1 60); do
 done
 LOGFILE="$(cat "$POINTER_FILE" 2>/dev/null)/getm-0000.log"
 
-# OCEANICU_SKIP_HEALTH_CHECK (optional): the CPU-stall health-check
-# watchdog is ON by default -- set (any non-empty value) to turn it OFF
-# for this run. Replaces the old GETM-log NaN scan entirely (2026-09-02,
-# per user: "the DB do not reflect if e.g. there has been a blow up") --
-# see health_check.py's own docstring for what it actually checks
-# (sstat's own TotalCPU for this job, not log content) and its known
-# limitation (a busy-polling MPI hang looks like healthy CPU usage, not
-# a stall). ON by default because, unlike the old NaN scan, this is
-# cheap regardless of how much log output GETM produces -- one sstat
-# call every ~10 min, not a per-log-line operation.
-if [ -n "${OCEANICU_SKIP_HEALTH_CHECK:-}" ]; then
-    echo "OCEANICU_SKIP_HEALTH_CHECK set -- not health-checking this job."
+# OCEANICU_HEALTH_CHECK (optional): the CPU-stall health-check watchdog
+# is ON HOLD, OFF by default -- set (any non-empty value) to turn it on
+# anyway. Was briefly ON by default (2026-09-02), then reverted the same
+# day: confirmed against the REAL cluster that sstat's job accounting is
+# unreliable here -- TotalCPU isn't even a valid --format field, and
+# AveCPU (which is) returns garbage (e.g. "213503982334-14:25:51") for
+# every step of a real job, repeatably, not just once. health_check.py
+# itself was safe throughout (a failed/garbage sstat read is treated as
+# "skip this cycle", never as a false stall -- so nothing was ever
+# wrongly killed), just silently useless -- every cycle no-opped rather
+# than actually monitoring anything. On hold pending a more reliable
+# signal (log-growth was proposed, but has its own real false-positive
+# risk: legitimate gaps between GETM report lines vary a lot by
+# domain/report.days, and scyllapfs write-visibility lag on top of
+# that -- not resolved yet, see EXPERIMENT_TRACKING.md). The `kill`
+# command / chunks.last_health_check column / health_check.py's overall
+# structure all stay in place to build on once a real signal is chosen.
+if [ -z "${OCEANICU_HEALTH_CHECK:-}" ]; then
+    echo "OCEANICU_HEALTH_CHECK not set -- health-check watchdog on hold (default; see comment above)."
     MONITOR_PID=""
 else
 ( HEALTH_CHECK_INTERVAL_SECONDS="${OCEANICU_HEALTH_CHECK_INTERVAL_SECONDS:-600}"

@@ -4,6 +4,23 @@ running RIGHT NOW on SLURM. Invoked repeatedly (every ~10 min, see
 run_chunk.slurm's own background loop) while chunk_runner.py's srun is
 still alive.
 
+**ON HOLD as of 2026-09-02, OFF by default** (OCEANICU_HEALTH_CHECK=1
+in run_chunk.slurm to enable anyway) -- confirmed against the REAL
+cluster that sstat's job accounting is unreliable here: TotalCPU isn't
+even a valid --format field, and AveCPU (which is) returns garbage
+(e.g. "213503982334-14:25:51") for every step of a real, healthy
+192-task job, repeatably. Nothing was ever wrongly killed by this --
+a failed/garbage sstat read always skips the cycle, never counts as a
+stall -- but every cycle silently no-opped instead of monitoring
+anything. See EXPERIMENT_TRACKING.md's "Monitoring a running chunk"
+for the full story and what a replacement signal needs to account for
+(log-growth was proposed, but has its own unresolved false-positive
+risk -- legitimate report-line gaps vary a lot by domain/report.days,
+plus scyllapfs write-visibility lag). The structure below (looks up
+the running chunk itself, fail-safe on any bad reading, overwrite-not-
+history-spam heartbeat) is still the right shape to build on -- only
+_get_total_cpu_seconds's actual signal needs replacing.
+
 Motivation: the old approach (tail the GETM log for a literal "nan"
 string, run_chunk.slurm's OCEANICU_NAN_CHECK) only ever proves ONE
 specific failure mode -- a numerical blow-up that actually prints "nan"
