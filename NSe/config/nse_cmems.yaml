@@ -362,10 +362,10 @@ boundaries:
       tpxo_folder: ${TPXO_FOLDER}
     CMEMS:
       folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMEMS}
-      folder_template: nse/hourly
+      folder_template: null
       filename_template: hourly_{start_date}_to_{end_date}.nc
-      start_date: '2024-03-02'
-      end_date: '2026-01-01'
+      start_date: '2010-01-01'
+      end_date: '2026-08-17'
     CMIP6:
       folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}
       folder_template: '{setup}/CMIP6/{model}/{scenario}'
