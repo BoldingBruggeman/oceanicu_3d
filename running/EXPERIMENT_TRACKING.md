@@ -1262,6 +1262,42 @@ matches zero rows, no error) -- a typo'd `experiment_id` in a queued command
 will show as `applied`, not `failed`. Worth knowing when composing
 queue entries; not yet fixed.
 
+**Every applied entry also gets a `queue_command` row in that
+experiment's own `history`** (added 2026-09-03), independent of the
+push-back file above and of whatever history entry the applied action
+itself already writes (`priority_changed`, `chunk_started`, `removed`,
+...). This is what makes "what queued commands actually touched this
+experiment, and who really queued them" answerable straight from
+`oceanicu-experiments show`, without cross-referencing archival
+`applied-queue_*.yaml` files or SSH-ing anywhere:
+
+```
+history:
+timestamp                  user  event             detail
+2026-09-03T10:44:24+00:00  kb    priority_changed  -5 -> 42
+2026-09-03T10:44:24+00:00  kb    queue_command     cmd-20260903T104420Z-2876 (set-priority) from queue_kb.yaml, queued_at=2026-09-03T10:44:20+00:00 -> applied: fake/notstarted/spare: priority set to 42
+```
+
+The `user` on this entry is deliberately `queued_by` from the queue
+file itself -- i.e. whoever actually ran `oceanicu-experiments --queue
+...` -- **not** whoever's OS account happens to run the apply step
+(typically the HPC login-node cron identity). The action's own history
+entry right above it (`priority_changed` etc.) still carries that
+apply-time identity, unchanged -- this is a second, complementary
+entry giving the real originator. This distinction caused real
+confusion in production before this was added: every queue-applied
+action showing the cron user's name made it look like someone else was
+actively at the terminal, when most were the user's own queued
+commands finally landing.
+
+Written by `get_commands_and_update_registry.py` itself
+(`rt.record_queue_command`), right after each entry's status is
+decided -- covers the `add`-file-check failure path too, not just the
+subprocess success/failure branches, so a refused/failed queued
+command is traceable the same way a successful one is. Best-effort and
+non-fatal: if this write itself fails for some reason, it prints a
+`WARNING` and the actual apply result is unaffected either way.
+
 ## Keeping bb-server1's copy of the registry up to date
 
 The command queue above covers requests flowing IN to the HPC (add an

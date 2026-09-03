@@ -416,6 +416,29 @@ def main() -> int:
         print(f"{_ts()}: nothing pending across {len(queue_paths)} queue file(s) ({total} total entries).")
         return 0
 
+    def _record_queue_result(entry: dict, qp: Path, entry_args: dict) -> None:
+        """Best-effort: log this queue entry's real result (id, action,
+        who queued it, when, outcome) into the registry's own history
+        table -- see record_queue_command's own docstring for why this
+        matters (a durable, in-DB record independent of whatever the
+        applied action's own history entry says, attributed to the
+        REAL queuer rather than whoever's OS account ran this apply
+        step). Skipped (not fatal) if the entry has no experiment_id to
+        attach it to, or if the DB write itself fails -- this is a
+        supplementary record, never allowed to break the actual apply."""
+        eid = entry_args.get("experiment_id")
+        if not eid:
+            return
+        detail = (f"{entry['id']} ({entry['action']}) from {qp.name}, queued_at="
+                  f"{entry.get('queued_at')} -> {entry['status']}"
+                  f"{': ' + entry['note'][:300] if entry.get('note') else ''}")
+        try:
+            with rt.connect(args.db) as conn:
+                rt.record_queue_command(conn, eid, detail, user=entry.get("queued_by"))
+        except Exception as exc:
+            print(f"{_ts()}: WARNING: couldn't record queue-command history for "
+                  f"{entry['id']}: {exc}", file=sys.stderr)
+
     applied = 0
     failed = 0
     for qp, entry in pending:
@@ -434,6 +457,7 @@ def main() -> int:
                 print(f"{_ts()}: {entry['id']} ({qp.name}): FAILED (add, checking files) -- {verify_error}",
                       file=sys.stderr)
                 _write_back(qp, sources[qp])
+                _record_queue_result(entry, qp, entry_args)
                 continue
 
         cli_args = _args_dict_to_cli(entry_args)
@@ -456,6 +480,7 @@ def main() -> int:
         # partway through a long queue must not lose already-applied
         # statuses or force re-applying everything from scratch.
         _write_back(qp, sources[qp])
+        _record_queue_result(entry, qp, entry_args)
 
     still_pending = sum(
         1 for d in sources.values() for e in d.get("commands", []) if e.get("status") == "pending"

@@ -1237,6 +1237,35 @@ def record_health_check(
 
 
 @_rpc_or_local
+def record_queue_command(conn: sqlite3.Connection, experiment_id: str, detail: str,
+                          user: Optional[str] = None) -> None:
+    """Log a queued command's real result to history -- a durable,
+    in-DB record of what get_commands_and_update_registry.py actually
+    applied, with its real queue metadata (the command's own id,
+    queued_by, queued_at, which queue file it came from), independent
+    of whatever the applied ACTION's own history entry already records
+    (e.g. chunk_started, removed). Written by get_commands_and_update_
+    registry.py itself, right after each subprocess call to
+    oceanicu_experiments.py returns -- covers both success and failure,
+    so a refused/failed queued command is traceable too, not just
+    successful ones.
+
+    *user* here is deliberately entry['queued_by'] (who actually
+    QUEUED the command, from the queue file itself) -- NOT whoever's
+    OS account happened to run the apply step (typically the HPC
+    login-node cron identity, e.g. 'rict', regardless of who queued
+    it). The action's OWN history entry (chunk_started, removed, ...)
+    still carries that apply-time identity, unchanged; this is a
+    second, complementary entry giving the real originator. Confirmed
+    this distinction caused real confusion in production, 2026-09-02
+    (every queue-applied action showing 'rict' made it look like a
+    colleague was actively intervening, when most were the user's own
+    queued commands finally being applied by cron)."""
+    _log_history(conn, experiment_id, "queue_command", detail, user=user)
+    conn.commit()
+
+
+@_rpc_or_local
 def list_running_chunks(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     """Every chunk currently marked 'running', across ALL experiments --
     the cross-experiment counterpart to get_running_chunk (which is
