@@ -109,6 +109,10 @@ mask_regions:
      - [-7.34, 57.1]
 
  - type: point
+   name: North Ireland/boundary
+   lonlat: [-7.5, 55,3]
+
+ - type: point
    name: River Dee
    lonlat: [-3.18, 53.35]
 
@@ -125,6 +129,30 @@ mask_regions:
  - type: point
    name: Limfjorden
    lonlat: [8.26, 56.8]
+
+ - type: rectangle
+   name: Danis/German Wadden Sea
+   lon: [ 8.5,  8.66]
+   lat: [54.4, 55.45]
+
+ - type: rectangle
+   name: Egon
+   lon: [ 8.42,  8.42]
+   lat: [54.75,  54.8]
+
+ - type: rectangle
+   name: Kurt
+   lon: [ 8.82,  8.82]
+   lat: [54.25,  54.3]
+
+ - type: rectangle
+   name: Elbe
+   lon: [ 8.74,  9.3]
+   lat: [53.9,  53.9]
+
+ - type: point
+   name: Kaj
+   lonlat: [8.9, 53.95]
 
  - type: point
    name: Busum
