@@ -110,7 +110,7 @@ mask_regions:
 
  - type: point
    name: North Ireland/boundary
-   lonlat: [-7.5, 55,3]
+   lonlat: [-7.5, 55.3]
 
  - type: point
    name: River Dee
