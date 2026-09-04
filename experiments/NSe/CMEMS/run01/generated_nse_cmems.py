@@ -285,8 +285,14 @@ def run(sim):
     _dry_run = args.dry_run if args.dry_run is not None else (False and not args.stop)
     if not _dry_run and args.stop:
         stop = datetime.datetime.fromisoformat(args.stop)
+        # --- temporary memory-leak diagnostic, see generated_nse_cmems_memory_monitor.py ---
+        from generated_nse_cmems_memory_monitor import setup_memory_monitor
+        _sample_memory = setup_memory_monitor(sim, resolve_data_path)
+        _sample_memory(force=True)
         while sim.time < stop:
             sim.advance(check_finite=bool(config.get('runtime', {}).get('check_finite', False)))
+            _sample_memory()
+        _sample_memory(force=True)
         sim.finish()
     elif _dry_run:
         print(f"dry run: built and started only, not advanced, time={sim.time}", file=sys.stderr)
