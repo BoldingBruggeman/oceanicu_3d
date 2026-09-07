@@ -823,13 +823,14 @@ def derive_data_assignments(config: dict) -> list[dict]:
         # a run starting 2010) -- fixed by making the placeholder itself
         # incapable of failing, exactly like tcc's own constant_value=0.5
         # below already is.
+        _placeholder_comment = "placeholder -- overwritten below by meteo.data_script (set_meteo_data)"
         entries += [
-            {"target": "simulation.airsea.t2m", "kind": "constant", "constant_value": 15.0},
-            {"target": "simulation.airsea.qa", "kind": "constant", "constant_value": 0.008},
-            {"target": "simulation.airsea.u10", "kind": "constant", "constant_value": 0.0},
-            {"target": "simulation.airsea.v10", "kind": "constant", "constant_value": 0.0},
-            {"target": "simulation.airsea.sp", "kind": "constant", "constant_value": 101325.0},
-            {"target": "simulation.airsea.tp", "kind": "constant", "constant_value": 0.0},
+            {"target": "simulation.airsea.t2m", "kind": "constant", "constant_value": 15.0, "comment": _placeholder_comment},
+            {"target": "simulation.airsea.qa", "kind": "constant", "constant_value": 0.008, "comment": _placeholder_comment},
+            {"target": "simulation.airsea.u10", "kind": "constant", "constant_value": 0.0, "comment": _placeholder_comment},
+            {"target": "simulation.airsea.v10", "kind": "constant", "constant_value": 0.0, "comment": _placeholder_comment},
+            {"target": "simulation.airsea.sp", "kind": "constant", "constant_value": 101325.0, "comment": _placeholder_comment},
+            {"target": "simulation.airsea.tp", "kind": "constant", "constant_value": 0.0, "comment": _placeholder_comment},
             # Placeholder/fallback. When meteo.CMIP6.radiation_source ==
             # "pseudo_tcc" (the default), meteo.data_script (set_meteo_data,
             # default scripts/meteo.py:set_meteo_data) overwrites this with a
@@ -839,7 +840,7 @@ def derive_data_assignments(config: dict) -> list[dict]:
             # shortwave_method/longwave_method are set to NET_FLUX to match --
             # see set_meteo_data's own docstring). Kept as a real entry (not
             # omitted) so the field has a sane value in either case.
-            {"target": "simulation.airsea.tcc", "kind": "constant", "constant_value": 0.5},
+            {"target": "simulation.airsea.tcc", "kind": "constant", "constant_value": 0.5, "comment": _placeholder_comment + " (when radiation_source: pseudo_tcc; unused for net/components)"},
         ]
 
     # FABM tracer boundary type + values (WOA-sourced) -- mirrors
