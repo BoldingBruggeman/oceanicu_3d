@@ -804,43 +804,42 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "simulation.airsea.ql_downwards", "kind": "file", "file": str(_folder / "era5_strd_????.nc"), "variable": "strd", "pre_transform_scale": 1 / 3600.0},
         ]
     elif meteo_source == "CMIP6":
-        # Safe constant placeholders, NOT real file reads -- these 6 fields
-        # are ALWAYS overwritten by meteo.data_script (set_meteo_data,
-        # scripts/meteo.py) immediately after apply_data_assignments runs
-        # (same "runs after, so it correctly overwrites this" ordering tcc's
-        # own placeholder below already relies on). A real `kind: file`
-        # placeholder here USED TO read the active scenario's own folder
-        # directly (e.g. tas_bc_*_disagg_????.nc under .../ssp126/meteo/)
-        # -- harmless as long as expand_year_glob silently matched whatever
-        # years existed. Once set_meteo_data started splicing historical/
-        # scenario automatically (2026-09-07) and expand_year_glob started
-        # correctly detecting genuinely-missing years instead of silently
-        # leaving them out, this became a REAL crash: a run starting before
-        # 2015 asks this placeholder for e.g. 2010 against the ssp126-only
-        # folder, which has no such file, and apply_data_assignments fails
-        # before set_meteo_data ever gets a chance to overwrite it with the
-        # correct spliced value. A real, reproduced bug (GFDL-ESM4/ssp126,
-        # a run starting 2010) -- fixed by making the placeholder itself
-        # incapable of failing, exactly like tcc's own constant_value=0.5
-        # below already is.
-        _placeholder_comment = "placeholder -- overwritten below by meteo.data_script (set_meteo_data)"
+        # t2m/qa/u10/v10/sp/tp deliberately have NO entry here at all (not
+        # even a placeholder) -- set_meteo_data (scripts/meteo.py,
+        # meteo.data_script's own default) sets all six UNCONDITIONALLY,
+        # before its own radiation_source branching even starts, so a
+        # static entry here would NEVER be the value actually used, only
+        # ever immediately overwritten. A `kind: constant` placeholder used
+        # to sit here for these six (and before that, an even-more-fragile
+        # real `kind: file` read of the active scenario's own folder, which
+        # could crash for years outside that one scenario's own coverage --
+        # see the historical/scenario splice's own comment in set_meteo_data
+        # for that story) -- removed entirely 2026-09-07, per user: "but if
+        # we know it is overwritten - write them in the first place [why]".
+        # Writing a value nothing ever reads is pure noise, and previously
+        # WAS a real point of confusion (a constant sitting right next to
+        # real file reads reads as a real, permanent value, not a
+        # placeholder about to vanish a few lines later).
+        #
+        # tcc is genuinely different, and keeps its own real placeholder
+        # below: set_meteo_data only overwrites it conditionally (when
+        # radiation_source == "pseudo_tcc"); for "net"/"components" it's
+        # never touched again after this, yet still needs SOME real value
+        # (pygetm's own FluxesFromMeteo requires every field it reads to be
+        # set before sim.start(), even one it then never actually consults
+        # because shortwave_method/longwave_method route around it).
         entries += [
-            {"target": "simulation.airsea.t2m", "kind": "constant", "constant_value": 15.0, "comment": _placeholder_comment},
-            {"target": "simulation.airsea.qa", "kind": "constant", "constant_value": 0.008, "comment": _placeholder_comment},
-            {"target": "simulation.airsea.u10", "kind": "constant", "constant_value": 0.0, "comment": _placeholder_comment},
-            {"target": "simulation.airsea.v10", "kind": "constant", "constant_value": 0.0, "comment": _placeholder_comment},
-            {"target": "simulation.airsea.sp", "kind": "constant", "constant_value": 101325.0, "comment": _placeholder_comment},
-            {"target": "simulation.airsea.tp", "kind": "constant", "constant_value": 0.0, "comment": _placeholder_comment},
-            # Placeholder/fallback. When meteo.CMIP6.radiation_source ==
-            # "pseudo_tcc" (the default), meteo.data_script (set_meteo_data,
-            # default scripts/meteo.py:set_meteo_data) overwrites this with a
-            # real, derived-from-rsds value right after apply_data_assignments
-            # runs. With radiation_source == "net"/"components", set_meteo_data
-            # sets swr/ql directly instead and tcc is unused (as long as
-            # shortwave_method/longwave_method are set to NET_FLUX to match --
-            # see set_meteo_data's own docstring). Kept as a real entry (not
-            # omitted) so the field has a sane value in either case.
-            {"target": "simulation.airsea.tcc", "kind": "constant", "constant_value": 0.5, "comment": _placeholder_comment + " (when radiation_source: pseudo_tcc; unused for net/components)"},
+            {
+                "target": "simulation.airsea.tcc",
+                "kind": "constant",
+                "constant_value": 0.5,
+                "comment": (
+                    "placeholder -- overwritten below by meteo.data_script "
+                    "(set_meteo_data) when radiation_source: pseudo_tcc; "
+                    "unused (but still required to have a real value) for "
+                    "net/components"
+                ),
+            },
         ]
 
     # FABM tracer boundary type + values (WOA-sourced) -- mirrors
