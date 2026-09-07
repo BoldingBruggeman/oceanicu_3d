@@ -29,6 +29,27 @@ interpolation:
     - name: st_malo_bay
       bbox: [-3.18, -1.42, 48.5, 49.8]
       min_depth: 10.0
+    # Dutch/German/Danish North Sea coast, ~Harlingen to ~Esbjerg. Only the
+    # seaward edge matters -- it's traced to roughly follow the coast at a
+    # modest offshore distance; the landward close is a plain straight line
+    # far to the east (never mind that it crosses land -- this only ever
+    # raises already-WET cells, land is excluded regardless of polygon
+    # shape) capped at 9.0E specifically so it stays clear of the Little
+    # Belt (~9.5-9.7E) and the rest of the Belt Sea/Kattegat, whose
+    # thalweg-tuned channel depths must not get overridden by a blanket
+    # 5 m floor. Verified against real coastline data (cartopy GSHHS)
+    # before adding -- see conversation for the iterations.
+    - name: dutch_german_danish_coast
+      vertices:
+        - [4.8, 53.6]
+        - [6.7, 53.7]
+        - [7.1, 53.75]
+        - [8.4, 54.1]
+        - [8.3, 54.6]
+        - [7.7, 55.6]
+        - [9.0, 55.6]
+        - [9.0, 53.6]
+      min_depth: 5.0
 
 analysis:
   nkeep_basins: 1
@@ -50,6 +71,18 @@ fixes:
     lat: 60.65
     action: set_depth
     value: 150.0
+  - lon: 8.5
+    lat: 53.95
+    action: set_depth
+    value: 4.5
+  - lon: 8.18
+    lat: 53.75
+    action: open_cell
+    value: 6.35   # phantom island: this cell is nan (land) in the pristine raw
+                  # source (topo_nse_orig.nc) even though all 8 immediate
+                  # neighbors are real, finite depth (0.76-18.9 m) -- no actual
+                  # land here (confirmed against a real map). Value is the mean
+                  # of those 8 neighbors.
 
 # Mask regions: force cells to land regardless of source depth.
 # Types: rectangle (lon/lat bounds), polygon (vertex list),
@@ -158,6 +191,81 @@ mask_regions:
    name: Busum
    lonlat: [8.98, 54.1]
 
+ # Dutch (West Frisian) and German (East Frisian) Wadden Sea barrier
+ # islands -- coordinates from general geographic knowledge, NOT
+ # surveyed/verified against this grid's actual resolution. Check the
+ # regenerated mask/bathymetry plots against a real map before treating
+ # these as final; adjust bounds if a cell or two is off.
+ #
+ # Each rectangle's eastern edge is extended to the next island's own
+ # western edge, closing the shallow Wadden Sea water between them (not
+ # just masking each island's own footprint) -- per-island resolution is
+ # too coarse for this grid to stably resolve those tidal flats/channels
+ # anyway. Two real gaps deliberately left OPEN, not closed: Schiermonnikoog
+ # -> Borkum (the Ems estuary, Dutch/German border -- a real navigable
+ # channel) and Wangerooge -> the existing "Danish/German Wadden Sea" entry
+ # at 8.5 (Jade Bay/Wilhelmshaven, also a real shipping channel) -- confirm
+ # before blanket-masking either.
+ - type: rectangle
+   name: Texel
+   lon: [4.72, 4.90]
+   lat: [52.92, 53.20]
+
+ - type: rectangle
+   name: Vlieland
+   lon: [4.90, 5.13]
+   lat: [53.24, 53.31]
+
+ - type: rectangle
+   name: Terschelling
+   lon: [5.13, 5.55]
+   lat: [53.36, 53.47]
+
+ - type: rectangle
+   name: Ameland
+   lon: [5.55, 6.09]
+   lat: [53.43, 53.48]
+
+ - type: rectangle
+   name: Schiermonnikoog
+   lon: [6.09, 6.30]
+   lat: [53.47, 53.52]
+
+ - type: rectangle
+   name: Borkum
+   lon: [6.62, 6.95]
+   lat: [53.55, 53.60]
+
+ - type: rectangle
+   name: Juist
+   lon: [6.95, 7.28]
+   lat: [53.65, 53.70]
+
+ - type: rectangle
+   name: Norderney
+   lon: [7.15, 7.37]
+   lat: [53.68, 53.75]
+
+ - type: rectangle
+   name: Baltrum
+   lon: [7.35, 7.44]
+   lat: [53.72, 53.75]
+
+ - type: rectangle
+   name: Langeoog
+   lon: [7.44, 7.67]
+   lat: [53.72, 53.78]
+
+ - type: rectangle
+   name: Spiekeroog
+   lon: [7.67, 7.85]
+   lat: [53.75, 53.78]
+
+ - type: rectangle
+   name: Wangerooge
+   lon: [7.85, 7.95]
+   lat: [53.77, 53.80]
+
 thalweg:
   # auto_corridors finds articulation points in the *wet* coarse graph — it only
   # works for passages that are open in the coarse grid.  Passages that are land
@@ -197,6 +305,26 @@ smooth:
       taper_width: 20
       taper_edge: north
       taper_shape: cosine
+    # Generous band spanning Texel through north of Esbjerg (includes the
+    # North Frisian islands too, not just Dutch/East Frisian) -- barrier
+    # islands and mainland are both land, so precision doesn't matter here;
+    # the wet-cell mask already confines the effect to the real Wadden Sea
+    # water regardless of how far the polygon extends onto either side.
+    # Capped at 9E to stay clear of the Little Belt. Verified against real
+    # coastline data before adding.
+    - name: wadden_sea
+      vertices:
+        - [4.6, 53.65]
+        - [6.3, 53.90]
+        - [8.0, 54.05]
+        - [8.4, 54.60]
+        - [7.7, 55.60]
+        - [9.0, 55.60]
+        - [9.0, 52.90]
+        - [4.6, 52.90]
+      filter: laplacian
+      iterations: 20
+      alpha: 0.3
   rx0: 0.20
   local_rx0:
     - name: "Northern boundary tighter"
