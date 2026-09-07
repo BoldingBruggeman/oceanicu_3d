@@ -433,16 +433,18 @@ meteo:
   ERA5:
     folder: ${ERA5_FOLDER}
     evaporation: true
-    shortwave_method: 1
-    longwave_method: 1
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
+  # shortwave_method/longwave_method no longer exist here -- set_meteo_data
+  # now reads the real value straight from simulation.airsea instead of a
+  # meteo-level copy that could silently drift from it (2026-09-07, see
+  # oceanicu_providers.py's own _meteo_shared comment). This file's own
+  # simulation.airsea.FluxesFromMeteo.shortwave_method/longwave_method
+  # (above) are already NET_FLUX, matching radiation_source: net below.
   CMIP6:
     folder: ${CMIP6_FOLDER}
     folder_template: CMIP6/{model}/{scenario}/meteo
     scenario: ssp126
     evaporation: true
-    shortwave_method: 1
-    longwave_method: 1
     radiation_source: net
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
     model: GFDL-ESM4

@@ -201,27 +201,27 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
     # instance, not anything source-specific), so both ERA5 and CMIP6 need them
     # identically. make_provider_slot's shared base (folder/folder_template/...)
     # is role-universal across ALL providers.py roles, not customizable per-role,
-    # so these three are declared here and passed to both choices below instead.
+    # so this is declared here and passed to both choices below instead.
+    #
+    # shortwave_method/longwave_method used to live here too (a cfg_airsea.py-
+    # era leftover from before simulation.airsea.shortwave_method/
+    # longwave_method existed as real, introspected pygetm.airsea.
+    # FluxesFromMeteo fields in their own right) -- removed 2026-09-07 (per
+    # user: "it seems short and long wave radiation methods are set two
+    # places in airsea and meteo?"). They were never real pygetm inputs from
+    # here; set_meteo_data's own radiation_source-consistency check read
+    # this COPY instead of the real simulation.airsea value, so the two
+    # could silently drift apart (a real, reproduced case: simulation.
+    # airsea's own value got updated to NET_FLUX for radiation_source:
+    # 'net', this copy didn't, and set_meteo_data warned using stale data).
+    # set_meteo_data now reads the real value directly -- see its own
+    # docstring/code for exactly where.
     _meteo_shared = (
         ParameterSpec(
             name="evaporation",
             type=TypeRef(kind="scalar", scalar_type="bool"),
             default=True,
             help="derive evaporation from latent heat flux (cfg.meteo.evaporation, shared across sources)",
-            importance=Importance.ADVANCED,
-        ),
-        ParameterSpec(
-            name="shortwave_method",
-            type=TypeRef(kind="scalar", scalar_type="int"),
-            default=1,
-            help="shortwave radiation method selector (see pygetm.airsea.FluxesFromMeteo)",
-            importance=Importance.ADVANCED,
-        ),
-        ParameterSpec(
-            name="longwave_method",
-            type=TypeRef(kind="scalar", scalar_type="int"),
-            default=1,
-            help="longwave radiation method selector (see pygetm.airsea.FluxesFromMeteo)",
             importance=Importance.ADVANCED,
         ),
         ParameterSpec(

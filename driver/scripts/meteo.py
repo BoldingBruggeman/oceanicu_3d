@@ -57,7 +57,7 @@ def set_meteo_data(sim, domain, config: dict) -> None:
       qa) -- so this single derived cloud fraction drives both fluxes, not
       just shortwave.
 
-    Whichever radiation_source is chosen, meteo.CMIP6.shortwave_method/
+    Whichever radiation_source is chosen, simulation.airsea.shortwave_method/
     longwave_method must be set consistently: "net"/"components" need
     NET_FLUX (-1) on both, or FluxesFromMeteo's default ROSATI_MIYAKODA/
     CLARK bulk formulas silently recompute (and discard) the swr/ql this
@@ -199,8 +199,18 @@ def set_meteo_data(sim, domain, config: dict) -> None:
     sim.airsea.tp.set(pygetm.input.from_nc(_spliced_paths("pr_bc_*_disagg_????.nc"), "pr") / 1000.0)
 
     radiation_source = meteo.get("radiation_source") or "pseudo_tcc"
-    shortwave_method = meteo.get("shortwave_method")
-    longwave_method = meteo.get("longwave_method")
+    # The REAL pygetm value (simulation.airsea.shortwave_method/
+    # longwave_method, introspected pygetm.airsea.FluxesFromMeteo fields,
+    # choice-flattened onto simulation.airsea directly -- confirmed via a
+    # real --print-config, same flattening this function's own docstring
+    # already warns about for meteo["CMIP6"] vs meteo itself). NOT a
+    # meteo.<source>-level copy -- that used to exist here but could
+    # silently drift from this real value with no warning of its own
+    # (removed 2026-09-07, see oceanicu_providers.py's _meteo_shared
+    # comment for the full story).
+    _airsea = config.get("simulation", {}).get("airsea", {})
+    shortwave_method = _airsea.get("shortwave_method")
+    longwave_method = _airsea.get("longwave_method")
     NET_FLUX = -1
     if radiation_source in ("net", "components") and (
         shortwave_method != NET_FLUX or longwave_method != NET_FLUX
@@ -213,8 +223,8 @@ def set_meteo_data(sim, domain, config: dict) -> None:
             f"{shortwave_method!r}/longwave_method={longwave_method!r} isn't "
             "NET_FLUX (-1) -- FluxesFromMeteo will silently recompute and "
             "discard these values from tcc every step instead. Set "
-            "meteo.CMIP6.shortwave_method/longwave_method to -1, or use "
-            "radiation_source: pseudo_tcc."
+            "simulation.airsea.shortwave_method/longwave_method to -1, or "
+            "use radiation_source: pseudo_tcc."
         )
     elif radiation_source == "pseudo_tcc" and (
         shortwave_method == NET_FLUX or longwave_method == NET_FLUX

@@ -138,10 +138,10 @@ simulation:
     coriolis_scheme: DEFAULT
 runtime:
   timestep: 20
-  split_factor: 30
-  dump_on_error: false
+  split_factor: 40
+  dump_on_error: true
   profile: null
-  check_finite: false
+  check_finite: true
   report:
     days: 1
   report_totals:
@@ -420,17 +420,21 @@ meteo:
   ERA5:
     folder: ${ERA5_FOLDER}
     evaporation: true
-    shortwave_method: 1
-    longwave_method: 1
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
+  # scenario is the FUTURE (>=2015) scenario only, and shortwave_method/
+  # longwave_method no longer exist here at all -- both same fixes as
+  # nse_cmip6.yaml (2026-09-07): set_meteo_data now always splices CMIP6's
+  # fixed historical experiment in automatically for years <=2014 (so
+  # 'historical' was never a valid scenario value here), and it now reads
+  # the real shortwave/longwave method straight from simulation.airsea
+  # instead of a meteo-level copy that could silently drift from it (see
+  # oceanicu_providers.py's own _meteo_shared comment for the full story).
   CMIP6:
     folder: ${CMIP6_FOLDER}
     folder_template: CMIP6/{model}/{scenario}/meteo
     model: MPI-ESM1-2-HR
-    scenario: historical
+    scenario: ssp126
     evaporation: true
-    shortwave_method: 1
-    longwave_method: 1
     radiation_source: pseudo_tcc
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
 river_discharge:
