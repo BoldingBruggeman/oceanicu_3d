@@ -429,6 +429,17 @@ def main(argv=None) -> int:
     # the same assignment.
     config.setdefault("runtime", {}).setdefault("post_data_script", "${SCRIPT_FOLDER}/meteo.py:set_sst_proxy")
 
+    # config['runtime']['stop'] has no schema meaning of its own (unlike
+    # 'time'/post_data_script above) -- injected directly into the VALIDATED
+    # config dict, same timing/reasoning as post_data_script just above
+    # (schema validation already ran; putting this in `raw` before it, like
+    # 'time', fails validation with "runtime.stop: unknown field", a real
+    # error hit while implementing this). Exists purely so a script-hook
+    # function (scripts/meteo.py's set_meteo_data) can read the run's own
+    # stop without args being in its scope -- mirrors pygetm-config's own
+    # codegen.py equivalent for generated scripts.
+    config.setdefault("runtime", {})["stop"] = args.stop
+
     if args.print_config:
         print(yaml.safe_dump(config, sort_keys=False))
         return 0
