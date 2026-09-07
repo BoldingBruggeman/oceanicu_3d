@@ -804,28 +804,32 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "simulation.airsea.ql_downwards", "kind": "file", "file": str(_folder / "era5_strd_????.nc"), "variable": "strd", "pre_transform_scale": 1 / 3600.0},
         ]
     elif meteo_source == "CMIP6":
-        _folder = Path(meteo.get("folder", ""))
-        if meteo.get("folder_template"):
-            _folder = _folder / meteo["folder_template"].format(
-                model=meteo.get("model", ""), scenario=meteo.get("scenario", "")
-            )
-        # "*" stands in for each variable's own bc-correct regridding.method
-        # (e.g. 'conservative' vs 'bilinear') -- do NOT hardcode 'bilinear'
-        # here: bc-correct's own disaggregated-output writer has a latent
-        # bug (real per-variable method/scenario not threaded through to
-        # that specific write path, silently defaulting to 'bilinear'/'' for
-        # every variable), and this glob is deliberately robust on both
-        # sides of that bug -- matches today's wrongly-named files AND
-        # correctly-named ones once that's fixed upstream, no change needed
-        # here either way. See driver/scripts/meteo.py's own set_meteo_data
-        # docstring for the same reasoning.
+        # Safe constant placeholders, NOT real file reads -- these 6 fields
+        # are ALWAYS overwritten by meteo.data_script (set_meteo_data,
+        # scripts/meteo.py) immediately after apply_data_assignments runs
+        # (same "runs after, so it correctly overwrites this" ordering tcc's
+        # own placeholder below already relies on). A real `kind: file`
+        # placeholder here USED TO read the active scenario's own folder
+        # directly (e.g. tas_bc_*_disagg_????.nc under .../ssp126/meteo/)
+        # -- harmless as long as expand_year_glob silently matched whatever
+        # years existed. Once set_meteo_data started splicing historical/
+        # scenario automatically (2026-09-07) and expand_year_glob started
+        # correctly detecting genuinely-missing years instead of silently
+        # leaving them out, this became a REAL crash: a run starting before
+        # 2015 asks this placeholder for e.g. 2010 against the ssp126-only
+        # folder, which has no such file, and apply_data_assignments fails
+        # before set_meteo_data ever gets a chance to overwrite it with the
+        # correct spliced value. A real, reproduced bug (GFDL-ESM4/ssp126,
+        # a run starting 2010) -- fixed by making the placeholder itself
+        # incapable of failing, exactly like tcc's own constant_value=0.5
+        # below already is.
         entries += [
-            {"target": "simulation.airsea.t2m", "kind": "file", "file": str(_folder / "tas_bc_*_disagg_????.nc"), "variable": "tas", "pre_transform_offset": -273.15},
-            {"target": "simulation.airsea.qa", "kind": "file", "file": str(_folder / "huss_bc_*_disagg_????.nc"), "variable": "huss"},
-            {"target": "simulation.airsea.u10", "kind": "file", "file": str(_folder / "uas_bc_*_disagg_????.nc"), "variable": "uas"},
-            {"target": "simulation.airsea.v10", "kind": "file", "file": str(_folder / "vas_bc_*_disagg_????.nc"), "variable": "vas"},
-            {"target": "simulation.airsea.sp", "kind": "file", "file": str(_folder / "psl_bc_*_disagg_????.nc"), "variable": "psl"},
-            {"target": "simulation.airsea.tp", "kind": "file", "file": str(_folder / "pr_bc_*_disagg_????.nc"), "variable": "pr", "pre_transform_scale": 1 / 1000.0},
+            {"target": "simulation.airsea.t2m", "kind": "constant", "constant_value": 15.0},
+            {"target": "simulation.airsea.qa", "kind": "constant", "constant_value": 0.008},
+            {"target": "simulation.airsea.u10", "kind": "constant", "constant_value": 0.0},
+            {"target": "simulation.airsea.v10", "kind": "constant", "constant_value": 0.0},
+            {"target": "simulation.airsea.sp", "kind": "constant", "constant_value": 101325.0},
+            {"target": "simulation.airsea.tp", "kind": "constant", "constant_value": 0.0},
             # Placeholder/fallback. When meteo.CMIP6.radiation_source ==
             # "pseudo_tcc" (the default), meteo.data_script (set_meteo_data,
             # default scripts/meteo.py:set_meteo_data) overwrites this with a
