@@ -86,7 +86,11 @@ meteo:
     model: "MPI-ESM1-2-HR"
     scenario: "ssp585"
   evaporation: True
-  # ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
+  # shortwave_method: ROSATI_MIYAKODA=1, NET_FLUX=-1, DOWNWARD_FLUX=-2
+  # longwave_method: CLARK=1, HASTENRATH_LAMB=2, BIGNAMI=3,
+  # BERLIAND_BERLIAND=4, JOSEY1=5, JOSEY2=6, NET_FLUX=-1, DOWNWARD_FLUX=-2
+  # (ROSATI_MIYAKODA is shortwave-only -- longwave's own "1" is CLARK,
+  # a different, unrelated bulk formula, not the same method by another name)
   shortwave_method: 1
   longwave_method: 1
 rivers:
