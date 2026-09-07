@@ -469,14 +469,38 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
             # cycling the same 12-month pattern all run) -- mirrors
             # boundary_baroclinic's own WOA branch.
             "WOA": (_fabm_tracers_param,),
-            # CMEMS: a real biogeochemistry time series already sitting at
-            # the boundary points (on_grid=True, climatology=False) -- real
-            # CMEMS BGC product/variable naming isn't confirmed for NSe yet
-            # (structurally complete, unverified, same status as the ERSEM
-            # dependency setup itself), so `tracers[*].file`/`variable` are
-            # left fully config-driven rather than a Python-side convention
-            # like WOA's woa_*.nc files.
-            "CMEMS": (_fabm_tracers_param,),
+            # CMEMS: real biogeochemistry data already sitting at the
+            # boundary points (on_grid=True always). `climatology` picks
+            # between reading it as a real, non-cycling time series
+            # (default -- e.g. a historical/near-term run covering the
+            # period the real CMEMS file actually spans) or cycling a
+            # single representative year (e.g. a 12-month mean derived from
+            # that same file) for periods no real data can cover at all --
+            # a future CMIP6-scenario run's own future years, since no
+            # reliable CMIP6-projected biogeochemical boundary is
+            # achievable (per user, 2026-09-07: "we have to do the best we
+            # can"). pygetm.core.Array.set's own climatology kwarg already
+            # supports on_grid=True + climatology=True together (confirmed
+            # directly against pygetm.input.InputManager.add's docstring --
+            # climatology only requires "a single climatological year...
+            # representative for any true year", independent of on_grid) --
+            # this was previously unreachable here only because
+            # derive_data_assignments hardcoded climatology=False for every
+            # CMEMS use, not a real pygetm limitation.
+            "CMEMS": (
+                ParameterSpec(
+                    name="climatology",
+                    type=TypeRef(kind="scalar", scalar_type="bool"),
+                    default=False,
+                    help="cycle this file as a single representative year "
+                    "(pygetm's own climatology=True) instead of reading it "
+                    "as a real, non-cycling time series -- see this choice's "
+                    "own comment in oceanicu_providers.py for when to use "
+                    "each.",
+                    importance=Importance.ADVANCED,
+                ),
+                _fabm_tracers_param,
+            ),
             # CMIP6: same real time series shape as CMEMS (on_grid=True,
             # climatology=False) -- boundary-VALUES only, mirrors
             # boundary_baroclinic's own CMIP6 branch (_CMIP6_SHARED gives
@@ -510,6 +534,19 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
     fabm = make_provider_slot(
         "fabm",
         {
+            # Explicit "off" choice -- previously FABM could only be disabled
+            # implicitly (omit the whole `fabm:` section, or set source:
+            # ERSEM with no `file`), which isn't discoverable in a TUI/web
+            # frontend's own source dropdown (ERSEM was the ONLY visible
+            # choice). oceanicu_driver.py's `if fabm_source == "ERSEM":`
+            # gate (and run_fabm_data_script's own no-op-if-unconfigured
+            # design) already skip every FABM data-setting step for any
+            # OTHER source value, "none" included -- no other code change
+            # needed. Zero extra params: the 5 shared base params (folder,
+            # folder_template, ...) still show up (make_provider_slot always
+            # merges those in) but are genuinely unused for this choice,
+            # same as any other minimal provider.
+            "none": (),
             "ERSEM": (
                 ParameterSpec(
                     name="file",
@@ -616,21 +653,50 @@ def derive_data_assignments(config: dict) -> list[dict]:
         # (bdy_3d_{variable}_{start}_{end}.nc), unlike CMEMS's single file
         # holding both thetao/so -- filename_template is formatted once per
         # target with variable='thetao'/'so' rather than reused as-is.
-        _cmip6_folder = Path(baroclinic.get("folder", ""))
-        if baroclinic.get("folder_template"):
-            _cmip6_folder = _cmip6_folder / baroclinic["folder_template"].format(
-                model=baroclinic.get("model", ""), scenario=baroclinic.get("scenario", "")
-            )
+        #
+        # Historical/scenario splice (same trick as meteo's own CMIP6
+        # splicing in scripts/meteo.py's set_meteo_data, per user,
+        # 2026-09-07): unlike meteo's per-year files, run-delta-boundaries
+        # writes ONE file per whole period -- a fixed historical bridge
+        # file (2010-01-01..2014-12-31, ocean-prep's own nse_delta_bdy_
+        # historical.yaml -- see that config's own header for why this
+        # period specifically) and one scenario file covering the real
+        # future period (baroclinic.start_date/end_date, e.g.
+        # 2015-01-01..2100-12-31 for ssp126). Both real files already exist
+        # on disk (confirmed 2026-09-07). Simpler than meteo's glob-based
+        # splice: `file:` accepts an exact-path LIST as-is (codegen.py's
+        # own list branch, no glob/wildcard resolution involved at all,
+        # unlike expand_year_glob), so this just concatenates the two
+        # whole-period files -- pygetm.input.from_nc reads them as one
+        # continuous series, same mechanism as meteo's per-year list.
+        # Unconditional (not start/stop-gated): a run entirely within one
+        # period only ever touches its own file's real time range, so
+        # listing both is harmless even then -- no need to thread runtime.
+        # stop into this deriver the way meteo's script-hook needed to.
+        _HIST_START, _HIST_END = "20100101", "20141231"
+
+        def _cmip6_bdy_folder(experiment: str) -> Path:
+            folder = Path(baroclinic.get("folder", ""))
+            if baroclinic.get("folder_template"):
+                folder = folder / baroclinic["folder_template"].format(
+                    model=baroclinic.get("model", ""), scenario=experiment
+                )
+            return folder
+
         _fn_tmpl = baroclinic.get("filename_template", "")
-        _temp_file = _cmip6_folder / _fn_tmpl.format(
-            variable="thetao", start_date=baroclinic.get("start_date", ""), end_date=baroclinic.get("end_date", "")
-        )
-        _salt_file = _cmip6_folder / _fn_tmpl.format(
-            variable="so", start_date=baroclinic.get("start_date", ""), end_date=baroclinic.get("end_date", "")
-        )
+
+        def _cmip6_bdy_files(variable: str) -> list[str]:
+            hist_path = _cmip6_bdy_folder("historical") / _fn_tmpl.format(
+                variable=variable, start_date=_HIST_START, end_date=_HIST_END
+            )
+            scen_path = _cmip6_bdy_folder(baroclinic.get("scenario", "")) / _fn_tmpl.format(
+                variable=variable, start_date=baroclinic.get("start_date", ""), end_date=baroclinic.get("end_date", "")
+            )
+            return [str(hist_path), str(scen_path)]
+
         entries += [
-            {"target": "open_boundary.temp.values", "kind": "file", "file": str(_temp_file), "variable": "thetao", "on_grid": True, "climatology": False},
-            {"target": "open_boundary.salt.values", "kind": "file", "file": str(_salt_file), "variable": "so", "on_grid": True, "climatology": False},
+            {"target": "open_boundary.temp.values", "kind": "file", "file": _cmip6_bdy_files("thetao"), "variable": "thetao", "on_grid": True, "climatology": False},
+            {"target": "open_boundary.salt.values", "kind": "file", "file": _cmip6_bdy_files("so"), "variable": "so", "on_grid": True, "climatology": False},
         ]
 
     # boundaries.barotropic 2D z/u/v boundary VALUES differ by source too --
@@ -657,16 +723,10 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "open_boundaries.u", "kind": "tpxo", "tpxo_folder": _tpxo_folder, "tpxo_variable": "u", "on_grid": True},
             {"target": "open_boundaries.v", "kind": "tpxo", "tpxo_folder": _tpxo_folder, "tpxo_variable": "v", "on_grid": True},
         ]
-    elif barotropic_source in ("CMEMS", "CMIP6"):
-        # Single file holding zos/uo/vo together (unlike baroclinic's CMIP6
-        # branch above, which needs one file PER variable) -- matches
+    elif barotropic_source == "CMEMS":
+        # Single file holding zos/uo/vo together -- matches
         # cfg_boundaries.py::data_2d's own generic branch, which reads all
-        # three off one resolved `fn` regardless of which non-TPXO source is
-        # active. barotropic.CMIP6.folder_template (nse_cmems.yaml's own
-        # unused '{setup}/CMIP6/{model}/{scenario}') is the only field here
-        # that isn't already covered elsewhere in this config dict -- no
-        # domain actually uses source: CMIP6 for barotropic today, so
-        # config.get("setup", "") staying empty in that case is harmless.
+        # three off one resolved `fn`.
         _folder = Path(barotropic.get("folder", ""))
         if barotropic.get("folder_template"):
             _folder = _folder / barotropic["folder_template"].format(
@@ -681,6 +741,39 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "open_boundaries.z", "kind": "file", "file": str(_file), "variable": "zos", "on_grid": True},
             {"target": "open_boundaries.u", "kind": "file", "file": str(_file), "variable": "uo", "on_grid": True},
             {"target": "open_boundaries.v", "kind": "file", "file": str(_file), "variable": "vo", "on_grid": True},
+        ]
+    elif barotropic_source == "CMIP6":
+        # Same historical/scenario splice as boundaries.baroclinic's own
+        # CMIP6 branch above (see that branch's comment for the full
+        # reasoning) -- real files confirmed on disk for both periods
+        # 2026-09-07, same NSe/CMIP6/{model}/{scenario}/bdy/ tree
+        # baroclinic's own files sit in (bdy_2d_*.nc there, alongside
+        # baroclinic's bdy_3d_{variable}_*.nc). ONE file holds zos/uo/vo
+        # together (unlike baroclinic's one-file-per-variable), so this
+        # only needs a single two-element file list, reused for all three
+        # targets.
+        _HIST_START, _HIST_END = "20100101", "20141231"
+
+        def _cmip6_bdy_folder(experiment: str) -> Path:
+            folder = Path(barotropic.get("folder", ""))
+            if barotropic.get("folder_template"):
+                folder = folder / barotropic["folder_template"].format(
+                    setup=config.get("setup", ""),
+                    model=barotropic.get("model", ""),
+                    scenario=experiment,
+                )
+            return folder
+
+        _fn_tmpl = barotropic.get("filename_template", "")
+        _hist_file = _cmip6_bdy_folder("historical") / _fn_tmpl.format(start_date=_HIST_START, end_date=_HIST_END)
+        _scen_file = _cmip6_bdy_folder(barotropic.get("scenario", "")) / _fn_tmpl.format(
+            start_date=barotropic.get("start_date", ""), end_date=barotropic.get("end_date", "")
+        )
+        _files = [str(_hist_file), str(_scen_file)]
+        entries += [
+            {"target": "open_boundaries.z", "kind": "file", "file": _files, "variable": "zos", "on_grid": True},
+            {"target": "open_boundaries.u", "kind": "file", "file": _files, "variable": "uo", "on_grid": True},
+            {"target": "open_boundaries.v", "kind": "file", "file": _files, "variable": "vo", "on_grid": True},
         ]
 
     # meteo's straightforward 1:1 file-read fields -- differ by SOURCE (ERA5
@@ -772,16 +865,29 @@ def derive_data_assignments(config: dict) -> list[dict]:
     if fabm_cfg.get("source") == "ERSEM" and fabm_cfg.get("file"):
         boundaries_fabm = config.get("boundaries", {}).get("fabm", {})
         boundaries_fabm_source = boundaries_fabm.get("source")
-        # WOA vs CMEMS vs CMIP6: same on_grid/climatology distinction as
-        # boundaries.baroclinic's own WOA/CMEMS/CMIP6 branches above -- a
-        # global climatology (WOA) vs a real time series already at the
-        # boundary points (CMEMS, CMIP6 delta-change output). Which TRACERS
-        # get a boundary at all is config-driven either way (boundaries.
+        # WOA vs CMEMS vs CMIP6: same on_grid distinction as boundaries.
+        # baroclinic's own WOA/CMEMS/CMIP6 branches above -- a global
+        # climatology (WOA) vs a real time series already at the boundary
+        # points (CMEMS, CMIP6 delta-change output). Which TRACERS get a
+        # boundary at all is config-driven either way (boundaries.
         # fabm.<source>.tracers -- see that ParameterSpec's own help text
         # for why this isn't a fixed list).
+        #
+        # CMEMS's own `climatology` is config-driven (boundaries.fabm.
+        # CMEMS.climatology, default False) rather than hardcoded like WOA/
+        # CMIP6 -- see that field's own ParameterSpec comment above for why
+        # (a future CMIP6-scenario run's own future years need CMEMS cycled
+        # as a stand-in climatology, since no real CMIP6-projected BGC
+        # boundary is achievable; a historical/near-term run reads the same
+        # source as a real, non-cycling time series instead).
         _fabm_grid_kwargs = {
             "WOA": {"on_grid": False, "climatology": True},
-            "CMEMS": {"on_grid": True, "climatology": False},
+            # NOT boundaries_fabm["CMEMS"]["climatology"] -- validate_config's
+            # choice-flattening puts the ACTIVE choice's own fields directly
+            # on boundaries_fabm itself (see _fabm_tracers below, and
+            # scripts/meteo.py's own set_meteo_data docstring for the same,
+            # previously-reproduced pitfall).
+            "CMEMS": {"on_grid": True, "climatology": bool(boundaries_fabm.get("climatology", False))},
             "CMIP6": {"on_grid": True, "climatology": False},
         }.get(boundaries_fabm_source)
         _fabm_tracers = boundaries_fabm.get("tracers") or {}

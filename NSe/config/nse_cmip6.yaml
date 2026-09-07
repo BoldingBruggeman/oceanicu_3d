@@ -139,9 +139,9 @@ simulation:
 runtime:
   timestep: 20
   split_factor: 30
-  dump_on_error: false
+  dump_on_error: true
   profile: null
-  check_finite: false
+  check_finite: true
   report:
     days: 1
   report_totals:
@@ -357,7 +357,7 @@ hydrography:
     salt: 36
 boundaries:
   barotropic:
-    source: TPXO
+    source: CMIP6
     TPXO:
       tpxo_folder: ${TPXO_FOLDER}
     CMEMS:
@@ -366,14 +366,23 @@ boundaries:
       filename_template: hourly_{start_date}_to_{end_date}.nc
       start_date: '2024-03-02'
       end_date: '2026-01-01'
+    # folder_template/filename_template/scenario/dates were all stale here
+    # (a bogus '{setup}/CMIP6/{model}/{scenario}' template that doesn't
+    # match the real bdy_2d file layout at all, scenario: ssp585
+    # inconsistent with the rest of this file's ssp126, and a narrow
+    # 2024-2026 date range) -- found and fixed while adding the historical/
+    # scenario splice below, 2026-09-07. Matches boundaries.baroclinic.
+    # CMIP6's own folder_template/model/scenario/dates exactly -- both read
+    # from the same real NSe/CMIP6/{model}/{scenario}/bdy/ tree (bdy_2d_
+    # *.nc here, bdy_3d_{variable}_*.nc there), confirmed on disk.
     CMIP6:
       folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}
-      folder_template: '{setup}/CMIP6/{model}/{scenario}'
-      filename_template: '{start_date}_to_{end_date}.nc'
+      folder_template: '{model}/{scenario}/bdy'
+      filename_template: 'bdy_2d_{start_date}_{end_date}.nc'
       model: MPI-ESM1-2-HR
-      scenario: ssp585
-      start_date: '2024-03-01'
-      end_date: '2026-01-01'
+      scenario: ssp126
+      start_date: '20150101'
+      end_date: '21001231'
   baroclinic:
     source: CMIP6
     WOA:
@@ -398,7 +407,34 @@ boundaries:
     # oceanicu_providers.py's boundaries.fabm comment for why. Only takes
     # effect once fabm.ERSEM.file below is actually set (FABM stays off
     # otherwise) -- see driver/scripts/fabm.py's configure_fabm.
-    source: WOA
+    # source was wrongly "CMIP6" here with no CMIP6 sub-block at all (only
+    # WOA's, below, was ever populated) -- a real pre-existing bug, found
+    # while fixing meteo.CMIP6.scenario (2026-09-07). CMIP6 itself isn't
+    # usable here: we can't reliably produce a real CMIP6-projected future
+    # biogeochemical boundary the way meteo/baroclinic get one (per user,
+    # 2026-09-07) -- CMEMS is the intended real-data source instead (a
+    # present-day/near-term reanalysis+forecast product, not a scenario
+    # projection, so this doesn't vary with meteo/baroclinic's own ssp126 --
+    # same non-scenario-varying role CMEMS already plays as boundary_
+    # baroclinic's own CMEMS alternative to its CMIP6 choice).
+    source: CMEMS
+    CMEMS:
+      folder: ${BOUNDARY_FOLDER_FABM_CMEMS}
+      # climatology: True -- this run's own period reaches past 2026 (real
+      # CMEMS coverage ends 2026-08-17), so cycling a single representative
+      # year is the best available stand-in for years no real data (or
+      # reliable CMIP6 projection, see this block's own header comment)
+      # can cover. bio_monthly_climatology.nc is a real 12-month mean of
+      # the actual CMEMS bio_daily_2010-01-01_to_2026-08-17.nc boundary
+      # series (same file boundaries.baroclinic.CMEMS reads), generated
+      # 2026-09-07 -- see that file's own `source` global attribute for
+      # exactly how.
+      climatology: true
+      tracers:
+        N3_n: {file: bio_monthly_climatology.nc, variable: no3, boundary_condition_type: SPONGE}
+        N1_p: {file: bio_monthly_climatology.nc, variable: po4, boundary_condition_type: SPONGE}
+        N5_s: {file: bio_monthly_climatology.nc, variable: si,  boundary_condition_type: SPONGE}
+        O2_o: {file: bio_monthly_climatology.nc, variable: o2,  boundary_condition_type: SPONGE}
     WOA:
       folder: ${BOUNDARY_FOLDER_FABM_WOA}
       # Not every FABM state variable needs an explicit open-ocean boundary
@@ -427,7 +463,15 @@ meteo:
     folder: ${CMIP6_FOLDER}
     folder_template: CMIP6/{model}/{scenario}/meteo
     model: MPI-ESM1-2-HR
-    scenario: historical
+    # This is the FUTURE (>=2015) scenario only -- driver/scripts/meteo.py's
+    # set_meteo_data now always splices CMIP6's fixed 'historical' experiment
+    # (<=2014) in automatically for any run reaching back that far, purely
+    # from the run's own start/stop; 'historical' is no longer a valid value
+    # here (it has no data past 2014, so a run extending past 2015 would try
+    # to read nonexistent historical/meteo files for those years and crash).
+    # Matches boundaries.baroclinic/river_discharge.CMIP6's own scenario
+    # below -- change together if a different scenario is intended.
+    scenario: ssp126
     evaporation: true
     shortwave_method: 1
     longwave_method: 1

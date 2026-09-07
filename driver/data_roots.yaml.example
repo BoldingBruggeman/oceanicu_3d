@@ -21,7 +21,7 @@ TPXO_FOLDER: /data/TPXO9
 # machine's stale ./boundaries.old snapshot the .example previously pointed
 # at, which doesn't exist on bb-server1 at all.
 BOUNDARY_FOLDER_BAROTROPIC_CMEMS: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
-BOUNDARY_FOLDER_BAROTROPIC_CMIP6: /data/CMIP6
+BOUNDARY_FOLDER_BAROTROPIC_CMIP6: /data/OceanICU/oceanicu_3d/data/NSe/CMIP6
 
 # boundaries.baroclinic
 BOUNDARY_FOLDER_BAROCLINIC_WOA: /data/WOA
@@ -48,6 +48,7 @@ RIVER_FOLDER_CMIP6: /data/BiasCorrected
 # exist.
 FABM_ERSEM_FOLDER: /data/FABM/ERSEM
 BOUNDARY_FOLDER_FABM_WOA: /data/FABM/WOA
+BOUNDARY_FOLDER_FABM_CMEMS: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
 
 # data_assignments (radiation.kc2, when ObsKd/space-varying is active)
 KD490_FOLDER: /data/Kd490

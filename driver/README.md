@@ -117,6 +117,7 @@ recorded here so a real migration checklist exists, not fixed yet:
 | `KD490_FOLDER` | `/data/Kd490` | external ref | 909M |
 | `FABM_ERSEM_FOLDER` | not confirmed -- no real NSe files yet | external ref (ERSEM dependency data: gelbstoff/CDOM product, AMM7-EMEP N-deposition) | ? |
 | `BOUNDARY_FOLDER_FABM_WOA` | not confirmed -- no real NSe files yet | external ref (WOA BGC tracer climatology) | ? |
+| `BOUNDARY_FOLDER_FABM_CMEMS` | same real folder as `BOUNDARY_FOLDER_BAROCLINIC_CMEMS` | generated (real CMEMS BGC boundary time series, `bio_daily_*.nc`; `bio_monthly_climatology.nc` derived from it for future-scenario runs, 2026-09-07) | (part of the CMEMS bdy data above) |
 
 **Fixed, 2026-08-19**: `HYDROGRAPHY_FOLDER_WOA`/`BOUNDARY_FOLDER_BAROCLINIC_WOA`
 said `/server/data/WOA` (real path: `/data/WOA`); `TPXO_FOLDER` said

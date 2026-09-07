@@ -37,6 +37,7 @@ RIVER_FOLDER_CMIP6: /work/shared/oceanICU/BiasCorrected
 # exist.
 FABM_ERSEM_FOLDER: /work/shared/oceanICU/FABM/
 BOUNDARY_FOLDER_FABM_WOA: /work/shared/oceanICU/FABM/
+BOUNDARY_FOLDER_FABM_CMEMS: /work/shared/oceanICU/NSe/CMEMS/bdy
 
 # data_assignments (radiation.kc2, when ObsKd/space-varying is active)
 KD490_FOLDER: /work/shared/oceanICU/Kd490
