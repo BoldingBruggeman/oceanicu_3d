@@ -115,7 +115,7 @@ _EXPERIMENT_COLUMNS = [
 _EXPERIMENT_COLUMN_LABELS = {
     "chunk_kind": "chunk",
     "chunk_multiplier": "multiplier",
-    "chunk_delay_seconds": "chunk_delay",
+    "chunk_delay_seconds": "delay",
 }
 
 
