@@ -139,7 +139,13 @@ def _print_table(rows: list, columns: list[str], labels: dict[str, str] | None =
     if not rows:
         print("(none)")
         return
-    widths = {c: max(len(c), *(len(str(_cell(r, c))) for r in rows)) for c in columns}
+    # Width from the DISPLAYED label, not the real column name -- e.g.
+    # chunk_delay_seconds (20 chars) shouldn't pad the column out to 20
+    # chars just because that's the real name, when the printed header is
+    # the much shorter "chunk_delay" (a real bug hit immediately: the
+    # first version of this labels= support fixed the header TEXT but left
+    # width computed off the old long name, per user, 2026-09-08).
+    widths = {c: max(len(labels.get(c, c)), *(len(str(_cell(r, c))) for r in rows)) for c in columns}
     header = "  ".join(labels.get(c, c).ljust(widths[c]) for c in columns)
     print(header)
     print("  ".join("-" * widths[c] for c in columns))
