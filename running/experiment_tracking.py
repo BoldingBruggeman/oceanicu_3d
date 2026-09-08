@@ -1122,9 +1122,17 @@ def start_chunk(
         (experiment_id, chunk_index, start, stop, chunk_dir, load_restart, save_restart,
          slurm_job_id, now, now, script_sha256, config_sha256, submitted_host),
     )
+    # Unconditional -- always bump updated_at on a new chunk start, not just
+    # the first chunk's not_started->in_progress transition. Previously
+    # guarded by `AND status != 'in_progress'`, which meant every chunk
+    # after the first silently skipped this update (status was already
+    # 'in_progress'), so `list --sort updated_at` went stale mid-run even
+    # though a new chunks row/chunk_started history event landed each
+    # time. finish_chunk's own updated_at bump (via recompute_experiment_
+    # status, itself unconditional) already covered the finish side; this
+    # brings the start side to parity. Per user, 2026-09-08.
     conn.execute(
-        "UPDATE experiments SET status = 'in_progress', updated_at = ? WHERE experiment_id = ? "
-        "AND status != 'in_progress'",
+        "UPDATE experiments SET status = 'in_progress', updated_at = ? WHERE experiment_id = ?",
         (now, experiment_id),
     )
     detail = f"chunk {chunk_index}: {start} -> {stop}"
