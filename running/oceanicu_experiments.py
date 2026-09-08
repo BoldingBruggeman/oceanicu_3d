@@ -584,12 +584,26 @@ def cmd_submit_chunk(args: argparse.Namespace) -> int:
     return 0
 
 
+def _trim_updated_at(rows: list) -> list:
+    """updated_at is stored+returned as a full ISO-8601 timestamp with UTC
+    offset (e.g. '2026-09-08T07:18:48+00:00') -- display-only trim down to
+    whole seconds (drop the '+00:00'), same as script/config_sha256 already
+    get truncated for display in cmd_show. Per user, 2026-09-08."""
+    out = []
+    for r in rows:
+        d = dict(r)
+        if d.get("updated_at"):
+            d["updated_at"] = str(d["updated_at"])[:19]
+        out.append(d)
+    return out
+
+
 def cmd_list(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         rows = rt.list_experiments(conn, status=args.status)
         if args.like:
             rows = [r for r in rows if args.like in r["experiment_id"]]
-        _print_table(rows, _EXPERIMENT_COLUMNS, labels=_EXPERIMENT_COLUMN_LABELS)
+        _print_table(_trim_updated_at(rows), _EXPERIMENT_COLUMNS, labels=_EXPERIMENT_COLUMN_LABELS)
     return 0
 
 
@@ -600,7 +614,7 @@ def cmd_show(args: argparse.Namespace) -> int:
             print(f"ERROR: no such experiment_id: {args.experiment_id!r}", file=sys.stderr)
             return 1
         print("experiment:")
-        _print_table([experiment], _EXPERIMENT_COLUMNS + ["experiment_root", "script", "config", "launcher", "fabm", "data_roots_file", "notes"], labels=_EXPERIMENT_COLUMN_LABELS)
+        _print_table(_trim_updated_at([experiment]), _EXPERIMENT_COLUMNS + ["experiment_root", "script", "config", "launcher", "fabm", "data_roots_file", "notes"], labels=_EXPERIMENT_COLUMN_LABELS)
         print()
         print("chunks:")
         chunks = rt.list_chunks(conn, args.experiment_id)
