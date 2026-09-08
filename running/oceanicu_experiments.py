@@ -103,9 +103,20 @@ _QUEUE_EXCLUDE_KEYS = {"db", "dry_run", "queue", "cmd", "func"}
 
 _EXPERIMENT_COLUMNS = [
     "experiment_id", "status", "control", "chunk_kind", "chunk_multiplier",
-    "initial_date", "stop_date", "priority", "chunk_delay_seconds",
+    "initial_date", "stop_date", "priority", "chunk_delay_seconds", "np",
     "updated_at",
 ]
+
+# Shorter display labels for `list`'s own printed header row ONLY -- the
+# real column names above still drive _cell() lookups and cmd_apply's own
+# before/after diff (both keyed off _EXPERIMENT_COLUMNS' real DB column
+# names), so this is purely cosmetic, not a rename of anything stored or
+# compared. Per user, 2026-09-08.
+_EXPERIMENT_COLUMN_LABELS = {
+    "chunk_kind": "chunk",
+    "chunk_multiplier": "multiplier",
+    "chunk_delay_seconds": "chunk_delay",
+}
 
 
 def _cell(r, c: str):
@@ -123,12 +134,13 @@ def _cell(r, c: str):
         return ""
 
 
-def _print_table(rows: list, columns: list[str]) -> None:
+def _print_table(rows: list, columns: list[str], labels: dict[str, str] | None = None) -> None:
+    labels = labels or {}
     if not rows:
         print("(none)")
         return
     widths = {c: max(len(c), *(len(str(_cell(r, c))) for r in rows)) for c in columns}
-    header = "  ".join(c.ljust(widths[c]) for c in columns)
+    header = "  ".join(labels.get(c, c).ljust(widths[c]) for c in columns)
     print(header)
     print("  ".join("-" * widths[c] for c in columns))
     for r in rows:
@@ -571,7 +583,7 @@ def cmd_list(args: argparse.Namespace) -> int:
         rows = rt.list_experiments(conn, status=args.status)
         if args.like:
             rows = [r for r in rows if args.like in r["experiment_id"]]
-        _print_table(rows, _EXPERIMENT_COLUMNS)
+        _print_table(rows, _EXPERIMENT_COLUMNS, labels=_EXPERIMENT_COLUMN_LABELS)
     return 0
 
 
@@ -582,7 +594,7 @@ def cmd_show(args: argparse.Namespace) -> int:
             print(f"ERROR: no such experiment_id: {args.experiment_id!r}", file=sys.stderr)
             return 1
         print("experiment:")
-        _print_table([experiment], _EXPERIMENT_COLUMNS + ["experiment_root", "script", "config", "np", "launcher", "fabm", "data_roots_file", "notes"])
+        _print_table([experiment], _EXPERIMENT_COLUMNS + ["experiment_root", "script", "config", "launcher", "fabm", "data_roots_file", "notes"], labels=_EXPERIMENT_COLUMN_LABELS)
         print()
         print("chunks:")
         chunks = rt.list_chunks(conn, args.experiment_id)
