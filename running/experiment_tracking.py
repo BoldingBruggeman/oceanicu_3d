@@ -77,6 +77,19 @@ EXPERIMENT_CONTROLS = ("run", "pause_requested", "paused")
 EXPERIMENT_STATUSES = ("not_started", "in_progress", "paused", "complete", "complete_with_warnings", "failed")
 CHUNK_STATUSES = ("running", "done", "failed")
 
+# list_experiments' allowed --sort keys, each mapped to a real ORDER BY
+# clause -- an allow-list, not a passthrough, so a sort key never reaches
+# the query as raw interpolated SQL. "priority" (the pre-existing default)
+# stays first so list_experiments() with no args is unchanged. Add more
+# keys here as they come up (per user, 2026-09-08).
+LIST_SORT_KEYS = ("priority", "status", "updated_at", "experiment_id")
+_SORT_ORDER_BY = {
+    "priority": "priority DESC, experiment_id",
+    "status": "status, experiment_id",
+    "updated_at": "updated_at DESC, experiment_id",
+    "experiment_id": "experiment_id",
+}
+
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS experiments (
     experiment_id           TEXT PRIMARY KEY,
@@ -671,13 +684,16 @@ def get_experiment(conn: sqlite3.Connection, experiment_id: str) -> Optional[sql
 
 @_rpc_or_local
 def list_experiments(
-    conn: sqlite3.Connection, *, status: Optional[str] = None,
+    conn: sqlite3.Connection, *, status: Optional[str] = None, sort: Optional[str] = None,
 ) -> list[sqlite3.Row]:
+    if sort is not None and sort not in _SORT_ORDER_BY:
+        raise ValueError(f"unknown sort key {sort!r}, must be one of {LIST_SORT_KEYS}")
+    order_by = _SORT_ORDER_BY[sort or "priority"]
     if status:
         return conn.execute(
-            "SELECT * FROM experiments WHERE status = ? ORDER BY priority DESC, experiment_id", (status,)
+            f"SELECT * FROM experiments WHERE status = ? ORDER BY {order_by}", (status,)
         ).fetchall()
-    return conn.execute("SELECT * FROM experiments ORDER BY priority DESC, experiment_id").fetchall()
+    return conn.execute(f"SELECT * FROM experiments ORDER BY {order_by}").fetchall()
 
 
 @_rpc_or_local

@@ -27,7 +27,7 @@ list/show are read-only and safe to point at a read-only mirror (e.g.
 bb-server1) if that's all you can reach -- you just might be looking at
 a slightly stale snapshot, not live state:
 
-    oceanicu_experiments.py list   [--status in_progress] [--like MPI-ESM1-2-HR]
+    oceanicu_experiments.py list   [--status in_progress] [--like MPI-ESM1-2-HR] [--sort updated_at]
     oceanicu_experiments.py show   --experiment-id ...              # experiment + full chunk history
 
 Every WRITE command below also works without --queue, but only if you
@@ -600,7 +600,7 @@ def _trim_updated_at(rows: list) -> list:
 
 def cmd_list(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rows = rt.list_experiments(conn, status=args.status)
+        rows = rt.list_experiments(conn, status=args.status, sort=args.sort)
         if args.like:
             rows = [r for r in rows if args.like in r["experiment_id"]]
         _print_table(_trim_updated_at(rows), _EXPERIMENT_COLUMNS, labels=_EXPERIMENT_COLUMN_LABELS)
@@ -914,6 +914,8 @@ def main() -> int:
     l = sub.add_parser("list"); _add_common(l); l.set_defaults(func=cmd_list)
     l.add_argument("--status", default=None, choices=list(rt.EXPERIMENT_STATUSES))
     l.add_argument("--like", default=None, help="substring filter on experiment_id")
+    l.add_argument("--sort", default=None, choices=list(rt.LIST_SORT_KEYS),
+                    help="default: priority (desc), experiment_id")
 
     s = sub.add_parser("show"); _add_common(s); s.set_defaults(func=cmd_show)
     s.add_argument("--experiment-id", required=True)
