@@ -104,6 +104,7 @@ _QUEUE_EXCLUDE_KEYS = {"db", "dry_run", "queue", "cmd", "func"}
 _EXPERIMENT_COLUMNS = [
     "experiment_id", "status", "control", "chunk_kind", "chunk_multiplier",
     "initial_date", "stop_date", "priority", "chunk_delay_seconds",
+    "updated_at",
 ]
 
 
