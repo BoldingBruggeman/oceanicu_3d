@@ -9,20 +9,6 @@
     <lastBuildDate>Wed, 09 Sep 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/areas/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>AMM7</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</link>
-      <pubDate>Wed, 09 Sep 2026 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</guid>
-      <description>AMM7 modeling area — validation results and experiment overview.</description>
-    </item>
-    <item>
-      <title>NS</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</link>
-      <pubDate>Wed, 09 Sep 2026 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</guid>
-      <description>NS modeling area — validation results and experiment overview.</description>
-    </item>
-    <item>
       <title>NSe</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</link>
       <pubDate>Wed, 09 Sep 2026 00:00:00 +0000</pubDate>
