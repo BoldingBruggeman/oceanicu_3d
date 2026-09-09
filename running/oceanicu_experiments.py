@@ -103,7 +103,7 @@ _QUEUE_EXCLUDE_KEYS = {"db", "dry_run", "queue", "cmd", "func"}
 
 _EXPERIMENT_COLUMNS = [
     "experiment_id", "status", "control", "chunk_kind", "chunk_multiplier",
-    "initial_date", "stop_date", "priority", "chunk_delay_seconds", "np",
+    "actual_chunk", "initial_date", "stop_date", "priority", "chunk_delay_seconds", "np",
     "updated_at",
 ]
 
@@ -115,6 +115,7 @@ _EXPERIMENT_COLUMNS = [
 _EXPERIMENT_COLUMN_LABELS = {
     "chunk_kind": "chunk",
     "chunk_multiplier": "multiplier",
+    "actual_chunk": "actual",
     "chunk_delay_seconds": "delay",
 }
 
@@ -603,6 +604,12 @@ def cmd_list(args: argparse.Namespace) -> int:
         rows = rt.list_experiments(conn, status=args.status, sort=args.sort)
         if args.like:
             rows = [r for r in rows if args.like in r["experiment_id"]]
+        # chunk_kind/chunk_multiplier are config (how BIG the next chunk
+        # will be) -- actual_chunk is the highest chunk_index this
+        # experiment has actually reached so far, one grouped query for
+        # every experiment rather than a per-row lookup.
+        latest = rt.get_latest_chunk_indices(conn)
+        rows = [{**dict(r), "actual_chunk": latest.get(r["experiment_id"], "")} for r in rows]
         _print_table(_trim_updated_at(rows), _EXPERIMENT_COLUMNS, labels=_EXPERIMENT_COLUMN_LABELS)
     return 0
 

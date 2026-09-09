@@ -1343,6 +1343,21 @@ def list_chunks(conn: sqlite3.Connection, experiment_id: str) -> list[sqlite3.Ro
 
 
 @_rpc_or_local
+def get_latest_chunk_indices(conn: sqlite3.Connection) -> dict[str, int]:
+    """{experiment_id: highest chunk_index reached so far} for every
+    experiment that has at least one chunk row -- one grouped query for
+    all experiments at once (not N+1 per-experiment lookups), so `list`
+    can show each experiment's actual current chunk alongside its
+    chunk_kind/chunk_multiplier config, not just the config that
+    determines the SIZE of chunks it runs. An experiment with no chunks
+    yet simply has no entry in the returned dict."""
+    rows = conn.execute(
+        "SELECT experiment_id, MAX(chunk_index) AS latest FROM chunks GROUP BY experiment_id"
+    ).fetchall()
+    return {r["experiment_id"]: r["latest"] for r in rows}
+
+
+@_rpc_or_local
 def rerun_from(
     conn: sqlite3.Connection, experiment_id: str, *, chunk_index: Optional[int] = None,
     user: Optional[str] = None, note: Optional[str] = None, force: bool = False,
