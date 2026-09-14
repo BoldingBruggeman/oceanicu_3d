@@ -445,6 +445,22 @@ meteo:
     radiation_source: components
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
     model: GFDL-ESM4
+  CMIP6:
+    folder: ${CMIP6_FOLDER}
+    folder_template: CMIP6/{model}/{scenario}/meteo
+    scenario: ssp126
+    evaporation: true
+    radiation_source: net
+    data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
+    model: GFDL-ESM4
+  # folder deliberately left unset (an empty mapping, NOT omitted -- see
+  # ChoiceSpec's own nested-vs-flat handling in yaml_parse._validate_choice:
+  # a bare `Fluxes:` with nothing under it parses as YAML null, not an
+  # empty dict, which breaks the nested-form detection there). Inactive
+  # for now -- set source: Fluxes and a real folder here to switch to
+  # Fluxes' "from file" method, or leave the folder empty for its own
+  # static constant values (also needs simulation.airsea.type: Fluxes).
+  Fluxes: {}
 river_discharge:
   source: emorid
   emorid:

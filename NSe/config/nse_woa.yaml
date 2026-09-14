@@ -109,7 +109,7 @@ simulation:
     BlumbergMellor: {}
     ShchepetkinMcwilliams: {}
   airsea:
-    type: Fluxes
+    type: FluxesFromMeteo
     Fluxes:
       taux: 0.01
       tauy: 0.01
@@ -416,11 +416,19 @@ meteo:
   # Every alternative stays specified here regardless of which is active,
   # same convention as simulation.airsea's own Fluxes/FluxesFromMeteo
   # blocks -- switch both `source:` here and `type:` below together.
-  source: Fluxes
+  source: ERA5
   ERA5:
     folder: ${ERA5_FOLDER}
     evaporation: true
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
+  CMIP6-raw:
+    folder: ${CMIP6_RAW_FOLDER}
+    folder_template: '{model}/{scenario}'
+    scenario: ssp126
+    evaporation: true
+    radiation_source: components
+    data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
+    model: GFDL-ESM4
   CMIP6:
     folder: ${CMIP6_FOLDER}
     folder_template: CMIP6/{model}/{scenario}/meteo
@@ -432,15 +440,13 @@ meteo:
   # folder deliberately left unset (an empty mapping, NOT omitted -- see
   # ChoiceSpec's own nested-vs-flat handling in yaml_parse._validate_choice:
   # a bare `Fluxes:` with nothing under it parses as YAML null, not an
-  # empty dict, which breaks the nested-form detection there): with
-  # source: Fluxes active and no folder configured,
-  # oceanicu_providers.derive_data_assignments derives NOTHING for
-  # taux/tauy/sp/shf/swr/pe -- simulation.airsea.Fluxes' own static values
-  # (below) are what actually drive this run (the "constant" method, per
-  # user 2026-09-14). Set a real folder here (flux_taux_????.nc/
-  # flux_tauy_????.nc/flux_sp_????.nc/flux_shf_????.nc/flux_swr_????.nc/
-  # flux_pe_????.nc must all exist there) to switch to the "from file"
-  # method instead -- no other change needed.
+  # empty dict, which breaks the nested-form detection there). Inactive
+  # for now (source: ERA5 above is active) -- set source: Fluxes and a
+  # real folder here (flux_taux_????.nc/flux_tauy_????.nc/flux_sp_????.nc/
+  # flux_shf_????.nc/flux_swr_????.nc/flux_pe_????.nc must all exist
+  # there) to switch to Fluxes' "from file" method; source: Fluxes with
+  # this left empty gives Fluxes' own static constant values instead
+  # (also needs simulation.airsea.type: Fluxes below to match).
   Fluxes: {}
 river_discharge:
   source: emorid
@@ -460,7 +466,7 @@ river_discharge:
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
 fabm:
-  source: ERSEM
+  source: none
   ERSEM:
     folder: ${FABM_ERSEM_FOLDER}
     data_script: ${SCRIPT_FOLDER}/fabm.py:configure_fabm
