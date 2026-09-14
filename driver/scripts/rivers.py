@@ -1,14 +1,14 @@
-"""EMORID river positioning + discharge data attachment (nse_from_oceanicu.yaml's
-river_discharge.emorid.script/data_script -- see oceanicu_providers.py). Mirrors
-cfg_rivers.py's own real two-step split ("1) Set name and position of rivers...
-2) Attach river data to the Simulation object"), verified against that source.
+"""EMORID river positioning + discharge data attachment (a domain config's
+river_discharge.emorid.script/data_script -- see oceanicu_providers.py).
+Mirrors cfg_rivers.py's own two-step split ("1) Set name and position of
+rivers... 2) Attach river data to the Simulation object").
 
 Loaded via pygetm_config.providers.load_dotted_target ("path/to/file.py:name"),
-never imported directly -- see nse_driver.py's own module docstring for how
-that's wired (river_discharge.emorid.script/data_script defaults, both pointing
-here) and pygetm_config's docs/yaml_vs_python.md for why this stays real Python
-rather than a static YAML list at all (the *set* of rivers is threshold-filtered
-and domain-footprint-dependent at run time, not fixed).
+never imported directly -- see oceanicu_driver.py's own module docstring for
+how that's wired (river_discharge.emorid.script/data_script defaults, both
+pointing here) and pygetm_config's docs/yaml_vs_python.md for why this stays
+real Python rather than a static YAML list at all (the *set* of rivers is
+threshold-filtered and domain-footprint-dependent at run time, not fixed).
 """
 
 from __future__ import annotations
@@ -28,12 +28,18 @@ def add_rivers(domain, config: dict):
 
     Reads the validated `river_discharge:` section (a `nested_by_label`
     ChoiceSpec -- see oceanicu_providers.py), not a free-form dict: whichever
-    source is active (only "emorid" is registered today) has its fields
-    flattened onto `config["river_discharge"]` directly by validate_config,
-    regardless of whether the YAML wrote them nested under `emorid:` or flat.
+    source is active ("emorid" or "CMIP6") has its fields flattened onto
+    `config["river_discharge"]` directly by validate_config, regardless of
+    whether the YAML wrote them nested under `emorid:`/`CMIP6:` or flat. Both
+    sources use this SAME function unchanged -- CMIP6's delta-change river
+    projection (stats/cli/river_projection.py's river_flows_future_
+    {scenario}.nc) is keyed by the same EMORID stations, just with a Q_mean
+    variable added so the threshold lookup below finds a match; only
+    folder/folder_template/file (see `file`'s own {model}/{scenario}
+    templating below) differ between the two sources.
 
-    `folder` may be a "${VAR}"/"$VAR" reference (pygetm-config's own TODO
-    item 15 lazy-resolution mechanism) -- resolve_data_path expands it here,
+    `folder` may be a "${VAR}"/"$VAR" reference (pygetm-config's own lazy
+    data-path resolution mechanism) -- resolve_data_path expands it here,
     at actual use time, exactly like pygetm-config's own generic kind="path"/
     kind="file" handling does for core schema fields. This function isn't
     core pygetm-config code (it's a project-specific script hook, loaded via
@@ -45,7 +51,13 @@ def add_rivers(domain, config: dict):
     import pygetm
 
     rcfg = config["river_discharge"]
-    path = Path(resolve_data_path(rcfg["folder"])) / rcfg["file"]
+    # .format() is a no-op for "emorid"'s literal filename (no {} in it) --
+    # only source=CMIP6 actually has {model}/{scenario} placeholders here,
+    # same substitution folder_template already does elsewhere (meteo.py's
+    # own folder_template.format(model=..., scenario=...)) -- avoids the
+    # filename and `scenario:` field ever disagreeing with each other.
+    filename = rcfg["file"].format(model=rcfg.get("model", ""), scenario=rcfg.get("scenario", ""))
+    path = Path(resolve_data_path(rcfg["folder"])) / filename
     threshold = rcfg.get("threshold", 0)
 
     with xr.open_dataset(path) as ds:
@@ -71,8 +83,8 @@ def add_rivers(domain, config: dict):
 
 def set_river_data(sim, domain, config: dict) -> int:
     """Mirrors cfg_rivers.py's own data() -- the second half of
-    river_discharge's job (user request): add_rivers (above) only sets
-    POSITION; this attaches the REAL, time-varying discharge to each river
+    river_discharge's job: add_rivers (above) only sets POSITION; this
+    attaches the REAL, time-varying discharge to each river
     actually present in this subdomain (sim.rivers -- a pygetm.rivers.
     LocalRiverCollection, keyed by name, only rivers that fall within THIS
     subdomain -- not necessarily every one add_rivers positioned on the
@@ -92,7 +104,8 @@ def set_river_data(sim, domain, config: dict) -> int:
     import xarray as xr
 
     rcfg = config["river_discharge"]
-    path = Path(resolve_data_path(rcfg["folder"])) / rcfg["file"]
+    filename = rcfg["file"].format(model=rcfg.get("model", ""), scenario=rcfg.get("scenario", ""))
+    path = Path(resolve_data_path(rcfg["folder"])) / filename
     # CFDatetimeCoder(use_cftime=True), matching cfg_rivers.py's own real
     # data() exactly -- needed for Q's time dimension, unlike add_rivers
     # above (which never reads a time-varying variable at all).

@@ -127,7 +127,7 @@ def main(argv=None) -> int:
         "scripts/rivers.py's add_rivers(), whose real source gets embedded in the generated "
         "script (see pygetm_config.loader.run_river_discharge_script's docstring). The "
         "generated script has its own real argparse CLI (-h shows it) -- --start/--stop/"
-        "--dry-run/--load-restart/--save-restart/--skip-unavailable-output are genuine "
+        "--dry-run/--load-restart/--load-restart-time/--save-restart/--skip-unavailable-output are genuine "
         "runtime arguments of THAT script, defaulting to whatever was given here, not fixed "
         "at generation time. Defaults to generated_<domain>.py, derived from the config "
         "file's own name, or pass a path.",
@@ -156,7 +156,30 @@ def main(argv=None) -> int:
         "against the source config).",
     )
     parser.add_argument("--load-restart", default=None, metavar="PATH", help="resume from a restart file; overrides runtime.time with the restart's own time")
+    parser.add_argument(
+        "--load-restart-time", default=None, metavar="ISO8601",
+        help="only relevant with --load-restart. Which internal snapshot to resume from, for a "
+        "restart file that holds more than one (e.g. written with add_restart(interval=...) "
+        "instead of the default single end-of-run snapshot) -- must exactly match one of the "
+        "file's own time coordinate values, or sim.load_restart() raises listing the file's "
+        "actual span. Omit to use the last snapshot in the file (sim.load_restart()'s own "
+        "default), same behavior as before this flag existed.",
+    )
     parser.add_argument("--save-restart", default=None, metavar="PATH", help="write a restart file for this run")
+    parser.add_argument(
+        "--save-restart-interval", type=float, default=None, metavar="N",
+        help="only relevant with --save-restart. How often to write a snapshot, in "
+        "--save-restart-interval-units; overrides runtime.save_restart_interval. Omit (and "
+        "leave the config unset) for pygetm's own default (one snapshot, at the end of this "
+        "invocation).",
+    )
+    parser.add_argument(
+        "--save-restart-interval-units", default=None, metavar="UNIT",
+        help="only relevant with --save-restart-interval. One of pygetm.output.TimeUnit's own "
+        "member names: TIMESTEPS/SECONDS/MINUTES/HOURS/DAYS/MONTHS/YEARS; overrides "
+        "runtime.save_restart_interval_units. Default TIMESTEPS if an interval is given but "
+        "this is not.",
+    )
     parser.add_argument(
         "--data-root",
         action="append",
@@ -312,8 +335,8 @@ def main(argv=None) -> int:
     # docstring, and the matching comment on boundaries.baroclinic above).
     meteo = raw.get("meteo") or {}
     meteo_source = meteo.get("source")
-    meteo_cfg = (meteo.get(meteo_source) or {}) if meteo_source in ("ERA5", "CMIP6") else {}
-    if meteo_source in ("ERA5", "CMIP6"):
+    meteo_cfg = (meteo.get(meteo_source) or {}) if meteo_source in ("ERA5", "CMIP6", "CMIP6-raw") else {}
+    if meteo_source in ("ERA5", "CMIP6", "CMIP6-raw"):
         if not meteo_cfg.get("data_script"):
             meteo_cfg["data_script"] = "${SCRIPT_FOLDER}/meteo.py:set_meteo_data"
         meteo[meteo_source] = meteo_cfg
@@ -564,12 +587,32 @@ def main(argv=None) -> int:
     # docstring). add_restart() must be registered before sim.start(), same
     # as any other output file; load_restart()'s own return value overrides
     # runtime.time -- resuming from a restart always uses the restart's own
-    # saved time, not whatever runtime.time/--start the config/CLI gave.
+    # saved time, not whatever runtime.time/--start the config/CLI gave --
+    # unless --load-restart-time picks a different snapshot from a restart
+    # file that holds more than one (sim.load_restart's own time= kwarg;
+    # None means its own default, the last snapshot in the file).
     if args.save_restart:
-        sim.output_manager.add_restart(args.save_restart)
+        restart_kwargs: dict = {}
+        _interval = args.save_restart_interval
+        if _interval is None:
+            _interval = config.get("runtime", {}).get("save_restart_interval")
+        if _interval is not None:
+            restart_kwargs["interval"] = _interval
+            _units = args.save_restart_interval_units
+            if _units is None:
+                _units = config.get("runtime", {}).get("save_restart_interval_units", "TIMESTEPS")
+            from pygetm.output import TimeUnit
+
+            restart_kwargs["interval_units"] = (
+                TimeUnit(_units) if isinstance(_units, int) else getattr(TimeUnit, _units)
+            )
+        sim.output_manager.add_restart(args.save_restart, **restart_kwargs)
     start_kwargs = loader.build_start_kwargs(config, schema)
     if args.load_restart:
-        start_kwargs["time"] = sim.load_restart(args.load_restart)
+        restart_time = None
+        if args.load_restart_time:
+            restart_time = datetime.datetime.fromisoformat(args.load_restart_time)
+        start_kwargs["time"] = sim.load_restart(args.load_restart, time=restart_time)
     sim.start(**start_kwargs)
 
     if args.dry_run:

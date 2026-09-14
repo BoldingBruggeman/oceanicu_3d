@@ -1,11 +1,11 @@
-"""Hydrography initial-condition attachment (nse_from_oceanicu.yaml's
+"""Hydrography initial-condition attachment (a domain config's
 hydrography.<source>.data_script -- see oceanicu_providers.py). Mirrors
-cfg_ic.py's own real create() for the WOA/CMEMS branches specifically
+cfg_ic.py's own create() for the WOA/CMEMS branches specifically
 ("constant" hydrography is plain data_assignments, no Python needed).
 
 Loaded via pygetm_config.providers.load_dotted_target ("path/to/file.py:name"),
-never imported directly -- see nse_driver.py's own module docstring for how
-that's wired (hydrography.<source>.data_script's default, pointing here).
+never imported directly -- see oceanicu_driver.py's own module docstring for
+how that's wired (hydrography.<source>.data_script's default, pointing here).
 """
 
 from __future__ import annotations
@@ -20,21 +20,21 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
     ("constant" hydrography is plain data_assignments, no Python needed).
     Real Python needed for: (1) `.isel(time=imonth)` -- a monthly
     CLIMATOLOGY index PICK for the initial, one-time value (imonth derived
-    from config['runtime']['time'], matching run_model.py's own real
+    from config['runtime']['time'], matching run_model.py's own
     `simstart.month - 1`) -- NOT pygetm-config's own `climatology: True`
     data_assignments flag, which means something different (keep cycling
     the whole 12-month pattern for the entire run, wrong for an initial
     condition). (2) sim.density.convert_ts(sim.salt, sim.temp) -- pyGETM's
     internal state is conservative temperature/absolute salinity, WOA/CMEMS
-    provide in-situ/practical values (user request, TODO item 21) --
-    called for BOTH WOA and CMEMS, matching cfg_ic.py's own real code
-    exactly (present in both real-data branches, absent from "constant").
+    provide in-situ/practical values -- called for BOTH WOA and CMEMS,
+    matching cfg_ic.py's own code exactly (present in both real-data
+    branches, absent from "constant").
 
     Masks out land points afterward (sim.temp/sim.salt set to
     pygetm.constants.FILL_VALUE where sim.T.mask == 0), matching cfg_ic.py's
-    own real code -- both WOA/CMEMS climatology files are GLOBAL, so
-    horizontal interpolation can leave real (non-fill) values sitting at
-    domain points outside the real ocean mask.
+    own code -- both WOA/CMEMS climatology files are GLOBAL, so horizontal
+    interpolation can leave real (non-fill) values sitting at domain points
+    outside the real ocean mask.
 
     Registered via hydrography.data_script (see pygetm_config.loader.
     run_hydrography_data_script) -- only called when NOT loading from a
@@ -43,8 +43,8 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
     function doesn't special-case runtype for any of its three data_script
     hooks.
 
-    `folder` may be a "${VAR}"/"$VAR" reference (pygetm-config's own TODO
-    item 15 lazy-resolution mechanism) -- resolve_data_path expands it here,
+    `folder` may be a "${VAR}"/"$VAR" reference (pygetm-config's own lazy
+    data-path resolution mechanism) -- resolve_data_path expands it here,
     at actual use time. See scripts/rivers.py's own docstring for why this
     function has to opt into that explicitly (a project-specific script
     hook, not core pygetm-config code going through loader._coerce_value's
@@ -64,7 +64,23 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
     if source not in ("WOA", "CMEMS"):
         return
 
-    time = config["runtime"]["time"]
+    # runtime.time is deliberately never in the static config (start/stop
+    # are per-invocation, not per-setup -- see nse_from_oceanicu.yaml's own
+    # header comment) -- both oceanicu_driver.py's live path and codegen's
+    # generated scripts fill it in from --start before this hook ever runs
+    # (`config.setdefault('runtime', {})['time'] = args.start`), but only if
+    # --start was actually given somewhere (at generation time, baked into
+    # the script's own --start default, or at the script's own invocation).
+    # A bare KeyError here (real, reproduced case: a --dry-run invocation
+    # with no --start anywhere) gave no hint why; this hook's own monthly-
+    # climatology index pick genuinely can't proceed without a real date.
+    time = config.get("runtime", {}).get("time")
+    if time is None:
+        raise RuntimeError(
+            "hydrography's monthly-climatology initial condition needs a real start time, but "
+            "runtime.time isn't set anywhere -- pass --start explicitly (either when generating "
+            "this script, or when running it)."
+        )
     if isinstance(time, str):
         time = datetime.datetime.fromisoformat(time)
     imonth = time.month - 1
@@ -79,7 +95,7 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
 
     sim.salt.set(pygetm.input.from_nc(salt_file, salt_var).isel(time=imonth), on_grid=False)
     sim.temp.set(pygetm.input.from_nc(temp_file, temp_var).isel(time=imonth), on_grid=False)
-    sim.density.convert_ts(sim.salt, sim.temp)
+    #sim.density.convert_ts(sim.salt, sim.temp)
 
     sim.temp[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
     sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE

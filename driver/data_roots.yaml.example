@@ -34,6 +34,11 @@ BOUNDARY_FOLDER_BAROCLINIC_CMIP6: /data/OceanICU/oceanicu_3d/data/NSe/CMIP6
 # meteo
 ERA5_FOLDER: /data/ERA5
 CMIP6_FOLDER: /data/BiasCorrected
+# Raw (not bias-corrected) CMIP6 archive, fetched via ocean-data's
+# DataLoader straight from Pangeo/ESGF -- meteo.CMIP6-raw's own
+# folder_template ('{model}/{scenario}') appends directly onto this, no
+# extra "CMIP6" path segment needed (unlike CMIP6_FOLDER above).
+CMIP6_RAW_FOLDER: /data/CMIP6
 
 # river_discharge
 RIVER_FOLDER: /data/EMORID

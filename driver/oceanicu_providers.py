@@ -311,15 +311,61 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         ),
     )
 
+    # CMIP6-raw: meteo read directly from the RAW (not bias-corrected) CMIP6
+    # archive -- /data/CMIP6/{model}/{scenario}/ (CMIP6_RAW_FOLDER, see
+    # machines.yaml), one whole-period file per variable per experiment
+    # (fetched via ocean-data's DataLoader, either Pangeo/GCS or ESGF's own
+    # prefer_streaming=False full-file-download path -- see that repo's
+    # esgf_loader.py). No net_sw/net_lw composite exists in the raw archive
+    # (that's a bias-correction-pipeline-computed quantity) -- only
+    # 'components' and 'pseudo_tcc' apply, not 'net'.
+    _meteo_cmip6_raw_radiation = (
+        ParameterSpec(
+            name="radiation_source",
+            type=TypeRef(kind="scalar", scalar_type="str", nullable=True),
+            default="pseudo_tcc",
+            choices=("components", "pseudo_tcc"),
+            help=(
+                "'components' | 'pseudo_tcc' (default) -- which RAW CMIP6 "
+                "radiation data scripts/meteo.py:set_meteo_data uses. No "
+                "'net' option here (unlike meteo.CMIP6.radiation_source): "
+                "net_sw/net_lw are a bias-correction-pipeline composite, "
+                "not a raw CMIP6 variable. 'components': rsds-rsus and "
+                "rlds-rlus, subtracted at runtime from the raw files. "
+                "'pseudo_tcc': same clearness-index-derived cloud-fraction "
+                "proxy as meteo.CMIP6.radiation_source='pseudo_tcc', fed "
+                "from the raw rsds file instead of the bias-corrected one. "
+                "Whichever is chosen must be matched with the right "
+                "shortwave_method/longwave_method (NET_FLUX=-1 for "
+                "'components', a bulk-formula method e.g. the default 1 "
+                "for 'pseudo_tcc') -- see set_meteo_data's own docstring."
+            ),
+            importance=Importance.ADVANCED,
+        ),
+    )
+
     meteo = make_provider_slot(
         "meteo",
         {
             # humidity_measure differs by source (DEW_POINT_TEMPERATURE for ERA5
-            # vs SPECIFIC_HUMIDITY for CMIP6, per cfg_airsea.py) but that's a
-            # fixed consequence of the source choice, not itself a configurable
-            # field -- not modeled as a param here.
+            # vs SPECIFIC_HUMIDITY for CMIP6/CMIP6-raw, per cfg_airsea.py) but
+            # that's a fixed consequence of the source choice, not itself a
+            # configurable field -- not modeled as a param here.
             "ERA5": _meteo_shared,
             "CMIP6": _meteo_shared + _CMIP6_SHARED + _meteo_cmip6_radiation,
+            "CMIP6-raw": _meteo_shared + _CMIP6_SHARED + _meteo_cmip6_raw_radiation,
+            # For simulation.airsea.type: Fluxes (prescribed taux/tauy/sp/shf/
+            # swr/pe) ONLY -- reads each field as a real time/spatially-varying
+            # NetCDF file instead of Fluxes' own static YAML constants. Added
+            # 2026-09-14 per user: constant (Fluxes' own static values, no
+            # meteo section needed) or from-file (this) should both be
+            # straightforward. Only `folder` needed (make_provider_slot's
+            # shared base) -- see derive_data_assignments' own "Fluxes" branch
+            # below for the fixed flux_<field>_????.nc naming convention (one
+            # glob per field, all six always required, matching ERA5's own
+            # all-or-nothing pattern -- a field you want to stay constant
+            # instead just means not using this provider at all).
+            "Fluxes": (),
         },
         default="ERA5",
     )
@@ -622,6 +668,24 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
 def derive_data_assignments(config: dict) -> list[dict]:
     entries: list[dict] = []
 
+    # runtime.calendar (see schema._build_runtime_section) forces the WHOLE
+    # simulation onto a non-standard calendar (currently only 'noleap', to
+    # match a raw CMIP6 model like GFDL-ESM4 -- see driver/scripts/meteo.py)
+    # -- every OTHER real-world-calendar data source the sim reads then
+    # needs a matching pre-converted copy, or pygetm's own calendar check
+    # raises (Concatenate(...) is incompatible with simulation calendar
+    # noleap). '_noleap' is the fixed suffix these pre-converted copies use
+    # (ocean-prep's run-tidal-boundaries/run-delta-boundaries with
+    # --calendar noleap for bdy_2d/bdy_3d, a one-off convert_calendar +
+    # to_netcdf for EMORID rivers -- see nse_tidal_bdy_noleap.yaml /
+    # nse_delta_bdy_noleap.yaml / nse_delta_bdy_historical_noleap.yaml).
+    # Empty string when calendar is None/'standard' (the overwhelming
+    # majority of configs) -- every existing experiment's file paths stay
+    # byte-identical to before this was added.
+    _calendar_suffix = (
+        "_noleap" if config.get("runtime", {}).get("calendar") == "noleap" else ""
+    )
+
     # boundaries.baroclinic 3D temp/salt boundary VALUES differ by source --
     # WOA: a global climatology (on_grid=False, climatology=True, cycling
     # the same 12-month pattern all run) vs CMEMS: a real time series
@@ -686,12 +750,15 @@ def derive_data_assignments(config: dict) -> list[dict]:
         _fn_tmpl = baroclinic.get("filename_template", "")
 
         def _cmip6_bdy_files(variable: str) -> list[str]:
-            hist_path = _cmip6_bdy_folder("historical") / _fn_tmpl.format(
-                variable=variable, start_date=_HIST_START, end_date=_HIST_END
-            )
-            scen_path = _cmip6_bdy_folder(baroclinic.get("scenario", "")) / _fn_tmpl.format(
+            hist_name = _fn_tmpl.format(variable=variable, start_date=_HIST_START, end_date=_HIST_END)
+            scen_name = _fn_tmpl.format(
                 variable=variable, start_date=baroclinic.get("start_date", ""), end_date=baroclinic.get("end_date", "")
             )
+            if _calendar_suffix:
+                hist_name = hist_name.removesuffix(".nc") + _calendar_suffix + ".nc"
+                scen_name = scen_name.removesuffix(".nc") + _calendar_suffix + ".nc"
+            hist_path = _cmip6_bdy_folder("historical") / hist_name
+            scen_path = _cmip6_bdy_folder(baroclinic.get("scenario", "")) / scen_name
             return [str(hist_path), str(scen_path)]
 
         entries += [
@@ -765,10 +832,15 @@ def derive_data_assignments(config: dict) -> list[dict]:
             return folder
 
         _fn_tmpl = barotropic.get("filename_template", "")
-        _hist_file = _cmip6_bdy_folder("historical") / _fn_tmpl.format(start_date=_HIST_START, end_date=_HIST_END)
-        _scen_file = _cmip6_bdy_folder(barotropic.get("scenario", "")) / _fn_tmpl.format(
+        _hist_name = _fn_tmpl.format(start_date=_HIST_START, end_date=_HIST_END)
+        _scen_name = _fn_tmpl.format(
             start_date=barotropic.get("start_date", ""), end_date=barotropic.get("end_date", "")
         )
+        if _calendar_suffix:
+            _hist_name = _hist_name.removesuffix(".nc") + _calendar_suffix + ".nc"
+            _scen_name = _scen_name.removesuffix(".nc") + _calendar_suffix + ".nc"
+        _hist_file = _cmip6_bdy_folder("historical") / _hist_name
+        _scen_file = _cmip6_bdy_folder(barotropic.get("scenario", "")) / _scen_name
         _files = [str(_hist_file), str(_scen_file)]
         entries += [
             {"target": "open_boundaries.z", "kind": "file", "file": _files, "variable": "zos", "on_grid": True},
@@ -786,8 +858,70 @@ def derive_data_assignments(config: dict) -> list[dict]:
     # loader._airsea_flux_target_inactive/codegen.py's own copy already
     # skip whichever doesn't match simulation.airsea's actual shortwave_
     # method/longwave_method, so no need to duplicate that condition here.
+    # BUT that only covers picking between FluxesFromMeteo's OWN swr/ql
+    # sub-choices -- it says nothing about simulation.airsea not being
+    # FluxesFromMeteo at all. Real, reproduced bug (2026-09-14): a config
+    # with `simulation.airsea.type: Fluxes` (prescribed taux/tauy/sp/shf/
+    # swr/pe -- a completely different pygetm.airsea class with no t2m/d2m/
+    # u10/v10/tp/tcc attributes at all) but a `meteo:` section still active
+    # (e.g. left over from copying a template) crashed at generation-time
+    # call-site execution with `AttributeError: 'Fluxes' object has no
+    # attribute 't2m'`.
+    #
+    # NOT fixed by silently skipping these entries when airsea.type !=
+    # FluxesFromMeteo: per user, 2026-09-14, `Fluxes` with time/spatially-
+    # varying values sourced from FILES (feeding taux/tauy/shf/swr/pe
+    # directly, instead of FluxesFromMeteo's own bulk-formula inputs) is a
+    # legitimate thing to want -- a silent skip would leave `Fluxes` at its
+    # literal YAML defaults with NO real forcing at all, and LOOK like it
+    # worked. So: meteo.source="Fluxes" is its own real branch below
+    # (targets Fluxes' own field names), and a MISMATCHED combination
+    # (an ERA5/CMIP6/CMIP6-raw source, which only know FluxesFromMeteo's
+    # field names, paired with a non-FluxesFromMeteo airsea.type -- or,
+    # symmetrically, meteo.source="Fluxes" paired with an airsea.type that
+    # isn't "Fluxes") raises a clear, actionable error instead of either
+    # crashing on an AttributeError deep in a set() call or silently doing
+    # nothing.
     meteo = config.get("meteo", {})
     meteo_source = meteo.get("source")
+    _airsea_type = config.get("simulation", {}).get("airsea", {}).get("type")
+    _FLUXES_FROM_METEO_SOURCES = ("ERA5", "CMIP6", "CMIP6-raw")
+    if meteo_source in _FLUXES_FROM_METEO_SOURCES and _airsea_type not in (None, "FluxesFromMeteo"):
+        raise ValueError(
+            f"meteo.source={meteo_source!r} derives data_assignments for FluxesFromMeteo's own fields "
+            f"(t2m/d2m/u10/v10/sp/tp/tcc/swr/ql), but simulation.airsea.type={_airsea_type!r} -- those "
+            "targets don't exist on that airsea class. Use meteo.source: Fluxes instead if you want "
+            "file-sourced values feeding Fluxes' taux/tauy/shf/swr/pe directly, or set "
+            "simulation.airsea.type back to FluxesFromMeteo, or remove the meteo: section if Fluxes' "
+            "own static/data_assignments-set values are all you want."
+        )
+    if meteo_source == "Fluxes" and _airsea_type not in (None, "Fluxes"):
+        raise ValueError(
+            f"meteo.source='Fluxes' derives data_assignments for Fluxes' own fields (taux/tauy/sp/shf/"
+            f"swr/pe), but simulation.airsea.type={_airsea_type!r} -- those targets don't exist on that "
+            "airsea class. Set simulation.airsea.type: Fluxes, or use a different meteo.source that "
+            "matches FluxesFromMeteo instead."
+        )
+    if meteo_source == "Fluxes":
+        # Two real modes in ONE provider, not two: no `folder` configured
+        # (default) means "constant" -- stay a valid, active source: Fluxes
+        # choice (satisfies the discriminator, keeps this whole meteo:
+        # section legal) that derives NOTHING, so simulation.airsea.Fluxes'
+        # own static YAML values (taux/tauy/sp/shf/swr/pe) win untouched.
+        # A real `folder` switches to "from file" -- per user, 2026-09-14:
+        # "constant... but file method shall be configurable" -- configuring
+        # the folder IS the switch, no separate mode flag needed.
+        _folder_raw = meteo.get("folder")
+        if _folder_raw:
+            _folder = Path(_folder_raw)
+            entries += [
+                {"target": "simulation.airsea.taux", "kind": "file", "file": str(_folder / "flux_taux_????.nc"), "variable": "taux"},
+                {"target": "simulation.airsea.tauy", "kind": "file", "file": str(_folder / "flux_tauy_????.nc"), "variable": "tauy"},
+                {"target": "simulation.airsea.sp", "kind": "file", "file": str(_folder / "flux_sp_????.nc"), "variable": "sp"},
+                {"target": "simulation.airsea.shf", "kind": "file", "file": str(_folder / "flux_shf_????.nc"), "variable": "shf"},
+                {"target": "simulation.airsea.swr", "kind": "file", "file": str(_folder / "flux_swr_????.nc"), "variable": "swr"},
+                {"target": "simulation.airsea.pe", "kind": "file", "file": str(_folder / "flux_pe_????.nc"), "variable": "pe"},
+            ]
     if meteo_source == "ERA5":
         _folder = Path(meteo.get("folder", ""))
         entries += [
@@ -803,7 +937,7 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "simulation.airsea.ql", "kind": "file", "file": str(_folder / "era5_str_????.nc"), "variable": "str", "pre_transform_scale": 1 / 3600.0},
             {"target": "simulation.airsea.ql_downwards", "kind": "file", "file": str(_folder / "era5_strd_????.nc"), "variable": "strd", "pre_transform_scale": 1 / 3600.0},
         ]
-    elif meteo_source == "CMIP6":
+    elif meteo_source in ("CMIP6", "CMIP6-raw"):
         # t2m/qa/u10/v10/sp/tp deliberately have NO entry here at all (not
         # even a placeholder) -- set_meteo_data (scripts/meteo.py,
         # meteo.data_script's own default) sets all six UNCONDITIONALLY,

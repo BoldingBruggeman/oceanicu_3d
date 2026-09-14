@@ -22,8 +22,23 @@ def set_meteo_data(sim, domain, config: dict) -> None:
     only supports a scale/offset on ONE file's value; pre_transform_expression
     is deliberately refused for security reasons).
 
+    Handles TWO CMIP6 sources, both spliced across the historical/scenario
+    boundary the same way (see "Historical/scenario splicing" below):
+    meteo.source == "CMIP6" reads the BIAS-CORRECTED archive (ocean-prep's
+    own bc-correct pipeline output); meteo.source == "CMIP6-raw" reads
+    straight from the RAW CMIP6 archive fetched by ocean-data's DataLoader
+    (/data/CMIP6/{model}/{scenario}/, CMIP6_RAW_FOLDER -- see machines.yaml
+    and meteo.CMIP6-raw.folder/folder_template), no bias correction applied
+    at all. Everything below that says "CMIP6" without qualification
+    applies to the bias-corrected path only; the raw path's own filename
+    convention, variable-name quirk, and units are covered in its own
+    branch inline below (search "CMIP6-raw" in this function's body).
+
     meteo.CMIP6.radiation_source picks how CMIP6 radiation is supplied
-    ("net" | "components" | "pseudo_tcc", default "pseudo_tcc"):
+    ("net" | "components" | "pseudo_tcc", default "pseudo_tcc") --
+    meteo.CMIP6-raw.radiation_source is the same idea with only
+    "components"/"pseudo_tcc" (no "net": that's a bias-correction-pipeline
+    composite, not a raw CMIP6 variable):
 
     - "net": net_sw/net_lw are ALREADY bias-corrected as one direct file
       each (net_sw = rsds - rsus, net_lw = rlds - rlus, corrected as a
@@ -132,8 +147,25 @@ def set_meteo_data(sim, domain, config: dict) -> None:
     source text, not a separate module-level definition.
     """
     meteo = config.get("meteo") or {}
-    if meteo.get("source") != "CMIP6":
+    source = meteo.get("source")
+    if source not in ("CMIP6", "CMIP6-raw"):
         return
+
+    # Same gap/fix as oceanicu_providers.derive_data_assignments' own ERA5
+    # branch (see its comment, 2026-09-14): this function only knows how to
+    # write FluxesFromMeteo-shaped targets (t2m/qa/u10/v10/sp/tp/swr/ql/tcc
+    # below). `simulation.airsea.type: Fluxes` has none of those attributes
+    # -- raise a clear error rather than an AttributeError deep in a
+    # sim.airsea.<x>.set(...) call, or (worse) silently doing nothing and
+    # leaving Fluxes with no real forcing at all.
+    _airsea_type = config.get("simulation", {}).get("airsea", {}).get("type")
+    if _airsea_type not in (None, "FluxesFromMeteo"):
+        raise ValueError(
+            f"meteo.source={source!r} (meteo.data_script) writes FluxesFromMeteo's own fields "
+            f"(t2m/qa/u10/v10/sp/tp/swr/ql/tcc), but simulation.airsea.type={_airsea_type!r} -- those "
+            "targets don't exist on that airsea class. See oceanicu_providers.derive_data_assignments' "
+            "own ERA5-branch comment for the same gap/options."
+        )
 
     import datetime
 
@@ -191,12 +223,117 @@ def set_meteo_data(sim, domain, config: dict) -> None:
             paths += expand_year_glob(pattern, scen_start, _stop)
         return paths
 
-    sim.airsea.t2m.set(pygetm.input.from_nc(_spliced_paths("tas_bc_*_disagg_????.nc"), "tas") - 273.15)
-    sim.airsea.qa.set(pygetm.input.from_nc(_spliced_paths("huss_bc_*_disagg_????.nc"), "huss"))
-    sim.airsea.u10.set(pygetm.input.from_nc(_spliced_paths("uas_bc_*_disagg_????.nc"), "uas"))
-    sim.airsea.v10.set(pygetm.input.from_nc(_spliced_paths("vas_bc_*_disagg_????.nc"), "vas"))
-    sim.airsea.sp.set(pygetm.input.from_nc(_spliced_paths("psl_bc_*_disagg_????.nc"), "psl"))
-    sim.airsea.tp.set(pygetm.input.from_nc(_spliced_paths("pr_bc_*_disagg_????.nc"), "pr") / 1000.0)
+    # CMIP6-raw: one whole-period file per variable per experiment (not a
+    # year-per-file glob like the bias-corrected archive), so splicing only
+    # ever needs at most 2 files (historical + scenario), not expand_year_
+    # glob's per-year expansion. Defined unconditionally (same pattern as
+    # _spliced_paths above) -- only ever CALLED from inside a `source ==
+    # "CMIP6-raw"` branch below, but a helper defined only inside one such
+    # branch and called from a separate, later one is unbound the moment
+    # they're not literally the same `if` block (Python has no block
+    # scoping, but a conditionally-executed def still isn't executed on a
+    # path that skips it) -- keeping every closure's OWN def unconditional,
+    # like _spliced_paths already is, avoids that trap entirely.
+    #
+    # rsds/rsus/pr previously came back renamed (to a shared 'sw', and to
+    # 'precip' respectively) by ocean-data's own CMIP6 normalisation --
+    # name_mappings.py's CF-attribute-based standardize_variable_names,
+    # meant for OCEAN CMIP6 variables (thetao/so/tos -> temp/salt/sst)
+    # matching on generic CF standard_name/long_name substrings, which
+    # unintentionally also caught these atmospheric ones. Fixed at the
+    # source (ocean-data's data_loader.py:_normalise_cmip6_conventions now
+    # skips that rename for known atmospheric variable_ids) and the 9
+    # already-fetched files affected were repaired in place (ncrename) --
+    # every raw-fetched file now keeps its own real CMIP6 variable_id, so
+    # this translation table is no longer needed. Kept as an explicit
+    # empty mapping (not deleted outright) so a REGRESSION in that fix
+    # shows up as a clear KeyError-style failure in _raw_var below rather
+    # than silently reading the wrong file's variable under a stale name.
+    _RAW_STORED_VARNAME: dict = {}
+
+    def _raw_paths(var: str) -> list:
+        """At most 2 whole-period files (historical, scenario), picked by
+        whether this run's own [start, stop) reaches into each side of
+        HIST_CUTOFF_YEAR -- same splicing intent as _spliced_paths,
+        simplified because there's only one file per side to pick, not a
+        year range to expand. Matched with a `*` wildcard rather than a
+        fixed suffix: the real fetched files carry a fetch-method tag
+        ("_onfly"/"_nostream", an ocean-data implementation detail, not a
+        stable naming convention) that this must not hardcode.
+        """
+        def _one(experiment: str) -> list:
+            pattern = f"{var}_3hr_{experiment}_*.nc"
+            candidates = sorted(_experiment_folder(experiment).glob(pattern))
+            if not candidates:
+                raise FileNotFoundError(
+                    f"meteo.CMIP6-raw: no file matching {pattern!r} in "
+                    f"{_experiment_folder(experiment)}"
+                )
+            return [str(candidates[0])]
+
+        if not _start or not _stop:
+            return _one(scenario)
+        start_year = datetime.datetime.fromisoformat(_start).year
+        stop_year = datetime.datetime.fromisoformat(_stop).year
+        paths = []
+        if start_year <= HIST_CUTOFF_YEAR:
+            paths += _one("historical")
+        if stop_year > HIST_CUTOFF_YEAR:
+            paths += _one(scenario)
+        return paths
+
+    def _raw_var(var: str):
+        return pygetm.input.from_nc(
+            _raw_paths(var), _RAW_STORED_VARNAME.get(var, var),
+        )
+
+    if source == "CMIP6-raw":
+        # RAW_HIST_START_YEAR guards against silently reading a truncated
+        # series: only 1990-2014 was ever fetched for the historical
+        # experiment (a deliberate, narrower choice than CMIP6's own full
+        # 1850-2014 protocol range -- see fetch_historical.py in ocean-
+        # data's own scratch scripts, not this repo), so a run starting
+        # earlier than that has no raw data to read at all.
+        RAW_HIST_START_YEAR = 1990
+        if _start and datetime.datetime.fromisoformat(_start).year < RAW_HIST_START_YEAR:
+            raise ValueError(
+                f"meteo.CMIP6-raw: no raw historical data before "
+                f"{RAW_HIST_START_YEAR} (run starts "
+                f"{datetime.datetime.fromisoformat(_start).year}) -- only "
+                f"{RAW_HIST_START_YEAR}-{HIST_CUTOFF_YEAR} was fetched for "
+                "the historical experiment, not the full 1850-2014 CMIP6 "
+                "protocol range."
+            )
+
+        # Units: CMIP6's own native units, unconverted by any bias-
+        # correction step -- tas/huss/uas/vas/ps all match pygetm.airsea's
+        # own expected units directly (K needs -> degC for t2m same as the
+        # bias-corrected branch below; huss kg/kg, uas/vas m/s, ps Pa all
+        # need no conversion). pr is "kg m-2 s-1" (a mass flux -- 1 kg/m^2
+        # of water is 1 mm depth, so this IS already "mm s-1" numerically);
+        # sim.airsea.tp wants "m s-1" (pygetm.airsea's own real Array attrs,
+        # confirmed via introspection) -- same /1000.0 factor as the bias-
+        # corrected branch below, because bias-correction adjusts VALUES
+        # only, never units, so raw and bias-corrected pr share this same
+        # native-CMIP6 unit convention.
+        sim.airsea.t2m.set(_raw_var("tas") - 273.15)
+        sim.airsea.qa.set(_raw_var("huss"))
+        sim.airsea.u10.set(_raw_var("uas"))
+        sim.airsea.v10.set(_raw_var("vas"))
+        # Real surface pressure ("ps"), NOT sea-level pressure ("psl") --
+        # unlike the bias-corrected branch below (which only ever had psl
+        # bias-corrected, per the ocean-prep pipeline's own historical
+        # choice), the raw fetch pulled ps directly, which is the
+        # meteorologically correct field for an airsea flux model anyway.
+        sim.airsea.sp.set(_raw_var("ps"))
+        sim.airsea.tp.set(_raw_var("pr") / 1000.0)
+    else:
+        sim.airsea.t2m.set(pygetm.input.from_nc(_spliced_paths("tas_bc_*_disagg_????.nc"), "tas") - 273.15)
+        sim.airsea.qa.set(pygetm.input.from_nc(_spliced_paths("huss_bc_*_disagg_????.nc"), "huss"))
+        sim.airsea.u10.set(pygetm.input.from_nc(_spliced_paths("uas_bc_*_disagg_????.nc"), "uas"))
+        sim.airsea.v10.set(pygetm.input.from_nc(_spliced_paths("vas_bc_*_disagg_????.nc"), "vas"))
+        sim.airsea.sp.set(pygetm.input.from_nc(_spliced_paths("psl_bc_*_disagg_????.nc"), "psl"))
+        sim.airsea.tp.set(pygetm.input.from_nc(_spliced_paths("pr_bc_*_disagg_????.nc"), "pr") / 1000.0)
 
     radiation_source = meteo.get("radiation_source") or "pseudo_tcc"
     # The REAL pygetm value (simulation.airsea.shortwave_method/
@@ -240,31 +377,23 @@ def set_meteo_data(sim, domain, config: dict) -> None:
             "longwave_method at a bulk-formula method (e.g. the default 1)."
         )
 
-    if radiation_source == "net":
-        sim.airsea.swr.set(
-            pygetm.input.from_nc(_spliced_paths("net_sw_bc_*_disagg_????.nc"), "net_sw")
-        )
-        sim.airsea.ql.set(
-            pygetm.input.from_nc(_spliced_paths("net_lw_bc_*_disagg_????.nc"), "net_lw")
-        )
-    elif radiation_source == "components":
-        sim.airsea.swr.set(
-            pygetm.input.from_nc(_spliced_paths("rsds_bc_*_disagg_????.nc"), "rsds")
-            - pygetm.input.from_nc(_spliced_paths("rsus_bc_*_disagg_????.nc"), "rsus")
-        )
-        sim.airsea.ql.set(
-            pygetm.input.from_nc(_spliced_paths("rlds_bc_*_disagg_????.nc"), "rlds")
-            - pygetm.input.from_nc(_spliced_paths("rlus_bc_*_disagg_????.nc"), "rlus")
-        )
-    elif radiation_source == "pseudo_tcc":
+    def _pseudo_tcc(rsds) -> None:
+        """Shared clearness-index-derived cloud-fraction proxy -- same
+        computation for both CMIP6 sources, differing only in how `rsds`
+        (already the resolved DataArray) was itself read. See this
+        function's own top docstring for the calibration/formula details.
+        """
         import numpy as np
-
-        rsds = pygetm.input.from_nc(_spliced_paths("rsds_bc_*_{exp}_????.nc"), "rsds")
 
         solar_constant = 1361.0
         fit_a, fit_b, fit_c = -2.234072161944959, 0.6895789115452573, 0.8957591501340265
 
-        lat = np.deg2rad(rsds["latitude"])
+        # Raw CMIP6 files keep their native short coordinate names ("lat"/
+        # "lon"); the bias-corrected archive's own files use "latitude"/
+        # "longitude" -- read whichever this particular DataArray actually
+        # has rather than hardcoding one.
+        lat_name = "lat" if "lat" in rsds.coords else "latitude"
+        lat = np.deg2rad(rsds[lat_name])
         doy = rsds["time"].dt.dayofyear
         decl = np.deg2rad(23.45) * np.sin(2 * np.pi * (284 + doy) / 365.0)
         dist_factor = 1.0 + 0.033 * np.cos(2 * np.pi * doy / 365.0)
@@ -277,11 +406,43 @@ def set_meteo_data(sim, domain, config: dict) -> None:
         kt = (rsds / toa.where(toa > 1.0)).clip(0.0, 1.2).fillna(0.0)
         tcc = (fit_a * kt**2 + fit_b * kt + fit_c).clip(0.0, 1.0)
         sim.airsea.tcc.set(pygetm.input.wrap(tcc, name="tcc"))
+
+    if source == "CMIP6-raw":
+        if radiation_source == "components":
+            sim.airsea.swr.set(_raw_var("rsds") - _raw_var("rsus"))
+            sim.airsea.ql.set(_raw_var("rlds") - _raw_var("rlus"))
+        elif radiation_source == "pseudo_tcc":
+            _pseudo_tcc(_raw_var("rsds"))
+        else:
+            raise ValueError(
+                f"meteo.CMIP6-raw.radiation_source: {radiation_source!r} not "
+                "recognized (expected 'components' or 'pseudo_tcc' -- raw "
+                "CMIP6 has no net_sw/net_lw composite)"
+            )
     else:
-        raise ValueError(
-            f"meteo.CMIP6.radiation_source: {radiation_source!r} not recognized "
-            "(expected 'net', 'components', or 'pseudo_tcc')"
-        )
+        if radiation_source == "net":
+            sim.airsea.swr.set(
+                pygetm.input.from_nc(_spliced_paths("net_sw_bc_*_disagg_????.nc"), "net_sw")
+            )
+            sim.airsea.ql.set(
+                pygetm.input.from_nc(_spliced_paths("net_lw_bc_*_disagg_????.nc"), "net_lw")
+            )
+        elif radiation_source == "components":
+            sim.airsea.swr.set(
+                pygetm.input.from_nc(_spliced_paths("rsds_bc_*_disagg_????.nc"), "rsds")
+                - pygetm.input.from_nc(_spliced_paths("rsus_bc_*_disagg_????.nc"), "rsus")
+            )
+            sim.airsea.ql.set(
+                pygetm.input.from_nc(_spliced_paths("rlds_bc_*_disagg_????.nc"), "rlds")
+                - pygetm.input.from_nc(_spliced_paths("rlus_bc_*_disagg_????.nc"), "rlus")
+            )
+        elif radiation_source == "pseudo_tcc":
+            _pseudo_tcc(pygetm.input.from_nc(_spliced_paths("rsds_bc_*_{exp}_????.nc"), "rsds"))
+        else:
+            raise ValueError(
+                f"meteo.CMIP6.radiation_source: {radiation_source!r} not recognized "
+                "(expected 'net', 'components', or 'pseudo_tcc')"
+            )
 
 
 def set_sst_proxy(sim, domain, config: dict) -> None:
