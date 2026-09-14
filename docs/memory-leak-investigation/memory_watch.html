@@ -1,0 +1,669 @@
+<title>Memory Depletion Watch</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface-2: #eef0f3;
+    --border: #dde1e7;
+    --text: #1c2128;
+    --text-dim: #5b6472;
+    --text-faint: #8991a0;
+    --accent: #0e7c86;
+    --accent-dim: #0e7c8622;
+    --danger: #c2410c;
+    --danger-dim: #c2410c1a;
+    --danger-line: #c2410c55;
+    --grid: #e3e6ea;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171c;
+      --surface: #1b1f26;
+      --surface-2: #20252d;
+      --border: #2b313b;
+      --text: #e6e9ee;
+      --text-dim: #9aa3b0;
+      --text-faint: #6b7280;
+      --accent: #4fd1de;
+      --accent-dim: #4fd1de1f;
+      --danger: #fb923c;
+      --danger-dim: #fb923c22;
+      --danger-line: #fb923c66;
+      --grid: #262b33;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171c;
+    --surface: #1b1f26;
+    --surface-2: #20252d;
+    --border: #2b313b;
+    --text: #e6e9ee;
+    --text-dim: #9aa3b0;
+    --text-faint: #6b7280;
+    --accent: #4fd1de;
+    --accent-dim: #4fd1de1f;
+    --danger: #fb923c;
+    --danger-dim: #fb923c22;
+    --danger-line: #fb923c66;
+    --grid: #262b33;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    margin: 0;
+    padding: 32px 20px 60px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+
+  header { margin-bottom: 28px; }
+  header .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 6px;
+  }
+  header h1 {
+    font-size: 27px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+  header p {
+    color: var(--text-dim);
+    font-size: 14.5px;
+    line-height: 1.55;
+    margin: 0;
+    max-width: 640px;
+  }
+  header code {
+    font-family: var(--mono);
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 24px 0 32px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .kpi .label {
+    font-size: 11.5px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .kpi .value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .kpi .sub {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .kpi.warn { border-color: var(--danger-line); background: var(--danger-dim); }
+  .kpi.warn .value { color: var(--danger); }
+
+  section.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px 16px;
+    margin-bottom: 22px;
+  }
+  section.panel h2 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 2px;
+  }
+  section.panel .desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: 0 0 14px;
+    line-height: 1.5;
+  }
+
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .axis-label { font-family: var(--mono); font-size: 10.5px; fill: var(--text-faint); }
+  .gridline { stroke: var(--grid); stroke-width: 1; }
+  .mem-line { fill: none; stroke: var(--accent); stroke-width: 2.25; }
+  .mem-dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2.25; }
+  .mem-dot.anomaly { stroke: var(--danger); fill: var(--danger-dim); }
+  .mem-dot.fresh { stroke: var(--accent); fill: var(--accent); }
+  .trend-line { fill: none; stroke: var(--text-faint); stroke-width: 1.5; stroke-dasharray: 5 4; }
+  .zero-line { stroke: var(--danger); stroke-width: 1.25; stroke-dasharray: 3 3; }
+  .callout { font-family: var(--mono); font-size: 11px; fill: var(--danger); }
+  .callout-dim { font-family: var(--mono); font-size: 11px; fill: var(--text-faint); }
+  .bar { fill: var(--accent); }
+  .bar.anomaly { fill: var(--danger); }
+  .bar-label { font-family: var(--mono); font-size: 10.5px; fill: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 12.5px;
+  }
+  th, td {
+    text-align: right;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  th:first-child, td:first-child { text-align: left; }
+  th {
+    color: var(--text-faint);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+  }
+  tr.anomaly td { background: var(--danger-dim); color: var(--danger); }
+  tr.anomaly td:first-child::after { content: " ⚠"; }
+  tr.fresh td { background: var(--accent-dim); }
+
+  .note {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 14px;
+  }
+  .note b { color: var(--text); }
+  .note.verdict-clear { border-left: 3px solid var(--accent); }
+  .note.verdict-lead { border-left: 3px solid var(--danger); }
+
+  .section-tag {
+    display: inline-block;
+    font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 3px 9px; border-radius: 100px; margin-bottom: 14px;
+    background: var(--surface-2); color: var(--text-faint);
+  }
+  .diag-line { fill: none; stroke: var(--accent); stroke-width: 2; }
+  .diag-dot { fill: var(--surface); stroke: var(--accent); stroke-width: 2; }
+  .diag-dot.spike { fill: var(--danger); stroke: var(--danger); }
+  .diag-plateau { stroke: var(--text-faint); stroke-width: 1.25; stroke-dasharray: 4 3; }
+
+  footer {
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 11.5px;
+    font-family: var(--mono);
+    margin-top: 28px;
+  }
+
+  @media (max-width: 640px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">NSe · CMIP6-raw · GFDL-ESM4 · 30 MPI ranks</p>
+    <h1>Memory Depletion Watch</h1>
+    <p><code>free</code> memory samples from the 30-core run of <code>generated_nse_cmip6_raw.py</code> on bb-server1, read from <code>memory.dat</code> (simulation date, wall-clock time, system free memory in GB, via <code>free -m</code>). Auto-sampling every 15 minutes finished at 14:02 — 15 samples total, run still healthy.</p>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section class="panel">
+    <h2>Free memory vs. real elapsed time</h2>
+    <p class="desc">Dashed line is the least-squares trend across all samples, extrapolated to where it crosses zero. The amber point is an anomalous sample (see note below); the newest sample is highlighted.</p>
+    <svg id="chart-mem" viewBox="0 0 880 340" preserveAspectRatio="xMidYMid meet"></svg>
+  </section>
+
+  <section class="panel">
+    <h2>dMemory/dt between consecutive samples</h2>
+    <p class="desc">Finite-difference rate of change, GB per hour of real time, plotted at each interval's midpoint.</p>
+    <svg id="chart-rate" viewBox="0 0 880 300" preserveAspectRatio="xMidYMid meet"></svg>
+  </section>
+
+  <section class="panel">
+    <h2>Raw samples</h2>
+    <table id="data-table">
+      <thead>
+        <tr><th>Sim. date</th><th>Clock</th><th>Elapsed (h)</th><th>Mem free (GB)</th><th>Δmem/Δt to next (GB/h)</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="note">
+      <b>Anomaly at sample 6:</b> the simulation date jumps backward (2014‑12‑18 → 2014‑01‑02) while only 8 real minutes pass, and the implied depletion rate spikes to −13.4 GB/h. Most likely <code>memory.dat</code> was being appended from more than one output stream at that point, so that one delta isn't reliable — the surrounding trend is what the projection below is based on.
+      <br><br>
+      <b>The bigger signal:</b> depletion is remarkably linear at ≈ −1.8 to −2.2 GB/h of real time. At that rate, free memory reaches zero a few hours out — worth watching as more samples land automatically every 15 minutes.
+    </div>
+  </section>
+
+  <hr style="border:none;border-top:1px solid var(--border);margin:32px 0;">
+  <span class="section-tag">Experiment 2 — comparison run</span>
+  <h2 style="font-size:19px;margin:0 0 4px;">2014–2016 (2 years), two debug options disabled</h2>
+  <p style="font-size:13px;color:var(--text-dim);margin:0 0 16px;max-width:660px;line-height:1.5;">Started 2026-09-13 18:16 on bb-server1, same 30-rank setup as Experiment 1 but with two debug options turned off and a shorter 2-year span — a direct comparison to see whether disabling those options changes the depletion rate. Sampling continues every 15 min into <code>memory_run2.dat</code>.</p>
+
+  <div class="kpis" id="kpis-run2"></div>
+
+  <section class="panel">
+    <h2>Free memory vs. real elapsed time — Experiment 2</h2>
+    <p class="desc">Same metric as Experiment 1 (<code>free -m</code>, free column), separate run and separate trend line.</p>
+    <svg id="chart-mem-run2" viewBox="0 0 880 300" preserveAspectRatio="xMidYMid meet"></svg>
+  </section>
+
+  <hr style="border:none;border-top:1px solid var(--border);margin:32px 0;">
+  <span class="section-tag">Experiment 3 — no output</span>
+  <h2 style="font-size:19px;margin:0 0 4px;">2014–2016 (2 years), output disabled entirely</h2>
+  <p style="font-size:13px;color:var(--text-dim);margin:0 0 16px;max-width:660px;line-height:1.5;">Started 2026-09-14 07:37 on bb-server1, same 30-rank/2-year setup as Experiment 2 but with no <code>output:</code> section at all (confirmed absent from the generated config) — the decisive test of the output-writing hypothesis. Sampling every 15 min into <code>memory_run3.dat</code>.</p>
+
+  <div class="kpis" id="kpis-run3"></div>
+
+  <section class="panel">
+    <h2>Free memory vs. real elapsed time — Experiment 3</h2>
+    <p class="desc">Same metric as Experiments 1 and 2. If output writing is the main driver, this run should show a much flatter decline.</p>
+    <svg id="chart-mem-run3" viewBox="0 0 880 300" preserveAspectRatio="xMidYMid meet"></svg>
+  </section>
+
+  <hr style="border:none;border-top:1px solid var(--border);margin:32px 0;">
+  <span class="section-tag">Root-cause diagnostics — isolated reproductions</span>
+  <h2 style="font-size:19px;margin:0 0 16px;">Which code path is actually leaking?</h2>
+
+  <section class="panel">
+    <h2>1. Meteo interpolation (read path) — isolated test</h2>
+    <p class="desc">Built the real <code>HorizontalInterpolation</code> + <code>TemporalInterpolation</code> pipeline for all 10 raw CMIP6 files against the real NSe target grid (30×40 → 251×257 cells, ~54× upsampling), then drove it directly with <code>.update(time)</code> every 3 simulated hours — no hydrodynamics, no output, just repeated reads. 3,200 iterations = 32,000 total update calls, spanning 400+ simulated days.</p>
+    <svg id="chart-diag-meteo" viewBox="0 0 880 220" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="note verdict-clear"><b>Verdict: clean.</b> RSS oscillates in a tight 752–799 MB band with zero net drift across the entire run. The meteo read path does not leak.</div>
+  </section>
+
+  <section class="panel">
+    <h2>2. Historical → ssp126 file boundary crossing</h2>
+    <p class="desc">Same pipeline, fine-grained sampling every single 3-hour step (not every 200) across 2014-12-20 → 2015-01-10, to catch what happens exactly when <code>Concatenate</code> first touches the scenario file.</p>
+    <svg id="chart-diag-boundary" viewBox="0 0 880 220" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="note verdict-clear"><b>Verdict: real, but tiny and one-time.</b> A genuine +56 MB step exactly at 2015-01-01 00:00 (both files' handles/metadata now held at once), then a stable new plateau — not an ongoing leak, and far too small (56 MB) to explain a multi-GB decline.</div>
+  </section>
+
+  <section class="panel">
+    <h2>3. Output writing (netCDF4/HDF5 unlimited time dimension) — isolated test</h2>
+    <p class="desc">Standalone netCDF4 file, unlimited time dimension, 4 variables (2× 3D, 2× 2D, smaller grid than production to isolate the mechanism cheaply), <code>sync()</code> every write matching production's <code>sync_interval: 1</code>. 10,000 sequential writes.</p>
+    <svg id="chart-diag-write" viewBox="0 0 880 220" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="note verdict-lead"><b>Verdict: real, monotonic growth — the strongest lead.</b> RSS climbs 50.8→128.2 MB over ~8,500 writes, then plateaus flat. Unlike the meteo path, this is genuine sustained growth, not oscillation. Production fields are ~18× larger per 3D variable across several files and many more timesteps — if the ceiling scales with variable size × chunk count, it could plausibly sit in the multi-GB range, meaning Experiment 1's decline may be the ramp-up portion of a much higher plateau. Not yet confirmed at production scale.</div>
+  </section>
+
+  <footer id="footer-text">memory.dat · bb-server1:/data/OceanICU/oceanicu_3d/ · sampling every 15 min</footer>
+</div>
+
+<script>
+(function() {
+  // clock-time strings assumed same calendar day as sample 1 (07:34); elapsed hours computed from that.
+  const raw = [
+    {sim: "2013-10-13", clock: "7:34",  mem: 18.2},
+    {sim: "2014-01-18", clock: "8:24",  mem: 16.8},
+    {sim: "2014-04-20", clock: "9:12",  mem: 15.2},
+    {sim: "2014-07-17", clock: "9:58",  mem: 13.7},
+    {sim: "2014-12-18", clock: "11:18", mem: 11.3},
+    {sim: "2014-01-02", clock: "11:26", mem: 9.5, anomaly: true},
+    {sim: "2015-02-21", clock: "11:56", mem: 8.6},
+    {sim: "2015-03-24", clock: "12:17", mem: 8.0},
+    {sim: "2015-04-17", clock: "12:32", mem: 7.5},
+    {sim: "2015-05-11", clock: "12:47", mem: 7.2},
+    {sim: "2015-06-03", clock: "13:02", mem: 6.7},
+    {sim: "2015-06-27", clock: "13:17", mem: 6.5},
+    {sim: "2015-07-21", clock: "13:32", mem: 6.1},
+    {sim: "2015-08-13", clock: "13:47", mem: 5.7},
+    {sim: "2015-09-06", clock: "14:02", mem: 5.3},
+  ];
+  function clockToHours(c) { const [h,m] = c.split(":").map(Number); return h + m/60; }
+  const t0 = clockToHours(raw[0].clock);
+  const rows = raw.map(r => ({...r, t: clockToHours(r.clock) - t0}));
+  rows[rows.length-1].fresh = true;
+
+  const rates = [];
+  for (let i = 0; i < rows.length - 1; i++) {
+    const dt = rows[i+1].t - rows[i].t;
+    const dm = rows[i+1].mem - rows[i].mem;
+    rates.push({ tmid: (rows[i].t + rows[i+1].t) / 2, rate: dm / dt, anomaly: rows[i+1].anomaly === true });
+  }
+
+  const n = rows.length;
+  let sumT=0,sumM=0,sumTM=0,sumT2=0;
+  rows.forEach(r => { sumT+=r.t; sumM+=r.mem; sumTM+=r.t*r.mem; sumT2+=r.t*r.t; });
+  const b = (n*sumTM - sumT*sumM) / (n*sumT2 - sumT*sumT);
+  const a = (sumM - b*sumT) / n;
+  const tZero = -a/b;
+
+  // KPIs
+  (function() {
+    const last = rows[rows.length-1];
+    const avgRate = rates.reduce((s,r)=>s+r.rate,0) / rates.length;
+    const projHours = tZero - last.t;
+    document.getElementById("kpis").innerHTML = `
+      <div class="kpi">
+        <div class="label">Memory free now</div>
+        <div class="value">${last.mem.toFixed(1)} GB</div>
+        <div class="sub">down from ${rows[0].mem.toFixed(1)} GB at start</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Avg depletion rate</div>
+        <div class="value">${b.toFixed(2)} GB/h</div>
+        <div class="sub">linear fit, ${n} samples</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Real time elapsed</div>
+        <div class="value">${last.t.toFixed(2)} h</div>
+        <div class="sub">${rows[0].clock} → ${last.clock}</div>
+      </div>
+      <div class="kpi warn">
+        <div class="label">Projected exhaustion</div>
+        <div class="value">${projHours>0? '~'+projHours.toFixed(1)+'h out' : 'past due'}</div>
+        <div class="sub">≈ ${tZero.toFixed(1)}h from run start, if trend holds</div>
+      </div>`;
+  })();
+
+  // chart 1
+  (function() {
+    const svg = document.getElementById("chart-mem");
+    const W = 880, H = 340, ML = 54, MR = 24, MT = 18, MB = 40;
+    const plotW = W - ML - MR, plotH = H - MT - MB;
+    const tMax = Math.max(tZero, rows[rows.length-1].t) * 1.04;
+    const mMax = 20, mMin = 0;
+    const x = t => ML + (t / tMax) * plotW;
+    const y = m => MT + (1 - (m - mMin) / (mMax - mMin)) * plotH;
+
+    let s = "";
+    for (let m = 0; m <= mMax; m += 5) {
+      s += `<line class="gridline" x1="${ML}" y1="${y(m)}" x2="${W-MR}" y2="${y(m)}"/>`;
+      s += `<text class="axis-label" x="${ML-8}" y="${y(m)+4}" text-anchor="end">${m}</text>`;
+    }
+    for (let t = 0; t <= Math.floor(tMax); t += 2) {
+      s += `<line class="gridline" x1="${x(t)}" y1="${MT}" x2="${x(t)}" y2="${H-MB}"/>`;
+      s += `<text class="axis-label" x="${x(t)}" y="${H-MB+18}" text-anchor="middle">${t}h</text>`;
+    }
+    s += `<text class="axis-label" x="${W/2}" y="${H-4}" text-anchor="middle">real elapsed time since run start (${rows[0].clock})</text>`;
+    s += `<text class="axis-label" transform="translate(14 ${MT+plotH/2}) rotate(-90)" text-anchor="middle">memory free (GB)</text>`;
+
+    s += `<line class="zero-line" x1="${ML}" y1="${y(0)}" x2="${W-MR}" y2="${y(0)}"/>`;
+    s += `<line class="trend-line" x1="${x(0)}" y1="${y(a)}" x2="${x(tZero)}" y2="${y(0)}"/>`;
+    s += `<circle cx="${x(tZero)}" cy="${y(0)}" r="4" fill="none" stroke="var(--danger)" stroke-width="2"/>`;
+    s += `<text class="callout" x="${x(tZero)}" y="${y(0)-10}" text-anchor="middle">≈ ${tZero.toFixed(1)}h → exhausted</text>`;
+
+    const path = rows.map((r,i) => (i===0?"M":"L") + x(r.t).toFixed(1) + " " + y(r.mem).toFixed(1)).join(" ");
+    s += `<path class="mem-line" d="${path}"/>`;
+    rows.forEach(r => {
+      const cls = r.anomaly ? 'anomaly' : (r.fresh ? 'fresh' : '');
+      s += `<circle class="mem-dot ${cls}" cx="${x(r.t)}" cy="${y(r.mem)}" r="${r.fresh?6:5}"/>`;
+    });
+    svg.innerHTML = s;
+  })();
+
+  // chart 2
+  (function() {
+    const svg = document.getElementById("chart-rate");
+    const W = 880, H = 300, ML = 54, MR = 24, MT = 18, MB = 46;
+    const plotW = W - ML - MR, plotH = H - MT - MB;
+    const rMin = Math.min(...rates.map(r => r.rate)) * 1.15;
+    const rMax = 1;
+    const tMax = rows[rows.length-1].t * 1.04;
+    const x = t => ML + (t / tMax) * plotW;
+    const y = r => MT + (1 - (r - rMin) / (rMax - rMin)) * plotH;
+    const barW = Math.min(46, plotW / (rates.length * 1.8));
+
+    let s = "";
+    for (let r = 0; r >= rMin; r -= 2) {
+      s += `<line class="gridline" x1="${ML}" y1="${y(r)}" x2="${W-MR}" y2="${y(r)}"/>`;
+      s += `<text class="axis-label" x="${ML-8}" y="${y(r)+4}" text-anchor="end">${r}</text>`;
+    }
+    s += `<line class="gridline" x1="${ML}" y1="${y(0)}" x2="${W-MR}" y2="${y(0)}" stroke-width="1.5"/>`;
+    s += `<text class="axis-label" x="${W/2}" y="${H-6}" text-anchor="middle">interval midpoint, elapsed hours</text>`;
+    s += `<text class="axis-label" transform="translate(14 ${MT+plotH/2}) rotate(-90)" text-anchor="middle">GB / hour</text>`;
+
+    rates.forEach(r => {
+      const bx = x(r.tmid) - barW/2;
+      const yTop = Math.min(y(0), y(r.rate));
+      const barH = Math.abs(y(r.rate) - y(0));
+      s += `<rect class="bar${r.anomaly?' anomaly':''}" x="${bx}" y="${yTop}" width="${barW}" height="${Math.max(barH,1)}" rx="3"/>`;
+      s += `<text class="bar-label" x="${x(r.tmid)}" y="${y(r.rate) + (r.rate<0? -8 : 16)}" text-anchor="middle">${r.rate.toFixed(1)}</text>`;
+    });
+    svg.innerHTML = s;
+  })();
+
+  // table
+  (function() {
+    const tbody = document.querySelector("#data-table tbody");
+    rows.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      if (r.anomaly) tr.className = "anomaly";
+      else if (r.fresh) tr.className = "fresh";
+      const rateToNext = i < rates.length ? rates[i].rate.toFixed(2) : "—";
+      tr.innerHTML = `<td>${r.sim}</td><td>${r.clock}</td><td>${r.t.toFixed(3)}</td><td>${r.mem.toFixed(1)}</td><td>${rateToNext}</td>`;
+      tbody.appendChild(tr);
+    });
+  })();
+
+  document.getElementById("footer-text").textContent =
+    `memory.dat · bb-server1:/data/OceanICU/oceanicu_3d/ · ${rows.length} samples so far · sampling every 15 min`;
+
+  // ---------- generic small line-chart renderer for the diagnostic panels ----------
+  function drawDiagChart(svgId, points, opts) {
+    const svg = document.getElementById(svgId);
+    const W = 880, H = 220, ML = 50, MR = 20, MT = 14, MB = 32;
+    const plotW = W - ML - MR, plotH = H - MT - MB;
+    const xs = points.map(p => p.x), ys = points.map(p => p.y);
+    const xMin = 0, xMax = Math.max(...xs) * 1.02;
+    const yMin = opts.yMin !== undefined ? opts.yMin : Math.min(...ys) * 0.97;
+    const yMax = opts.yMax !== undefined ? opts.yMax : Math.max(...ys) * 1.03;
+    const x = v => ML + ((v - xMin) / (xMax - xMin)) * plotW;
+    const y = v => MT + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+
+    let s = "";
+    const ySteps = 4;
+    for (let i = 0; i <= ySteps; i++) {
+      const v = yMin + (yMax - yMin) * i / ySteps;
+      s += `<line class="gridline" x1="${ML}" y1="${y(v)}" x2="${W-MR}" y2="${y(v)}"/>`;
+      s += `<text class="axis-label" x="${ML-8}" y="${y(v)+4}" text-anchor="end">${v.toFixed(0)}</text>`;
+    }
+    const xSteps = 5;
+    for (let i = 0; i <= xSteps; i++) {
+      const v = xMin + (xMax - xMin) * i / xSteps;
+      s += `<text class="axis-label" x="${x(v)}" y="${H-MB+18}" text-anchor="middle">${opts.xFmt ? opts.xFmt(v) : Math.round(v)}</text>`;
+    }
+    s += `<text class="axis-label" x="${W/2}" y="${H-4}" text-anchor="middle">${opts.xLabel}</text>`;
+    s += `<text class="axis-label" transform="translate(12 ${MT+plotH/2}) rotate(-90)" text-anchor="middle">${opts.yLabel}</text>`;
+
+    if (opts.plateauAt !== undefined) {
+      s += `<line class="diag-plateau" x1="${ML}" y1="${y(opts.plateauAt)}" x2="${W-MR}" y2="${y(opts.plateauAt)}"/>`;
+    }
+
+    const path = points.map((p,i) => (i===0?"M":"L") + x(p.x).toFixed(1) + " " + y(p.y).toFixed(1)).join(" ");
+    s += `<path class="diag-line" d="${path}"/>`;
+    points.forEach(p => {
+      s += `<circle class="diag-dot${p.spike?' spike':''}" cx="${x(p.x)}" cy="${y(p.y)}" r="${p.spike?4.5:3}"/>`;
+    });
+    if (opts.annotate) {
+      const p = points.find(pt => pt.spike);
+      if (p) s += `<text class="callout" x="${x(p.x)}" y="${y(p.y)-10}" text-anchor="middle">${opts.annotate}</text>`;
+    }
+    svg.innerHTML = s;
+  }
+
+  // 1. meteo interpolation isolation (iter -> RSS MB), 3200 iterations
+  drawDiagChart("chart-diag-meteo", [
+    {x:0,y:777.2},{x:200,y:793.0},{x:400,y:786.5},{x:600,y:793.9},{x:800,y:787.5},
+    {x:1000,y:794.0},{x:1200,y:778.4},{x:1400,y:799.4},{x:1600,y:793.2},{x:1800,y:793.9},
+    {x:2000,y:793.0},{x:2200,y:752.1},{x:2400,y:793.8},{x:2600,y:784.2},{x:2800,y:793.9},
+    {x:3000,y:787.5},{x:3200,y:794.0},
+  ], {yMin: 740, yMax: 810, xLabel: "update() iteration (3h steps)", yLabel: "RSS (MB)"});
+
+  // 2. boundary crossing (iter -> RSS MB), fine-grained around 2015-01-01 (iter 96)
+  drawDiagChart("chart-diag-boundary", [
+    {x:80,y:738.75},{x:88,y:738.75},{x:92,y:738.75},{x:95,y:738.75},
+    {x:96,y:794.71,spike:true},{x:97,y:794.71},{x:98,y:804.02},{x:99,y:779.62},{x:100,y:779.78},
+    {x:101,y:755.84},{x:102,y:781.32},{x:104,y:794.94},{x:107,y:782.31},{x:109,y:755.47},
+    {x:110,y:795.42},{x:115,y:754.49},{x:130,y:783.0},{x:149,y:782.31},{x:158,y:797.21},{x:167,y:795.91},
+  ], {yMin: 720, yMax: 820, xLabel: "iteration (3h steps; 96 = 2015-01-01 00:00)", yLabel: "RSS (MB)", annotate: "+56 MB step"});
+
+  // 3. output writing isolation (write # -> RSS MB), 10000 writes
+  drawDiagChart("chart-diag-write", [
+    {x:0,y:50.8},{x:500,y:97.2},{x:1000,y:112.6},{x:1500,y:118.1},{x:2000,y:118.7},
+    {x:2500,y:119.2},{x:3000,y:119.8},{x:3500,y:120.9},{x:4000,y:121.4},{x:4500,y:122.5},
+    {x:5000,y:123.2},{x:5500,y:123.8},{x:6000,y:124.3},{x:6500,y:125.4},{x:7000,y:126.0},
+    {x:7500,y:127.1},{x:8000,y:127.6},{x:8500,y:128.2},{x:9000,y:128.2},{x:9500,y:128.2},{x:9999,y:128.2},
+  ], {yMin: 40, yMax: 140, xLabel: "sequential netCDF write #", yLabel: "RSS (MB)", plateauAt: 128.2});
+
+  // ---------- Experiment 2 (run2): edit/extend raw2 as new samples land ----------
+  const raw2 = [
+    {sim: "2014-01-01", clock: "18:17", mem: 21.4},
+    {sim: "2014-02-06", clock: "18:32", mem: 20.3},
+    {sim: "2014-03-13", clock: "18:47", mem: 19.5},
+    {sim: "2014-04-17", clock: "19:02", mem: 18.8},
+    {sim: "2014-05-22", clock: "19:17", mem: 18.1},
+    {sim: "2014-06-26", clock: "19:32", mem: 17.4},
+    {sim: "2014-07-31", clock: "19:47", mem: 16.6},
+    {sim: "2014-09-04", clock: "20:02", mem: 15.7},
+    {sim: "2014-10-10", clock: "20:17", mem: 14.9},
+    {sim: "2014-11-14", clock: "20:32", mem: 14.3},
+    {sim: "2014-12-19", clock: "20:47", mem: 13.6},
+    {sim: "2015-01-19", clock: "21:02", mem: 11.5, anomaly: true},
+    {sim: "2015-02-16", clock: "21:17", mem: 11.1},
+    {sim: "2015-03-16", clock: "21:32", mem: 10.5},
+    {sim: "2015-04-13", clock: "21:47", mem: 10.1},
+    {sim: "2015-05-11", clock: "22:02", mem: 9.7},
+    {sim: "2015-06-08", clock: "22:17", mem: 9.3},
+    {sim: "2015-07-06", clock: "22:32", mem: 8.8},
+    {sim: "2015-08-03", clock: "22:47", mem: 8.4},
+    {sim: "2015-08-31", clock: "23:02", mem: 8.1},
+    {sim: "2015-09-28", clock: "23:17", mem: 7.7},
+    {sim: "2015-10-25", clock: "23:32", mem: 7.2},
+    {sim: "2015-11-23", clock: "23:47", mem: 6.7},
+    {sim: "2015-12-21", clock: "0:02", mem: 6.2, dayOffset: 1},
+  ];
+  const t0b = clockToHours(raw2[0].clock);
+  const rows2 = raw2.map(r => ({...r, t: clockToHours(r.clock) + 24*(r.dayOffset||0) - t0b}));
+  rows2[rows2.length-1].fresh = true;
+
+  const rates2 = [];
+  for (let i = 0; i < rows2.length - 1; i++) {
+    const dt = rows2[i+1].t - rows2[i].t;
+    const dm = rows2[i+1].mem - rows2[i].mem;
+    rates2.push({ tmid: (rows2[i].t + rows2[i+1].t) / 2, rate: dt > 0 ? dm / dt : 0 });
+  }
+  let b2 = null;
+  if (rows2.length >= 2) {
+    const n2 = rows2.length;
+    let sT=0,sM=0,sTM=0,sT2=0;
+    rows2.forEach(r => { sT+=r.t; sM+=r.mem; sTM+=r.t*r.mem; sT2+=r.t*r.t; });
+    b2 = (n2*sTM - sT*sM) / (n2*sT2 - sT*sT);
+  }
+
+  (function() {
+    const last = rows2[rows2.length-1];
+    const avgRate2 = rates2.length ? rates2.reduce((s,r)=>s+r.rate,0)/rates2.length : null;
+    document.getElementById("kpis-run2").innerHTML = `
+      <div class="kpi">
+        <div class="label">Memory free now (run2)</div>
+        <div class="value">${last.mem.toFixed(1)} GB</div>
+        <div class="sub">down from ${rows2[0].mem.toFixed(1)} GB at start</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Depletion rate (run2)</div>
+        <div class="value">${b2===null?'—':b2.toFixed(2)+' GB/h'}</div>
+        <div class="sub">vs. Experiment 1: ${b.toFixed(2)} GB/h</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Real time elapsed</div>
+        <div class="value">${last.t.toFixed(2)} h</div>
+        <div class="sub">${rows2[0].clock} → ${last.clock}</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Samples so far</div>
+        <div class="value">${rows2.length}</div>
+        <div class="sub">every 15 min, run in progress</div>
+      </div>`;
+  })();
+
+  drawDiagChart("chart-mem-run2", rows2.map(r => ({x: r.t, y: r.mem, spike: r.fresh || r.anomaly})),
+    {yMin: 0, yMax: Math.max(22, rows2[0].mem*1.1), xLabel: `real elapsed time since run2 start (${rows2[0].clock})`, yLabel: "memory free (GB)",
+     annotate: "hist→ssp126 boundary crossed here"});
+
+  // ---------- Experiment 3 (run3, no output): edit/extend raw3 as new samples land ----------
+  const raw3 = [
+    {sim: "", clock: "7:37", mem: 14.6},
+    {sim: "2014-02-08", clock: "7:52", mem: 14.0},
+    {sim: "2014-03-17", clock: "8:07", mem: 13.5},
+    {sim: "2014-04-23", clock: "8:22", mem: 13.0},
+    {sim: "2014-05-30", clock: "8:37", mem: 12.5},
+    {sim: "2014-07-06", clock: "8:52", mem: 12.0},
+    {sim: "2014-08-12", clock: "9:07", mem: 11.6},
+    {sim: "2014-09-18", clock: "9:22", mem: 11.0},
+    {sim: "2014-10-26", clock: "9:37", mem: 10.6},
+    {sim: "2014-12-02", clock: "9:52", mem: 1.1},
+    {sim: "2015-01-07", clock: "10:07", mem: 0.7},
+  ];
+  const t0c = clockToHours(raw3[0].clock);
+  const rows3 = raw3.map(r => ({...r, t: clockToHours(r.clock) + 24*(r.dayOffset||0) - t0c}));
+  rows3[rows3.length-1].fresh = true;
+
+  const rates3 = [];
+  for (let i = 0; i < rows3.length - 1; i++) {
+    const dt = rows3[i+1].t - rows3[i].t;
+    const dm = rows3[i+1].mem - rows3[i].mem;
+    rates3.push({ tmid: (rows3[i].t + rows3[i+1].t) / 2, rate: dt > 0 ? dm / dt : 0 });
+  }
+  let b3 = null;
+  if (rows3.length >= 2) {
+    const n3 = rows3.length;
+    let sT=0,sM=0,sTM=0,sT2=0;
+    rows3.forEach(r => { sT+=r.t; sM+=r.mem; sTM+=r.t*r.mem; sT2+=r.t*r.t; });
+    b3 = (n3*sTM - sT*sM) / (n3*sT2 - sT*sT);
+  }
+
+  (function() {
+    const last = rows3[rows3.length-1];
+    const avgRate3 = rates3.length ? rates3.reduce((s,r)=>s+r.rate,0)/rates3.length : null;
+    document.getElementById("kpis-run3").innerHTML = `
+      <div class="kpi">
+        <div class="label">Memory free now (run3)</div>
+        <div class="value">${last.mem.toFixed(1)} GB</div>
+        <div class="sub">down from ${rows3[0].mem.toFixed(1)} GB at start</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Depletion rate (run3)</div>
+        <div class="value">${b3===null?'—':b3.toFixed(2)+' GB/h'}</div>
+        <div class="sub">vs. run2 underlying: ~2.4 GB/h</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Real time elapsed</div>
+        <div class="value">${last.t.toFixed(2)} h</div>
+        <div class="sub">${rows3[0].clock} → ${last.clock}</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Samples so far</div>
+        <div class="value">${rows3.length}</div>
+        <div class="sub">every 15 min, run in progress</div>
+      </div>`;
+  })();
+
+  drawDiagChart("chart-mem-run3", rows3.map(r => ({x: r.t, y: r.mem, spike: r.fresh})),
+    {yMin: 0, yMax: Math.max(16, rows3[0].mem*1.1), xLabel: `real elapsed time since run3 start (${rows3[0].clock})`, yLabel: "memory free (GB)"});
+})();
+</script>
