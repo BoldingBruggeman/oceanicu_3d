@@ -51,6 +51,23 @@ def add_rivers(domain, config: dict):
     import pygetm
 
     rcfg = config["river_discharge"]
+    # folder_template (e.g. "CMIP6/{model}/{scenario}/rivers") must be
+    # applied here explicitly, same as every other CMIP6 provider does
+    # (oceanicu_providers.py's boundaries.baroclinic/barotropic/fabm
+    # branches all do `folder / folder_template.format(model=..., scenario=...)`)
+    # -- river_discharge has no core-schema equivalent doing this for it
+    # automatically (unlike open_boundaries' file: kind, which gets
+    # ${VAR} resolution for free but NOT folder_template composition).
+    # Missing this meant `folder` alone (e.g. scylla's bare
+    # RIVER_FOLDER_CMIP6=/work/shared/oceanICU/BiasCorrected, deliberately
+    # NOT including CMIP6/<model>/<scenario>/rivers -- see
+    # driver/scylla_data_roots.yaml) resolved to a file that never
+    # existed (FileNotFoundError, hit on the HPC 2026-09-15).
+    folder = Path(resolve_data_path(rcfg["folder"]))
+    if rcfg.get("folder_template"):
+        folder = folder / rcfg["folder_template"].format(
+            model=rcfg.get("model", ""), scenario=rcfg.get("scenario", "")
+        )
     # .format() is a no-op for "emorid"'s literal filename (no {} in it) --
     # only source=CMIP6 actually has {model}/{scenario} placeholders here,
     # same substitution folder_template already does elsewhere (meteo.py's
@@ -73,7 +90,7 @@ def add_rivers(domain, config: dict):
     # the same treatment for a noleap-calendar run.
     if config.get("runtime", {}).get("calendar") == "noleap":
         filename = filename.removesuffix(".nc") + "_noleap.nc"
-    path = Path(resolve_data_path(rcfg["folder"])) / filename
+    path = folder / filename
     threshold = rcfg.get("threshold", 0)
 
     with xr.open_dataset(path) as ds:
@@ -120,11 +137,17 @@ def set_river_data(sim, domain, config: dict) -> int:
     import xarray as xr
 
     rcfg = config["river_discharge"]
+    # folder_template composition -- see add_rivers' own comment above for why.
+    folder = Path(resolve_data_path(rcfg["folder"]))
+    if rcfg.get("folder_template"):
+        folder = folder / rcfg["folder_template"].format(
+            model=rcfg.get("model", ""), scenario=rcfg.get("scenario", "")
+        )
     filename = rcfg["file"].format(model=rcfg.get("model", ""), scenario=rcfg.get("scenario", ""))
     # Inlined, not a shared helper -- see add_rivers' own comment above for why.
     if config.get("runtime", {}).get("calendar") == "noleap":
         filename = filename.removesuffix(".nc") + "_noleap.nc"
-    path = Path(resolve_data_path(rcfg["folder"])) / filename
+    path = folder / filename
     # CFDatetimeCoder(use_cftime=True), matching cfg_rivers.py's own real
     # data() exactly -- needed for Q's time dimension, unlike add_rivers
     # above (which never reads a time-varying variable at all).
