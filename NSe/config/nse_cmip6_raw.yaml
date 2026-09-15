@@ -142,8 +142,10 @@ runtime:
   dump_on_error: true
   profile: null
   check_finite: true
-  report: {days: 1}
-  report_totals: {days: 7}
+  report:
+    days: 1
+  report_totals:
+    days: 7
   debug_output: false
   calendar: noleap
   save_restart_interval: null
@@ -453,20 +455,13 @@ meteo:
     radiation_source: net
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
     model: GFDL-ESM4
-  # folder deliberately left unset (an empty mapping, NOT omitted -- see
-  # ChoiceSpec's own nested-vs-flat handling in yaml_parse._validate_choice:
-  # a bare `Fluxes:` with nothing under it parses as YAML null, not an
-  # empty dict, which breaks the nested-form detection there). Inactive
-  # for now -- set source: Fluxes and a real folder here to switch to
-  # Fluxes' "from file" method, or leave the folder empty for its own
-  # static constant values (also needs simulation.airsea.type: Fluxes).
   Fluxes: {}
 river_discharge:
-  source: emorid
+  source: CMIP6-raw
   emorid:
     folder: ${RIVER_FOLDER}
     file: EMORID_1990_2024_noleap.nc
-    threshold: 0
+    threshold: 0.0
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
   CMIP6:
@@ -475,7 +470,26 @@ river_discharge:
     model: MPI-ESM1-2-HR
     scenario: ssp126
     file: river_flows_future_{scenario}.nc
-    threshold: 0
+    threshold: 0.0
+    script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
+    data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
+  # Same bias-corrected river_flows_future_{scenario}.nc projection as
+  # CMIP6 above (reusing bias-corrected river data for a raw-meteo run is
+  # already accepted practice -- see boundaries.barotropic/baroclinic's
+  # own CMIP6 choice, reused as-is for both), pointed at a noleap-calendar
+  # copy instead -- needed since this whole simulation runs on
+  # runtime.calendar: noleap. Only generated for GFDL-ESM4 (the model
+  # this config's meteo/boundaries actually use), via
+  # xarray.Dataset.convert_calendar("noleap", ...) -- a no-op on the real
+  # Q values at this file's monthly resolution (no Feb 29 to drop there),
+  # just fixes the time coordinate's calendar attribute.
+  CMIP6-raw:
+    folder: ${RIVER_FOLDER_CMIP6}
+    folder_template: CMIP6/{model}/{scenario}/rivers
+    model: GFDL-ESM4
+    scenario: ssp126
+    file: river_flows_future_{scenario}_noleap.nc
+    threshold: 0.0
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
 fabm:

@@ -450,6 +450,31 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         {
             "emorid": _river_shared_fields,
             "CMIP6": _river_shared_fields + _CMIP6_SHARED,
+            # For runtime.calendar: noleap simulations (CMIP6-raw meteo) --
+            # same underlying bias-corrected river_flows_future_{scenario}.nc
+            # projection as "CMIP6" above (per user, 2026-09-15: reusing
+            # bias-corrected river/boundary data for a raw-meteo run is
+            # already accepted practice, same as boundaries.barotropic/
+            # baroclinic's own CMIP6 choice being reused as-is for both),
+            # just pointed at a noleap-calendar copy -- `file:` in the YAML
+            # names that copy explicitly (e.g.
+            # river_flows_future_{scenario}_noleap.nc), same convention as
+            # "CMIP6" above, no separate default needed here. Unlike
+            # boundaries' own dynamic `_calendar_suffix` (one "CMIP6" choice,
+            # suffix computed from runtime.calendar in
+            # derive_data_assignments), this is a genuinely separate named
+            # choice -- matches meteo's own explicit ERA5/CMIP6/CMIP6-raw/
+            # Fluxes split instead. Currently only generated for GFDL-ESM4
+            # (the only model CMIP6-raw meteo actually uses) -- see
+            # /data/BiasCorrected/CMIP6/GFDL-ESM4/{ssp126,ssp370}/rivers/
+            # river_flows_future_{scenario}_noleap.nc, produced via
+            # xarray.Dataset.convert_calendar("noleap", ...) (a no-op on
+            # the actual Q values at this file's monthly resolution --
+            # there's no Feb 29 to drop at that resolution -- just fixes
+            # the time coordinate's own calendar attribute so pygetm's
+            # Concatenate/temporal_interpolation don't reject it against a
+            # noleap simulation time).
+            "CMIP6-raw": _river_shared_fields + _CMIP6_SHARED,
         },
         default="emorid",
     )
