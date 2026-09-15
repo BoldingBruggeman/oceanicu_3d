@@ -18,28 +18,6 @@ from pathlib import Path
 from pygetm_config.loader import resolve_data_path
 
 
-def _apply_calendar_suffix(filename: str, config: dict) -> str:
-    """Same mechanism as oceanicu_providers.derive_data_assignments' own
-    `_calendar_suffix` for boundaries (see that function's docstring for
-    the full reasoning) -- one "CMIP6" river_discharge choice, not a
-    separate named one, with the noleap-calendar file selection made
-    dynamically here from runtime.calendar rather than baked into a
-    second config choice. river_discharge's `file:` (unlike boundaries'
-    filename_template) is read directly by THIS script hook rather than
-    resolved inside derive_data_assignments, so the suffix has to be
-    applied here instead -- real bug fixed this way, not a separate
-    river_discharge.CMIP6-raw choice (per user, 2026-09-15: "do it the
-    way it was done for the boundaries").  Applies to EVERY river source
-    equally (not just CMIP6) -- "emorid"'s own real-observation file
-    needs the identical treatment for a noleap-calendar run, and this
-    keeps both sources's file-naming rule in exactly one place rather
-    than duplicating the calendar check per source.
-    """
-    if config.get("runtime", {}).get("calendar") != "noleap":
-        return filename
-    return filename.removesuffix(".nc") + "_noleap.nc"
-
-
 def add_rivers(domain, config: dict):
     """Mirrors cfg_rivers.py's create() -- dynamic, threshold-filtered, read from
     an EMORID/JRC discharge file at run time. The *set* of rivers depends on the
@@ -79,7 +57,22 @@ def add_rivers(domain, config: dict):
     # own folder_template.format(model=..., scenario=...)) -- avoids the
     # filename and `scenario:` field ever disagreeing with each other.
     filename = rcfg["file"].format(model=rcfg.get("model", ""), scenario=rcfg.get("scenario", ""))
-    filename = _apply_calendar_suffix(filename, config)
+    # Inlined rather than a shared helper: pygetm_config.codegen's
+    # _emit_script_hook embeds ONE function's source per script/data_script
+    # reference (inspect.getsource on just that function, no dependency
+    # scan of sibling module-level helpers -- see its own docstring on
+    # local imports for the same limitation) -- a separate
+    # _apply_calendar_suffix() here left the generated standalone script
+    # calling an undefined name (NameError, hit on the HPC 2026-09-15).
+    # Same mechanism as oceanicu_providers.derive_data_assignments' own
+    # `_calendar_suffix` for boundaries; applied here directly since
+    # river_discharge's `file:` is read by THIS script hook, not resolved
+    # inside derive_data_assignments (per user, 2026-09-15: "do it the way
+    # it was done for the boundaries"). Applies to EVERY river source
+    # equally, not just CMIP6 -- "emorid"'s own real-observation file needs
+    # the same treatment for a noleap-calendar run.
+    if config.get("runtime", {}).get("calendar") == "noleap":
+        filename = filename.removesuffix(".nc") + "_noleap.nc"
     path = Path(resolve_data_path(rcfg["folder"])) / filename
     threshold = rcfg.get("threshold", 0)
 
@@ -128,7 +121,9 @@ def set_river_data(sim, domain, config: dict) -> int:
 
     rcfg = config["river_discharge"]
     filename = rcfg["file"].format(model=rcfg.get("model", ""), scenario=rcfg.get("scenario", ""))
-    filename = _apply_calendar_suffix(filename, config)
+    # Inlined, not a shared helper -- see add_rivers' own comment above for why.
+    if config.get("runtime", {}).get("calendar") == "noleap":
+        filename = filename.removesuffix(".nc") + "_noleap.nc"
     path = Path(resolve_data_path(rcfg["folder"])) / filename
     # CFDatetimeCoder(use_cftime=True), matching cfg_rivers.py's own real
     # data() exactly -- needed for Q's time dimension, unlike add_rivers

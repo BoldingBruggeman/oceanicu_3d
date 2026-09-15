@@ -457,13 +457,16 @@ meteo:
     model: GFDL-ESM4
   Fluxes: {}
 river_discharge:
-  # source's own file gets a "_noleap" suffix applied dynamically by
-  # scripts/rivers.py's _apply_calendar_suffix, matching runtime.calendar
-  # below -- same mechanism as boundaries.barotropic/baroclinic's own
-  # _calendar_suffix (oceanicu_providers.py), not a separate named
-  # CMIP6-raw choice. `file:` here stays the plain, un-suffixed name;
-  # the noleap copy (river_flows_future_ssp126_noleap.nc) must already
-  # exist alongside it on disk.
+  # source's own file gets a "_noleap" suffix applied dynamically, inline
+  # in scripts/rivers.py's add_rivers/set_river_data (not a shared helper --
+  # pygetm_config.codegen's script-hook embedding only inlines one
+  # function's source at a time, so a separate helper function left the
+  # generated standalone script calling an undefined name), matching
+  # runtime.calendar below -- same mechanism as boundaries.barotropic/
+  # baroclinic's own _calendar_suffix (oceanicu_providers.py), not a
+  # separate named CMIP6-raw choice. `file:` here stays the plain,
+  # un-suffixed name; the noleap copy (river_flows_future_ssp126_noleap.nc)
+  # must already exist alongside it on disk.
   source: CMIP6
   emorid:
     folder: ${RIVER_FOLDER}
