@@ -457,38 +457,26 @@ meteo:
     model: GFDL-ESM4
   Fluxes: {}
 river_discharge:
-  source: CMIP6-raw
+  # source's own file gets a "_noleap" suffix applied dynamically by
+  # scripts/rivers.py's _apply_calendar_suffix, matching runtime.calendar
+  # below -- same mechanism as boundaries.barotropic/baroclinic's own
+  # _calendar_suffix (oceanicu_providers.py), not a separate named
+  # CMIP6-raw choice. `file:` here stays the plain, un-suffixed name;
+  # the noleap copy (river_flows_future_ssp126_noleap.nc) must already
+  # exist alongside it on disk.
+  source: CMIP6
   emorid:
     folder: ${RIVER_FOLDER}
-    file: EMORID_1990_2024_noleap.nc
+    file: EMORID_1990_2024.nc
     threshold: 0.0
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
   CMIP6:
     folder: ${RIVER_FOLDER_CMIP6}
     folder_template: CMIP6/{model}/{scenario}/rivers
-    model: MPI-ESM1-2-HR
-    scenario: ssp126
-    file: river_flows_future_{scenario}.nc
-    threshold: 0.0
-    script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
-    data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
-  # Same bias-corrected river_flows_future_{scenario}.nc projection as
-  # CMIP6 above (reusing bias-corrected river data for a raw-meteo run is
-  # already accepted practice -- see boundaries.barotropic/baroclinic's
-  # own CMIP6 choice, reused as-is for both), pointed at a noleap-calendar
-  # copy instead -- needed since this whole simulation runs on
-  # runtime.calendar: noleap. Only generated for GFDL-ESM4 (the model
-  # this config's meteo/boundaries actually use), via
-  # xarray.Dataset.convert_calendar("noleap", ...) -- a no-op on the real
-  # Q values at this file's monthly resolution (no Feb 29 to drop there),
-  # just fixes the time coordinate's calendar attribute.
-  CMIP6-raw:
-    folder: ${RIVER_FOLDER_CMIP6}
-    folder_template: CMIP6/{model}/{scenario}/rivers
     model: GFDL-ESM4
     scenario: ssp126
-    file: river_flows_future_{scenario}_noleap.nc
+    file: river_flows_future_{scenario}.nc
     threshold: 0.0
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
