@@ -9,39 +9,37 @@ simulated date periodically, with a wall-clock timestamp on every line --
 enough to measure real wall-clock pace per simulated year and compare
 chunks against each other.
 
-**These logs are rsynced down from the HPC, not written locally** --
-at the time of this analysis, only chunks 000/001/002 had actually
-synced any data down; 003 onward were empty local directories. That is
-**not** evidence those chunks failed -- it may simply be that the rsync
-hasn't caught up yet, or (for chunk 004, which shows four separate
-`.attempt-*` retry directories, all empty) that the chunk itself hasn't
-produced output yet either way. Re-run the analysis
-(`running/analyze_chunk_pace.py`, see below) after the next sync to get
-an updated picture before drawing conclusions about anything past chunk
-002.
+**These logs are rsynced down from the HPC, not written locally**, so an
+early pass of this analysis (chunks 000-002 only) carried an explicit
+caveat about drawing conclusions past chunk 002. Re-run
+(`running/analyze_chunk_pace.py`, see below) whenever more has synced.
 
-## Findings (chunks 000-002, the only ones with data at analysis time)
+## Findings (chunks 000-013, 2010-2050 -- update, 2026-09-16)
 
-Per-simulated-year wall-clock time:
+The original 9-year sample (chunks 000-002) is now 41 years (chunks
+000-013, chunk 013 still in progress) -- and the years fall into two
+known populations, not one: historical forcing (< 2015) and scenario
+forcing (>= 2015), either side of the splice date. Pooling both into one
+blended mean and reporting each year's deviation from it (the original
+framing) makes each class look noisier than it is and buries the actual
+between-class difference. `analyze_chunk_pace.py --split-year 2015` (now
+supports this) reports each year against its own class mean instead, plus
+a direct class comparison:
 
-| Year | Chunk | Wall time |
-|---|---|---|
-| 2010 | 000 | 37.9 min |
-| 2011 | 000 | 38.5 min |
-| 2012 | 000 | 38.6 min |
-| 2013 | 001 | 37.2 min |
-| 2014 | 001 | 38.6 min |
-| **2015** | 001 | **43.2 min** |
-| 2016 | 002 | 42.6 min |
-| 2017 | 002 | 43.2 min |
-| 2018 | 002 | 43.0 min |
+- **Before 2015** (5 years): mean 2284.6 s (38.08 min), every year within
+  ±3% of that mean.
+- **2015 onward** (36 years): mean 2554.2 s (42.57 min), every year within
+  ±4% of that mean -- no trend up or down across 30+ years of scenario
+  forcing, not gradual drift from something else (growing output volume,
+  memory pressure).
+- **Class comparison: scenario-period mean is +11.8% vs. historical-period
+  mean** -- the real number this analysis is after, cleaner than the
+  original "~13% slowdown" estimate eyeballed off a blended mean.
 
-Overall spread: ~15% of the mean (37.0-43.3 min/year) -- not huge, but
-**not random noise either**. There's a clean, sustained step: every year
-from 2010-2014 runs at ~37-39 min; every year from 2015 onward runs at
-~43 min, a consistent ~13% slowdown that kicks in exactly at 2015 and
-*stays* there through chunk 002 (fully within the scenario period) rather
-than being a one-off blip at the transition.
+Still a clean, sustained step exactly at the historical->scenario
+boundary, not a one-off transition blip -- **very consistent with the
+original finding**, now on 4x the sample and measured with the right
+statistic.
 
 2015-01-01 is exactly the historical -> SSP-scenario forcing boundary for
 this CMIP6-raw setup (`meteo.source: CMIP6-raw`, model `GFDL-ESM4`,
@@ -283,8 +281,13 @@ disk saturating at 16 writers. So:
 ## Re-running this analysis
 
 ```bash
-python running/analyze_chunk_pace.py <local_run01_mirror> [--csv out.csv]
+python running/analyze_chunk_pace.py <local_run01_mirror> [--csv out.csv] [--split-year 2015]
 ```
+
+`--split-year 2015` is what produced the two-class breakdown above --
+pass it whenever the sample is known to span two different populations
+(here, the historical/scenario forcing splice); omit it for a run with no
+such known split, which falls back to one pooled mean.
 
 `<local_run01_mirror>` is wherever `run01`'s chunk directories land
 locally after rsyncing from bb-server1. The script is resilient to

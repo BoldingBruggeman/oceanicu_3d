@@ -223,7 +223,7 @@ def analyze_run_dir(run_dir: Path) -> list[ChunkResult]:
     return results
 
 
-def print_report(results: list[ChunkResult]) -> None:
+def print_report(results: list[ChunkResult], split_year: Optional[int] = None) -> None:
     n_complete = sum(1 for r in results if r.status == "complete")
     n_progress = sum(1 for r in results if r.status == "in_progress")
     n_none = sum(1 for r in results if r.status == "no_data")
@@ -250,7 +250,17 @@ def print_report(results: list[ChunkResult]) -> None:
         print()
 
     complete_years = [(c, y, s) for c, y, s, partial in all_year_rows if not partial]
-    if complete_years:
+    if not complete_years:
+        print("No fully-complete simulated years yet -- nothing to summarize.")
+        return
+
+    def _stats(rows: list[tuple[str, int, float]]) -> tuple[float, float]:
+        vals = [s for _, _, s in rows]
+        m = sum(vals) / len(vals)
+        var = sum((s - m) ** 2 for s in vals) / len(vals)
+        return m, var**0.5
+
+    if split_year is None:
         secs = [s for _, _, s in complete_years]
         mean = sum(secs) / len(secs)
         variance = sum((s - mean) ** 2 for s in secs) / len(secs)
@@ -267,8 +277,38 @@ def print_report(results: list[ChunkResult]) -> None:
         for chunk, year, s in sorted(complete_years, key=lambda row: row[1]):
             dev_pct = (s - mean) / mean * 100 if mean else 0.0
             print(f"    {year} (chunk {chunk}): {s/60:6.2f} min  ({dev_pct:+5.1f}% vs mean)")
-    else:
-        print("No fully-complete simulated years yet -- nothing to summarize.")
+        return
+
+    # --split-year given: the sample is known to fall into two distinct
+    # populations (e.g. historical vs. scenario forcing either side of a
+    # splice date) -- pooling them into one mean and reporting each year's
+    # deviation from that BLENDED mean makes each class look artificially
+    # noisier than it is and obscures the actual between-class difference.
+    # Report each year against its OWN class mean instead, then compare
+    # the two class means directly.
+    class1 = [row for row in complete_years if row[1] < split_year]
+    class2 = [row for row in complete_years if row[1] >= split_year]
+    print(f"--- Pace summary, split at year {split_year} (two known populations) ---")
+    print(f"  n years          : {len(complete_years)}  ({len(class1)} before, {len(class2)} from {split_year})")
+    print()
+
+    for label, rows in ((f"before {split_year}", class1), (f"{split_year} onward", class2)):
+        if not rows:
+            print(f"  [{label}]: no complete years")
+            continue
+        mean, stdev = _stats(rows)
+        print(f"  [{label}]  n={len(rows)}  mean={mean:.1f} s ({mean/60:.2f} min)  stdev={stdev:.1f} s")
+        for chunk, year, s in sorted(rows, key=lambda row: row[1]):
+            dev_pct = (s - mean) / mean * 100 if mean else 0.0
+            print(f"    {year} (chunk {chunk}): {s/60:6.2f} min  ({dev_pct:+5.1f}% vs class mean)")
+        print()
+
+    if class1 and class2:
+        mean1, _ = _stats(class1)
+        mean2, _ = _stats(class2)
+        diff_pct = (mean2 - mean1) / mean1 * 100 if mean1 else 0.0
+        print(f"  class comparison : [{split_year} onward] mean is {diff_pct:+.1f}% vs. "
+              f"[before {split_year}] mean ({mean2:.1f} s vs {mean1:.1f} s)")
 
 
 def write_csv(results: list[ChunkResult], out_path: Path) -> None:
@@ -291,6 +331,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("run_dir", type=Path, help="Local directory containing 00?_* chunk subdirectories")
     parser.add_argument("--csv", type=Path, default=None, help="Also write per-chunk/per-year rows to this CSV file")
+    parser.add_argument("--split-year", type=int, default=None,
+                         help="Years split into two known populations at this year (e.g. a "
+                              "historical/scenario forcing splice) -- report each year against "
+                              "its OWN class mean instead of one pooled mean, plus a direct "
+                              "class-vs-class comparison")
     args = parser.parse_args()
 
     if not args.run_dir.is_dir():
@@ -302,7 +347,7 @@ def main() -> int:
         print(f"No chunk directories (NNN_STARTDATE_ENDDATE) found under {args.run_dir}")
         return 0
 
-    print_report(results)
+    print_report(results, split_year=args.split_year)
     if args.csv:
         write_csv(results, args.csv)
     return 0
