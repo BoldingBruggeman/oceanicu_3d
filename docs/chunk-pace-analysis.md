@@ -14,32 +14,62 @@ early pass of this analysis (chunks 000-002 only) carried an explicit
 caveat about drawing conclusions past chunk 002. Re-run
 (`running/analyze_chunk_pace.py`, see below) whenever more has synced.
 
-## Findings (chunks 000-013, 2010-2050 -- update, 2026-09-16)
+## Findings (chunks 000-013, 2010-2050)
 
-The original 9-year sample (chunks 000-002) is now 41 years (chunks
-000-013, chunk 013 still in progress) -- and the years fall into two
-known populations, not one: historical forcing (< 2015) and scenario
-forcing (>= 2015), either side of the splice date. Pooling both into one
-blended mean and reporting each year's deviation from it (the original
-framing) makes each class look noisier than it is and buries the actual
-between-class difference. `analyze_chunk_pace.py --split-year 2015` (now
-supports this) reports each year against its own class mean instead, plus
-a direct class comparison:
+Baseline = first 5 complete simulated years (`analyze_chunk_pace.py
+--baseline-years 5`; see "Re-running this analysis" for why this is a
+fixed year-count, not a calendar cutoff). Every other year is compared
+against that fixed baseline mean:
 
-- **Before 2015** (5 years): mean 2284.6 s (38.08 min), every year within
-  ±3% of that mean.
-- **2015 onward** (36 years): mean 2554.2 s (42.57 min), every year within
-  ±4% of that mean -- no trend up or down across 30+ years of scenario
-  forcing, not gradual drift from something else (growing output volume,
-  memory pressure).
-- **Class comparison: scenario-period mean is +11.8% vs. historical-period
-  mean** -- the real number this analysis is after, cleaner than the
-  original "~13% slowdown" estimate eyeballed off a blended mean.
+| Year | Chunk | Wall time | vs. baseline mean |
+|---|---|---|---|
+| 2010 | 000 | 37.73 min | -0.9% |
+| 2011 | 000 | 38.43 min | +0.9% |
+| 2012 | 000 | 38.58 min | +1.3% |
+| 2013 | 001 | 37.02 min | -2.8% |
+| 2014 | 001 | 38.62 min | +1.4% |
+| 2015 | 001 | 43.25 min | +13.6% |
+| 2016 | 002 | 42.33 min | +11.2% |
+| 2017 | 002 | 43.22 min | +13.5% |
+| 2018 | 002 | 42.98 min | +12.9% |
+| 2019 | 003 | 41.80 min | +9.8% |
+| 2020 | 003 | 42.40 min | +11.4% |
+| 2021 | 003 | 43.72 min | +14.8% |
+| 2022 | 004 | 40.87 min | +7.3% |
+| 2023 | 004 | 41.55 min | +9.1% |
+| 2024 | 004 | 41.78 min | +9.7% |
+| 2025 | 005 | 42.60 min | +11.9% |
+| 2026 | 005 | 43.10 min | +13.2% |
+| 2027 | 005 | 42.62 min | +11.9% |
+| 2028 | 006 | 42.50 min | +11.6% |
+| 2029 | 006 | 42.55 min | +11.7% |
+| 2030 | 006 | 43.00 min | +12.9% |
+| 2031 | 007 | 41.97 min | +10.2% |
+| 2032 | 007 | 42.57 min | +11.8% |
+| 2033 | 007 | 42.77 min | +12.3% |
+| 2034 | 008 | 42.38 min | +11.3% |
+| 2035 | 008 | 42.35 min | +11.2% |
+| 2036 | 008 | 42.03 min | +10.4% |
+| 2037 | 009 | 42.43 min | +11.4% |
+| 2038 | 009 | 42.90 min | +12.7% |
+| 2039 | 009 | 42.85 min | +12.5% |
+| 2040 | 010 | 42.75 min | +12.3% |
+| 2041 | 010 | 43.63 min | +14.6% |
+| 2042 | 010 | 43.42 min | +14.0% |
+| 2043 | 011 | 42.60 min | +11.9% |
+| 2044 | 011 | 43.17 min | +13.4% |
+| 2045 | 011 | 42.72 min | +12.2% |
+| 2046 | 012 | 41.47 min | +8.9% |
+| 2047 | 012 | 42.50 min | +11.6% |
+| 2048 | 012 | 43.23 min | +13.5% |
+| 2049 | 013 | 41.82 min | +9.8% |
+| 2050 | 013 | 42.70 min | +12.1% |
 
-Still a clean, sustained step exactly at the historical->scenario
-boundary, not a one-off transition blip -- **very consistent with the
-original finding**, now on 4x the sample and measured with the right
-statistic.
+- **Baseline** (2010-2014, n=5): mean 2284.6 s (38.08 min), every year
+  within ±3% of it.
+- **Everything since** (2015-2050, n=36): mean 2554.2 s (42.57 min) --
+  **+11.8% vs. the baseline mean** -- every individual year within ±3
+  points of that +11.8%, no trend up or down across 30+ years.
 
 2015-01-01 is exactly the historical -> SSP-scenario forcing boundary for
 this CMIP6-raw setup (`meteo.source: CMIP6-raw`, model `GFDL-ESM4`,
@@ -281,13 +311,20 @@ disk saturating at 16 writers. So:
 ## Re-running this analysis
 
 ```bash
-python running/analyze_chunk_pace.py <local_run01_mirror> [--csv out.csv] [--split-year 2015]
+python running/analyze_chunk_pace.py <local_run01_mirror> [--csv out.csv] [--baseline-years 5]
 ```
 
-`--split-year 2015` is what produced the two-class breakdown above --
-pass it whenever the sample is known to span two different populations
-(here, the historical/scenario forcing splice); omit it for a run with no
-such known split, which falls back to one pooled mean.
+`--baseline-years 5` is what produced the table above -- it fixes the
+baseline to the first 5 chronological complete years and compares every
+other year against that same fixed mean. Deliberately a year-*count*,
+not a calendar cutoff like `--split-year 2015` would be: the 2015+
+slowdown was caused by a chunking bug in the scenario forcing files,
+since fixed -- once the run continues past the fix, new data for
+calendar years >= 2015 needs to be compared against the same unchanging
+baseline to see whether it moves back toward it, not silently pooled
+back in with the old, still-buggy 2015+ data under a shared "post-2015"
+label. Omit the flag for a run with no known baseline period, which
+falls back to one pooled mean across every year.
 
 `<local_run01_mirror>` is wherever `run01`'s chunk directories land
 locally after rsyncing from bb-server1. The script is resilient to

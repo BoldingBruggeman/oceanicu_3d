@@ -223,7 +223,7 @@ def analyze_run_dir(run_dir: Path) -> list[ChunkResult]:
     return results
 
 
-def print_report(results: list[ChunkResult], split_year: Optional[int] = None) -> None:
+def print_report(results: list[ChunkResult], baseline_years: Optional[int] = None) -> None:
     n_complete = sum(1 for r in results if r.status == "complete")
     n_progress = sum(1 for r in results if r.status == "in_progress")
     n_none = sum(1 for r in results if r.status == "no_data")
@@ -260,7 +260,7 @@ def print_report(results: list[ChunkResult], split_year: Optional[int] = None) -
         var = sum((s - m) ** 2 for s in vals) / len(vals)
         return m, var**0.5
 
-    if split_year is None:
+    if baseline_years is None:
         secs = [s for _, _, s in complete_years]
         mean = sum(secs) / len(secs)
         variance = sum((s - mean) ** 2 for s in secs) / len(secs)
@@ -279,36 +279,49 @@ def print_report(results: list[ChunkResult], split_year: Optional[int] = None) -
             print(f"    {year} (chunk {chunk}): {s/60:6.2f} min  ({dev_pct:+5.1f}% vs mean)")
         return
 
-    # --split-year given: the sample is known to fall into two distinct
-    # populations (e.g. historical vs. scenario forcing either side of a
-    # splice date) -- pooling them into one mean and reporting each year's
-    # deviation from that BLENDED mean makes each class look artificially
-    # noisier than it is and obscures the actual between-class difference.
-    # Report each year against its OWN class mean instead, then compare
-    # the two class means directly.
-    class1 = [row for row in complete_years if row[1] < split_year]
-    class2 = [row for row in complete_years if row[1] >= split_year]
-    print(f"--- Pace summary, split at year {split_year} (two known populations) ---")
-    print(f"  n years          : {len(complete_years)}  ({len(class1)} before, {len(class2)} from {split_year})")
+    # --baseline-years given: the sample is known to fall into two
+    # populations, but NOT along a fixed calendar boundary that stays
+    # valid forever -- e.g. here, years >= 2015 were slow because of a
+    # chunking bug in the scenario forcing files, now fixed. Once the run
+    # continues past the fix, NEW years >= 2015 will be fast again, so a
+    # calendar `--split-year 2015` would silently pool old-buggy and
+    # new-fixed years back together and hide exactly the change being
+    # watched for. The baseline has to be a FIXED anchor instead: the
+    # first N chronological years (by count, not by calendar value) --
+    # whatever comes in later, however many populations it turns out to
+    # contain, is reported against that same fixed baseline mean, never
+    # against a mean that keeps being recomputed to include new data.
+    sorted_years = sorted(complete_years, key=lambda row: row[1])
+    baseline = sorted_years[:baseline_years]
+    rest = sorted_years[baseline_years:]
+    if len(baseline) < baseline_years:
+        print(f"warning: only {len(baseline)} complete year(s) available, "
+              f"fewer than --baseline-years {baseline_years} -- baseline is "
+              f"under-sized.", file=sys.stderr)
+
+    print(f"--- Pace summary, fixed baseline = first {len(baseline)} years ---")
+    print(f"  n years          : {len(complete_years)}  ({len(baseline)} baseline, {len(rest)} compared against it)")
     print()
 
-    for label, rows in ((f"before {split_year}", class1), (f"{split_year} onward", class2)):
-        if not rows:
-            print(f"  [{label}]: no complete years")
-            continue
-        mean, stdev = _stats(rows)
-        print(f"  [{label}]  n={len(rows)}  mean={mean:.1f} s ({mean/60:.2f} min)  stdev={stdev:.1f} s")
-        for chunk, year, s in sorted(rows, key=lambda row: row[1]):
-            dev_pct = (s - mean) / mean * 100 if mean else 0.0
-            print(f"    {year} (chunk {chunk}): {s/60:6.2f} min  ({dev_pct:+5.1f}% vs class mean)")
-        print()
+    base_mean, base_stdev = _stats(baseline)
+    print(f"  [baseline]  n={len(baseline)}  mean={base_mean:.1f} s ({base_mean/60:.2f} min)  stdev={base_stdev:.1f} s")
+    for chunk, year, s in baseline:
+        dev_pct = (s - base_mean) / base_mean * 100 if base_mean else 0.0
+        print(f"    {year} (chunk {chunk}): {s/60:6.2f} min  ({dev_pct:+5.1f}% vs baseline mean)")
+    print()
 
-    if class1 and class2:
-        mean1, _ = _stats(class1)
-        mean2, _ = _stats(class2)
-        diff_pct = (mean2 - mean1) / mean1 * 100 if mean1 else 0.0
-        print(f"  class comparison : [{split_year} onward] mean is {diff_pct:+.1f}% vs. "
-              f"[before {split_year}] mean ({mean2:.1f} s vs {mean1:.1f} s)")
+    if rest:
+        rest_mean, rest_stdev = _stats(rest)
+        print(f"  [rest]  n={len(rest)}  mean={rest_mean:.1f} s ({rest_mean/60:.2f} min)  stdev={rest_stdev:.1f} s "
+              f"(shown for context only -- each year below is compared against the FIXED baseline mean above, not this one)")
+        for chunk, year, s in rest:
+            dev_pct = (s - base_mean) / base_mean * 100 if base_mean else 0.0
+            print(f"    {year} (chunk {chunk}): {s/60:6.2f} min  ({dev_pct:+5.1f}% vs baseline mean)")
+        print()
+        diff_pct = (rest_mean - base_mean) / base_mean * 100 if base_mean else 0.0
+        print(f"  overall          : [rest] mean is {diff_pct:+.1f}% vs. [baseline] mean "
+              f"({rest_mean:.1f} s vs {base_mean:.1f} s) -- watch individual years above move "
+              f"back toward 0% once data simulated with the fix in place lands")
 
 
 def write_csv(results: list[ChunkResult], out_path: Path) -> None:
@@ -331,11 +344,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("run_dir", type=Path, help="Local directory containing 00?_* chunk subdirectories")
     parser.add_argument("--csv", type=Path, default=None, help="Also write per-chunk/per-year rows to this CSV file")
-    parser.add_argument("--split-year", type=int, default=None,
-                         help="Years split into two known populations at this year (e.g. a "
-                              "historical/scenario forcing splice) -- report each year against "
-                              "its OWN class mean instead of one pooled mean, plus a direct "
-                              "class-vs-class comparison")
+    parser.add_argument("--baseline-years", type=int, default=None,
+                         help="Fix a baseline of the first N chronological complete years (by "
+                              "count, not calendar value) and compare every other year against "
+                              "that FIXED mean, instead of one pooled mean. Deliberately "
+                              "count-based, not a calendar cutoff (e.g. --split-year 2015): once "
+                              "a bug affecting years >= some calendar year is fixed, new data for "
+                              "those same calendar years needs to be compared against the SAME "
+                              "unchanging baseline, not silently pooled back in with old data")
     args = parser.parse_args()
 
     if not args.run_dir.is_dir():
@@ -347,7 +363,7 @@ def main() -> int:
         print(f"No chunk directories (NNN_STARTDATE_ENDDATE) found under {args.run_dir}")
         return 0
 
-    print_report(results, split_year=args.split_year)
+    print_report(results, baseline_years=args.baseline_years)
     if args.csv:
         write_csv(results, args.csv)
     return 0
