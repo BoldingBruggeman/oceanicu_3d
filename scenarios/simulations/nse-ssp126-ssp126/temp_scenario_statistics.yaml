@@ -1,0 +1,36 @@
+format: '1.1'
+variable: temp
+title: TEMP Validation Statistics
+created: '2026-09-17 08:55:41'
+periods:
+- period: all
+  is_all_period: true
+  model: ''
+  analysed: '2026-09-17 08:55:41'
+  datasets:
+    temp:
+      reference:
+        mean: 10.786931
+        std: 4.382215
+        min: -494.091244
+        max: 270.654263
+        units: degrees_Celsius
+      scenarios:
+        SSP1-2.6:
+          mean: 11.082765
+          std: 4.727236
+          trend: -0.009483
+          p_value: 0.529285
+          period_changes:
+            2020s:
+              mean: 11.32234
+              change: 0.535409
+              pct_change: 4.963498
+            2030s:
+              mean: 11.061761
+              change: 0.27483
+              pct_change: 2.547802
+            2040s:
+              mean: 11.072024
+              change: 0.285093
+              pct_change: 2.642949
