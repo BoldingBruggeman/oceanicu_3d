@@ -231,7 +231,66 @@ def analyze_run_dir(run_dir: Path) -> list[ChunkResult]:
 _BASELINE_YEARS = 5
 
 
-def print_report(results: list[ChunkResult]) -> None:
+@dataclass
+class _Trend:
+    slope: float
+    intercept: float
+    r2: float
+    t_stat: float
+    sig: str
+    slope_pct_per_year: float
+    span_years: float
+    x0: float
+    x1: float
+
+
+def _linear_trend(rest: list[tuple[str, int, float]], base_mean: float) -> Optional[_Trend]:
+    """OLS trend of [rest]'s per-year seconds against calendar year.
+
+    Plain stdlib least squares + a t-statistic for significance -- the
+    step vs. baseline is one thing (a fixed offset from e.g. a forcing
+    splice), but is the pace ALSO still drifting release over release,
+    independent of that step? No numpy/scipy dependency (this script is
+    deliberately stdlib-only): no incomplete-beta/t-CDF for an exact
+    p-value, but for n this size the t-distribution is already close to
+    normal, so |t| ~ 2 is the usual ~p<0.05 rule of thumb, ~2.7 for ~p<0.01.
+    """
+    if len(rest) < 3:
+        return None
+    xs = [float(year) for _, year, _ in rest]
+    ys = [s for _, _, s in rest]
+    n = len(xs)
+    x_mean = sum(xs) / n
+    y_mean = sum(ys) / n
+    cov = sum((x - x_mean) * (y - y_mean) for x, y in zip(xs, ys))
+    var = sum((x - x_mean) ** 2 for x in xs)
+    slope = cov / var if var else 0.0
+    intercept = y_mean - slope * x_mean
+    ss_tot = sum((y - y_mean) ** 2 for y in ys)
+    ss_res = sum((y - (slope * x + intercept)) ** 2 for x, y in zip(xs, ys))
+    r2 = 1 - ss_res / ss_tot if ss_tot else 0.0
+    slope_pct_per_year = slope / base_mean * 100 if base_mean else 0.0
+    se_slope = ((ss_res / (n - 2)) / var) ** 0.5 if var and n > 2 else float("nan")
+    t_stat = slope / se_slope if se_slope else float("nan")
+    sig = ("p<0.01" if abs(t_stat) > 2.7 else
+           "p<0.05" if abs(t_stat) > 2.0 else
+           "not significant at p<0.05")
+    return _Trend(
+        slope=slope, intercept=intercept, r2=r2, t_stat=t_stat, sig=sig,
+        slope_pct_per_year=slope_pct_per_year, span_years=xs[-1] - xs[0],
+        x0=xs[0], x1=xs[-1],
+    )
+
+
+@dataclass
+class PaceSummary:
+    baseline: list[tuple[str, int, float]]
+    rest: list[tuple[str, int, float]]
+    base_mean: float
+    trend: Optional[_Trend]
+
+
+def print_report(results: list[ChunkResult]) -> Optional[PaceSummary]:
     n_complete = sum(1 for r in results if r.status == "complete")
     n_progress = sum(1 for r in results if r.status == "in_progress")
     n_none = sum(1 for r in results if r.status == "no_data")
@@ -260,7 +319,7 @@ def print_report(results: list[ChunkResult]) -> None:
     complete_years = [(c, y, s) for c, y, s, partial in all_year_rows if not partial]
     if not complete_years:
         print("No fully-complete simulated years yet -- nothing to summarize.")
-        return
+        return None
 
     def _stats(rows: list[tuple[str, int, float]]) -> tuple[float, float]:
         vals = [s for _, _, s in rows]
@@ -312,41 +371,52 @@ def print_report(results: list[ChunkResult]) -> None:
               f"({rest_mean:.1f} s vs {base_mean:.1f} s) -- watch individual years above move "
               f"back toward 0% once data simulated with the fix in place lands")
 
-        # Linear trend across [rest] itself, in calendar-year order -- the
-        # step vs. baseline is one thing (a fixed offset from the 2015
-        # forcing splice), but is the pace ALSO still drifting upward
-        # release over release, independent of that step? Plain OLS, no
-        # numpy/scipy dependency (this script is deliberately stdlib-only).
-        if len(rest) >= 3:
-            xs = [float(year) for _, year, _ in rest]
-            ys = [s for _, _, s in rest]
-            n = len(xs)
-            x_mean = sum(xs) / n
-            y_mean = sum(ys) / n
-            cov = sum((x - x_mean) * (y - y_mean) for x, y in zip(xs, ys))
-            var = sum((x - x_mean) ** 2 for x in xs)
-            slope = cov / var if var else 0.0
-            intercept = y_mean - slope * x_mean
-            # R^2, to say how much of the noise this line actually explains.
-            ss_tot = sum((y - y_mean) ** 2 for y in ys)
-            ss_res = sum((y - (slope * x + intercept)) ** 2 for x, y in zip(xs, ys))
-            r2 = 1 - ss_res / ss_tot if ss_tot else 0.0
-            slope_pct_per_year = slope / base_mean * 100 if base_mean else 0.0
-            span_years = xs[-1] - xs[0]
-            # Standard error of the slope + t-statistic (still stdlib-only --
-            # no incomplete-beta/t-CDF for an exact p-value, but for n this
-            # size the t-distribution is already close to normal, so |t| ~ 2
-            # is the usual ~p<0.05 rule of thumb, ~2.7 for ~p<0.01).
-            se_slope = ((ss_res / (n - 2)) / var) ** 0.5 if var and n > 2 else float("nan")
-            t_stat = slope / se_slope if se_slope else float("nan")
-            sig = ("p<0.01" if abs(t_stat) > 2.7 else
-                   "p<0.05" if abs(t_stat) > 2.0 else
-                   "not significant at p<0.05")
-            print(f"  trend within [rest]: {slope:+.2f} s/year ({slope_pct_per_year:+.2f}% of baseline "
-                  f"mean per year), R^2={r2:.2f}, t={t_stat:.2f} ({sig}), over {span_years:.0f} years "
-                  f"({int(xs[0])}-{int(xs[-1])})")
-            print(f"    -- i.e. pace is {'still getting worse' if slope > 0 else 'improving' if slope < 0 else 'flat'} "
+        trend = _linear_trend(rest, base_mean)
+        if trend is not None:
+            print(f"  trend within [rest]: {trend.slope:+.2f} s/year ({trend.slope_pct_per_year:+.2f}% of "
+                  f"baseline mean per year), R^2={trend.r2:.2f}, t={trend.t_stat:.2f} ({trend.sig}), "
+                  f"over {trend.span_years:.0f} years ({int(trend.x0)}-{int(trend.x1)})")
+            print(f"    -- i.e. pace is "
+                  f"{'still getting worse' if trend.slope > 0 else 'improving' if trend.slope < 0 else 'flat'} "
                   f"release over release, on top of the step already measured above")
+        return PaceSummary(baseline=baseline, rest=rest, base_mean=base_mean, trend=trend)
+
+    return PaceSummary(baseline=baseline, rest=rest, base_mean=base_mean, trend=None)
+
+
+def plot_pace(summary: PaceSummary, out_path: Path) -> None:
+    """Plot per-year pace (minutes/simulated year) with the [rest] linear trend."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    base_years = [y for _, y, _ in summary.baseline]
+    base_mins = [s / 60 for _, _, s in summary.baseline]
+    rest_years = [y for _, y, _ in summary.rest]
+    rest_mins = [s / 60 for _, _, s in summary.rest]
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+    ax.scatter(base_years, base_mins, color="#4a7ab8", label=f"baseline (first {len(summary.baseline)} yr)", zorder=3)
+    ax.scatter(rest_years, rest_mins, color="#d9822b", label="post-baseline", zorder=3)
+    ax.axhline(summary.base_mean / 60, color="#4a7ab8", linestyle="--", linewidth=1,
+               label=f"baseline mean ({summary.base_mean / 60:.1f} min)")
+
+    if summary.trend is not None:
+        t = summary.trend
+        xs_line = [t.x0, t.x1]
+        ys_line = [(t.slope * x + t.intercept) / 60 for x in xs_line]
+        ax.plot(xs_line, ys_line, color="#d9822b", linewidth=2,
+                label=f"trend: {t.slope:+.2f} s/yr, R^2={t.r2:.2f}, {t.sig}")
+
+    ax.set_xlabel("simulated year")
+    ax.set_ylabel("wall-clock minutes per simulated year")
+    ax.set_title("GETM chunk pace vs. fixed baseline")
+    ax.legend(loc="best", fontsize=9)
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=150)
+    plt.close(fig)
+    print(f"wrote {out_path}")
 
 
 def write_csv(results: list[ChunkResult], out_path: Path) -> None:
@@ -369,6 +439,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("run_dir", type=Path, help="Local directory containing 00?_* chunk subdirectories")
     parser.add_argument("--csv", type=Path, default=None, help="Also write per-chunk/per-year rows to this CSV file")
+    parser.add_argument("--plot", type=Path, default=None,
+                         help="Also write a PNG plot of per-year pace + the [rest] linear trend")
     args = parser.parse_args()
 
     if not args.run_dir.is_dir():
@@ -380,9 +452,14 @@ def main() -> int:
         print(f"No chunk directories (NNN_STARTDATE_ENDDATE) found under {args.run_dir}")
         return 0
 
-    print_report(results)
+    summary = print_report(results)
     if args.csv:
         write_csv(results, args.csv)
+    if args.plot:
+        if summary is None:
+            print("error: no complete years to plot", file=sys.stderr)
+            return 1
+        plot_pace(summary, args.plot)
     return 0
 
 
