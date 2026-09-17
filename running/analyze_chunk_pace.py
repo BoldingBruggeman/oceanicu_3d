@@ -223,7 +223,15 @@ def analyze_run_dir(run_dir: Path) -> list[ChunkResult]:
     return results
 
 
-def print_report(results: list[ChunkResult], baseline_years: Optional[int] = None) -> None:
+# Fixed baseline: the first 5 simulated years are this run's own
+# historical-forced period (2010-2014, before the scenario-forcing
+# splice) -- not a tunable parameter, a fact about this experiment. See
+# print_report's own comment below for why this has to be a fixed
+# year-COUNT, not a calendar cutoff.
+_BASELINE_YEARS = 5
+
+
+def print_report(results: list[ChunkResult]) -> None:
     n_complete = sum(1 for r in results if r.status == "complete")
     n_progress = sum(1 for r in results if r.status == "in_progress")
     n_none = sum(1 for r in results if r.status == "no_data")
@@ -260,44 +268,25 @@ def print_report(results: list[ChunkResult], baseline_years: Optional[int] = Non
         var = sum((s - m) ** 2 for s in vals) / len(vals)
         return m, var**0.5
 
-    if baseline_years is None:
-        secs = [s for _, _, s in complete_years]
-        mean = sum(secs) / len(secs)
-        variance = sum((s - mean) ** 2 for s in secs) / len(secs)
-        stdev = variance**0.5
-        spread_pct = (max(secs) - min(secs)) / mean * 100 if mean else 0.0
-        print("--- Pace summary across complete simulated years ---")
-        print(f"  n years          : {len(secs)}")
-        print(f"  min / max        : {min(secs):.1f} s ({min(secs)/60:.2f} min) / "
-              f"{max(secs):.1f} s ({max(secs)/60:.2f} min)")
-        print(f"  mean / stdev     : {mean:.1f} s / {stdev:.1f} s")
-        print(f"  spread           : {spread_pct:.1f}% of mean")
-        print()
-        print("  by year:")
-        for chunk, year, s in sorted(complete_years, key=lambda row: row[1]):
-            dev_pct = (s - mean) / mean * 100 if mean else 0.0
-            print(f"    {year} (chunk {chunk}): {s/60:6.2f} min  ({dev_pct:+5.1f}% vs mean)")
-        return
-
-    # --baseline-years given: the sample is known to fall into two
-    # populations, but NOT along a fixed calendar boundary that stays
-    # valid forever -- e.g. here, years >= 2015 were slow because of a
-    # chunking bug in the scenario forcing files, now fixed. Once the run
-    # continues past the fix, NEW years >= 2015 will be fast again, so a
-    # calendar `--split-year 2015` would silently pool old-buggy and
-    # new-fixed years back together and hide exactly the change being
-    # watched for. The baseline has to be a FIXED anchor instead: the
-    # first N chronological years (by count, not by calendar value) --
-    # whatever comes in later, however many populations it turns out to
-    # contain, is reported against that same fixed baseline mean, never
-    # against a mean that keeps being recomputed to include new data.
+    # The sample is known to fall into two populations, but NOT along a
+    # fixed calendar boundary that stays valid forever -- e.g. here,
+    # years >= 2015 were slow because of a chunking bug in the scenario
+    # forcing files, now fixed. Once the run continues past the fix, NEW
+    # years >= 2015 will be fast again, so a calendar cutoff would
+    # silently pool old-buggy and new-fixed years back together and hide
+    # exactly the change being watched for. The baseline has to be a
+    # FIXED anchor instead: the first _BASELINE_YEARS chronological years
+    # (by count, not by calendar value) -- whatever comes in later,
+    # however many populations it turns out to contain, is reported
+    # against that same fixed baseline mean, never against a mean that
+    # keeps being recomputed to include new data.
     sorted_years = sorted(complete_years, key=lambda row: row[1])
-    baseline = sorted_years[:baseline_years]
-    rest = sorted_years[baseline_years:]
-    if len(baseline) < baseline_years:
+    baseline = sorted_years[:_BASELINE_YEARS]
+    rest = sorted_years[_BASELINE_YEARS:]
+    if len(baseline) < _BASELINE_YEARS:
         print(f"warning: only {len(baseline)} complete year(s) available, "
-              f"fewer than --baseline-years {baseline_years} -- baseline is "
-              f"under-sized.", file=sys.stderr)
+              f"fewer than the fixed {_BASELINE_YEARS}-year baseline -- "
+              f"baseline is under-sized.", file=sys.stderr)
 
     print(f"--- Pace summary, fixed baseline = first {len(baseline)} years ---")
     print(f"  n years          : {len(complete_years)}  ({len(baseline)} baseline, {len(rest)} compared against it)")
@@ -344,14 +333,6 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("run_dir", type=Path, help="Local directory containing 00?_* chunk subdirectories")
     parser.add_argument("--csv", type=Path, default=None, help="Also write per-chunk/per-year rows to this CSV file")
-    parser.add_argument("--baseline-years", type=int, default=None,
-                         help="Fix a baseline of the first N chronological complete years (by "
-                              "count, not calendar value) and compare every other year against "
-                              "that FIXED mean, instead of one pooled mean. Deliberately "
-                              "count-based, not a calendar cutoff (e.g. --split-year 2015): once "
-                              "a bug affecting years >= some calendar year is fixed, new data for "
-                              "those same calendar years needs to be compared against the SAME "
-                              "unchanging baseline, not silently pooled back in with old data")
     args = parser.parse_args()
 
     if not args.run_dir.is_dir():
@@ -363,7 +344,7 @@ def main() -> int:
         print(f"No chunk directories (NNN_STARTDATE_ENDDATE) found under {args.run_dir}")
         return 0
 
-    print_report(results, baseline_years=args.baseline_years)
+    print_report(results)
     if args.csv:
         write_csv(results, args.csv)
     return 0

@@ -16,10 +16,11 @@ caveat about drawing conclusions past chunk 002. Re-run
 
 ## Findings (chunks 000-013, 2010-2050)
 
-Baseline = first 5 complete simulated years (`analyze_chunk_pace.py
---baseline-years 5`; see "Re-running this analysis" for why this is a
-fixed year-count, not a calendar cutoff). Every other year is compared
-against that fixed baseline mean:
+Baseline = first 5 complete simulated years, fixed in the script itself
+(not a CLI flag -- there's only ever one right answer for this
+experiment: its own historical-forced period, 2010-2014; see "Re-running
+this analysis" for why this has to be a fixed year-count, not a calendar
+cutoff). Every other year is compared against that fixed baseline mean:
 
 | Year | Chunk | Wall time | vs. baseline mean |
 |---|---|---|---|
@@ -311,20 +312,18 @@ disk saturating at 16 writers. So:
 ## Re-running this analysis
 
 ```bash
-python running/analyze_chunk_pace.py <local_run01_mirror> [--csv out.csv] [--baseline-years 5]
+python running/analyze_chunk_pace.py <local_run01_mirror> [--csv out.csv]
 ```
 
-`--baseline-years 5` is what produced the table above -- it fixes the
-baseline to the first 5 chronological complete years and compares every
-other year against that same fixed mean. Deliberately a year-*count*,
-not a calendar cutoff like `--split-year 2015` would be: the 2015+
-slowdown was caused by a chunking bug in the scenario forcing files,
-since fixed -- once the run continues past the fix, new data for
-calendar years >= 2015 needs to be compared against the same unchanging
-baseline to see whether it moves back toward it, not silently pooled
-back in with the old, still-buggy 2015+ data under a shared "post-2015"
-label. Omit the flag for a run with no known baseline period, which
-falls back to one pooled mean across every year.
+The baseline (first 5 chronological complete years) is fixed in the
+script itself, not a flag -- there's only one right answer for this
+experiment, its own historical-forced period. Deliberately a year
+*count*, not a calendar cutoff: the 2015+ slowdown was caused by a
+chunking bug in the scenario forcing files, since fixed -- once the run
+continues past the fix, new data for calendar years >= 2015 needs to be
+compared against the same unchanging baseline to see whether it moves
+back toward it, not silently pooled back in with the old, still-buggy
+2015+ data under a shared "post-2015" label.
 
 `<local_run01_mirror>` is wherever `run01`'s chunk directories land
 locally after rsyncing from bb-server1. The script is resilient to
