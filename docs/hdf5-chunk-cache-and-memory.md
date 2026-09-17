@@ -383,6 +383,95 @@ the paused archive-rewrite job is mid-way through `CNRM-ESM2-1/ssp370`
 using the old value of 240, so changing the constant now would need
 that job's already-completed files revisited too).
 
+## The other option: no chunking, no compression, float32
+
+Every option above still leaves a chunk cache to size. The alternative
+is removing the chunk cache from the picture entirely: **contiguous
+storage** (no `chunksizes`, no `zlib`) with float32 for the size
+reduction. Since there's no such thing as a "chunk" for a contiguous
+dataset, none of `get_var_chunk_cache`/`set_var_chunk_cache`/HDF5's DAPL
+cache machinery even applies -- there's nothing to allocate, so nothing
+to leak, independent of chunk-size tuning entirely.
+
+Tested the same way as every other candidate (same real file, cold read
+via `posix_fadvise`, `/proc/self/io` for real disk bytes, real
+multi-sweep RSS check -- not assumed):
+
+| | Contiguous, float32, no compression |
+|---|---|
+| RSS right after open | 49.4 MB |
+| RSS after one full year-sweep (8760 reads) | 50.2 MB (+0.8MB, noise) |
+| RSS after a **second** full sweep, same handle, no reopen | **50.2 MB -- zero further growth** |
+| File size | 711.4 MB (vs. ~360MB compressed) |
+| Real disk bytes read per sweep | 707.1 MB (vs. ~357-360MB compressed) |
+| Full-year sweep wall time | 2.33s (cold) -> 1.95s (warm) |
+
+The second-sweep check is the direct proof, not an inference: read
+through the same open file's whole year of data twice, and RSS does not
+move at all between the two passes. This eliminates the year-crossing
+mechanism completely, rather than shrinking it -- there is no cache
+byte-budget being filled at all, so run length stops being a memory
+variable.
+
+The disk-space "cost" here needs the right baseline, and against the
+*other candidates* (~361-364MB, already float32 -- the comparison drawn
+above) it looks like ~2x. But **today's actual archive is still
+float64**, not float32 -- this file's real current on-disk size is
+975.9MB (float64, chunked, zlib-4+shuffle), against a true float64 raw
+size of 1422.7MB. That's a compression ratio of 68.6% of raw -- i.e.
+compression today only removes ~31% of the size, nowhere near halving
+it. Since float32-uncompressed is *exactly* half of float64-raw by
+construction (711.3MB, matching the measured 711.4MB), and 68.6% > 50%,
+switching straight to contiguous float32 -- with *no* compression at
+all -- is still a **27% reduction versus what's actually on disk
+today** (976MB -> 711MB), not an increase.
+
+The general rule this falls out of: uncompressed float32 only ends up
+*larger* than the current archive if today's compression already beats
+50% of the float64 raw size. It doesn't (68.6%), so this option is a
+net win on disk space too, not a trade-off against it -- the real cost
+is purely relative to the *other, compressed* float32 candidates above,
+which do better still (~361MB) by adding compression back on top of the
+same float32 halving.
+
+On wall time: this machine didn't even show a cost either -- 2.33s beat
+every chunked+compressed variant (4.37-5.48s) above, because there's
+zero decompression CPU cost and the extra raw I/O volume (707MB vs.
+~357-360MB for the compressed variants) didn't offset that saving here.
+That result is specific to bb-server1's local disk, though, not
+architectural -- a slower or more contended parallel filesystem (closer
+to scylla's real environment) could tip it the other way. The memory
+result, by contrast, holds regardless of the filesystem: it follows
+directly from there being no cache, not from anything about disk speed.
+
+One detail worth being explicit about, since it's *why* the sequential
+read pattern is efficient here: netCDF/HDF5 stores a variable in C
+order (row-major), with the last-listed dimension varying fastest. For
+`tas(time, lat, lon)`, that means the complete `(lat, lon)` field for
+`time=0` is one contiguous block on disk, immediately followed by the
+complete field for `time=1`, and so on -- "field, then next field," in
+time order. A single-timestep read is therefore always one contiguous
+byte range (`offset = i * nlat*nlon*4`, `length = nlat*nlon*4`), and
+reading forward through simulated time -- the real access pattern -- is
+also reading forward through physically adjacent bytes, i.e. a plain
+sequential scan. Had the dimension order instead been e.g.
+`tas(lat, lon, time)`, the same forward-through-time read pattern would
+touch one scattered 4-byte element per field position per timestep --
+a genuinely bad access pattern. That's not a risk here; the archive's
+existing dimension order already matches how it's actually read.
+
+This is a genuinely strong option specifically for the memory-leak
+problem this document is about, independent of whatever gets decided
+for chunk size for other reasons (throughput on the real HPC filesystem,
+total archive disk footprint). The two options aren't a memory-vs-cost
+trade-off against *today's* archive -- both are a net improvement over
+what's on disk now, purely from the float64->float32 halving:
+chunked+compressed+small-cache (24h/~4MB, above) is the smaller-still
+option (~361MB, ~63% smaller than today) but leaves a (now small,
+bounded) cache to manage; contiguous+float32 removes the cache question
+entirely, is still ~27% smaller than today, and only gives up the
+further reduction compression would have added on top.
+
 ## Status / what's left
 
 - **Fixed**: `_raw_var()` (CMIP6-raw meteo reads) -- file-level cache
@@ -396,5 +485,12 @@ that job's already-completed files revisited too).
 - **Open question**: whether to also make the meteo chunk-cache size a
   YAML config knob rather than a hardcoded constant, once applied to
   `_spliced_paths()` too.
+- **Open decision**: chunked+compressed+small-cache (24h/~4MB) vs.
+  contiguous+float32+no-compression for the eventual archive rewrite --
+  see "The other option" above. Both are smaller on disk than today's
+  actual float64 archive; the choice is cache-management complexity
+  (chunked) vs. simplicity + zero cache-related memory risk by
+  construction (contiguous), not a memory-vs-disk-space trade-off
+  against what's on disk now.
 - **Unrelated, still unsolved**: the CMIP6-raw runtime step (item 1) --
   see `docs/chunk-pace-analysis.md`.
