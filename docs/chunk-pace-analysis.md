@@ -151,12 +151,33 @@ grew from ~964 MB to ~1193 MB each (contiguous costs more disk than the
 zlib-compressed original, ~230 MB x 2 -- trivial against 812 GB free on
 `/data` at the time).
 
-**Not yet confirmed**: whether this actually closes most of the observed
-~13% chunk-pace gap in a real run -- chunks 000-002 already ran against
-the *old*, badly-chunked files, so their recorded pace reflects the bug.
-Re-run `running/analyze_chunk_pace.py` once chunk 003 (or a re-run of an
-affected chunk) has synced down with data generated *after* this fix, and
-compare.
+**Confirmed NOT closed, 2026-09-17 -- the fix never reached the machine
+that actually runs the simulation.** Chunk 018 (years 2064-2066)'s log
+has mtime 2026-09-17 07:58 -- almost a full day *after* the fix above
+(2026-09-16 12:35) -- and still shows the same +15-21% gap vs. baseline,
+no improvement at all. The fix was applied to `/data/CMIP6/...` on
+**bb-server1**, but this run's own output is *rsynced into* bb-server1
+(confirmed: an `rt`-owned `rsync --server` process actively writing into
+`experiments/NSe/CMIP6_raw/run01/` while this was checked) -- the
+simulation itself runs elsewhere (HPC), which has its own separate copy
+of these CMIP6-raw files, never touched by this fix.
+`machines.yaml` confirms this structurally: `scylla:` has no
+`CMIP6_RAW_FOLDER` entry at all, unlike `bb-server1`'s explicit
+`/data/CMIP6` -- HPC's own copy of `uas`/`vas` lives somewhere this fix
+never reached. Getting the real speedup needs the same rewrite applied
+to (or copied onto) HPC's own copy, not just bb-server1's -- not done,
+being investigated on the HPC side directly (no ssh access to it from
+here).
+
+**Also found while re-running the analysis with more data (54 years,
+2015-2069) as more chunks synced down**: the post-2015 years aren't just
+sitting flat at the step above -- they're `running/analyze_chunk_pace.py`
+finds a real, statistically significant *ongoing* upward trend within
+them too: **+3.27 s/year (t=6.25, p<0.01)**, on top of the fixed +13.7%
+step. Two separate effects, not one: the 2015 forcing-splice chunking
+bug explains the step; something else -- not yet identified -- is
+additionally making each subsequent simulated year slightly slower than
+the last, independent of it.
 
 ## A much bigger version of the same bug: the bias-corrected disagg archive
 
