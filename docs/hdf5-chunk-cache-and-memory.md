@@ -264,6 +264,125 @@ well before counting any of GETM's own model-state memory. The fix
 converts an unbounded-with-run-length growth curve into an essentially
 flat one.
 
+## Choosing the actual chunk size and cache size for the BiasCorrected archive
+
+Chunk size decides cache size almost completely -- a cache smaller than
+one chunk gets no reuse benefit at all (every access re-decompresses),
+so once a chunk shape is chosen, the cache size that actually matters is
+essentially fixed at "some small multiple of that chunk's decompressed
+byte size." These aren't two independent knobs.
+
+### Method
+
+One real file (`tas_bc_bilinear_ssp126_disagg_2020.nc`) rewritten to the
+pipeline's own target encoding (float32, zlib level 4, shuffle -- mirrors
+`rewrite_disagg_v2.py`'s `_storage_encoding`) at several candidate TIME
+chunk sizes (the spatial extent stays full-grid throughout; only the
+time dimension's chunk size varies), then read sequentially through a
+full simulated year, one hour at a time -- the real access pattern,
+matching `TemporalInterpolation`'s index-based lookups, not date-based
+`.sel()` (see the `.sel(time=slice(...))` dead end above -- same
+lesson applies here: only scalar `isel()` reflects real usage).
+
+Reads were forced to be genuinely cold via `os.posix_fadvise(fd, 0, 0,
+os.POSIX_FADV_DONTNEED)` per file before each benchmark run -- **not**
+`/proc/sys/vm/drop_caches`, which would evict the *entire shared
+machine's* page cache and disrupt every other user/process on
+bb-server1. The per-file advisory call needs no elevated privileges and
+only affects the one file being tested. Real disk bytes read were
+confirmed via `/proc/self/io`'s `read_bytes` (which tracks actual
+storage I/O, not just syscall byte counts) -- the first attempt at this,
+without dropping the cache, silently measured a fully page-cache-warm
+read (0 bytes from storage) and would have been a meaningless
+comparison.
+
+### Results: chunk size (cache = 2x chunk throughout)
+
+| Chunk | Chunks/year | Cache (2x) | File size | Full-year sweep | Real bytes read from disk | Peak RSS (1 var) |
+|---|---|---|---|---|---|---|
+| 1h | 8760 | 1.0 MB | 370.5 MB | 4.71s | 366.2 MB | 55.2 MB |
+| 6h | 1460 | 1.0 MB | 364.2 MB | 4.45s | 359.8 MB | 53.4 MB |
+| 12h | 730 | 2.0 MB | 363.3 MB | 4.40s | 359.0 MB | 58.4 MB |
+| **24h** | 365 | 3.9 MB | 362.3 MB | **4.43s (fastest of the original 6)** | 357.9 MB | 66.1 MB |
+| 72h | 122 | 11.7 MB | 361.7 MB | 4.67s | 357.4 MB | 89.6 MB |
+| 240h (**current**) | 37 | 39.0 MB | 361.5 MB | 4.81s | 357.1 MB | 186.6 MB |
+| 720h | 13 | 116.9 MB | 361.4 MB | 5.41s | 357.1 MB | 298.9 MB |
+| 2190h | 4 | 355.7 MB | 361.4 MB | 5.48s | 357.0 MB | 638.1 MB |
+
+Two things fall out cleanly:
+
+- **Total disk bytes read per full year-sweep is essentially invariant
+  to chunk size** (~357-360MB) -- every part of the file is touched
+  exactly once regardless of how it's chunked. Only 1h is noticeably
+  worse, and only because 1-row chunks lose most of shuffle's
+  cross-timestep compression benefit (370.5MB file vs. ~361-364MB for
+  everything >=6h).
+- **Peak memory scales linearly with chunk size** (53MB at 6h to 638MB
+  at 2190h, a 12x range) since the cache must be sized to hold the
+  chunk. **240h (today's setting) is close to the worst point on the
+  whole curve**: no faster than 6-72h, but far more memory-hungry.
+  6h/12h/24h are all close to each other and near the low end of both
+  memory *and* wall time -- this isn't a "smaller = less memory but
+  slower" trade-off, smaller genuinely wins on both axes across this
+  whole range.
+
+### Why the 2x cache margin, and does dropping to 1x cost anything?
+
+The 2x figure used throughout is a **safety margin, not a derived
+requirement**. `TemporalInterpolation` brackets the current simulation
+time between the record just before and just after it. Exactly at the
+moment the sim clock crosses a chunk boundary, that bracket straddles
+two chunks -- chunk N's last record and chunk N+1's first record are
+both needed at once. A cache sized for exactly one chunk evicts N the
+moment N+1 is fetched; if the interpolator ever re-touches N's record
+after that (depends on exactly how it holds onto previously-read values
+internally -- not verified here), that's a thrash: fetch N+1, evict N,
+need N again, re-fetch N, evict N+1, .... 2x buys enough headroom for
+both chunks to coexist through a boundary crossing regardless of those
+internals.
+
+Tested directly at chunk=24h, 1x vs 2x cache:
+
+| Cache | Cache size | Sweep wall time | Peak RSS |
+|---|---|---|---|
+| 1x | 1.95 MB | 4.37s | 64.9 MB |
+| 2x | 3.90 MB | 4.37s | 63.2 MB |
+
+No measurable wall-time difference, and the RSS difference (64.9 vs.
+63.2MB) is within ordinary allocator noise at this size -- 1x doesn't
+show a downside here. But this simple sequential single-index-at-a-time
+sweep never actually exercises the specific "both chunks needed inside
+one interpolation step" scenario the margin exists for -- it just reads
+one index at a time, never two chunks within the same call. So this
+result shows 1x isn't obviously worse for straight-line reading, **not**
+that 1x is safe against the boundary case that motivated 2x. Given the
+memory cost of the margin is trivial at these chunk sizes (a few MB),
+keeping 2x is the cheap, safe choice rather than something worth
+relitigating.
+
+### Recommendation
+
+**24h** chunk size (365 chunks/year, one per simulated day -- a natural
+granularity, and few enough discrete chunks per file to keep parallel-
+filesystem metadata/seek overhead low, unlike 6h/12h's much larger
+chunk *counts*) with a **2x-chunk cache (~4MB)**. Extrapolated to
+production scale (8 variables/rank, ~55MB fixed per-rank overhead paid
+once, cache cost multiplying per variable):
+
+| Chunk | Per-rank | Aggregate @ 184 ranks |
+|---|---|---|
+| 24h | ~143 MB | **~26 GB** |
+| 72h | ~327 MB | ~60 GB |
+| 240h (current) | ~1.1 GB | **~203 GB** |
+| 2190h | ~4.7 GB | ~868 GB |
+
+**~7.7x reduction in aggregate meteo-cache memory (203GB -> 26GB) with
+no wall-clock cost** if `STORAGE_TIME_CHUNK` moves from 240 to 24 --
+*not yet changed* (deliberately deferred pending a decision on timing:
+the paused archive-rewrite job is mid-way through `CNRM-ESM2-1/ssp370`
+using the old value of 240, so changing the constant now would need
+that job's already-completed files revisited too).
+
 ## Status / what's left
 
 - **Fixed**: `_raw_var()` (CMIP6-raw meteo reads) -- file-level cache
@@ -271,12 +390,11 @@ flat one.
 - **Not fixed**: `_spliced_paths()` (bias-corrected `CMIP6` meteo reads)
   -- this is the branch actually exposed to the year-crossing growth
   documented here. Needs the same bracket treatment.
+- **Not yet changed**: `STORAGE_TIME_CHUNK` in `rewrite_disagg_v2.py`
+  (still 240) -- see "Recommendation" above for the 24h case and why
+  the change is deferred, not rejected.
 - **Open question**: whether to also make the meteo chunk-cache size a
   YAML config knob rather than a hardcoded constant, once applied to
   `_spliced_paths()` too.
-- **Open question, deliberately deferred**: what chunk shape to use if/
-  when the BiasCorrected disagg archive itself gets rewritten -- see
-  "Chunk size matters as much as cache size" above; this is now informed
-  by real numbers rather than a guess.
 - **Unrelated, still unsolved**: the CMIP6-raw runtime step (item 1) --
   see `docs/chunk-pace-analysis.md`.
