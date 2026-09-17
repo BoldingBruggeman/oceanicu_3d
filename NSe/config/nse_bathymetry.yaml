@@ -155,6 +155,11 @@ mask_regions:
    lat: [53.65, 53.65]
 
  - type: rectangle
+   name: Black River
+   lon: [1.06,  1.06]
+   lat: [51.7, 51.8]
+
+ - type: rectangle
    name: Limfjorden
    lon: [ 8.18,  8.26]
    lat: [56.65, 56.75]
@@ -236,6 +241,20 @@ mask_regions:
    lon: [6.62, 6.95]
    lat: [53.55, 53.60]
 
+ # Ems estuary's own southward tail toward Emden/Dollart -- the coarse
+ # grid resolves it as a thin, shallow, narrowing channel south of the
+ # wide Wadden Sea opening between Schiermonnikoog and Borkum (53.55-
+ # 53.60N, which stays open). Closing four rows total, in two steps per
+ # user (2026-09-16): first 53.30 (7.14/7.22E) and 53.35 (6.98/7.06/
+ # 7.14E) -- leaving the row at 53.40 (6.98E) which then became an
+ # isolated 1-cell dead end and was auto-pruned by nkeep_basins -- then
+ # 53.45 (6.34/6.42/6.50E and, as a separate arm, 6.90/6.98E) and 53.50
+ # (6.42-6.98E) on top. New southern edge of the estuary: 53.55N.
+ - type: rectangle
+   name: Ems estuary southward tail (close four lower rows)
+   lon: [6.30, 7.30]
+   lat: [53.28, 53.53]
+
  - type: rectangle
    name: Juist
    lon: [6.95, 7.28]
@@ -265,6 +284,40 @@ mask_regions:
    name: Wangerooge
    lon: [7.85, 7.95]
    lat: [53.77, 53.80]
+
+ # Weser/Elbe estuary, 2026-09-14: a code/data change in this run (cause not
+ # yet root-caused -- ocean_mask flipped wet on these 14 cells despite the
+ # connected-component algorithm itself being unchanged code, and neither
+ # phantom-island detection nor local_min_depth can explain a mask flip;
+ # confirmed against fine-resolution GEBCO that these cells ARE real wet
+ # estuary channel per the fine source) newly opened these 14 cells versus
+ # the previous (2026-09-07) production file. Explicitly reverting to match
+ # that prior behaviour per request -- NOT because the fine-source water is
+ # wrong (it isn't), but because the coarser regridded estuary extent used
+ # in production should stay as it was until this is understood. Revisit if
+ # the root cause is found and the wider estuary is wanted after all.
+ #
+ # 11 of the 14 cells sit in one clean block with no legitimately-wet
+ # neighbours inside the same bounding box (verified against the backed-up
+ # 2026-09-07 file -- every cell in this rectangle was land there), so a
+ # single rectangle covers them safely. The remaining 3 are each
+ # interspersed with cells that ARE legitimately wet in the 2026-09-07 file
+ # (e.g. lon=8.18/8.26, lat=53.65 are real open water immediately next to
+ # revert 12/13) -- a rectangle there would over-mask, so those stay as
+ # individual points.
+ - type: rectangle
+   name: Weser estuary revert (block)
+   lon: [8.05, 8.62]
+   lat: [53.42, 53.62]
+ - type: point
+   name: Weser estuary revert 12
+   lonlat: [8.10, 53.65]
+ - type: point
+   name: Weser estuary revert 13
+   lonlat: [8.34, 53.65]
+ - type: point
+   name: Weser estuary revert 14
+   lonlat: [8.66, 53.90]
 
 thalweg:
   # auto_corridors finds articulation points in the *wet* coarse graph — it only

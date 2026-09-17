@@ -74,28 +74,28 @@ simulation:
       gamma_surf: true
     Adaptive:
       nz: 40
-      ddu: 0.0
-      ddl: 0.0
+      ddu: 0.001
+      ddl: 0.001
       gamma_surf: true
-      Dgamma: 0.0
+      Dgamma: 10.0
       csigma: 0.0
       cgvc: 1.0
       chsurf: 0.0
       hsurf: 0.5
       chmidd: 0.0
-      hmidd: -4
+      hmidd: -4.0
       chbott: 0.0
       hbott: -0.25
       decay: 0.6666666666666666
       hpow: 3
       cneigh: 0.0
       rneigh: 0.25
-      cNN: 0.0
+      cNN: 4.0
       drho: 0.3
       cSS: 0.0
       dvel: 0.1
-      chmin: 0.0
-      hmin: 0.3
+      chmin: 2
+      hmin: 0.75
       nvfilter: 1
       vfilter: 0.3
       nhfilter: 1
