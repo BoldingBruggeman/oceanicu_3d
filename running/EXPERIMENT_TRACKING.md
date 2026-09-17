@@ -683,6 +683,38 @@ oceanicu-experiments rerun --experiment-id ... --from-current --note "fixed off-
 what, when, including these events) as its own table, and the chunks
 table shows each chunk's own script/config hash (first 12 hex chars).
 
+**Safety check: numbered-but-misdated chunks.** The next chunk's number
+(`next_chunk_index`, over all rows) and its start date (`next_chunk_start`,
+only `'done'` rows) are two independent queries. If a stale non-`'done'`
+row is ever left sitting at `chunk_index - 1` -- e.g. a crash that never
+reached `finish_chunk`, later auto-marked `failed` as orphaned -- the two
+queries can disagree: the new chunk gets the right *number* but the wrong
+*date range*, e.g. a directory literally named `002_...` carrying `001_`'s
+own dates. `chunk_runner.py` checks this before building the directory: it
+looks up the chunk at `chunk_index - 1` and refuses (exit 2, with a
+`rerun --from-chunk <n>` command to actually fix it) unless that row is
+`'done'` and its `stop` matches what `next_chunk_start` just computed.
+
+**Resuming from a different snapshot.** A restart file normally holds one
+snapshot (the model state at the end of the chunk that wrote it), but
+pygetm's `add_restart(interval=...)` can write several into the same file
+(e.g. monthly). By default the next chunk always resumes from the *last*
+one in the file -- `--restart-time` on `rerun` asks for a specific one
+instead:
+
+```bash
+oceanicu-experiments rerun --experiment-id ... --from-chunk 4 --restart-time 2012-06-01T00:00:00
+```
+
+This is one-shot: the request is recorded on the experiment (`show` prints
+it as `pending restart-time`) and consumed by the very next chunk that
+actually starts, which clears it back to unset -- it never silently applies
+to a later chunk too. A plain `rerun` with no `--restart-time` also clears
+any previously-set, not-yet-consumed request. If the given time isn't
+actually one of the snapshots in the restart file, the chunk fails
+immediately with pygetm's own error naming the file's real span, rather
+than silently resuming from the wrong point.
+
 ## Remove an experiment from the registry
 
 ```bash
@@ -692,6 +724,47 @@ oceanicu-experiments remove --experiment-id NSe/CMIP6/CNRM-ESM2-1/ssp126/run01
 Only removes the registry/chunk-history rows -- never touches files.
 Refuses if the experiment is `in_progress` unless you pass `--force` (pause it
 first, normally).
+
+## Rename an experiment, or clean out its generated files
+
+For reusing/relocating an experiment, or clearing stale generated files
+before overwriting them from a fresh remote source (e.g. `stage`-ing a
+freshly-generated driver script/config/utils module in from another
+machine):
+
+```bash
+# Change the id and/or move the actual directory on disk:
+oceanicu-experiments rename --experiment-id OLD_ID --new-experiment-id NEW_ID
+oceanicu-experiments rename --experiment-id ID --new-experiment-root /new/absolute/or/relative/path
+
+# Remove generated*.py/generated*.yaml at the experiment's real, resolved
+# experiment_root -- the exact files/location `stage` writes to, so
+# `clean` then `stage` is the intended pair:
+oceanicu-experiments clean --experiment-id ID
+```
+
+`rename --new-experiment-id` moves the experiment's `chunks` **and**
+`history` rows to the new id too (so `show`/`list` read as if it always
+ran under the new id), and logs one additional `renamed` history entry
+recording the old id/root so the change itself stays visible in the
+audit trail. `rename --new-experiment-root` physically `mv`s the
+directory -- on **this** machine, so run it from wherever the
+experiment's files actually live (it refuses if the current root can't
+be found here, rather than guessing), and only updates the registry
+after the move succeeds, so a failed move never leaves the registry
+pointing at a location that doesn't exist. `clean` is non-recursive,
+same as `stage`'s own destination -- it never touches anything else
+sitting in the experiment root (logs, restart files, real NetCDF
+output).
+
+Both refuse if the experiment is `in_progress` unless you pass
+`--force`, same rule as `remove`. Both work with `--dry-run` (`clean`
+lists what it would remove without deleting anything; `rename` prints
+what it would `mv` without moving anything) and `--queue` (for either
+one, queuing defers the *entire* command -- including `clean`'s file
+deletion and `rename`'s directory move -- to run later wherever the
+registry actually lives, e.g. useful when you can't reach the
+authoritative side directly right now).
 
 ## Dry-run any `oceanicu-experiments` command
 

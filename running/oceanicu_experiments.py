@@ -117,6 +117,7 @@ _EXPERIMENT_COLUMN_LABELS = {
     "chunk_multiplier": "multiplier",
     "actual_chunk": "actual",
     "chunk_delay_seconds": "delay",
+    "next_load_restart_time": "pending restart-time",
 }
 
 
@@ -497,6 +498,107 @@ def cmd_remove(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_rename(args: argparse.Namespace) -> int:
+    """Rename an experiment's experiment_id and/or move its
+    experiment_root -- for reusing/relocating an experiment (e.g.
+    before `clean` + `stage`-ing a fresh copy of its generated files
+    from a remote source) without losing its chunk/history record.
+
+    A --new-experiment-root move is real disk I/O this function does
+    itself (rename_experiment's own DB update never touches the
+    filesystem -- see its docstring), so it must happen BEFORE the DB
+    update, and never at all under --dry-run (the generic scratch-DB
+    redirect in main() protects the SQLite side automatically, but does
+    nothing for a real `shutil.move` performed here)."""
+    if args.new_experiment_id is None and args.new_experiment_root is None:
+        print("ERROR: nothing to do -- pass --new-experiment-id and/or --new-experiment-root", file=sys.stderr)
+        return 1
+
+    with rt.connect(args.db) as conn:
+        row = rt.get_experiment(conn, args.experiment_id)
+        if row is None:
+            print(f"ERROR: no such experiment_id: {args.experiment_id!r}", file=sys.stderr)
+            return 1
+
+        old_root_resolved = None
+        new_root_resolved = None
+        if args.new_experiment_root is not None:
+            old_root_resolved = Path(rt.resolve_experiment_root(row["experiment_root"]))
+            new_root_resolved = Path(rt.resolve_experiment_root(args.new_experiment_root))
+            if not old_root_resolved.is_dir():
+                print(f"ERROR: {old_root_resolved} (current experiment_root, resolved) isn't a directory on "
+                      f"this machine -- refusing to guess; run this from the machine that actually holds it.",
+                      file=sys.stderr)
+                return 1
+            if new_root_resolved.exists():
+                print(f"ERROR: {new_root_resolved} (new experiment_root, resolved) already exists -- "
+                      f"refusing to overwrite it.", file=sys.stderr)
+                return 1
+            if args.dry_run:
+                print(f"[dry-run] would mv {old_root_resolved} -> {new_root_resolved}")
+            else:
+                new_root_resolved.parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(old_root_resolved), str(new_root_resolved))
+
+        try:
+            rt.rename_experiment(
+                conn, args.experiment_id,
+                new_experiment_id=args.new_experiment_id,
+                new_experiment_root=args.new_experiment_root,
+                force=args.force, user=rt._current_user(),
+            )
+        except (KeyError, ValueError) as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            if new_root_resolved is not None and not args.dry_run:
+                print(f"WARNING: {old_root_resolved} was already moved to {new_root_resolved} before this "
+                      f"failed -- the registry still has the OLD experiment_root on record. Move it back, "
+                      f"or re-run rename with the same --new-experiment-root to finish the DB update.",
+                      file=sys.stderr)
+            return 1
+
+    msg = f"renamed {args.experiment_id!r}"
+    if args.new_experiment_id:
+        msg += f" -> {args.new_experiment_id!r}"
+    if args.new_experiment_root:
+        msg += f", root moved to {args.new_experiment_root}"
+    print(msg)
+    return 0
+
+
+def cmd_clean(args: argparse.Namespace) -> int:
+    """Remove generated*.py/generated*.yaml at an experiment's real,
+    resolved experiment_root -- the exact files/location `stage`
+    writes to, so `clean` then `stage` is the intended pair for
+    overwriting an experiment's generated files from a fresh remote
+    source. Non-recursive, same as stage's own destination."""
+    with rt.connect(args.db) as conn:
+        row = rt.get_experiment(conn, args.experiment_id)
+        if row is None:
+            print(f"ERROR: no such experiment_id: {args.experiment_id!r}", file=sys.stderr)
+            return 1
+        if row["status"] == "in_progress" and not args.force:
+            print(f"ERROR: {args.experiment_id!r} is in_progress -- pause it first, or pass --force "
+                  f"if you're sure.", file=sys.stderr)
+            return 1
+
+        root = Path(rt.resolve_experiment_root(row["experiment_root"]))
+        matches = sorted(root.glob("generated*.py")) + sorted(root.glob("generated*.yaml"))
+        if not matches:
+            print(f"no generated*.py/generated*.yaml files under {root} -- nothing to clean")
+            return 0
+
+        for f in matches:
+            if args.dry_run:
+                print(f"[dry-run] would remove {f}")
+            else:
+                f.unlink()
+                print(f"removed {f}")
+
+        if not args.dry_run:
+            rt.log_cleaned(conn, args.experiment_id, [f.name for f in matches], user=rt._current_user())
+    return 0
+
+
 def cmd_kill(args: argparse.Namespace) -> int:
     """scancel the actually-running SLURM job for an experiment's current
     chunk, then mark that chunk failed -- for exactly the case `pause`
@@ -621,7 +723,7 @@ def cmd_show(args: argparse.Namespace) -> int:
             print(f"ERROR: no such experiment_id: {args.experiment_id!r}", file=sys.stderr)
             return 1
         print("experiment:")
-        _print_table(_trim_updated_at([experiment]), _EXPERIMENT_COLUMNS + ["experiment_root", "script", "config", "launcher", "fabm", "data_roots_file", "notes"], labels=_EXPERIMENT_COLUMN_LABELS)
+        _print_table(_trim_updated_at([experiment]), _EXPERIMENT_COLUMNS + ["experiment_root", "script", "config", "launcher", "fabm", "data_roots_file", "next_load_restart_time", "notes"], labels=_EXPERIMENT_COLUMN_LABELS)
         print()
         print("chunks:")
         chunks = rt.list_chunks(conn, args.experiment_id)
@@ -763,11 +865,14 @@ def cmd_rerun(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         try:
             n = rt.rerun_from(conn, args.experiment_id, chunk_index=chunk_index, user=rt._current_user(),
-                               note=args.note, force=args.force)
+                               note=args.note, force=args.force, restart_time=args.restart_time)
         except (KeyError, ValueError) as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
     print(f"{args.experiment_id}: dropped {n} chunk record(s) -- next submission redoes from there")
+    if args.restart_time:
+        print(f"  will resume from snapshot {args.restart_time!r} instead of the restart "
+              f"file's own last snapshot (one-shot; consumed by that next chunk)")
     return 0
 
 
@@ -902,6 +1007,37 @@ def main() -> int:
     r.add_argument("--experiment-id", required=True)
     r.add_argument("--force", action="store_true")
 
+    rn = sub.add_parser(
+        "rename",
+        help="change an experiment's experiment_id and/or move its experiment_root -- for "
+             "reusing/relocating an experiment (e.g. before `clean` + `stage`-ing a fresh copy "
+             "of its generated files from a remote source) without losing its chunk/history "
+             "record",
+    )
+    _add_common(rn); rn.set_defaults(func=cmd_rename)
+    rn.add_argument("--experiment-id", required=True, help="the experiment's CURRENT experiment_id")
+    rn.add_argument("--new-experiment-id", default=None,
+                     help="new experiment_id -- chunks and history rows move to it too, and a "
+                          "'renamed' history entry records the old id")
+    rn.add_argument("--new-experiment-root", default=None,
+                     help="new experiment_root -- the CURRENT resolved root is mv'd to the new "
+                          "resolved location on THIS machine (refuses if the current one isn't "
+                          "found locally, or the new one already exists), and only then is the "
+                          "registry updated; stored in the DB as given, unresolved, same as add's "
+                          "own --experiment-root")
+    rn.add_argument("--force", action="store_true", help="allow renaming an in_progress experiment")
+
+    cl = sub.add_parser(
+        "clean",
+        help="remove generated*.py/generated*.yaml at an experiment's real, resolved "
+             "experiment_root -- the exact files/location `stage` writes to, so `clean` then "
+             "`stage` is the intended pair for overwriting an experiment's generated files from "
+             "a fresh remote source",
+    )
+    _add_common(cl); cl.set_defaults(func=cmd_clean)
+    cl.add_argument("--experiment-id", required=True)
+    cl.add_argument("--force", action="store_true", help="allow cleaning an in_progress experiment")
+
     k = sub.add_parser("kill"); _add_common(k); k.set_defaults(func=cmd_kill)
     k.add_argument("--experiment-id", required=True,
                     help="scancel this experiment's currently-running chunk (if any) and mark it "
@@ -1033,6 +1169,14 @@ def main() -> int:
                      help="allow dropping a chunk row that's still marked running -- scancels "
                           "the live job first (same as kill), then proceeds. Without this, "
                           "rerun refuses outright while the experiment is in_progress.")
+    rr.add_argument("--restart-time", default=None, metavar="ISO8601",
+                     help="resume the redone chunk from this specific internal snapshot of its "
+                          "load_restart file, instead of the file's own default (its last "
+                          "snapshot) -- only meaningful when that file actually holds more than "
+                          "one (a restart written with add_restart(interval=...)). One-shot: "
+                          "consumed by the very next chunk that actually starts, then cleared -- "
+                          "never silently reused for a later chunk. Omitting this on a rerun "
+                          "clears any previously-pending, not-yet-consumed request too.")
 
     rs = sub.add_parser("reset"); _add_common(rs); rs.set_defaults(func=cmd_reset)
     rs.add_argument("--experiment-id", required=True,

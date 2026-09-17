@@ -119,6 +119,18 @@ CREATE TABLE IF NOT EXISTS experiments (
     -- set-chunk-delay -- takes effect on the very next hand-off, never
     -- retroactively, same as chunk_multiplier/stop_date already do.
     chunk_delay_seconds INTEGER NOT NULL DEFAULT 0,
+    -- next_load_restart_time added 2026-09-10 (see _migrate_schema for an
+    -- already-existing experiments table). Pending, ONE-SHOT request: which
+    -- internal snapshot (ISO date/datetime) the NEXT chunk to start should
+    -- take from its load_restart file, instead of the file's own default
+    -- (the last snapshot) -- a restart file can hold more than one (see
+    -- pygetm's add_restart(interval=...)/load_restart(time=...)). Set via
+    -- `rerun --restart-time`; consumed and cleared back to NULL by
+    -- start_chunk the moment it actually starts that chunk (see its own
+    -- load_restart_time handling) -- never silently reused for a later
+    -- chunk. NULL (the default) means "use the file's own last snapshot",
+    -- unchanged behavior from before this column existed.
+    next_load_restart_time TEXT,
     notes            TEXT,
     created_at       TEXT NOT NULL,
     updated_at       TEXT NOT NULL
@@ -131,6 +143,14 @@ CREATE TABLE IF NOT EXISTS chunks (
     stop          TEXT NOT NULL,
     chunk_dir     TEXT NOT NULL,
     load_restart  TEXT,
+    -- load_restart_time added 2026-09-10 (see _migrate_schema). Which
+    -- internal snapshot this chunk's own load_restart file was actually
+    -- asked for (see experiments.next_load_restart_time -- consumed and
+    -- recorded here at the moment this row was inserted). NULL means "the
+    -- file's own last snapshot", either because load_restart itself is
+    -- NULL (first chunk) or because no restart-time was pending when this
+    -- chunk started.
+    load_restart_time TEXT,
     save_restart  TEXT NOT NULL,
     slurm_job_id  TEXT,
     submit_time   TEXT,
@@ -245,10 +265,16 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
         if "last_health_check" not in chunk_cols:
             conn.execute("ALTER TABLE chunks ADD COLUMN last_health_check TEXT")
             conn.commit()
+        if "load_restart_time" not in chunk_cols:
+            conn.execute("ALTER TABLE chunks ADD COLUMN load_restart_time TEXT")
+            conn.commit()
 
         run_cols = {row["name"] for row in conn.execute("PRAGMA table_info(experiments)")}
         if "chunk_delay_seconds" not in run_cols:
             conn.execute("ALTER TABLE experiments ADD COLUMN chunk_delay_seconds INTEGER NOT NULL DEFAULT 0")
+            conn.commit()
+        if "next_load_restart_time" not in run_cols:
+            conn.execute("ALTER TABLE experiments ADD COLUMN next_load_restart_time TEXT")
             conn.commit()
     except sqlite3.OperationalError as exc:
         if "readonly" not in str(exc).lower() and "read-only" not in str(exc).lower():
@@ -786,6 +812,93 @@ def set_notes(conn: sqlite3.Connection, experiment_id: str, notes: Optional[str]
 
 
 @_rpc_or_local
+def rename_experiment(
+    conn: sqlite3.Connection, experiment_id: str, *,
+    new_experiment_id: Optional[str] = None,
+    new_experiment_root: Optional[str] = None,
+    force: bool = False,
+    user: Optional[str] = None,
+) -> None:
+    """Change an experiment's experiment_id and/or experiment_root in
+    place -- for reusing/relocating an experiment (e.g. before
+    overwriting its generated files from a fresh remote source) without
+    losing its chunk/history record.
+
+    No filesystem access here at all -- experiment_root is stored AS
+    GIVEN, unresolved, same convention as add_experiment/
+    set_data_roots_file (resolved fresh on whatever machine next reads
+    it, never baked in here). Moving the actual directory on disk, if
+    that's wanted, is the CALLER's job (oceanicu_experiments.py's
+    cmd_rename) -- it's inherently local-machine-only (the registry can
+    be remote via an ssh:// relay while the files are local), so it
+    can't live in an @_rpc_or_local function's body, which may run on
+    the relay's own process instead of the caller's machine. The caller
+    is expected to do that move FIRST and only call this afterwards, so
+    a failed move never leaves the registry pointing at a location that
+    doesn't exist.
+
+    experiment_id is chunks.experiment_id's FK target (no CASCADE), and
+    -- unlike remove_experiment's own deliberate choice to leave
+    history behind -- this rewrites history rows too, so show/list read
+    as if the experiment always ran under the new id. PRAGMA
+    defer_foreign_keys defers FK enforcement to this transaction's
+    commit instead of per-statement, which is what makes updating the
+    referenced primary key (experiments.experiment_id) safe here at
+    all -- without it, updating chunks first would still reference a
+    row that (for one statement) no longer exists.
+    """
+    row = get_experiment(conn, experiment_id)
+    if row is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
+    if row["status"] == "in_progress" and not force:
+        raise ValueError(
+            f"{experiment_id!r} is in_progress -- pause it first, or pass force=True "
+            f"if you're sure."
+        )
+
+    new_id = new_experiment_id or experiment_id
+    new_root = new_experiment_root or row["experiment_root"]
+    if new_experiment_id is None and new_experiment_root is None:
+        raise ValueError("rename_experiment: nothing to change -- pass new_experiment_id and/or new_experiment_root")
+    if new_id != experiment_id and get_experiment(conn, new_id) is not None:
+        raise ValueError(f"{new_id!r} already exists -- refusing to clobber it")
+
+    id_changed = new_id != experiment_id
+    root_changed = new_root != row["experiment_root"]
+
+    if id_changed:
+        conn.execute("PRAGMA defer_foreign_keys=ON")
+        conn.execute("UPDATE chunks SET experiment_id = ? WHERE experiment_id = ?", (new_id, experiment_id))
+        conn.execute("UPDATE history SET experiment_id = ? WHERE experiment_id = ?", (new_id, experiment_id))
+    conn.execute(
+        "UPDATE experiments SET experiment_id = ?, experiment_root = ?, updated_at = ? WHERE experiment_id = ?",
+        (new_id, new_root, _now(), experiment_id),
+    )
+
+    detail_parts = []
+    if id_changed:
+        detail_parts.append(f"experiment_id {experiment_id!r} -> {new_id!r}")
+    if root_changed:
+        detail_parts.append(f"experiment_root {row['experiment_root']!r} -> {new_root!r}")
+    _log_history(conn, new_id, "renamed", "; ".join(detail_parts), user=user)
+    conn.commit()
+
+
+@_rpc_or_local
+def log_cleaned(
+    conn: sqlite3.Connection, experiment_id: str, removed_files: list, user: Optional[str] = None,
+) -> None:
+    """Audit-log entry for oceanicu_experiments.py's `clean` command --
+    the actual file deletion is local-filesystem work done by the
+    caller (same "can't live in an @_rpc_or_local body" reasoning as
+    rename_experiment's directory move); this just records that it
+    happened, through the (possibly remote) registry connection like
+    every other history entry."""
+    _log_history(conn, experiment_id, "cleaned", f"removed: {', '.join(removed_files)}", user=user)
+    conn.commit()
+
+
+@_rpc_or_local
 def set_chunk_delay(
     conn: sqlite3.Connection, experiment_id: str, chunk_delay_seconds: int, user: Optional[str] = None,
 ) -> None:
@@ -1080,8 +1193,19 @@ def start_chunk(
     chunk_dir: str, load_restart: Optional[str], save_restart: str,
     slurm_job_id: Optional[str] = None, user: Optional[str] = None,
     script_sha256: Optional[str] = None, config_sha256: Optional[str] = None,
-    submitted_host: Optional[str] = None,
+    submitted_host: Optional[str] = None, load_restart_time: Optional[str] = None,
 ) -> None:
+    """Record a chunk as started -- inserts its row, flips the experiment to
+    'in_progress', and logs a chunk_started history event.
+
+    load_restart_time: which internal snapshot of *load_restart* this chunk
+    was actually asked to resume from (see experiments.next_load_restart_time
+    -- chunk_runner.py reads that pending, one-shot column and passes it
+    straight through here). Recorded on this chunk's own row either way;
+    when given, ALSO clears experiments.next_load_restart_time back to NULL
+    in the same call -- consumed exactly once, never silently reused for a
+    later chunk that never asked for it.
+    """
     now = _now()
 
     # Compare against the most recent chunk still ON RECORD for this experiment
@@ -1116,12 +1240,19 @@ def start_chunk(
 
     conn.execute(
         """INSERT INTO chunks (experiment_id, chunk_index, start, stop, chunk_dir,
-               load_restart, save_restart, slurm_job_id, submit_time,
+               load_restart, load_restart_time, save_restart, slurm_job_id, submit_time,
                start_time, status, script_sha256, config_sha256, submitted_host)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'running', ?, ?, ?)""",
-        (experiment_id, chunk_index, start, stop, chunk_dir, load_restart, save_restart,
-         slurm_job_id, now, now, script_sha256, config_sha256, submitted_host),
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'running', ?, ?, ?)""",
+        (experiment_id, chunk_index, start, stop, chunk_dir, load_restart, load_restart_time,
+         save_restart, slurm_job_id, now, now, script_sha256, config_sha256, submitted_host),
     )
+    if load_restart_time:
+        # One-shot: this chunk just consumed the pending request, so it must
+        # not silently carry over to whatever chunk starts after this one.
+        conn.execute(
+            "UPDATE experiments SET next_load_restart_time = NULL WHERE experiment_id = ?",
+            (experiment_id,),
+        )
     # Unconditional -- always bump updated_at on a new chunk start, not just
     # the first chunk's not_started->in_progress transition. Previously
     # guarded by `AND status != 'in_progress'`, which meant every chunk
@@ -1137,7 +1268,8 @@ def start_chunk(
     )
     detail = f"chunk {chunk_index}: {start} -> {stop}"
     if load_restart:
-        detail += f" (load_restart={load_restart})"
+        detail += f" (load_restart={load_restart}"
+        detail += f", time={load_restart_time})" if load_restart_time else ")"
     _log_history(conn, experiment_id, "chunk_started", detail, user=user)
     conn.commit()
 
@@ -1321,6 +1453,23 @@ def get_running_chunk(conn: sqlite3.Connection, experiment_id: str) -> Optional[
 
 
 @_rpc_or_local
+def get_chunk(conn: sqlite3.Connection, experiment_id: str, chunk_index: int) -> Optional[sqlite3.Row]:
+    """One chunk's full row, by index, regardless of status -- unlike
+    get_done_chunk_restart (which only ever returns something for a
+    'done' row), this exists so a caller can tell the difference between
+    "no such chunk", "it exists but isn't done", and "it's done but
+    something else about it is wrong" -- see chunk_runner.py's own
+    next_chunk_start/next_chunk_index consistency check, which needs
+    exactly that distinction to fail loudly with a useful diagnostic
+    instead of silently building a chunk_dir whose date range doesn't
+    match its own numeric index."""
+    return conn.execute(
+        "SELECT * FROM chunks WHERE experiment_id = ? AND chunk_index = ?",
+        (experiment_id, chunk_index),
+    ).fetchone()
+
+
+@_rpc_or_local
 def get_done_chunk_restart(conn: sqlite3.Connection, experiment_id: str, chunk_index: int) -> Optional[str]:
     """save_restart path of a specific completed chunk -- what the NEXT
     chunk's --load-restart should point at. Exists as its own named,
@@ -1361,6 +1510,7 @@ def get_latest_chunk_indices(conn: sqlite3.Connection) -> dict[str, int]:
 def rerun_from(
     conn: sqlite3.Connection, experiment_id: str, *, chunk_index: Optional[int] = None,
     user: Optional[str] = None, note: Optional[str] = None, force: bool = False,
+    restart_time: Optional[str] = None,
 ) -> int:
     """Rewind an experiment's tracked history so its NEXT execution redoes chunk
     *chunk_index* onward (dropping any record of it and everything after).
@@ -1390,6 +1540,17 @@ def rerun_from(
     Does NOT touch files on disk (no chunk_dir is deleted) -- run_chunks.py
     archives a pre-existing chunk_dir aside before reusing it, so a
     previous attempt's logs/output are never silently overwritten.
+
+    restart_time: request a specific internal snapshot (ISO date/datetime)
+    from the redone chunk's own load_restart file, instead of the file's
+    default (its last snapshot) -- only meaningful when that file actually
+    holds more than one (see pygetm's add_restart(interval=...)/
+    load_restart(time=...)). Stored on experiments.next_load_restart_time,
+    a one-shot request consumed and cleared by start_chunk the moment this
+    redone chunk actually starts (see its own docstring) -- never silently
+    reused for a chunk after that. None (default): unchanged behavior,
+    the next chunk uses the file's own last snapshot, same as before this
+    parameter existed.
     """
     row = get_experiment(conn, experiment_id)
     if row is None:
@@ -1443,8 +1604,9 @@ def rerun_from(
     )
     n_dropped = cur.rowcount
     conn.execute(
-        "UPDATE experiments SET control = 'run', updated_at = ? WHERE experiment_id = ?",
-        (_now(), experiment_id),
+        "UPDATE experiments SET control = 'run', next_load_restart_time = ?, updated_at = ? "
+        "WHERE experiment_id = ?",
+        (restart_time, _now(), experiment_id),
     )
     detail = f"dropped {n_dropped} chunk(s) from index {chunk_index} onward"
     if dropped is not None and (dropped["script_sha256"] or dropped["config_sha256"]):
@@ -1452,6 +1614,8 @@ def rerun_from(
                    f"config={(dropped['config_sha256'] or '?')[:12]})")
     if scancel_note:
         detail += f" -- forced while in_progress, {scancel_note}"
+    if restart_time:
+        detail += f" -- restart_time={restart_time}"
     if note:
         detail += f" -- {note}"
     _log_history(conn, experiment_id, "rerun", detail, user=user)
