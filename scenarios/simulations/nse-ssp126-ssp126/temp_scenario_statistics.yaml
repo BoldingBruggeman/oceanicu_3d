@@ -6,7 +6,7 @@ periods:
 - period: all
   is_all_period: true
   model: ''
-  analysed: '2026-09-17 08:55:41'
+  analysed: '2026-09-17 09:56:44'
   datasets:
     temp:
       reference:
@@ -17,10 +17,10 @@ periods:
         units: degrees_Celsius
       scenarios:
         SSP1-2.6:
-          mean: 11.082765
-          std: 4.727236
-          trend: -0.009483
-          p_value: 0.529285
+          mean: 11.198673
+          std: 4.694386
+          trend: 0.005838
+          p_value: 0.566674
           period_changes:
             2020s:
               mean: 11.32234
@@ -31,6 +31,6 @@ periods:
               change: 0.27483
               pct_change: 2.547802
             2040s:
-              mean: 11.072024
-              change: 0.285093
-              pct_change: 2.642949
+              mean: 11.071905
+              change: 0.284974
+              pct_change: 2.641845
