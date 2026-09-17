@@ -333,8 +333,17 @@ def print_report(results: list[ChunkResult]) -> None:
             r2 = 1 - ss_res / ss_tot if ss_tot else 0.0
             slope_pct_per_year = slope / base_mean * 100 if base_mean else 0.0
             span_years = xs[-1] - xs[0]
+            # Standard error of the slope + t-statistic (still stdlib-only --
+            # no incomplete-beta/t-CDF for an exact p-value, but for n this
+            # size the t-distribution is already close to normal, so |t| ~ 2
+            # is the usual ~p<0.05 rule of thumb, ~2.7 for ~p<0.01).
+            se_slope = ((ss_res / (n - 2)) / var) ** 0.5 if var and n > 2 else float("nan")
+            t_stat = slope / se_slope if se_slope else float("nan")
+            sig = ("p<0.01" if abs(t_stat) > 2.7 else
+                   "p<0.05" if abs(t_stat) > 2.0 else
+                   "not significant at p<0.05")
             print(f"  trend within [rest]: {slope:+.2f} s/year ({slope_pct_per_year:+.2f}% of baseline "
-                  f"mean per year), R^2={r2:.2f}, over {span_years:.0f} years "
+                  f"mean per year), R^2={r2:.2f}, t={t_stat:.2f} ({sig}), over {span_years:.0f} years "
                   f"({int(xs[0])}-{int(xs[-1])})")
             print(f"    -- i.e. pace is {'still getting worse' if slope > 0 else 'improving' if slope < 0 else 'flat'} "
                   f"release over release, on top of the step already measured above")
