@@ -99,6 +99,11 @@ cutoff). Every other year is compared against that fixed baseline mean:
   additionally making each subsequent simulated year slightly slower
   than the last, independent of it.
 
+  ![Chunk pace vs. fixed baseline, with the [rest] linear trend](chunk-pace-trend.png)
+
+  Regenerate with:
+  `python running/analyze_chunk_pace.py <run_dir> --plot chunk-pace-trend.png`
+
 2015-01-01 is exactly the historical -> SSP-scenario forcing boundary for
 this CMIP6-raw setup (`meteo.source: CMIP6-raw`, model `GFDL-ESM4`,
 scenario `ssp126` -- see `driver/scripts/meteo.py`'s historical/scenario
