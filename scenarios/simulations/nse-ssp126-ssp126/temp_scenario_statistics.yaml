@@ -6,31 +6,31 @@ periods:
 - period: all
   is_all_period: true
   model: ''
-  analysed: '2026-09-17 09:56:44'
+  analysed: '2026-09-17 10:42:37'
   datasets:
     temp:
       reference:
-        mean: 10.786931
-        std: 4.382215
-        min: -494.091244
-        max: 270.654263
+        mean: 10.787473
+        std: 4.344725
+        min: -1.864253
+        max: 23.749674
         units: degrees_Celsius
       scenarios:
         SSP1-2.6:
-          mean: 11.198673
-          std: 4.694386
-          trend: 0.005838
-          p_value: 0.566674
+          mean: 11.201335
+          std: 4.547426
+          trend: 0.005464
+          p_value: 0.563624
           period_changes:
             2020s:
-              mean: 11.32234
-              change: 0.535409
-              pct_change: 4.963498
+              mean: 11.321357
+              change: 0.533885
+              pct_change: 4.949117
             2030s:
-              mean: 11.061761
-              change: 0.27483
-              pct_change: 2.547802
+              mean: 11.061916
+              change: 0.274444
+              pct_change: 2.544096
             2040s:
-              mean: 11.071905
-              change: 0.284974
-              pct_change: 2.641845
+              mean: 11.071797
+              change: 0.284324
+              pct_change: 2.635687
