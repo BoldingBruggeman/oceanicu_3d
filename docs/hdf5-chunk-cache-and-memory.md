@@ -11,7 +11,11 @@ This investigation started blended together and needs to stay split:
    in `docs/chunk-pace-analysis.md`. We rechunked the raw GFDL-ESM4 files
    from contiguous storage to `[1, nlat, nlon]` hoping for improvement,
    particularly past chunk 013/2051 where the fix should have started
-   applying -- **it did not measurably help**. This remains unsolved.
+   applying -- **it did not measurably help**, and that rechunk was
+   later reverted as part of the flat-storage decision this document
+   ends on (see "Final decision" below) -- so CMIP6-raw is back to
+   contiguous storage regardless. The runtime step itself remains
+   unsolved.
 2. **Memory blowup crossing a year boundary** (this document): using the
    **bias-corrected** meteo source (`meteo.source: CMIP6`, e.g.
    `experiments/NSe/CMIP6/GFDL-ESM4/ssp126/run01`, which reads one file
@@ -472,25 +476,119 @@ bounded) cache to manage; contiguous+float32 removes the cache question
 entirely, is still ~27% smaller than today, and only gives up the
 further reduction compression would have added on top.
 
+### Does opening many DIFFERENT contiguous files still accumulate anything?
+
+The single-file, double-sweep test above only proves no growth from
+repeatedly *reading* one already-open file. It doesn't rule out some
+other fixed per-file overhead (HDF5's own metadata cache, unrelated to
+chunk data) accumulating every time a *new* file is opened -- which is
+the actually-relevant production pattern (one new file per variable per
+year, all held open forever). Tested directly: 10 distinct real years,
+each converted to contiguous float32, opened one after another, **none
+ever closed**, each read through fully before opening the next:
+
+```
+file #1  (2015): rss= 89.1 MB
+file #2  (2016): rss=114.7 MB
+file #3  (2017): rss=114.7 MB
+file #4  (2018): rss=114.7 MB
+file #5  (2019): rss=114.7 MB
+file #6  (2020): rss=114.8 MB
+file #7  (2021): rss=114.8 MB
+file #8  (2022): rss=114.9 MB
+file #9  (2023): rss=114.9 MB
+file #10 (2024): rss=114.9 MB
+```
+
+Settles after the second file, then stays flat -- 8 more files opened,
+all held open forever, add a combined 0.2MB (noise). So this isn't just
+"reading an already-open file doesn't leak," it's "opening more and
+more distinct files doesn't either." There's no cache-like quantity to
+size for the contiguous case at all: HDF5's tunable raw-data cache
+(everything else in this document) only exists for *chunked* datasets --
+a contiguous dataset has no chunks, so HDF5 never allocates that
+structure for it. A read just goes straight to the OS's normal buffered
+I/O, not a per-dataset HDF5 buffer.
+
+## Final decision (2026-09-17): all meteo files go flat
+
+**Every meteo file this project reads -- both CMIP6-raw
+(`_raw_var()`) and bias-corrected (`_spliced_paths()`) -- is contiguous,
+uncompressed, float32.** Not a chunked-with-a-well-sized-cache
+compromise; no chunk cache at all, for either source.
+
+This supersedes the chunked+24h+~4MB recommendation above (still left
+in this document because the reasoning and numbers remain valid and
+instructive -- e.g. if compression or the smaller disk footprint ever
+becomes the priority again) and closes out the "open decision" between
+the two options in favour of the one with zero remaining cache-tuning
+surface: it removes the year-crossing leak *architecturally*, for both
+meteo sources, rather than by sizing a cache correctly for one of them.
+
+**CMIP6-raw**: the `[1, nlat, nlon]` rechunk applied earlier the same
+day (see the rechunk-job history further up) was reverted -- these
+files were *already* contiguous+float32+uncompressed before that
+rechunk, so restoring the `.bak_*` copies made from before it was
+enough for `historical` and all four scenario directories (`ssp126`,
+`ssp245`, `ssp370`, `ssp585`) *except* one real gap the revert-from-
+backup alone didn't catch: `historical`'s five `_nostream`-fetched
+files (`ps`, `rlds`, `rlus`, `rsds`, `rsus`) were **already** chunked
+`[30, 30, 40]` + zlib-4 *before* today's rechunk work ever touched them
+-- a pre-existing inconsistency from however they were originally
+fetched, not something introduced today. Restoring the backup faithfully
+restored that inconsistency along with everything else. Found by
+checking every variable in every experiment directory individually
+(not assuming uniformity from checking `uas` alone, which is what
+missed it the first time) and fixed with the same
+contiguous-conversion approach, bit-exact verified:
+
+| File | Old (chunked+compressed) | New (flat) |
+|---|---|---|
+| `ps_..._nostream.nc` | 200.5 MB | 351.0 MB |
+| `rlds_..._nostream.nc` | 245.2 MB | 351.0 MB |
+| `rlus_..._nostream.nc` | 220.5 MB | 351.0 MB |
+| `rsds_..._nostream.nc` | 182.8 MB | 351.0 MB |
+| `rsus_..._nostream.nc` | 184.9 MB | 351.0 MB |
+
+All five GFDL-ESM4 experiment directories (`historical`, `ssp126`,
+`ssp245`, `ssp370`, `ssp585`) are now uniformly float32/contiguous/
+uncompressed across all 10 variables each -- verified per-variable, not
+assumed.
+
+**BiasCorrected archive**: `rewrite_disagg_v2.py` rewritten (v3) to
+produce contiguous, uncompressed float32 -- `STORAGE_TIME_CHUNK` and
+the `zlib`/`shuffle`/`chunksizes` arguments to `createVariable` are
+gone entirely, not just changed. A full-archive rewrite
+(`/data/BiasCorrected/CMIP6/*/*/meteo/*disagg*.nc`, 7175 files, 16
+parallel workers) is running as of this writing. Sizes move in both
+directions depending on each file's *current* state, exactly as the
+general rule above predicts: files still in the original float64
+format shrink (~27%, e.g. one `tas` file measured at 975.9MB ->
+711.4MB), while files already re-encoded earlier this session as
+float32+chunked+compressed can grow if their compression had been
+doing better than the 50% threshold (e.g. one `pr` file measured at
+475.3MB -> 711.4MB; one `rlds` file at 425.8MB -> 711.4MB) -- expected
+and accepted, since the point is eliminating the cache, not minimizing
+disk space.
+
 ## Status / what's left
 
-- **Fixed**: `_raw_var()` (CMIP6-raw meteo reads) -- file-level cache
-  shrink via the bracket technique. Commits `0b8eb88`, `5f9d4b4`.
-- **Not fixed**: `_spliced_paths()` (bias-corrected `CMIP6` meteo reads)
-  -- this is the branch actually exposed to the year-crossing growth
-  documented here. Needs the same bracket treatment.
-- **Not yet changed**: `STORAGE_TIME_CHUNK` in `rewrite_disagg_v2.py`
-  (still 240) -- see "Recommendation" above for the 24h case and why
-  the change is deferred, not rejected.
-- **Open question**: whether to also make the meteo chunk-cache size a
-  YAML config knob rather than a hardcoded constant, once applied to
-  `_spliced_paths()` too.
-- **Open decision**: chunked+compressed+small-cache (24h/~4MB) vs.
-  contiguous+float32+no-compression for the eventual archive rewrite --
-  see "The other option" above. Both are smaller on disk than today's
-  actual float64 archive; the choice is cache-management complexity
-  (chunked) vs. simplicity + zero cache-related memory risk by
-  construction (contiguous), not a memory-vs-disk-space trade-off
-  against what's on disk now.
+- **Done**: CMIP6-raw (`_raw_var()`'s underlying files) -- all 5
+  experiment directories, all 10 variables, contiguous/uncompressed/
+  float32, including the `historical`/`_nostream` gap above.
+- **In progress**: BiasCorrected archive rewrite (`_spliced_paths()`'s
+  underlying files) -- 7175 files, running in the background,
+  monitored for failures.
+- **Superseded, not needed**: the file-level cache-shrink bracket in
+  `_raw_var()`/`_open_with_small_cache()` (commits `0b8eb88`, `5f9d4b4`)
+  is now dead weight -- there's no chunk cache on a contiguous file for
+  `netCDF4.set_chunk_cache()` to affect. Harmless (a global default that
+  never gets consulted), but worth removing in a follow-up cleanup pass
+  rather than leaving code that looks load-bearing and isn't.
+- **Moot**: extending the same bracket to `_spliced_paths()`, and making
+  the meteo chunk-cache size a YAML config knob -- both were about
+  sizing a cache that no longer exists for either meteo source.
+- **Moot**: `STORAGE_TIME_CHUNK` -- removed from `rewrite_disagg_v2.py`
+  entirely rather than changed to 24.
 - **Unrelated, still unsolved**: the CMIP6-raw runtime step (item 1) --
   see `docs/chunk-pace-analysis.md`.
