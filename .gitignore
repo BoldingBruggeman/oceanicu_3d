@@ -1,6 +1,13 @@
 *.log
 *.nc
 !NSe/Bathymetry/bathymetry_nse.nc
+
+# Timestamped local safety copies made before editing the bathymetry mask
+# or the boundary point list -- kept on disk deliberately, never meant
+# to be committed.
+NSe/Bathymetry/bathymetry_nse.nc.bak_*
+NSe/Bathymetry/nse_bdy_lonlat.txt.bak_*
+
 *.prof
 *.prof.stats
 __pycache__
