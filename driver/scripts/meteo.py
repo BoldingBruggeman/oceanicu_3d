@@ -284,30 +284,53 @@ def set_meteo_data(sim, domain, config: dict) -> None:
             paths += _one(scenario)
         return paths
 
-    def _raw_var(var: str):
-        """Open with a small (~1MB) per-variable HDF5 chunk cache, not
-        HDF5's own default (16-64MB observed) -- that default was sized
-        for the files' old near-contiguous storage; now that they're
+    def _open_with_small_cache(path: str):
+        """Open one file with a small (~1MB) HDF5 chunk cache applied to
+        EVERY variable in it (main var + lat/lon/bnds/height), not HDF5's
+        own default (16-64MB observed) -- that default was sized for
+        these files' old near-contiguous storage; now that they're
         rechunked to [1, nlat, nlon] (~4.8KB/chunk, see the 2026-09-17
-        rechunk of /data/CMIP6/GFDL-ESM4/{historical,ssp370}), a 16-64MB
-        cache holds thousands of chunks nobody needs, and pygetm's
-        per-MPI-rank opens each pay for that memory independently.
-        Must be set via a raw netCDF4.Dataset BEFORE any data is read --
-        xr.open_dataset(path) has no kwarg for this. Handing pygetm.
-        input.from_nc() an already-open xarray NetCDF4DataStore (instead
-        of the usual bare path string) works because from_nc()/_open()
-        just forward whatever `paths` elements they're given straight to
-        xr.open_dataset() -- a DataStore is accepted there exactly like
-        a path. This ONLY affects reading these CMIP6-raw meteo files;
-        GETM's own history/restart writer is a separate code path this
-        never touches.
+        rechunk of /data/CMIP6/GFDL-ESM4/{historical,ssp370}), a
+        16-64MB cache holds thousands of chunks nobody needs, and
+        pygetm's per-MPI-rank opens each pay for that memory
+        independently.
+
+        netCDF4.set_chunk_cache()/get_chunk_cache() (module-level, wraps
+        the netCDF-C library's nc_set_chunk_cache/nc_get_chunk_cache) is
+        a PROCESS-WIDE default applied to every variable at the moment
+        its underlying HDF5 dataset is opened -- confirmed directly,
+        2026-09-17: shrinking it, opening a file, then immediately
+        restoring it, leaves every variable in that already-open file
+        at the SMALL size permanently (HDF5 captures the cache size once,
+        at open time, per file handle -- restoring the global default
+        afterwards does not leak back into it), while a second file
+        opened after the restore gets the ORIGINAL default. That bracket
+        -- shrink, open, restore, always via try/finally so a failed
+        open can't leave the small size in effect for every later file
+        in the process -- is what gives file-level (not just one named
+        variable) scoping with no risk to GETM's own history/restart
+        writer, which opens its own files later in the same process and
+        is a separate code path this never touches regardless.
+
+        The cache must be set before xarray/HDF5 touches any data --
+        xr.open_dataset(path) has no kwarg for this -- so this opens the
+        file itself via netCDF4.Dataset and hands pygetm.input.from_nc()
+        the resulting xarray NetCDF4DataStore instead of a bare path;
+        from_nc()/_open() just forward whatever `paths` elements they're
+        given straight to xr.open_dataset(), so a DataStore works there
+        exactly like a path.
         """
-        varname = _RAW_STORED_VARNAME.get(var, var)
-        stores = []
-        for path in _raw_paths(var):
+        default_cache = netCDF4.get_chunk_cache()
+        netCDF4.set_chunk_cache(1_000_000, 521, 0.75)
+        try:
             nc = netCDF4.Dataset(path, "r")
-            nc.variables[varname].set_var_chunk_cache(1_000_000, 521, 0.75)
-            stores.append(xr.backends.NetCDF4DataStore(nc))
+        finally:
+            netCDF4.set_chunk_cache(*default_cache)
+        return xr.backends.NetCDF4DataStore(nc)
+
+    def _raw_var(var: str):
+        varname = _RAW_STORED_VARNAME.get(var, var)
+        stores = [_open_with_small_cache(path) for path in _raw_paths(var)]
         return pygetm.input.from_nc(stores, varname)
 
     if source == "CMIP6-raw":
