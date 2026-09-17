@@ -14,7 +14,7 @@ early pass of this analysis (chunks 000-002 only) carried an explicit
 caveat about drawing conclusions past chunk 002. Re-run
 (`running/analyze_chunk_pace.py`, see below) whenever more has synced.
 
-## Findings (chunks 000-013, 2010-2050)
+## Findings (chunks 000-019, 2010-2069)
 
 Baseline = first 5 complete simulated years, fixed in the script itself
 (not a CLI flag -- there's only ever one right answer for this
@@ -63,14 +63,41 @@ cutoff). Every other year is compared against that fixed baseline mean:
 | 2046 | 012 | 41.47 min | +8.9% |
 | 2047 | 012 | 42.50 min | +11.6% |
 | 2048 | 012 | 43.23 min | +13.5% |
-| 2049 | 013 | 41.82 min | +9.8% |
-| 2050 | 013 | 42.70 min | +12.1% |
+| 2049 | 013 | 44.05 min | +15.7% |
+| 2050 | 013 | 43.20 min | +13.5% |
+| 2051 | 013 | 43.00 min | +12.9% |
+| 2052 | 014 | 44.07 min | +15.7% |
+| 2053 | 014 | 43.42 min | +14.0% |
+| 2054 | 014 | 43.80 min | +15.0% |
+| 2055 | 015 | 43.83 min | +15.1% |
+| 2056 | 015 | 44.13 min | +15.9% |
+| 2057 | 015 | 43.70 min | +14.8% |
+| 2058 | 016 | 47.17 min | +23.9% |
+| 2059 | 016 | 43.27 min | +13.6% |
+| 2060 | 016 | 42.73 min | +12.2% |
+| 2061 | 017 | 45.93 min | +20.6% |
+| 2062 | 017 | 45.08 min | +18.4% |
+| 2063 | 017 | 46.72 min | +22.7% |
+| 2064 | 018 | 43.72 min | +14.8% |
+| 2065 | 018 | 44.73 min | +17.5% |
+| 2066 | 018 | 46.27 min | +21.5% |
+| 2067 | 019 | 47.03 min | +23.5% |
+| 2068 | 019 | 44.58 min | +17.1% |
+| 2069 | 019 | 42.65 min | +12.0% |
 
 - **Baseline** (2010-2014, n=5): mean 2284.6 s (38.08 min), every year
   within ±3% of it.
-- **Everything since** (2015-2050, n=36): mean 2554.2 s (42.57 min) --
-  **+11.8% vs. the baseline mean** -- every individual year within ±3
-  points of that +11.8%, no trend up or down across 30+ years.
+- **Everything since** (2015-2069, n=55): mean 2597.5 s (43.29 min) --
+  **+13.7% vs. the baseline mean**. Individual years now range +7.3% to
+  +23.9% -- NOT flat at one offset any more (it was ±3 points around
+  +11.8% on the smaller, 2015-2050 sample) -- see the significant ongoing
+  trend below for why.
+- **Linear trend within the 2015+ years themselves**: **+3.27 s/year
+  (t=6.25, p<0.01)**, on top of the step above. A second, separate,
+  statistically real effect -- the 2015 forcing-splice chunking bug
+  explains the step, but something else, not yet identified, is
+  additionally making each subsequent simulated year slightly slower
+  than the last, independent of it.
 
 2015-01-01 is exactly the historical -> SSP-scenario forcing boundary for
 this CMIP6-raw setup (`meteo.source: CMIP6-raw`, model `GFDL-ESM4`,
@@ -169,14 +196,13 @@ to (or copied onto) HPC's own copy, not just bb-server1's -- not done,
 being investigated on the HPC side directly (no ssh access to it from
 here).
 
-**Also found while re-running the analysis with more data (54 years,
+**Also found while re-running the analysis with more data (55 years,
 2015-2069) as more chunks synced down**: the post-2015 years aren't just
-sitting flat at the step above -- they're `running/analyze_chunk_pace.py`
-finds a real, statistically significant *ongoing* upward trend within
-them too: **+3.27 s/year (t=6.25, p<0.01)**, on top of the fixed +13.7%
-step. Two separate effects, not one: the 2015 forcing-splice chunking
-bug explains the step; something else -- not yet identified -- is
-additionally making each subsequent simulated year slightly slower than
+sitting flat at the step above -- see the Findings table's own "linear
+trend within the 2015+ years" result. Two separate effects, not one:
+the 2015 forcing-splice chunking bug explains the step; something else
+-- not yet identified -- is additionally making each subsequent
+simulated year slightly slower than
 the last, independent of it.
 
 ## A much bigger version of the same bug: the bias-corrected disagg archive
