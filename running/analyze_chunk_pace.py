@@ -312,6 +312,33 @@ def print_report(results: list[ChunkResult]) -> None:
               f"({rest_mean:.1f} s vs {base_mean:.1f} s) -- watch individual years above move "
               f"back toward 0% once data simulated with the fix in place lands")
 
+        # Linear trend across [rest] itself, in calendar-year order -- the
+        # step vs. baseline is one thing (a fixed offset from the 2015
+        # forcing splice), but is the pace ALSO still drifting upward
+        # release over release, independent of that step? Plain OLS, no
+        # numpy/scipy dependency (this script is deliberately stdlib-only).
+        if len(rest) >= 3:
+            xs = [float(year) for _, year, _ in rest]
+            ys = [s for _, _, s in rest]
+            n = len(xs)
+            x_mean = sum(xs) / n
+            y_mean = sum(ys) / n
+            cov = sum((x - x_mean) * (y - y_mean) for x, y in zip(xs, ys))
+            var = sum((x - x_mean) ** 2 for x in xs)
+            slope = cov / var if var else 0.0
+            intercept = y_mean - slope * x_mean
+            # R^2, to say how much of the noise this line actually explains.
+            ss_tot = sum((y - y_mean) ** 2 for y in ys)
+            ss_res = sum((y - (slope * x + intercept)) ** 2 for x, y in zip(xs, ys))
+            r2 = 1 - ss_res / ss_tot if ss_tot else 0.0
+            slope_pct_per_year = slope / base_mean * 100 if base_mean else 0.0
+            span_years = xs[-1] - xs[0]
+            print(f"  trend within [rest]: {slope:+.2f} s/year ({slope_pct_per_year:+.2f}% of baseline "
+                  f"mean per year), R^2={r2:.2f}, over {span_years:.0f} years "
+                  f"({int(xs[0])}-{int(xs[-1])})")
+            print(f"    -- i.e. pace is {'still getting worse' if slope > 0 else 'improving' if slope < 0 else 'flat'} "
+                  f"release over release, on top of the step already measured above")
+
 
 def write_csv(results: list[ChunkResult], out_path: Path) -> None:
     with open(out_path, "w", newline="") as f:
