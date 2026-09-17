@@ -169,7 +169,9 @@ def set_meteo_data(sim, domain, config: dict) -> None:
 
     import datetime
 
+    import netCDF4
     import pygetm
+    import xarray as xr
 
     # NOT meteo.get("CMIP6") -- validate_config's choice-flattening puts the
     # ACTIVE choice's own fields directly on the parent dict (here, `meteo`
@@ -283,9 +285,30 @@ def set_meteo_data(sim, domain, config: dict) -> None:
         return paths
 
     def _raw_var(var: str):
-        return pygetm.input.from_nc(
-            _raw_paths(var), _RAW_STORED_VARNAME.get(var, var),
-        )
+        """Open with a small (~1MB) per-variable HDF5 chunk cache, not
+        HDF5's own default (16-64MB observed) -- that default was sized
+        for the files' old near-contiguous storage; now that they're
+        rechunked to [1, nlat, nlon] (~4.8KB/chunk, see the 2026-09-17
+        rechunk of /data/CMIP6/GFDL-ESM4/{historical,ssp370}), a 16-64MB
+        cache holds thousands of chunks nobody needs, and pygetm's
+        per-MPI-rank opens each pay for that memory independently.
+        Must be set via a raw netCDF4.Dataset BEFORE any data is read --
+        xr.open_dataset(path) has no kwarg for this. Handing pygetm.
+        input.from_nc() an already-open xarray NetCDF4DataStore (instead
+        of the usual bare path string) works because from_nc()/_open()
+        just forward whatever `paths` elements they're given straight to
+        xr.open_dataset() -- a DataStore is accepted there exactly like
+        a path. This ONLY affects reading these CMIP6-raw meteo files;
+        GETM's own history/restart writer is a separate code path this
+        never touches.
+        """
+        varname = _RAW_STORED_VARNAME.get(var, var)
+        stores = []
+        for path in _raw_paths(var):
+            nc = netCDF4.Dataset(path, "r")
+            nc.variables[varname].set_var_chunk_cache(1_000_000, 521, 0.75)
+            stores.append(xr.backends.NetCDF4DataStore(nc))
+        return pygetm.input.from_nc(stores, varname)
 
     if source == "CMIP6-raw":
         # RAW_HIST_START_YEAR guards against silently reading a truncated
