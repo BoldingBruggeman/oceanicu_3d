@@ -38,24 +38,39 @@ pointing --db at one "succeeds" with no warning, writes into a copy with
 no effect on the real thing, and vanishes next time a real push
 overwrites it. On this project's actual HPC, nobody runs these directly
 by hand at all -- see EXPERIMENT_TRACKING.md "Set up an experiment" before using any of
-these without --queue:
+these without --queue. Grouped below by what they actually do, not
+alphabetically:
 
+    # Lifecycle -- bring an experiment's files/registry row into or out
+    # of existence, or relocate/rename it (see stage, above, for the
+    # local-file-only half of this):
     oceanicu_experiments.py add    --experiment-id ... --experiment-root ... --script ... --config ...
                              --initial-date 2015-01-01 --stop-date 2099-12-31
                              [--data-roots-file ...] [--chunk-kind annual]
                              [--chunk-multiplier 5] [--np 192] [--priority 0]
     oceanicu_experiments.py remove --experiment-id ... [--force]
+    oceanicu_experiments.py rename --experiment-id ... [--new-experiment-id ...] [--new-experiment-root ...] [--force]
+    oceanicu_experiments.py clean  --experiment-id ... [--force]   # rm generated*.py/generated*.yaml at its real experiment_root
+
+    # Start / stop / kill -- whether and when chunks actually run:
+    oceanicu_experiments.py submit-chunk --experiment-id ...   # sbatch run_chunk.slurm now; HPC only, never touches the registry
+    oceanicu_experiments.py pause  --experiment-id ... | --all
+    oceanicu_experiments.py resume --experiment-id ... | --all
+    oceanicu_experiments.py kill   --experiment-id ...   # scancel the running chunk now, unlike pause
+    oceanicu_experiments.py delay-all --seconds N | --clear
+
+    # Alter the situation -- settings that take effect on the NEXT
+    # chunk hand-off, never retroactively:
     oceanicu_experiments.py chunk-size --experiment-id ... --chunk-kind ... --chunk-multiplier ...
+    oceanicu_experiments.py set-priority --experiment-id ... --priority ...
     oceanicu_experiments.py set-chunk-delay --experiment-id ... --seconds N   # persistent, per-experiment pacing
+    oceanicu_experiments.py set-stop-date --experiment-id ... --stop-date ...
     oceanicu_experiments.py set-data-roots-file --experiment-id ... --path ...
     oceanicu_experiments.py set-np --experiment-id ... --np ...
     oceanicu_experiments.py set-launcher --experiment-id ... --launcher srun|mpiexec
     oceanicu_experiments.py set-notes --experiment-id ... --notes ...
-    oceanicu_experiments.py pause  --experiment-id ... | --all
-    oceanicu_experiments.py resume --experiment-id ... | --all
-    oceanicu_experiments.py kill   --experiment-id ...   # scancel the running chunk now, unlike pause
-    oceanicu_experiments.py submit-chunk --experiment-id ...   # sbatch run_chunk.slurm now; HPC only, never touches the registry
-    oceanicu_experiments.py delay-all --seconds N | --clear
+
+    # Recovery -- rewind an experiment's own progress:
     oceanicu_experiments.py rerun  --experiment-id ... [--from-chunk N | --from-current | --from-scratch] [--note ...] [--force]
     oceanicu_experiments.py reset  --experiment-id ... [--note ...] [--force]   # = rerun --from-scratch, clearer name: back to just-added state
 
@@ -936,6 +951,8 @@ def main() -> int:
                          "\"Command queue\"")
     sub = p.add_subparsers(dest="cmd", required=True)
 
+    # --- Registry lifecycle: bring an experiment's files/registry row into
+    # or out of existence, or relocate/rename it. ------------------------
     st = sub.add_parser(
         "stage",
         help="rsync (filtered by --include, default generated*.py/generated*.yaml) an "
@@ -1038,12 +1055,17 @@ def main() -> int:
     cl.add_argument("--experiment-id", required=True)
     cl.add_argument("--force", action="store_true", help="allow cleaning an in_progress experiment")
 
-    k = sub.add_parser("kill"); _add_common(k); k.set_defaults(func=cmd_kill)
-    k.add_argument("--experiment-id", required=True,
-                    help="scancel this experiment's currently-running chunk (if any) and mark it "
-                         "failed -- unlike pause, takes effect immediately rather than at the next "
-                         "chunk boundary; unlike remove, the experiment stays in the registry")
+    # --- Inspect: read-only. ---------------------------------------------
+    l = sub.add_parser("list"); _add_common(l); l.set_defaults(func=cmd_list)
+    l.add_argument("--status", default=None, choices=list(rt.EXPERIMENT_STATUSES))
+    l.add_argument("--like", default=None, help="substring filter on experiment_id")
+    l.add_argument("--sort", default=None, choices=list(rt.LIST_SORT_KEYS),
+                    help="default: priority (desc), experiment_id")
 
+    s = sub.add_parser("show"); _add_common(s); s.set_defaults(func=cmd_show)
+    s.add_argument("--experiment-id", required=True)
+
+    # --- Start / stop / kill: whether and when chunks actually run. -----
     sc = sub.add_parser("submit-chunk"); _add_common(sc); sc.set_defaults(func=cmd_submit_chunk)
     sc.add_argument("--experiment-id", required=True,
                      help="sbatch run_chunk.slurm for this ALREADY-REGISTERED experiment, right "
@@ -1054,15 +1076,42 @@ def main() -> int:
                           "run_chunk.slurm deployed alongside this script, same as every other "
                           "SLURM-only command here.")
 
-    l = sub.add_parser("list"); _add_common(l); l.set_defaults(func=cmd_list)
-    l.add_argument("--status", default=None, choices=list(rt.EXPERIMENT_STATUSES))
-    l.add_argument("--like", default=None, help="substring filter on experiment_id")
-    l.add_argument("--sort", default=None, choices=list(rt.LIST_SORT_KEYS),
-                    help="default: priority (desc), experiment_id")
+    pa = sub.add_parser("pause"); _add_common(pa); pa.set_defaults(func=cmd_pause)
+    g1 = pa.add_mutually_exclusive_group(required=True)
+    g1.add_argument("--experiment-id")
+    g1.add_argument("--all", action="store_true")
 
-    s = sub.add_parser("show"); _add_common(s); s.set_defaults(func=cmd_show)
-    s.add_argument("--experiment-id", required=True)
+    re_ = sub.add_parser("resume"); _add_common(re_); re_.set_defaults(func=cmd_resume)
+    g2 = re_.add_mutually_exclusive_group(required=True)
+    g2.add_argument("--experiment-id")
+    g2.add_argument("--all", action="store_true")
 
+    k = sub.add_parser("kill"); _add_common(k); k.set_defaults(func=cmd_kill)
+    k.add_argument("--experiment-id", required=True,
+                    help="scancel this experiment's currently-running chunk (if any) and mark it "
+                         "failed -- unlike pause, takes effect immediately rather than at the next "
+                         "chunk boundary; unlike remove, the experiment stays in the registry")
+
+    da = sub.add_parser(
+        "delay-all",
+        help="pause the hand-off before the next chunk/experiment submission for N seconds, "
+             "then resume automatically -- e.g. the HPC is needed for something else "
+             "for a while. Unlike pause/resume, a chunk already running is never "
+             "affected, and nothing needs to be manually resumed afterward.",
+    )
+    _add_common(da)
+    da.set_defaults(func=cmd_delay_all)
+    g4 = da.add_mutually_exclusive_group(required=True)
+    g4.add_argument("--seconds", type=int, metavar="N",
+                     help="wait this many seconds (from now) before the next "
+                          "submission proceeds; live-adjustable at any time by "
+                          "running this again with a new value")
+    g4.add_argument("--clear", action="store_true",
+                     help="cancel any pending delay -- submissions proceed immediately again")
+
+    # --- Alter the situation: change an experiment's settings, in effect
+    # from its next chunk hand-off onward -- never retroactive, never
+    # affects a chunk already running. ------------------------------------
     c = sub.add_parser("chunk-size"); _add_common(c); c.set_defaults(func=cmd_chunk_size)
     c.add_argument("--experiment-id", required=True)
     c.add_argument("--chunk-kind", default=None, choices=["annual", "monthly", "daily"])
@@ -1126,33 +1175,7 @@ def main() -> int:
     sn.add_argument("--experiment-id", required=True)
     sn.add_argument("--notes", required=True)
 
-    pa = sub.add_parser("pause"); _add_common(pa); pa.set_defaults(func=cmd_pause)
-    g1 = pa.add_mutually_exclusive_group(required=True)
-    g1.add_argument("--experiment-id")
-    g1.add_argument("--all", action="store_true")
-
-    re_ = sub.add_parser("resume"); _add_common(re_); re_.set_defaults(func=cmd_resume)
-    g2 = re_.add_mutually_exclusive_group(required=True)
-    g2.add_argument("--experiment-id")
-    g2.add_argument("--all", action="store_true")
-
-    da = sub.add_parser(
-        "delay-all",
-        help="pause the hand-off before the next chunk/experiment submission for N seconds, "
-             "then resume automatically -- e.g. the HPC is needed for something else "
-             "for a while. Unlike pause/resume, a chunk already running is never "
-             "affected, and nothing needs to be manually resumed afterward.",
-    )
-    _add_common(da)
-    da.set_defaults(func=cmd_delay_all)
-    g4 = da.add_mutually_exclusive_group(required=True)
-    g4.add_argument("--seconds", type=int, metavar="N",
-                     help="wait this many seconds (from now) before the next "
-                          "submission proceeds; live-adjustable at any time by "
-                          "running this again with a new value")
-    g4.add_argument("--clear", action="store_true",
-                     help="cancel any pending delay -- submissions proceed immediately again")
-
+    # --- Recovery: rewind an experiment's own progress. ------------------
     rr = sub.add_parser("rerun"); _add_common(rr); rr.set_defaults(func=cmd_rerun)
     rr.add_argument("--experiment-id", required=True)
     rr.add_argument("--note", default=None,
