@@ -208,8 +208,16 @@ def _list_meteo_files(config: dict, start: str, stop: str) -> list:
 
 def _list_river_files(config: dict, start: str, stop: str) -> list:
     """Mirrors driver/scripts/rivers.py's add_rivers/set_river_data
-    folder/filename logic. One whole file covers the whole run
-    regardless of [start, stop], so this only reports existence.
+    folder/filename logic -- each whole file's own coverage is checked
+    by the caller (_time_coverage_ok), not here.
+
+    For river_discharge.source == "CMIP6" specifically, mirrors
+    set_river_data's own historical/scenario splice (same 2014/2015
+    boundary as meteo.py): if [start, stop] reaches back before 2015,
+    the real EMORID historical file (${RIVER_FOLDER}/RIVER_FILE, NOT
+    ${RIVER_FOLDER_CMIP6}) is ALSO listed -- otherwise the checker would
+    keep reporting a coverage gap that set_river_data's own splice
+    already closes for real.
     Returns [(description, path, found)]."""
     rcfg = config.get("river_discharge")
     if not rcfg:
@@ -223,7 +231,18 @@ def _list_river_files(config: dict, start: str, stop: str) -> list:
     if config.get("runtime", {}).get("calendar") == "noleap":
         filename = filename.removesuffix(".nc") + "_noleap.nc"
     path = folder / filename
-    return [("river discharge", str(path), path.is_file())]
+    results = [("river discharge", str(path), path.is_file())]
+
+    HIST_CUTOFF_YEAR = 2014
+    if rcfg.get("source") == "CMIP6" and datetime.datetime.fromisoformat(start).year <= HIST_CUTOFF_YEAR:
+        hist_folder = Path(_resolve_data_path("${RIVER_FOLDER}"))
+        hist_filename = os.environ.get("RIVER_FILE", "EMORID_1990_2024.nc")
+        if config.get("runtime", {}).get("calendar") == "noleap":
+            hist_filename = hist_filename.removesuffix(".nc") + "_noleap.nc"
+        hist_path = hist_folder / hist_filename
+        results.append(("river discharge (historical)", str(hist_path), hist_path.is_file()))
+
+    return results
 
 
 def _list_ic_files(config: dict) -> list:

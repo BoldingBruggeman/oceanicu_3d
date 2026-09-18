@@ -133,7 +133,33 @@ def set_river_data(sim, domain, config: dict) -> int:
     up here -- this repo has no FABM model configured yet; cfg_rivers.py's
     own data() only does this when sim.fabm is truthy, so it's a real,
     deliberate scope limit, not an oversight.
+
+    river_discharge.source == "CMIP6" specifically: spliced across the
+    same 2014/2015 historical/scenario boundary meteo.py's set_meteo_data
+    and the codegen-baked-in open-boundary literals already use --
+    river_flows_future_{scenario}.nc (a delta-change projection off the
+    2015-2100 ssp period) only starts 2015-01-31, so a run/chunk whose
+    own period reaches back before that needs the real EMORID
+    observational record for the historical portion too, instead of (as
+    before) letting pygetm's TemporalInterpolation hard-fail with "time
+    series starts only at 2015-01-31" (a real gap, found running
+    running/check_inputs.py's --extended-dry-run against
+    NSe/CMIP6_raw/run01, 2026-09-19). ${RIVER_FOLDER}/RIVER_FILE are the
+    SEPARATE machine-configured env var/name for that file (see
+    machines.yaml) -- independent of ${RIVER_FOLDER_CMIP6}; RIVER_FILE
+    differs by archive vintage (e.g. scylla's real file isn't
+    bb-server1/orca's 'EMORID_1990_2024.nc'), so it's read from the
+    environment directly here rather than hardcoded, defaulting to
+    'EMORID_1990_2024.nc' only if genuinely unset. Verified directly
+    (2026-09-19) that the historical file and the CMIP6 projection file
+    share the identical 446-station site_name roster/order, so a
+    per-file by-name lookup (same as below) lines up correctly -- still
+    done independently per file rather than assumed, same caution as
+    the "site_name" vs "name" fallback already applies.
     """
+    import contextlib
+    import datetime
+    import os
     import xarray as xr
 
     rcfg = config["river_discharge"]
@@ -147,23 +173,66 @@ def set_river_data(sim, domain, config: dict) -> int:
     # Inlined, not a shared helper -- see add_rivers' own comment above for why.
     if config.get("runtime", {}).get("calendar") == "noleap":
         filename = filename.removesuffix(".nc") + "_noleap.nc"
-    path = folder / filename
+    future_path = folder / filename
+
+    HIST_CUTOFF_YEAR = 2014
+    hist_path = None
+    if rcfg.get("source") == "CMIP6":
+        time = config.get("runtime", {}).get("time")
+        if isinstance(time, str):
+            time = datetime.datetime.fromisoformat(time)
+        if time is not None and time.year <= HIST_CUTOFF_YEAR:
+            hist_folder = Path(resolve_data_path("${RIVER_FOLDER}"))
+            hist_filename = os.environ.get("RIVER_FILE", "EMORID_1990_2024.nc")
+            if config.get("runtime", {}).get("calendar") == "noleap":
+                hist_filename = hist_filename.removesuffix(".nc") + "_noleap.nc"
+            hist_path = hist_folder / hist_filename
+
     # CFDatetimeCoder(use_cftime=True), matching cfg_rivers.py's own real
     # data() exactly -- needed for Q's time dimension, unlike add_rivers
     # above (which never reads a time-varying variable at all).
     time_coder = xr.coders.CFDatetimeCoder(use_cftime=True)
     n_set = 0
-    with xr.open_dataset(path, engine="netcdf4", decode_times=time_coder) as ds:
+    # ExitStack, not a plain "with a, b:" -- hist_path is only sometimes
+    # present, and river.flow.set() below (matching this function's own
+    # pre-existing single-file pattern) must be called while every file
+    # it draws from is still open.
+    with contextlib.ExitStack() as stack:
+        datasets = []
+        if hist_path is not None:
+            datasets.append(stack.enter_context(
+                xr.open_dataset(hist_path, engine="netcdf4", decode_times=time_coder)
+            ))
+        datasets.append(stack.enter_context(
+            xr.open_dataset(future_path, engine="netcdf4", decode_times=time_coder)
+        ))
+
         # Same "site_name" vs "name" fallback as add_rivers above -- both
-        # read the same file, so if one needs it the other might too.
-        name_var = next((v for v in ("site_name", "name") if v in ds), None)
-        site_names = ds[name_var].values if name_var else range(ds.sizes["site"])
-        name_to_index = {str(n): i for i, n in enumerate(site_names)}
+        # read the same file(s), so if one needs it the other might too.
+        name_to_index_per_ds = []
+        for ds in datasets:
+            name_var = next((v for v in ("site_name", "name") if v in ds), None)
+            site_names = ds[name_var].values if name_var else range(ds.sizes["site"])
+            name_to_index_per_ds.append({str(n): i for i, n in enumerate(site_names)})
+
         for name, river in sim.rivers.items():
-            idx = name_to_index.get(name)
-            if idx is None:
+            indices = [nti.get(name) for nti in name_to_index_per_ds]
+            if any(i is None for i in indices):
                 continue
-            river.flow.set(ds["Q"].isel(site=idx))
+            if len(datasets) == 1:
+                flow = datasets[0]["Q"].isel(site=indices[0])
+            else:
+                # Historical sliced up to (not through) the boundary --
+                # its own real coverage runs well past 2015 too, and
+                # concatenating both files' full, overlapping ranges
+                # would break TemporalInterpolation's monotonic-time
+                # assumption.
+                hist_da = datasets[0]["Q"].isel(site=indices[0]).sel(
+                    time=slice(None, f"{HIST_CUTOFF_YEAR}-12-31")
+                )
+                fut_da = datasets[1]["Q"].isel(site=indices[1])
+                flow = xr.concat([hist_da, fut_da], dim="time")
+            river.flow.set(flow)
             river["salt"].set(0.0)
             n_set += 1
     return n_set
