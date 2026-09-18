@@ -62,3 +62,25 @@ if [ -n "$result" ]; then
 else
     echo "$(date -Is): $remote: up to date, nothing new."
 fi
+
+# Drop a status file get_commands_and_update_registry.py's own
+# _push_back_pull_status can rsync back to bb-server1 unconditionally
+# (even on a round with zero queued commands) -- this script itself
+# never talks to bb-server1 except to pull, so it doesn't push this
+# back directly; it just leaves it where OCEANICU_HPC_COMMANDS_DIR
+# already points, same directory --pull-from/--queue-dir already use.
+# Silently skipped if that var isn't set (e.g. a manual by-hand run).
+if [ -n "${OCEANICU_HPC_COMMANDS_DIR:-}" ]; then
+    status_file="$OCEANICU_HPC_COMMANDS_DIR/.last_pull_experiment_files.yaml"
+    mkdir -p "$OCEANICU_HPC_COMMANDS_DIR"
+    {
+        echo "pulled_at: $(date -Is)"
+        echo "remote: $remote"
+        if [ -n "$result" ]; then
+            echo "changed:"
+            echo "$result" | sed 's/^/  - /'
+        else
+            echo "changed: []"
+        fi
+    } > "$status_file"
+fi

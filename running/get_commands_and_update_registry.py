@@ -233,6 +233,32 @@ def _push_back_applied(remote: str, entries_by_file: dict[Path, list[dict]]) -> 
             print(f"{_ts()}: pushed {qp.name} -> {dest}")
 
 
+def _push_back_pull_status(remote: str, queue_dir: Path) -> None:
+    """Push bin/pull_experiment_files.sh's own last-run status (a
+    .last_pull_experiment_files.yaml it drops in queue_dir, if it ran
+    at all this cycle -- see its own OCEANICU_HPC_COMMANDS_DIR
+    handling) back to bb-server1, so a round with ZERO queued commands
+    still confirms from bb-server1's side that the file-pull actually
+    ran and what it changed -- unlike _push_back_applied above, this
+    is unconditional, not gated on there being anything to report from
+    the queue itself. Silently does nothing if the status file isn't
+    there (e.g. this script run standalone, without the file-pull half
+    of the chained cron -- see setup_experiment_tracking.sh's own note
+    on that being a supported, if less complete, configuration)."""
+    status_path = queue_dir / ".last_pull_experiment_files.yaml"
+    if not status_path.is_file():
+        return
+    dest = f"{remote.rstrip('/')}/last_pull_experiment_files.yaml"
+    result = subprocess.run(
+        ["rsync", "-a", str(status_path), dest], capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        print(f"{_ts()}: WARNING: failed to push pull-status back to {dest} "
+              f"(rc={result.returncode}): {result.stderr.strip()}", file=sys.stderr)
+    else:
+        print(f"{_ts()}: pushed pull-status -> {dest}")
+
+
 def _load_queue_data(path: Path) -> dict:
     if not path.is_file():
         return {"commands": []}
@@ -499,6 +525,7 @@ def main() -> int:
         for qp, entry in pending:
             entries_by_file.setdefault(qp, []).append(entry)
         _push_back_applied(args.pull_from, entries_by_file)
+        _push_back_pull_status(args.pull_from, Path(args.queue_dir))
 
     return 1 if failed else 0
 
