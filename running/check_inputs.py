@@ -287,23 +287,20 @@ def _check_file(path: str) -> tuple[bool, str]:
             d.close()
 
 
-def _time_coverage_ok(path: str, req_start: datetime.datetime, req_stop: datetime.datetime) -> Optional[tuple]:
-    """Checks a .nc file's own time axis against [req_start, req_stop],
-    using the file's OWN calendar for the comparison -- cftime refuses to
-    compare across calendars (a real, reproduced crash: a noleap river
-    file's cftime.DatetimeNoLeap vs. req_start/req_stop's plain
-    datetime.datetime), and forcing the file's own dates into plain
-    datetime.datetime isn't an option either (netCDF4.num2date's
-    only_use_python_datetimes=True raises outright for a noleap calendar,
-    not just for the genuinely-unrepresentable ones like 360_day -- also
-    reproduced directly). So req_start/req_stop are rebuilt as
-    cftime.datetime in the file's own calendar instead, and compared on
-    that common ground.
+def _as_tuple(dt) -> tuple:
+    """(year, month, day, hour, minute, second) -- comparable regardless
+    of calendar (cftime.datetime refuses to compare across calendars,
+    e.g. a noleap river file's dates vs. a plain datetime.datetime -- a
+    real, reproduced crash -- but every cftime/datetime flavor exposes
+    these same plain int attributes)."""
+    return (dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
 
-    Returns (ok, detail) if the file has a readable time axis, None if it
-    doesn't (or the file/calendar can't be read at all -- e.g. 360_day,
-    which cftime.datetime's own day-of-month range would reject)."""
-    import cftime
+
+def _read_time_bounds(path: str) -> Optional[tuple]:
+    """(cov_start, cov_stop) of a .nc file's own time axis (as whatever
+    cftime/datetime type netCDF4.num2date returns for its calendar), or
+    None if it has none / can't be read (e.g. 360_day, or no time
+    variable at all)."""
     import netCDF4
 
     d = None
@@ -316,20 +313,7 @@ def _time_coverage_ok(path: str, req_start: datetime.datetime, req_stop: datetim
         if not units:
             return None
         calendar = getattr(v, "calendar", "standard")
-        cov_start, cov_stop = netCDF4.num2date([v[0], v[-1]], units=units, calendar=calendar)
-        req_start_cf = cftime.datetime(
-            req_start.year, req_start.month, req_start.day,
-            req_start.hour, req_start.minute, req_start.second, calendar=calendar,
-        )
-        req_stop_cf = cftime.datetime(
-            req_stop.year, req_stop.month, req_stop.day,
-            req_stop.hour, req_stop.minute, req_stop.second, calendar=calendar,
-        )
-        ok = cov_start <= req_start_cf and req_stop_cf <= cov_stop
-        detail = f"covers {cov_start}..{cov_stop}"
-        if not ok:
-            detail += f" -- requested {req_start}..{req_stop} not fully covered"
-        return ok, detail
+        return tuple(netCDF4.num2date([v[0], v[-1]], units=units, calendar=calendar))
     except Exception:
         return None
     finally:
@@ -538,15 +522,37 @@ def check_generated_script(
     except RuntimeError as exc:
         inputs.append(InputCheck("river", "river_discharge.folder", "(unresolved)", False, str(exc)))
         river_files = []
+
+    # _list_river_files can return more than one file (source == "CMIP6"
+    # spliced with the real EMORID historical record -- see
+    # driver/scripts/rivers.py's own set_river_data) -- what needs to
+    # cover [req_start, req_stop] is their COMBINED span, not each file's
+    # own span independently (the historical file alone never reaches
+    # 2099; the projection file alone never reaches back before 2015 --
+    # neither is a failure on its own once the other is present).
+    req_start_t, req_stop_t = _as_tuple(req_start), _as_tuple(req_stop)
+    river_reports = []
+    river_bounds = []
     for desc, path, found in river_files:
         if not found:
-            inputs.append(InputCheck("river", desc, path, False, "not found"))
+            river_reports.append((desc, path, False, "not found"))
             continue
         ok, detail = _check_file(path)
         if ok:
-            cov = _time_coverage_ok(path, req_start, req_stop)
-            if cov:
-                ok, detail = cov
+            bounds = _read_time_bounds(path)
+            if bounds:
+                cov_start, cov_stop = bounds
+                river_bounds.append((_as_tuple(cov_start), _as_tuple(cov_stop)))
+                detail = f"covers {cov_start}..{cov_stop}"
+        river_reports.append((desc, path, ok, detail))
+
+    union_ok = bool(river_bounds) and (
+        min(b[0] for b in river_bounds) <= req_start_t <= req_stop_t <= max(b[1] for b in river_bounds)
+    )
+    for desc, path, file_ok, detail in river_reports:
+        ok = file_ok and (union_ok if river_bounds else True)
+        if file_ok and not ok:
+            detail += f" -- combined coverage does not fully cover requested {req_start}..{req_stop}"
         inputs.append(InputCheck("river", desc, path, ok, detail))
 
     if load_restart is None:
