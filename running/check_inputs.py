@@ -112,7 +112,9 @@ def _list_meteo_files(config: dict, start: str, stop: str) -> list:
     """Mirrors driver/scripts/meteo.py's set_meteo_data _raw_paths/
     _spliced_paths resolution, for the whole [start, stop] instead of
     one chunk. Never raises on a missing file. Returns
-    (description, path_or_pattern, found) tuples."""
+    (description, path_or_pattern, found, var) tuples -- `var` is the
+    variable name set_meteo_data actually reads from the file, so the
+    caller can check it's really inside, not just that the file opens."""
     meteo = config.get("meteo") or {}
     source = meteo.get("source")
     if source not in ("CMIP6", "CMIP6-raw"):
@@ -156,9 +158,9 @@ def _list_meteo_files(config: dict, start: str, stop: str) -> list:
                 candidates = sorted(folder.glob(pattern))
                 desc = f"CMIP6-raw {var} ({experiment})"
                 if candidates:
-                    results.append((desc, str(candidates[0]), True))
+                    results.append((desc, str(candidates[0]), True, var))
                 else:
-                    results.append((desc, str(folder / pattern), False))
+                    results.append((desc, str(folder / pattern), False, var))
 
     else:  # bias-corrected CMIP6
         var_templates = [
@@ -199,9 +201,9 @@ def _list_meteo_files(config: dict, start: str, stop: str) -> list:
                 desc = f"CMIP6 {var} ({experiment}, {seg_start}..{seg_stop})"
                 if matches:
                     for m in matches:
-                        results.append((desc, m, True))
+                        results.append((desc, m, True, var))
                 else:
-                    results.append((desc, pattern_str, False))
+                    results.append((desc, pattern_str, False, var))
 
     return results
 
@@ -218,7 +220,8 @@ def _list_river_files(config: dict, start: str, stop: str) -> list:
     ${RIVER_FOLDER_CMIP6}) is ALSO listed -- otherwise the checker would
     keep reporting a coverage gap that set_river_data's own splice
     already closes for real.
-    Returns [(description, path, found)]."""
+    Returns [(description, path, found, var)] -- both the projection
+    and the real EMORID file store discharge as "Q"."""
     rcfg = config.get("river_discharge")
     if not rcfg:
         return []
@@ -231,7 +234,7 @@ def _list_river_files(config: dict, start: str, stop: str) -> list:
     if config.get("runtime", {}).get("calendar") == "noleap":
         filename = filename.removesuffix(".nc") + "_noleap.nc"
     path = folder / filename
-    results = [("river discharge", str(path), path.is_file())]
+    results = [("river discharge", str(path), path.is_file(), "Q")]
 
     HIST_CUTOFF_YEAR = 2014
     if rcfg.get("source") == "CMIP6" and datetime.datetime.fromisoformat(start).year <= HIST_CUTOFF_YEAR:
@@ -240,7 +243,7 @@ def _list_river_files(config: dict, start: str, stop: str) -> list:
         if config.get("runtime", {}).get("calendar") == "noleap":
             hist_filename = hist_filename.removesuffix(".nc") + "_noleap.nc"
         hist_path = hist_folder / hist_filename
-        results.append(("river discharge (historical)", str(hist_path), hist_path.is_file()))
+        results.append(("river discharge (historical)", str(hist_path), hist_path.is_file(), "Q"))
 
     return results
 
@@ -248,26 +251,31 @@ def _list_river_files(config: dict, start: str, stop: str) -> list:
 def _list_ic_files(config: dict) -> list:
     """Mirrors driver/scripts/hydrography.py's set_hydrography_ic --
     only WOA/CMEMS read real files ("constant" hydrography has none).
-    Returns [(description, path, found)]."""
+    Returns [(description, path, found, var)]."""
     hydro = config.get("hydrography") or {}
     source = hydro.get("source")
     if source not in ("WOA", "CMEMS"):
         return []
     folder = Path(_resolve_data_path(hydro["folder"]))
     if source == "WOA":
-        files = [("hydrography IC salt (WOA)", folder / "woa_s.nc"),
-                 ("hydrography IC temp (WOA)", folder / "woa_t.nc")]
+        files = [("hydrography IC salt (WOA)", folder / "woa_s.nc", "s_an"),
+                 ("hydrography IC temp (WOA)", folder / "woa_t.nc", "t_an")]
     else:
-        files = [("hydrography IC salt (CMEMS)", folder / "so_2025_monthly_ic.nc"),
-                 ("hydrography IC temp (CMEMS)", folder / "thetao_2025_monthly_ic.nc")]
-    return [(desc, str(path), path.is_file()) for desc, path in files]
+        files = [("hydrography IC salt (CMEMS)", folder / "so_2025_monthly_ic.nc", "so_ff"),
+                 ("hydrography IC temp (CMEMS)", folder / "thetao_2025_monthly_ic.nc", "thetao_ff")]
+    return [(desc, str(path), path.is_file(), var) for desc, path, var in files]
 
 
-def _check_file(path: str) -> tuple[bool, str]:
+def _check_file(path: str, *, var: Optional[str] = None, expect_time: bool = False) -> tuple[bool, str]:
     """Existence + (for .nc files) a real open, to catch truncated/
-    corrupt downloads, not just missing files. Always closes the
-    handle explicitly (a leaked handle exhausted this session's fd
-    limit once already, in an unrelated script -- see
+    corrupt downloads, not just missing files -- plus, cheaply, since
+    the file is already open: that `var` (the variable name the driver
+    script actually reads, e.g. 'tas'/'Q'/'thetao') is really present,
+    and (if `expect_time`) that it has a real, usable 'time' coordinate
+    (present, with a 'units' attribute -- pygetm's TemporalInterpolation
+    needs that to do anything at all). Always closes the handle
+    explicitly (a leaked handle exhausted this session's fd limit once
+    already, in an unrelated script -- see
     docs/hdf5-chunk-cache-and-memory.md)."""
     p = Path(path)
     if not p.is_file():
@@ -279,12 +287,20 @@ def _check_file(path: str) -> tuple[bool, str]:
     d = None
     try:
         d = netCDF4.Dataset(path, "r")
-        return True, "ok"
     except Exception as exc:
         return False, f"unreadable/corrupt: {exc}"
+    try:
+        if var is not None and var not in d.variables:
+            sample = ", ".join(sorted(d.variables)[:8])
+            return False, f"opens fine but variable {var!r} not found (has: {sample}, ...)"
+        if expect_time:
+            if "time" not in d.variables:
+                return False, "opens fine but has no 'time' variable"
+            if not getattr(d.variables["time"], "units", None):
+                return False, "'time' variable has no 'units' attribute -- unusable for interpolation"
+        return True, "ok"
     finally:
-        if d is not None:
-            d.close()
+        d.close()
 
 
 def _as_tuple(dt) -> tuple:
@@ -351,6 +367,7 @@ class CheckReport:
 _DEF_RE = re.compile(r"^def (\w+)\(")
 _RESOLVE_RE = re.compile(r"resolve_data_path\((['\"])(.*?)\1\)")
 _DATE_RANGE_RE = re.compile(r"(\d{8})_(\d{8})")
+_FROM_NC_VAR_RE = re.compile(r"from_nc\(\[.*\],\s*['\"](\w+)['\"]\)")
 _OUTPUT_BLOCK_RE = re.compile(
     r"(output_file_\w+)\s*=\s*sim\.output_manager\.add_netcdf_file\(\s*"
     r"path=pathlib\.Path\(resolve_data_path\((['\"])(.*?)\2\)\)"
@@ -445,6 +462,7 @@ def check_generated_script(
 
         coverage_note = ""
         coverage_ok = True
+        boundary_var = None
         if date_ranges:
             category = "boundary"
             starts = [datetime.datetime.strptime(a, "%Y%m%d") for a, _ in date_ranges]
@@ -454,19 +472,27 @@ def check_generated_script(
             coverage_note = f"covers {cov_start.date()}..{cov_stop.date()}"
             if not coverage_ok:
                 coverage_note += f" -- requested {req_start.date()}..{req_stop.date()} not fully covered"
+            var_m = _FROM_NC_VAR_RE.search(line)
+            boundary_var = var_m.group(1) if var_m else None
         else:
             category = "bathymetry" if func == "create_domain" else "simulation setup"
 
         for p in literal_paths:
-            if p in seen_paths:
+            # Dedup key includes the variable, not just the path -- the
+            # SAME bdy_2d_*.nc file is referenced on separate lines for
+            # zos/uo/vo (three different variables, one file each); a
+            # path-only dedup would check the first and silently skip
+            # ever validating the other two exist (a real, caught bug).
+            seen_key = (p, boundary_var)
+            if seen_key in seen_paths:
                 continue
-            seen_paths.add(p)
+            seen_paths.add(seen_key)
             try:
                 resolved = _resolve_data_path(p)
             except RuntimeError as exc:
                 inputs.append(InputCheck(category, p, p, False, str(exc)))
                 continue
-            ok, detail = _check_file(resolved)
+            ok, detail = _check_file(resolved, var=boundary_var, expect_time=(boundary_var is not None))
             if ok and not coverage_ok:
                 ok, detail = False, coverage_note
             elif ok and coverage_note:
@@ -518,11 +544,11 @@ def check_generated_script(
     except (RuntimeError, ValueError) as exc:
         inputs.append(InputCheck("meteo", "meteo.folder", "(unresolved)", False, str(exc)))
         meteo_files = []
-    for desc, path_or_pattern, found in meteo_files:
+    for desc, path_or_pattern, found, var in meteo_files:
         if not found:
             inputs.append(InputCheck("meteo", desc, path_or_pattern, False, "not found"))
             continue
-        ok, detail = _check_file(path_or_pattern)
+        ok, detail = _check_file(path_or_pattern, var=var, expect_time=True)
         inputs.append(InputCheck("meteo", desc, path_or_pattern, ok, detail))
 
     try:
@@ -541,11 +567,11 @@ def check_generated_script(
     req_start_t, req_stop_t = _as_tuple(req_start), _as_tuple(req_stop)
     river_reports = []
     river_bounds = []
-    for desc, path, found in river_files:
+    for desc, path, found, var in river_files:
         if not found:
             river_reports.append((desc, path, False, "not found"))
             continue
-        ok, detail = _check_file(path)
+        ok, detail = _check_file(path, var=var, expect_time=True)
         if ok:
             bounds = _read_time_bounds(path)
             if bounds:
@@ -569,11 +595,11 @@ def check_generated_script(
         except RuntimeError as exc:
             inputs.append(InputCheck("initial condition", "hydrography.folder", "(unresolved)", False, str(exc)))
             ic_files = []
-        for desc, path, found in ic_files:
+        for desc, path, found, var in ic_files:
             if not found:
                 inputs.append(InputCheck("initial condition", desc, path, False, "not found"))
                 continue
-            ok, detail = _check_file(path)
+            ok, detail = _check_file(path, var=var, expect_time=True)
             inputs.append(InputCheck("initial condition", desc, path, ok, detail))
 
     if fabm:
