@@ -268,9 +268,23 @@ def _check_file(path: str) -> tuple[bool, str]:
             d.close()
 
 
-def _time_coverage(path: str) -> Optional[tuple]:
-    """Best-effort (start, stop) of a .nc file's own time axis, or
-    None if it has none / can't be read."""
+def _time_coverage_ok(path: str, req_start: datetime.datetime, req_stop: datetime.datetime) -> Optional[tuple]:
+    """Checks a .nc file's own time axis against [req_start, req_stop],
+    using the file's OWN calendar for the comparison -- cftime refuses to
+    compare across calendars (a real, reproduced crash: a noleap river
+    file's cftime.DatetimeNoLeap vs. req_start/req_stop's plain
+    datetime.datetime), and forcing the file's own dates into plain
+    datetime.datetime isn't an option either (netCDF4.num2date's
+    only_use_python_datetimes=True raises outright for a noleap calendar,
+    not just for the genuinely-unrepresentable ones like 360_day -- also
+    reproduced directly). So req_start/req_stop are rebuilt as
+    cftime.datetime in the file's own calendar instead, and compared on
+    that common ground.
+
+    Returns (ok, detail) if the file has a readable time axis, None if it
+    doesn't (or the file/calendar can't be read at all -- e.g. 360_day,
+    which cftime.datetime's own day-of-month range would reject)."""
+    import cftime
     import netCDF4
 
     d = None
@@ -283,8 +297,20 @@ def _time_coverage(path: str) -> Optional[tuple]:
         if not units:
             return None
         calendar = getattr(v, "calendar", "standard")
-        times = netCDF4.num2date([v[0], v[-1]], units=units, calendar=calendar)
-        return times[0], times[1]
+        cov_start, cov_stop = netCDF4.num2date([v[0], v[-1]], units=units, calendar=calendar)
+        req_start_cf = cftime.datetime(
+            req_start.year, req_start.month, req_start.day,
+            req_start.hour, req_start.minute, req_start.second, calendar=calendar,
+        )
+        req_stop_cf = cftime.datetime(
+            req_stop.year, req_stop.month, req_stop.day,
+            req_stop.hour, req_stop.minute, req_stop.second, calendar=calendar,
+        )
+        ok = cov_start <= req_start_cf and req_stop_cf <= cov_stop
+        detail = f"covers {cov_start}..{cov_stop}"
+        if not ok:
+            detail += f" -- requested {req_start}..{req_stop} not fully covered"
+        return ok, detail
     except Exception:
         return None
     finally:
@@ -499,13 +525,9 @@ def check_generated_script(
             continue
         ok, detail = _check_file(path)
         if ok:
-            cov = _time_coverage(path)
+            cov = _time_coverage_ok(path, req_start, req_stop)
             if cov:
-                cs, ce = cov
-                detail = f"covers {cs}..{ce}"
-                if not (cs <= req_start and req_stop <= ce):
-                    ok = False
-                    detail += f" -- requested {req_start}..{req_stop} not fully covered"
+                ok, detail = cov
         inputs.append(InputCheck("river", desc, path, ok, detail))
 
     if load_restart is None:
