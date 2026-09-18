@@ -504,10 +504,18 @@ def check_generated_script(
     # (same _resolve_data_path as the static-scan section above) -- a
     # missing env var is a real, reportable pre-flight failure, not a
     # crash, so it's caught here the same way the static scan already
-    # catches it per-literal.
+    # catches it per-literal. _expand_year_glob's own ValueError
+    # (2+ files matching one year's wildcard -- ambiguous, refuses to
+    # guess) is exactly as real a pre-flight failure: the real driver
+    # script's own set_meteo_data would hit the identical crash at
+    # runtime (a real, reproduced case: a stray duplicate-looking file
+    # left over on disk, e.g. tas_bc_bilinear__disagg_2010.nc alongside
+    # the correctly-named tas_bc_bilinear_historical_disagg_2010.nc) --
+    # a --dry-run's whole point is to surface that now, in a report
+    # covering everything else too, not die on the first one.
     try:
         meteo_files = _list_meteo_files(config, start, stop)
-    except RuntimeError as exc:
+    except (RuntimeError, ValueError) as exc:
         inputs.append(InputCheck("meteo", "meteo.folder", "(unresolved)", False, str(exc)))
         meteo_files = []
     for desc, path_or_pattern, found in meteo_files:
