@@ -386,11 +386,6 @@ def _main_tracked(args: argparse.Namespace) -> int:
             chunk_dir.rmdir()  # dry-experiment shouldn't leave an empty dir behind
             return 0
 
-        # Pointer file so a wrapper (e.g. run_chunk.slurm) that needs this
-        # chunk's log path to tail it live doesn't have to guess or parse
-        # stdout -- it can just wait for this file and read it.
-        (experiment_root / ".current_chunk_dir").write_text(str(chunk_dir) + "\n")
-
         # The running-chunk check above and this insert aren't wrapped in
         # one atomic transaction, so two processes starting at the exact
         # same instant could both pass the check and then collide here
@@ -412,6 +407,19 @@ def _main_tracked(args: argparse.Namespace) -> int:
                   f"-- backing off.", file=sys.stderr)
             chunk_dir.rmdir()
             return 1
+
+        # Pointer file so a wrapper (e.g. run_chunk.slurm) that needs this
+        # chunk's log path to tail it live doesn't have to guess or parse
+        # stdout -- it can just wait for this file and read it. Written
+        # only AFTER start_chunk() actually wins the DB race (not before
+        # it, as this used to be): the double-submit race above means two
+        # processes could each write this same experiment-wide pointer
+        # file for their OWN chunk_dir before either one knows who wins --
+        # whoever wrote last would leave the pointer aimed at the LOSER's
+        # chunk_dir, which then gets rmdir()'d a few lines up, leaving the
+        # wrapper tailing a directory that no longer exists even though
+        # the winner's chunk is the one actually running.
+        (experiment_root / ".current_chunk_dir").write_text(str(chunk_dir) + "\n")
 
     # DB connection closed while the (potentially long-running) simulation
     # executes, so it isn't held open across the whole chunk.
