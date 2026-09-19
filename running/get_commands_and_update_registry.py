@@ -265,6 +265,15 @@ def _load_queue_data(path: Path) -> dict:
     data = yaml.safe_load(path.read_text()) or {}
     if isinstance(data, list):
         data = {"commands": data}
+    # A hand-edited file with a bare "commands:" (no value) parses as
+    # {"commands": None} -- every caller below does data.get("commands", [])
+    # for exactly this "commands never explicitly set to a list" case, but
+    # dict.get's default only kicks in when the KEY is missing, not when
+    # it's present and None (confirmed: a real queue_kb.yaml hand-edited
+    # this way crashed oceanicu_experiments.py's own _queue_command the
+    # same way, TypeError: 'NoneType' object is not iterable here).
+    if data.get("commands") is None:
+        data["commands"] = []
     return data
 
 

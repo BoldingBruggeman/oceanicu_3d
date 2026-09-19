@@ -313,7 +313,15 @@ def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
     # the matching normalization in get_commands_and_update_registry.py.
     if isinstance(data, list):
         data = {"commands": data}
-    commands = data.setdefault("commands", [])
+    # setdefault's default only applies when the KEY is missing -- a
+    # hand-edited file with a bare "commands:" (no value) parses as
+    # {"commands": None}, and setdefault("commands", []) then returns
+    # that existing None right back (confirmed: this is exactly what a
+    # real queue_kb.yaml did in production -- AttributeError: 'NoneType'
+    # object has no attribute 'insert' on the commands.insert() below).
+    commands = data.get("commands")
+    if commands is None:
+        commands = data["commands"] = []
 
     call_args = {k: v for k, v in vars(args).items() if k not in _QUEUE_EXCLUDE_KEYS}
     cmd_id = f"cmd-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{secrets.token_hex(2)}"
