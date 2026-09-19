@@ -397,8 +397,6 @@ meteo:
   ERA5:
     folder: ${ERA5_FOLDER}
     evaporation: true
-    shortwave_method: 1
-    longwave_method: 1
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
   CMIP6:
     folder: ${CMIP6_FOLDER}
@@ -406,8 +404,6 @@ meteo:
     model: GFDL-ESM4
     scenario: ssp126
     evaporation: true
-    shortwave_method: 1
-    longwave_method: 1
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
 river_discharge:
   source: emorid

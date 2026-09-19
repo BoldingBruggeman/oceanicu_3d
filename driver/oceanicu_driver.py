@@ -60,22 +60,19 @@ from pygetm_config.yaml_parse import validate_config
 # scripts/hydrography.py), never imported directly here -- see those files'
 # own module docstrings.
 
-# meteo.<source>.shortwave_method/longwave_method (oceanicu_providers.py's
-# own _meteo_shared) are plain ints (matching cfg_airsea.py's own real -1/
-# -2/1 literals) -- but simulation.airsea.shortwave_method/longwave_method
-# (the REAL pygetm.airsea.FluxesFromMeteo constructor params that actually
-# control construction) are schema-typed as an ENUM of string names: a
-# synthesized "sentinel_overlay" enum, airsea.shortwave_method_or_sentinel/
-# longwave_method_or_sentinel, wrapping pygetm.airsea.ShortwaveMethod/
-# awex.LongwaveMethod plus the NET_FLUX(-1)/DOWNWARD_FLUX(-2) sentinels.
-# These two dicts translate the int value into the enum member name the
-# schema actually needs; kept as a name->name map (not the raw int) so this
-# stays correct even if pygetm ever renumbers the underlying enum values.
-_SHORTWAVE_METHOD_NAMES = {1: "ROSATI_MIYAKODA", -1: "NET_FLUX", -2: "DOWNWARD_FLUX"}
-_LONGWAVE_METHOD_NAMES = {
-    1: "CLARK", 2: "HASTENRATH_LAMB", 3: "BIGNAMI", 4: "BERLIAND_BERLIAND",
-    5: "JOSEY1", 6: "JOSEY2", -1: "NET_FLUX", -2: "DOWNWARD_FLUX",
-}
+# meteo.<source>.shortwave_method/longwave_method were removed from the
+# schema 2026-09-07 (see oceanicu_providers.py's own _meteo_shared comment):
+# they were a stale copy of simulation.airsea.<type>.shortwave_method/
+# longwave_method (the REAL pygetm.airsea.FluxesFromMeteo constructor
+# params) that could silently drift out of sync with it -- set_meteo_data
+# now reads the real simulation.airsea value directly instead. This file
+# used to propagate meteo.<source>.shortwave_method/longwave_method into
+# simulation.airsea.<type> here, recreating exactly that drift risk; removed
+# along with the int->enum-name translation dicts it needed, since the
+# schema now rejects those meteo-level fields outright (confirmed: a real
+# config still carrying them, NSe/config/nse_from_oceanicu.yaml, failed
+# validate_config with "unknown field" until the leftover fields were
+# dropped from it too).
 
 
 def main(argv=None) -> int:
@@ -372,16 +369,22 @@ def main(argv=None) -> int:
         _airsea_type_cfg["humidity_measure"] = (
             "DEW_POINT_TEMPERATURE" if meteo_source == "ERA5" else "SPECIFIC_HUMIDITY"
         )
-        if meteo_cfg.get("shortwave_method") is not None:
-            _airsea_type_cfg.setdefault(
-                "shortwave_method", _SHORTWAVE_METHOD_NAMES[meteo_cfg["shortwave_method"]]
-            )
-        if meteo_cfg.get("longwave_method") is not None:
-            _airsea_type_cfg.setdefault(
-                "longwave_method", _LONGWAVE_METHOD_NAMES[meteo_cfg["longwave_method"]]
-            )
         if meteo_cfg.get("evaporation") is not None:
             _airsea_type_cfg.setdefault("calculate_evaporation", meteo_cfg["evaporation"])
+    elif meteo_source == "Fluxes":
+        # Same auto-derivation as the ERA5/CMIP6/CMIP6-raw branch above, for
+        # the "Fluxes" meteo source added later (2026-09-14) -- that branch's
+        # own `_airsea_cfg.setdefault("type", "FluxesFromMeteo")` only ever
+        # ran for the three original sources (it's inside the `if
+        # meteo_source in (...)` block above, which meteo_source=="Fluxes"
+        # never enters), so a config using meteo.source: Fluxes still had to
+        # set simulation.airsea.type: Fluxes by hand -- exactly the
+        # duplication derive_data_assignments' own mismatch ValueError
+        # guards against catching, not something it removes. No shared
+        # params to propagate here (humidity_measure/shortwave_method/
+        # longwave_method/evaporation are all FluxesFromMeteo-specific), so
+        # just the `type` default.
+        raw.setdefault("simulation", {}).setdefault("airsea", {}).setdefault("type", "Fluxes")
 
     # fabm.<source>'s own schema default (fabm.data_script) isn't
     # auto-injected either (same reasoning as river_discharge.script/
