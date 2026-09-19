@@ -8,7 +8,6 @@ FABM output is configured in lib/cfg_output
 """
 
 import sys
-from pathlib import Path
 import xarray as xr
 
 import pygetm
@@ -16,7 +15,6 @@ import pygetm
 
 # A routine by Gennadi to make data compatible with the input manager
 def _add_coord(nc):  # Nicolas - make more generic later
-    global _fabm_folder
     fmesh = xr.open_dataset(_fabm_folder / "mesh_mask.nc")
     nc = nc.drop_vars(("lon", "lat"))
     nc = nc.rename_dims(x="longitude", y="latitude")

@@ -73,8 +73,8 @@ def create(
                     hfilter=0.4,
                     timescale=4.0 * 3600.0,
                 )
-            except:
-                print("Error: can not initialize Adaptive-coordinates")
+            except Exception as exc:
+                print(f"Error: can not initialize Adaptive-coordinates: {exc}")
                 sys.exit(1)
 
     return vertical_coordinates

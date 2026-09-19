@@ -16,8 +16,6 @@ cfg.meteo.CMIP6) provides the folder path.
 
 """
 
-from pathlib import Path
-
 import pygetm
 
 from .cfg_utils import resolve_folder
@@ -27,7 +25,6 @@ def create(cfg) -> pygetm.airsea:
     # If a meteo source is not set use the simple Fluxes method
     if not cfg.meteo.source:
         airsea = pygetm.airsea.Fluxes()
-        calculate_evaporation = False
     else:
         # Dew point variable differs between the two sources
         if cfg.meteo.source == "ERA5":
@@ -42,7 +39,6 @@ def create(cfg) -> pygetm.airsea:
         if cfg.meteo.longwave_method == -1 or cfg.meteo.longwave_method == -2:
             _longwave_method = cfg.meteo.longwave_method
         else:
-            n = cfg.meteo.longwave_method
             _longwave_method = pygetm.LongwaveMethod.CLARK
 
         airsea = pygetm.airsea.FluxesFromMeteo(

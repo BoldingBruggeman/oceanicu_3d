@@ -8,7 +8,6 @@ import yaml
 from pathlib import Path
 from types import SimpleNamespace
 import sys
-import os
 
 
 # ----------------------------------------------------------------------
