@@ -1,0 +1,10 @@
+#!/bin/bash
+# Wrapper so `run-chunks-local ...` works from anywhere (run it FROM the
+# experiment's own directory -- see run_chunks_local.py's own docstring)
+# once running/bin is on PATH -- see EXPERIMENT_TRACKING.md and
+# relay.env.example. Just forwards to the real script, which lives one
+# directory up from this one; pure stdlib, no conda env needed for this
+# one (only the actual pyGETM driver subprocess needs that, handled by
+# chunk_runner.py itself).
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+exec python3 "$(dirname "$SELF")/../run_chunks_local.py" "$@"
