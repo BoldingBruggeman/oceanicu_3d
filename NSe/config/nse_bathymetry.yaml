@@ -365,19 +365,22 @@ smooth:
     # water regardless of how far the polygon extends onto either side.
     # Capped at 9E to stay clear of the Little Belt. Verified against real
     # coastline data before adding.
-    - name: wadden_sea
-      vertices:
-        - [4.6, 53.65]
-        - [6.3, 53.90]
-        - [8.0, 54.05]
-        - [8.4, 54.60]
-        - [7.7, 55.60]
-        - [9.0, 55.60]
-        - [9.0, 52.90]
-        - [4.6, 52.90]
-      filter: laplacian
-      iterations: 20
-      alpha: 0.3
+    # Commented out: filter_type="laplacian" just landed in ocean-prep
+    # (2026-09-19) and hasn't been run/validated against a real bathymetry
+    # generation yet -- re-enable once it has.
+    # - name: wadden_sea
+    #   vertices:
+    #     - [4.6, 53.65]
+    #     - [6.3, 53.90]
+    #     - [8.0, 54.05]
+    #     - [8.4, 54.60]
+    #     - [7.7, 55.60]
+    #     - [9.0, 55.60]
+    #     - [9.0, 52.90]
+    #     - [4.6, 52.90]
+    #   filter: laplacian
+    #   iterations: 20
+    #   alpha: 0.3
   rx0: 0.20
   local_rx0:
     - name: "Northern boundary tighter"
