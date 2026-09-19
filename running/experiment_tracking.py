@@ -1641,7 +1641,7 @@ def recompute_experiment_status(conn: sqlite3.Connection, experiment_id: str) ->
         new_status = "not_started"
     elif any(c["status"] == "running" for c in chunks):
         new_status = "in_progress"
-    elif any(c["status"] == "failed" for c in chunks) and chunks[-1]["status"] == "failed":
+    elif chunks[-1]["status"] == "failed":
         new_status = "failed"
     else:
         done = [c for c in chunks if c["status"] == "done"]

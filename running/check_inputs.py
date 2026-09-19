@@ -580,9 +580,19 @@ def check_generated_script(
                 detail = f"covers {cov_start}..{cov_stop}"
         river_reports.append((desc, path, ok, detail))
 
-    union_ok = bool(river_bounds) and (
-        min(b[0] for b in river_bounds) <= req_start_t <= req_stop_t <= max(b[1] for b in river_bounds)
-    )
+    # Real coverage, not just the outer envelope -- min(starts)..max(stops)
+    # alone would call this OK even with a genuine gap in the middle (e.g.
+    # the historical file truncated short of 2015, scenario file starting
+    # exactly at 2015 as expected): sort by start and require each file to
+    # pick up no later than the previous one's own stop, same as the outer
+    # bracket check, not just the two endpoints.
+    river_bounds.sort(key=lambda b: b[0])
+    union_ok = bool(river_bounds) and river_bounds[0][0] <= req_start_t and req_stop_t <= river_bounds[-1][1]
+    if union_ok:
+        for (_, prev_stop), (cur_start, _) in zip(river_bounds, river_bounds[1:]):
+            if cur_start > prev_stop:
+                union_ok = False
+                break
     for desc, path, file_ok, detail in river_reports:
         ok = file_ok and (union_ok if river_bounds else True)
         if file_ok and not ok:

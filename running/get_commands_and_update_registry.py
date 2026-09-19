@@ -455,52 +455,74 @@ def main() -> int:
         eid = entry_args.get("experiment_id")
         if not eid:
             return
-        detail = (f"{entry['id']} ({entry['action']}) from {qp.name}, queued_at="
-                  f"{entry.get('queued_at')} -> {entry['status']}"
+        # .get() throughout, not entry[...] -- a malformed entry (missing
+        # even 'id'/'action') must still be able to reach this best-effort
+        # log call without raising, same "never allowed to break the
+        # actual apply" intent this function already documents for the
+        # DB-write half below.
+        entry_id = entry.get("id", "?")
+        detail = (f"{entry_id} ({entry.get('action', '?')}) from {qp.name}, queued_at="
+                  f"{entry.get('queued_at')} -> {entry.get('status', '?')}"
                   f"{': ' + entry['note'][:300] if entry.get('note') else ''}")
         try:
             with rt.connect(args.db) as conn:
                 rt.record_queue_command(conn, eid, detail, user=entry.get("queued_by"))
         except Exception as exc:
             print(f"{_ts()}: WARNING: couldn't record queue-command history for "
-                  f"{entry['id']}: {exc}", file=sys.stderr)
+                  f"{entry_id}: {exc}", file=sys.stderr)
 
     applied = 0
     failed = 0
     for qp, entry in pending:
-        action = entry["action"]
+        entry_id = entry.get("id", "?")
         entry_args = entry.get("args", {})
-        entry["applied_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        try:
+            action = entry["action"]
+            entry["applied_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
-        if action == "add":
-            verify_error = _verify_experiment_files_present(
-                entry_args["experiment_root"], entry_args["script"], entry_args["config"],
+            if action == "add":
+                verify_error = _verify_experiment_files_present(
+                    entry_args["experiment_root"], entry_args["script"], entry_args["config"],
+                )
+                if verify_error:
+                    entry["status"] = "failed"
+                    entry["note"] = verify_error
+                    failed += 1
+                    print(f"{_ts()}: {entry_id} ({qp.name}): FAILED (add, checking files) -- {verify_error}",
+                          file=sys.stderr)
+                    _write_back(qp, sources[qp])
+                    _record_queue_result(entry, qp, entry_args)
+                    continue
+
+            cli_args = _args_dict_to_cli(entry_args)
+            result = subprocess.run(
+                [sys.executable, str(OCEANICU_EXPERIMENTS_SCRIPT), "--db", args.db, action, *cli_args],
+                capture_output=True, text=True,
             )
-            if verify_error:
+            if result.returncode == 0:
+                entry["status"] = "applied"
+                entry["note"] = result.stdout.strip() or None
+                applied += 1
+                print(f"{_ts()}: {entry_id} ({qp.name}): applied ({action})")
+            else:
                 entry["status"] = "failed"
-                entry["note"] = verify_error
+                entry["note"] = (result.stderr.strip() or result.stdout.strip() or "unknown error")[-2000:]
                 failed += 1
-                print(f"{_ts()}: {entry['id']} ({qp.name}): FAILED (add, checking files) -- {verify_error}",
-                      file=sys.stderr)
-                _write_back(qp, sources[qp])
-                _record_queue_result(entry, qp, entry_args)
-                continue
-
-        cli_args = _args_dict_to_cli(entry_args)
-        result = subprocess.run(
-            [sys.executable, str(OCEANICU_EXPERIMENTS_SCRIPT), "--db", args.db, action, *cli_args],
-            capture_output=True, text=True,
-        )
-        if result.returncode == 0:
-            entry["status"] = "applied"
-            entry["note"] = result.stdout.strip() or None
-            applied += 1
-            print(f"{_ts()}: {entry['id']} ({qp.name}): applied ({action})")
-        else:
+                print(f"{_ts()}: {entry_id} ({qp.name}): FAILED ({action}) -- {entry['note']}", file=sys.stderr)
+        except Exception as exc:
+            # A malformed entry (e.g. an `add` missing experiment_root/
+            # script/config, or no `action` at all) must fail just THIS
+            # entry, not crash the whole batch -- every other failure mode
+            # in this loop already only ever marks one entry `failed` and
+            # moves on; an uncaught exception here would silently lose
+            # track of every remaining pending entry in the same run
+            # instead (they'd never get written back at all, and would
+            # incorrectly still show `pending` next round even though this
+            # run never actually looked at them again).
             entry["status"] = "failed"
-            entry["note"] = (result.stderr.strip() or result.stdout.strip() or "unknown error")[-2000:]
+            entry["note"] = f"unexpected error applying this entry: {exc}"[:2000]
             failed += 1
-            print(f"{_ts()}: {entry['id']} ({qp.name}): FAILED ({action}) -- {entry['note']}", file=sys.stderr)
+            print(f"{_ts()}: {entry_id} ({qp.name}): FAILED (unexpected error) -- {exc}", file=sys.stderr)
 
         # Write back after EACH command, not just at the end -- a crash
         # partway through a long queue must not lose already-applied
