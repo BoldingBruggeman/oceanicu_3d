@@ -11,8 +11,8 @@
 # the trip.
 
 chunk_kind: annual
-chunk_multiplier: 5
-np: 192
+chunk_multiplier: 10
+np: 183
 launcher: srun
 priority: 0
 chunk_delay_seconds: 0
