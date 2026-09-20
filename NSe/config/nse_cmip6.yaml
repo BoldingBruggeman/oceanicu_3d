@@ -463,7 +463,14 @@ meteo:
   # static constant values (also needs simulation.airsea.type: Fluxes).
   Fluxes: {}
 river_discharge:
-  source: emorid
+  # emorid alone (no CMIP6 splice) would leave a run with no valid river
+  # data at all once it runs past EMORID_1990_2024.nc's own real coverage
+  # (this scenario runs to 2099) -- CMIP6 gets the same historical+scenario
+  # splice as meteo/boundaries (add_rivers/set_river_data auto-includes the
+  # real EMORID historical file for any [start, stop] reaching back before
+  # 2015), same as nse_cmip6_raw.yaml already does correctly. No noleap
+  # suffix needed here (standard calendar, unlike the raw variant).
+  source: CMIP6
   emorid:
     folder: ${RIVER_FOLDER}
     file: EMORID_1990_2024.nc
@@ -473,7 +480,7 @@ river_discharge:
   CMIP6:
     folder: ${RIVER_FOLDER_CMIP6}
     folder_template: CMIP6/{model}/{scenario}/rivers
-    model: MPI-ESM1-2-HR
+    model: GFDL-ESM4
     scenario: ssp126
     file: river_flows_future_{scenario}.nc
     threshold: 0
