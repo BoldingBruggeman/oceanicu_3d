@@ -78,6 +78,19 @@ _CATEGORY_VARS = {
 
 _MANIFEST_COLUMNS = ("category", "relpath", "size", "mtime", "method", "value")
 
+# Vars naming a PURE DOWNLOAD from an external source, where a different
+# machine legitimately having a different regional extract/subset (not a
+# real data problem) is expected, not an error -- ERA5 specifically, per
+# user, 2026-09-20: "HPC might use a different ERA5 folder for a slightly
+# different area -- but since these are pure download it should not
+# matter and not regarded as an error." A mismatch here is still printed
+# (so it's visible, not silently swallowed) but never counted toward
+# `problems`/the exit code. Extendable via --advisory on the CLI for any
+# other var that turns out to have the same property (e.g. CMIP6_RAW_FOLDER
+# is also a pure download, but not yet confirmed to vary by machine the
+# same way -- not defaulted here until it actually comes up).
+_DEFAULT_ADVISORY_VARS = {"ERA5_FOLDER"}
+
 
 def _load_data_roots(path: str) -> dict:
     """Same tiny, self-contained parse as check_inputs.py's own
@@ -187,42 +200,50 @@ def _load_manifest(path: str) -> dict[str, tuple]:
     return entries
 
 
-def compare(data_roots_file: str, manifest_path: str) -> int:
+def compare(data_roots_file: str, manifest_path: str, advisory_vars: set) -> int:
     """Re-check each manifest entry the SAME way it was recorded (hash
     vs. stat) against the local data_roots -- returns the number of
-    problems found (0 = clean), same exit-code convention as
-    check_inputs.py's own report.ok."""
+    real problems found (0 = clean), same exit-code convention as
+    check_inputs.py's own report.ok. A mismatch under a var in
+    *advisory_vars* is still printed, marked [ADVISORY], but never
+    counted -- see _DEFAULT_ADVISORY_VARS' own comment."""
     data_roots = _load_data_roots(data_roots_file)
     by_category = _resolve_category_folders(data_roots)
     roots_by_var = {var: root for folders in by_category.values() for var, root in folders}
 
     manifest = _load_manifest(manifest_path)
     problems = 0
+    advisories = 0
     seen_relpaths: set = set()
+
+    def _report(var: str, tag: str, message: str) -> None:
+        nonlocal problems, advisories
+        if var in advisory_vars:
+            print(f"[ADVISORY {tag}] {message}", file=sys.stderr)
+            advisories += 1
+        else:
+            print(f"[{tag}] {message}", file=sys.stderr)
+            problems += 1
 
     for relpath, (_category, exp_size, _exp_mtime, method, exp_value) in sorted(manifest.items()):
         var, _, sub = relpath.partition("/")
         root = roots_by_var.get(var)
         if root is None:
-            print(f"[MISSING FOLDER] {var} (needed for {relpath}) not resolved on this machine", file=sys.stderr)
-            problems += 1
+            _report(var, "MISSING FOLDER", f"{var} (needed for {relpath}) not resolved on this machine")
             continue
         local_path = root / sub
         seen_relpaths.add(relpath)
         if not local_path.is_file():
-            print(f"[MISSING] {relpath}", file=sys.stderr)
-            problems += 1
+            _report(var, "MISSING", relpath)
             continue
         st = local_path.stat()
         if st.st_size != exp_size:
-            print(f"[SIZE MISMATCH] {relpath}: expected {exp_size}, got {st.st_size}", file=sys.stderr)
-            problems += 1
+            _report(var, "SIZE MISMATCH", f"{relpath}: expected {exp_size}, got {st.st_size}")
             continue
         if method == "md5":
             actual = _md5_of(local_path)
             if actual != exp_value:
-                print(f"[CONTENT MISMATCH] {relpath}: md5 {exp_value} -> {actual}", file=sys.stderr)
-                problems += 1
+                _report(var, "CONTENT MISMATCH", f"{relpath}: md5 {exp_value} -> {actual}")
         # method == "stat": size already checked above; mtime is
         # informational only (a legitimate re-transfer can change it
         # without the content actually differing), never itself a failure.
@@ -232,10 +253,12 @@ def compare(data_roots_file: str, manifest_path: str) -> int:
             for f in _iter_files(root):
                 relpath = f"{var}/{f.relative_to(root)}"
                 if relpath not in manifest and relpath not in seen_relpaths:
-                    print(f"[EXTRA, NOT IN MANIFEST] {relpath}", file=sys.stderr)
-                    problems += 1
+                    _report(var, "EXTRA, NOT IN MANIFEST", relpath)
 
-    print(f"{'ALL CHECKS PASSED' if problems == 0 else f'{problems} PROBLEM(S) FOUND'}", file=sys.stderr)
+    summary = "ALL CHECKS PASSED" if problems == 0 else f"{problems} PROBLEM(S) FOUND"
+    if advisories:
+        summary += f" ({advisories} advisory notice(s), not counted)"
+    print(summary, file=sys.stderr)
     return 0 if problems == 0 else 2
 
 
@@ -253,12 +276,20 @@ def main() -> int:
     c = sub.add_parser("compare", help="check this machine's own data against a manifest")
     c.add_argument("--data-roots-file", required=True)
     c.add_argument("manifest", metavar="MANIFEST_PATH")
+    c.add_argument("--advisory", action="append", default=[], metavar="VAR_NAME",
+                    help="treat a mismatch under this data_roots.yaml variable as informational, "
+                         f"not a real problem (default: {', '.join(sorted(_DEFAULT_ADVISORY_VARS))} -- "
+                         "pure downloads that legitimately differ by machine/region). Repeatable; "
+                         "adds to, doesn't replace, the defaults.")
+    c.add_argument("--no-default-advisory", action="store_true",
+                    help="don't apply the default advisory set above -- only --advisory vars (if any) count")
 
     args = p.parse_args()
     if args.cmd == "generate":
         generate(args.data_roots_file, args.output, args.max_hash_gb)
         return 0
-    return compare(args.data_roots_file, args.manifest)
+    advisory_vars = set(args.advisory) | (set() if args.no_default_advisory else _DEFAULT_ADVISORY_VARS)
+    return compare(args.data_roots_file, args.manifest, advisory_vars)
 
 
 if __name__ == "__main__":
