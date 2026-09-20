@@ -59,6 +59,19 @@ order across all of them, so real submission order is preserved
 regardless of which file an entry lives in. `--queue PATH` (a single,
 exact file) still works too, for a quick one-off or testing.
 
+**One name per queuing MACHINE, not just per person** (confirmed
+2026-09-20): the merge-by-id protection in _merge_queue_file/_pull below
+only protects entries that arrive as NEW ids on the bb-server1<-HPC leg
+-- the earlier orca<-relay-side rsync that stages a person's own queue
+file onto bb-server1 in the first place (e.g. the data repo's own
+UPDATE script) is a plain, unmerged overwrite. If the same person queues
+from two different machines (e.g. orca and shark) using the identical
+filename `queue_kb.yaml`, whichever machine's UPDATE runs LAST silently
+overwrites the other's un-synced entries -- there is no id-based
+protection on that hop. Name the file `queue_<name>_<machine>.yaml`
+(e.g. `queue_kb_orca.yaml`) so each machine's own queue is a distinct
+file; still matches the `queue_*.yaml` glob everywhere it needs to.
+
 `hpc_commands/` itself is plain data, deliberately NOT part of the
 `oceanicu_3d` git repo -- see EXPERIMENT_TRACKING.md "Command queue" for where
 it actually lives and how it physically gets here (rsync, at every hop,

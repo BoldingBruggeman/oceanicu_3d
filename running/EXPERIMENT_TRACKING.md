@@ -1113,6 +1113,18 @@ file, **each person gets their own**, `queue_<name>.yaml` -- avoids any
 risk of one person's `rsync` clobbering another's in-flight edit to the
 same file.
 
+**One name per queuing machine too, not just per person** (confirmed
+2026-09-20): that per-person filename only avoids collisions on the
+bb-server1<-HPC leg (merged by id there); the earlier per-person
+machine<-bb-server1 rsync (e.g. the data repo's own `UPDATE` script) is
+a plain, unmerged overwrite. If the same person queues from two
+different machines (e.g. orca and shark) using the identical
+`queue_kb.yaml`, whichever machine's sync runs last silently overwrites
+the other's un-synced entries. Name it per machine instead --
+`queue_<name>_<machine>.yaml` (e.g. `queue_kb_orca.yaml`,
+`queue_kb_shark.yaml`) -- still matches `queue_*.yaml` everywhere it
+needs to.
+
 **A brand-new experiment also needs its actual driver script/config
 physically present** at `experiment_root` before any chunk can start --
 the queue entry alone only carries the DB row. `stage` writes exactly
