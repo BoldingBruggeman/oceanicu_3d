@@ -64,6 +64,7 @@ alphabetically:
     oceanicu_experiments.py chunk-size --experiment-id ... --chunk-kind ... --chunk-multiplier ...
     oceanicu_experiments.py set-priority --experiment-id ... --priority ...
     oceanicu_experiments.py set-chunk-delay --experiment-id ... --seconds N   # persistent, per-experiment pacing
+    oceanicu_experiments.py set-start-date --experiment-id ... --start-date ...   # only takes effect before chunk 0 runs
     oceanicu_experiments.py set-stop-date --experiment-id ... --stop-date ...
     oceanicu_experiments.py set-data-roots-file --experiment-id ... --path ...
     oceanicu_experiments.py set-np --experiment-id ... --np ...
@@ -826,6 +827,15 @@ def cmd_set_stop_date(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_set_start_date(args: argparse.Namespace) -> int:
+    with rt.connect(args.db) as conn:
+        rt.set_start_date(conn, args.experiment_id, args.start_date, user=rt._current_user())
+    print(f"{args.experiment_id}: initial_date set to {args.start_date} -- only takes effect if chunk 0 "
+          f"hasn't run yet (next_chunk_start falls back to initial_date only when no chunk is 'done'); "
+          f"otherwise this has no practical effect until a rerun/reset drops all chunks first")
+    return 0
+
+
 def cmd_chunk_size(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         rt.set_chunk_settings(
@@ -1142,6 +1152,10 @@ def main() -> int:
     sd = sub.add_parser("set-stop-date"); _add_common(sd); sd.set_defaults(func=cmd_set_stop_date)
     sd.add_argument("--experiment-id", required=True)
     sd.add_argument("--stop-date", required=True, metavar="YYYY-MM-DD")
+
+    ssd = sub.add_parser("set-start-date"); _add_common(ssd); ssd.set_defaults(func=cmd_set_start_date)
+    ssd.add_argument("--experiment-id", required=True)
+    ssd.add_argument("--start-date", required=True, metavar="YYYY-MM-DD")
 
     sdrf = sub.add_parser(
         "set-data-roots-file",

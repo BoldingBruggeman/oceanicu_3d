@@ -944,6 +944,27 @@ def set_stop_date(conn: sqlite3.Connection, experiment_id: str, stop_date: str, 
 
 
 @_rpc_or_local
+def set_start_date(conn: sqlite3.Connection, experiment_id: str, initial_date: str, user: Optional[str] = None) -> None:
+    """Change an experiment's own start date (the initial_date column) --
+    unlike set_stop_date, this is only meaningful BEFORE the experiment's
+    first chunk has actually run: next_chunk_start (see its own docstring)
+    falls back to initial_date only when there's no 'done' chunk on record
+    yet; once chunk 0 exists, next_chunk_start always uses the chunks'
+    own history instead, so changing this has no practical effect on what
+    runs next until a rerun/reset (chunk_index=0) drops every chunk row
+    first. No recompute_experiment_status call needed -- unlike stop_date,
+    initial_date plays no part in status derivation."""
+    old = get_experiment(conn, experiment_id)
+    conn.execute(
+        "UPDATE experiments SET initial_date = ?, updated_at = ? WHERE experiment_id = ?",
+        (initial_date, _now(), experiment_id),
+    )
+    if old is not None:
+        _log_history(conn, experiment_id, "initial_date_changed", f"{old['initial_date']} -> {initial_date}", user=user)
+    conn.commit()
+
+
+@_rpc_or_local
 def chunk_delay_sentinel_path(conn: sqlite3.Connection) -> Path:
     """Path of the DELAY_ALL sentinel: same idea and same location
     convention as pause_all_sentinel_path (right next to the registry DB
