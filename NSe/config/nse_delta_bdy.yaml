@@ -163,6 +163,15 @@ variables:
   # different mismatch. cmip6.hist_period/transient are UNCHANGED and
   # correctly so -- that's CMIP6's own internal historical-vs-future
   # comparison, entirely independent of CMEMS's coverage.
+  # calibration_experiment/calibration_period: read only by direct_bc.py
+  # (Method 2, run against this SAME config file -- its own
+  # run_direct_bc_variable ignores output_suffix above, always writing
+  # '..._directbc_...' regardless, so the two methods' files never
+  # collide even though they share one config). talk/dissic have no
+  # CMEMS reference before 2024-07-29, so calibration can't use the
+  # historical experiment (ends 2014, zero overlap) -- must calibrate
+  # against ssp126's own early slice instead, matching the real short
+  # CMEMS window.
   - name: talk
     cmip6_var: talk
     table_id: Omon
@@ -173,6 +182,10 @@ variables:
     reference_period:
       start: "2024-07-29"
       end:   "2026-08-17"
+    calibration_experiment: ssp126
+    calibration_period:
+      start: "2024-07-29"
+      end:   "2026-08-17"
 
   - name: dissic
     cmip6_var: dissic
@@ -180,6 +193,10 @@ variables:
     frequency: daily
     output_suffix: deltachange
     reference_period:
+      start: "2024-07-29"
+      end:   "2026-08-17"
+    calibration_experiment: ssp126
+    calibration_period:
       start: "2024-07-29"
       end:   "2026-08-17"
 
