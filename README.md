@@ -1,5 +1,10 @@
 # [OceanICU](https://ocean-icu.eu/) [pyGETM ](https://github.com/BoldingBruggeman/getm-rewrite) setups
 
+> **Updating [bolding-bruggeman.com/oceanicu_3d](https://bolding-bruggeman.com/oceanicu_3d/)?**
+> Read [`docs/web-regeneration.md`](docs/web-regeneration.md) first — two
+> scripts, one real gotcha (hand-edited content pages get silently
+> overwritten), and a stale-looking directory that's actually a red herring.
+
 This repository contains  3(4?) different pyGETM setups used in the OceanICU project. 
 
 The setups are:
