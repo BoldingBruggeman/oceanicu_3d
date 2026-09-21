@@ -1,0 +1,157 @@
+# =============================================================================
+# NSe -- CMIP6 boundary conditions, Option A: raw, uncorrected model output.
+#
+# Separate from BOTH run-cmems-boundaries (pure observations, no future
+# extension) and run-delta-boundaries (CMEMS + CMIP6 future-vs-historical
+# delta, future only). This one extracts raw CMIP6 model output directly at
+# the boundary points, for ANY experiment -- no bias-correction step at all.
+# This is what already produces the historical-period thetao/so files
+# (bdy_3d_thetao_20100101_20141231.nc) that the future delta-change files
+# splice onto -- this config does the same thing, extended to the bio
+# variables, for BOTH the historical splice period and the future period (a
+# real, always-available baseline, useful for comparison against the
+# delta-change/direct-bias-correction methods even where those work fine).
+#
+# GFDL-ESM4/ssp126 only for now, matching the rest of this session's work.
+# 310-point boundary set (same file every other NSe boundary config uses).
+#
+# Bio variable availability confirmed 2026-06-02 (boundaries.old/config/
+# cmip6_amm7_bdy_create.yaml, this file's own template): no3/po4/si/o2/ph/
+# dissic/talk are all standard CMOR Omon output, available for all 3 models
+# checked. nh4 is not a core OMIP diagnostic and is skipped here (per
+# explicit user call, 2026-09-21 -- "nh4 does not matter for now").
+#
+# Usage
+# -----
+#   run-cmip6-boundaries --config NSe/config/nse_cmip6_bdy_create.yaml --category bio --experiment historical
+#   run-cmip6-boundaries --config NSe/config/nse_cmip6_bdy_create.yaml --category bio --experiment ssp126
+#   run-cmip6-boundaries --config NSe/config/nse_cmip6_bdy_create.yaml --category bio --dryrun
+# =============================================================================
+
+source_type: cmip6
+
+setup:
+  name: nse_cmip6_bio
+  description: "NSe -- raw CMIP6 biogeochemistry boundary conditions (Option A, uncorrected)"
+
+boundary_points:
+  file_path: "/home/kb/source/repos/OceanICU/oceanicu_3d/NSe/Bathymetry/nse_bdy_lonlat.txt"
+
+cmip6:
+  access: esgf
+  prefer: http
+  download_workers: 4
+  esgf_cache_dir: "/data/cache/cmip6"   # same cache delta_change.py already
+                                        # populated for talk/dissic/etc. --
+                                        # reuse it, don't fetch twice.
+
+  models:
+    GFDL-ESM4:
+      institution_id: NOAA-GFDL
+      variant_label:  r1i1p1f1
+      grid_label:     gr
+
+  experiments:
+    historical:
+      activity_id: CMIP
+      start_date:  "2010-01-01"   # matches thetao/so's own historical splice
+      end_date:    "2014-12-31"   # window, not CMIP6's full 1850- span.
+    ssp126:
+      activity_id: ScenarioMIP
+      start_date:  "2015-01-01"
+      end_date:    "2100-12-31"
+
+time_range:
+  start_date: "2010-01-01"
+  end_date:   "2100-12-31"
+
+processing:
+  coordinate_tolerance: 0.0001
+  chunk_size_months: 12
+  bbox_buffer: 2.0
+  cache_directory: "/data/cache/cmip6_bdy_nse"
+
+output:
+  base_directory: "/data/OceanICU/oceanicu_3d/data/NSe/CMIP6"
+  filename_template: "{model}/{experiment}/bdy/bdy_3d_{output_group}_{start}_{end}.nc"
+
+# =============================================================================
+# Datasets -- biogeochemistry (category: bio)
+#
+# One output_group per variable (not a shared monthly_bio file like the old
+# AMM7 template used) -- keeps this directly comparable to the delta-change/
+# direct-bc methods' own per-variable files, and each output_group already
+# carries its own '_rawcmip6' suffix so all three methods' files can sit in
+# the same directory without ever being confused for one another.
+# =============================================================================
+
+datasets:
+
+  no3:
+    category: bio
+    output_group: no3_rawcmip6
+    cmip6_table: Omon
+    variables:
+      - name: no3
+    target_frequency: monthly
+    depth_range:
+      minimum: 0.0
+      maximum: 5727.0
+
+  po4:
+    category: bio
+    output_group: po4_rawcmip6
+    cmip6_table: Omon
+    variables:
+      - name: po4
+    target_frequency: monthly
+    depth_range:
+      minimum: 0.0
+      maximum: 5727.0
+
+  si:
+    category: bio
+    output_group: si_rawcmip6
+    cmip6_table: Omon
+    variables:
+      - name: si
+    target_frequency: monthly
+    depth_range:
+      minimum: 0.0
+      maximum: 5727.0
+
+  o2:
+    category: bio
+    output_group: o2_rawcmip6
+    cmip6_table: Omon
+    variables:
+      - name: o2
+    target_frequency: monthly
+    depth_range:
+      minimum: 0.0
+      maximum: 5727.0
+
+  dissic:
+    category: bio
+    output_group: dissic_rawcmip6
+    cmip6_table: Omon
+    variables:
+      - name: dissic
+    target_frequency: monthly
+    depth_range:
+      minimum: 0.0
+      maximum: 5727.0
+
+  talk:
+    category: bio
+    output_group: talk_rawcmip6
+    cmip6_table: Omon
+    variables:
+      - name: talk
+    target_frequency: monthly
+    depth_range:
+      minimum: 0.0
+      maximum: 5727.0
+
+  # nh4: skipped -- not a core OMIP diagnostic, and explicitly deprioritized
+  # (2026-09-21: "nh4 does not matter for now").
