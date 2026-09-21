@@ -72,8 +72,19 @@ processing:
   cache_directory: "/data/cache/cmip6_bdy_nse"
 
 output:
-  base_directory: "/data/OceanICU/oceanicu_3d/data/NSe/CMIP6"
-  filename_template: "{model}/{experiment}/bdy/bdy_3d_{output_group}_{start}_{end}.nc"
+  # NOTE: cmip6_processor.py's run_cmip6_workflow hardcodes
+  # out_base = base_directory/CMIP6/{model}/{experiment} itself (see
+  # lib/boundaries/cmip6_processor.py:944) -- base_directory here must be
+  # ONE LEVEL UP from where the model/experiment output actually lands
+  # (NSe/, not NSe/CMIP6/), or that 'CMIP6' gets appended twice. Confirmed
+  # the hard way: a first attempt with base_directory already ending in
+  # .../CMIP6 produced .../CMIP6/CMIP6/GFDL-ESM4/ssp126/... and a
+  # filename_template using {model}/{experiment} raised
+  # KeyError('model') -- those aren't real format keys here (only
+  # dataset_id/output_group/start_date/end_date/start/end are), the
+  # model/experiment split is already handled by out_base itself.
+  base_directory: "/data/OceanICU/oceanicu_3d/data/NSe"
+  filename_template: "bdy/bdy_3d_{output_group}_{start}_{end}.nc"
 
 # =============================================================================
 # Datasets -- biogeochemistry (category: bio)
