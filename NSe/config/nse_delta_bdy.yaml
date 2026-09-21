@@ -58,6 +58,13 @@ reference:
     zos:      /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy      # hourly 2-D files (zos variable)
     uo:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy      # hourly 2-D barotropic transport
     vo:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy      # hourly 2-D barotropic transport
+    # talk/dissic: same directory -- load_ref_dataset scans for whichever
+    # file in the directory actually contains the requested variable, so
+    # this doesn't need to point at bio_carbon_new_*.nc by name. Real
+    # coverage is 2024-07-29 to 2026-08-17 only (see reference_period on
+    # each variable entry below, not this file's own period: block).
+    talk:     /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
+    dissic:   /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
   period:
     # Matches the REAL span of the live CMEMS data above (confirmed via
     # direct inspection: 2010-01-01 to 2026-08-17) -- NOT the old local
@@ -128,6 +135,39 @@ variables:
     cmip6_var: so
     table_id: Omon         # 3-D monthly salinity
     frequency: daily
+
+  # talk/dissic -- added 2026-09-21 as one of two methods being compared
+  # (this one: delta-change) for these two variables specifically. Unlike
+  # thetao/so, CMEMS has no reanalysis (MY) product anywhere for either --
+  # only a real, short NWS ANFC window (confirmed via live dry-run to
+  # start 2024-07-29, not the 2024-02-28 an older AMM7 config comment
+  # claimed). reference_period below overrides the file-level
+  # reference.period (2010-2025, thetao/so's own real window) with that
+  # real short one -- using the wrong (longer) period here would silently
+  # analog-cycle onto dates this reference file doesn't have, the exact
+  # bug reference.period's own comment above already describes for a
+  # different mismatch. cmip6.hist_period/transient are UNCHANGED and
+  # correctly so -- that's CMIP6's own internal historical-vs-future
+  # comparison, entirely independent of CMEMS's coverage.
+  - name: talk
+    cmip6_var: talk
+    table_id: Omon
+    frequency: daily
+    output_suffix: deltachange   # -> bdy_3d_talk_deltachange_*.nc, distinct
+                                  # from the direct-bias-correction method's
+                                  # bdy_3d_talk_directbc_*.nc (see direct_bc.py)
+    reference_period:
+      start: "2024-07-29"
+      end:   "2026-08-17"
+
+  - name: dissic
+    cmip6_var: dissic
+    table_id: Omon
+    frequency: daily
+    output_suffix: deltachange
+    reference_period:
+      start: "2024-07-29"
+      end:   "2026-08-17"
 
   # zos, uo, vo are handled by run-tidal-boundaries (TPXO9 + CMIP6 mean)
   # - name: zos
