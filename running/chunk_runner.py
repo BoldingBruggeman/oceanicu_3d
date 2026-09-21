@@ -77,13 +77,25 @@ def _advance_date(start, kind: str, multiplier: int):
         yy += mm // 12
         mm = mm % 12 + 1
         return start.replace(year=yy, month=mm)
-    # annual (default): run to January 1st of the target year, so a
-    # mid-year start (e.g. a spin-up beginning in December) still lands
-    # chunk boundaries on calendar-year edges from then on.
-    stop = start.replace(year=start.year + multiplier)
-    if stop.month != 1:
-        stop = stop.replace(month=1, day=1)
-    return stop
+    # annual (default): every chunk boundary should land on a real
+    # calendar-year edge (Jan 1) once things get going. If *start* isn't
+    # already Jan 1 (e.g. initial_date 2010-01-02, or a spin-up beginning
+    # in December), the multiplier is ignored for this one call --
+    # instead of a near-full-length chunk permanently offset by whatever
+    # day-of-year start happened to land on (the real bug this replaces:
+    # start.replace(year=start.year+multiplier) preserves start's own
+    # month/day, and the old code only checked stop.month != 1, so a
+    # start that already happened to be in January -- just not day 1 --
+    # never got caught at all, e.g. 2010-01-02 -> 2020-01-02, forever
+    # offset by one day, confirmed against a real chunk 0 row), this call
+    # returns a SHORT realignment chunk stopping at the very next Jan 1.
+    # Every following call then starts from a clean Jan 1, so the
+    # multiplier applies normally from then on -- no bookkeeping needed
+    # beyond this function always being handed whatever the previous
+    # chunk's own stop was.
+    if start.month != 1 or start.day != 1:
+        return start.replace(year=start.year + 1, month=1, day=1)
+    return start.replace(year=start.year + multiplier)
 
 
 def _launch_prefix(launcher: str, np: int) -> list[str]:
