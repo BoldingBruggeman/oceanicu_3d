@@ -65,6 +65,20 @@ reference:
     # each variable entry below, not this file's own period: block).
     talk:     /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
     dissic:   /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
+    # no3/po4/si/o2: NOT the shared bdy/ directory -- bio_monthly_
+    # climatology.nc (the real, production BOUNDARY_FOLDER_FABM_CMEMS
+    # file, still needed there for boundaries.fabm.CMEMS -- never move it)
+    # also contains these same 4 variables, on a fake 12-record
+    # climatology time axis. load_ref_dataset's directory scan would pick
+    # up BOTH files and hand open_mfdataset two incompatible time axes for
+    # the same variable -- the exact bug class its own comment already
+    # describes. A dedicated directory holding only a symlink to the real
+    # bio_daily file sidesteps this without touching the shared directory
+    # or the production file at all.
+    no3:      /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy_deltaref_bio_daily
+    po4:      /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy_deltaref_bio_daily
+    si:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy_deltaref_bio_daily
+    o2:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy_deltaref_bio_daily
   period:
     # Matches the REAL span of the live CMEMS data above (confirmed via
     # direct inspection: 2010-01-01 to 2026-08-17) -- NOT the old local
@@ -168,6 +182,37 @@ variables:
     reference_period:
       start: "2024-07-29"
       end:   "2026-08-17"
+
+  # no3/po4/si/o2 -- added 2026-09-21, same status check that surfaced
+  # talk/dissic found these four were only ever feasibility-checked
+  # (CMIP6-historical vs CMEMS climatology), never actually built into a
+  # real boundary file. Unlike talk/dissic, real CMEMS reanalysis coverage
+  # is long here (bio_daily_2010-01-01_to_2026-08-17.nc) -- no
+  # reference_period override needed, uses this file's own global period
+  # (2010-2025) same as thetao/so.
+  - name: no3
+    cmip6_var: no3
+    table_id: Omon
+    frequency: daily
+    output_suffix: deltachange
+
+  - name: po4
+    cmip6_var: po4
+    table_id: Omon
+    frequency: daily
+    output_suffix: deltachange
+
+  - name: si
+    cmip6_var: si
+    table_id: Omon
+    frequency: daily
+    output_suffix: deltachange
+
+  - name: o2
+    cmip6_var: o2
+    table_id: Omon
+    frequency: daily
+    output_suffix: deltachange
 
   # zos, uo, vo are handled by run-tidal-boundaries (TPXO9 + CMIP6 mean)
   # - name: zos
