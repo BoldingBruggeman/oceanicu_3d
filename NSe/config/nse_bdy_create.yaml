@@ -367,3 +367,76 @@ datasets:
         scenarios:
           - dataset_id: "cmems_mod_bal_bgc_anfc_P1D-m"   # Baltic ANFC has si from 2022-11-01
             start_date: "2025-01-01"
+
+# =============================================================================
+# Alkalinity / DIC -- added 2026-09-21 for FABM boundary bias-correction work.
+#
+# No CMEMS MY (reanalysis) product exists ANYWHERE (NWS/Baltic/global) for
+# talk or dissic -- confirmed against boundaries.old/config/amm7_bdy_create.yaml's
+# own documented variable-gap table. The only real data is NWS ANFC, from
+# 2024-02-28. Two variants requested here, each pair sharing an output_group
+# (distinct from `bio_daily` above so they never collide with/overwrite it):
+#
+#   *_old  -- naive request across the SAME global time_range as every other
+#             bio variable above (2010-01-01-), with no start_date override.
+#             Included deliberately as a comparison baseline against *_new,
+#             to show what "just adding it like the others" actually yields
+#             for a variable with no historical product at all.
+#   *_new  -- honest request explicitly bounded to the real ANFC coverage
+#             (start_date: 2024-02-28), matching AMM7's own existing
+#             dissic entry.
+# =============================================================================
+
+  # --- dissolved inorganic carbon, old method (naive, full 2010- request) ---
+  dissic_old:
+    category: bio
+    output_group: bio_carbon_old
+    variables:
+      - name: dissic
+    target_frequency: daily
+    depth_range:
+      minimum: 0.0
+      maximum: 5727.0
+    scenarios:
+      - dataset_id: "cmems_mod_nws_bgc-dissic_anfc_7km-3D_P1D-m"  # ANFC only (2024-02-28- )
+
+  # --- dissolved inorganic carbon, new method (honest ANFC-only window) ---
+  dissic_new:
+    category: bio
+    output_group: bio_carbon_new
+    variables:
+      - name: dissic
+    target_frequency: daily
+    depth_range:
+      minimum: 0.0
+      maximum: 5727.0
+    scenarios:
+      - dataset_id: "cmems_mod_nws_bgc-dissic_anfc_7km-3D_P1D-m"  # ANFC only (2024-02-28- )
+        start_date: "2024-02-28"
+
+  # --- alkalinity, old method (naive, full 2010- request) ---
+  talk_old:
+    category: bio
+    output_group: bio_carbon_old
+    variables:
+      - name: talk
+    target_frequency: daily
+    depth_range:
+      minimum: 0.0
+      maximum: 5727.0
+    scenarios:
+      - dataset_id: "cmems_mod_nws_bgc-talk_anfc_7km-3D_P1D-m"  # ANFC only (2024-02-28- ); no Baltic source
+
+  # --- alkalinity, new method (honest ANFC-only window) ---
+  talk_new:
+    category: bio
+    output_group: bio_carbon_new
+    variables:
+      - name: talk
+    target_frequency: daily
+    depth_range:
+      minimum: 0.0
+      maximum: 5727.0
+    scenarios:
+      - dataset_id: "cmems_mod_nws_bgc-talk_anfc_7km-3D_P1D-m"  # ANFC only (2024-02-28- ); no Baltic source
+        start_date: "2024-02-28"
