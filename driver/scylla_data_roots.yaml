@@ -38,6 +38,12 @@ RIVER_FOLDER_CMIP6: /work/shared/oceanICU/BiasCorrected
 FABM_ERSEM_FOLDER: /work/shared/oceanICU/FABM/
 BOUNDARY_FOLDER_FABM_WOA: /work/shared/oceanICU/FABM/
 BOUNDARY_FOLDER_FABM_CMEMS: /work/shared/oceanICU/NSe/CMEMS/bdy
+# Same root as BOUNDARY_FOLDER_BAROCLINIC_CMIP6 above -- UNLIKE that var,
+# whether the specific bio boundary files generated on bb-server1
+# 2026-09-21/22 (bdy_3d_<no3/po4/si/o2/dissic/talk>_<method>_*.nc) have
+# actually been synced to this path on scylla is NOT confirmed (no direct
+# access to check from bb-server1/orca).
+BOUNDARY_FOLDER_FABM_CMIP6: /work/shared/oceanICU/CMIP6
 
 # data_assignments (radiation.kc2, when ObsKd/space-varying is active)
 KD490_FOLDER: /work/shared/oceanICU/Kd490

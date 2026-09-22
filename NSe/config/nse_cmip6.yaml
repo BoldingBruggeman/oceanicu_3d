@@ -432,6 +432,50 @@ boundaries:
           file: woa_o.nc
           variable: o_an
           boundary_condition_type: SPONGE
+    # Real generated boundary files (2026-09-21/22, GFDL-ESM4/ssp126 only
+    # so far) -- oceanicu_providers.derive_data_assignments already had
+    # this branch wired (on_grid=True, climatology=False, folder_template
+    # model/scenario resolution) before any real file existed to point at;
+    # `file` per tracer is a literal name here (not templated), same as
+    # CMEMS's own tracers[*].file above -- matches what's actually on disk
+    # today, not a naming convention to rely on holding for other models/
+    # scenarios without checking again. method: deltachange chosen as the
+    # default since it's the only one of the 3 generation methods that
+    # exists for all 6 variables (direct bias-correction only exists for
+    # talk/dissic so far) -- see analyses/areas/NSe/boundaries_bio/ for the
+    # per-segment comparison between methods. O3_c/O3_TA (dissic/talk) are
+    # NEW here -- CMEMS/WOA above never had them (no real boundary file
+    # existed for either until this session).
+    CMIP6:
+      folder: ${BOUNDARY_FOLDER_FABM_CMIP6}
+      folder_template: '{model}/{scenario}/bdy'
+      model: GFDL-ESM4
+      scenario: ssp126
+      tracers:
+        N3_n:
+          file: bdy_3d_no3_deltachange_20150101_21001231.nc
+          variable: no3
+          boundary_condition_type: SPONGE
+        N1_p:
+          file: bdy_3d_po4_deltachange_20150101_21001231.nc
+          variable: po4
+          boundary_condition_type: SPONGE
+        N5_s:
+          file: bdy_3d_si_deltachange_20150101_21001231.nc
+          variable: si
+          boundary_condition_type: SPONGE
+        O2_o:
+          file: bdy_3d_o2_deltachange_20150101_21001231.nc
+          variable: o2
+          boundary_condition_type: SPONGE
+        O3_c:
+          file: bdy_3d_dissic_deltachange_20150101_21001231.nc
+          variable: dissic
+          boundary_condition_type: SPONGE
+        O3_TA:
+          file: bdy_3d_talk_deltachange_20150101_21001231.nc
+          variable: talk
+          boundary_condition_type: SPONGE
 meteo:
   source: CMIP6
   ERA5:
