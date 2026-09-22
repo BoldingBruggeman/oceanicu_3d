@@ -17,4 +17,9 @@ SRC="bb-server1:/data/OceanICU/oceanicu_3d/data/NSe/"
 DEST="/work/shared/oceanICU/NSe/"
 
 mkdir -p "$DEST"
-rsync -avh --progress --stats "$@" "$SRC" "$DEST"
+# Exclude backup/temp files -- real ones exist today under data/NSe/ from
+# 2026-09-21/22 debugging (.bak_pre_*, .wiped_*_mistake_*, .tmp_*), and a
+# plain mirror with no exclude would otherwise ship them to the HPC too.
+rsync -avh --progress --stats \
+    --exclude='*.bak_*' --exclude='*.tmp_*' --exclude='*.wiped_*' \
+    "$@" "$SRC" "$DEST"

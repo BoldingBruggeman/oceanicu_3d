@@ -53,7 +53,13 @@ sync_rivers() {
     fi
     mkdir -p "$dest"
     echo "--- $MODEL/$experiment/rivers (full, no disagg split for these) ---"
-    rsync -avh --progress --stats "$@" "$SRC_ROOT/$MODEL/$experiment/rivers/" "$dest"
+    # Exclude backup/temp files -- real ones exist today under
+    # BiasCorrected/CMIP6/*/rivers/ from 2026-09-21/22 debugging
+    # (.bak_pre_*, .bak_no_qmean_*, .tmp_*), and a plain sync with no
+    # exclude would otherwise ship them to the HPC too.
+    rsync -avh --progress --stats \
+        --exclude='*.bak_*' --exclude='*.tmp_*' \
+        "$@" "$SRC_ROOT/$MODEL/$experiment/rivers/" "$dest"
 }
 
 sync_meteo_disagg historical "$@"
