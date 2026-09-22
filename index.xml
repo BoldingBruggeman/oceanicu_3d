@@ -6,12 +6,12 @@
     <description>Recent content on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 21 Sep 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 22 Sep 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>NSe — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</link>
-      <pubDate>Mon, 21 Sep 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 22 Sep 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</guid>
       <description>&lt;h1 id=&#34;nse-analysis-overview&#34;&gt;NSe Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NSe&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -541,16 +541,47 @@ reportlab.&lt;/li&gt;
 The exact layout is defined in &lt;code&gt;lib/layout.py&lt;/code&gt;:&lt;/p&gt;</description>
     </item>
     <item>
+      <title>Hugo Deployment</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/hugo-deployment/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/hugo-deployment/</guid>
+      <description>&lt;h1 id=&#34;hugo-deployment-guide&#34;&gt;Hugo Deployment Guide&lt;/h1&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;reporting.md&#34;&gt;Reporting&lt;/a&gt; explains &lt;code&gt;ocean-reporting&lt;/code&gt;&amp;rsquo;s options and the
+&lt;code&gt;analyses/&lt;/code&gt; tree it reads. This guide is about what happens &lt;em&gt;after&lt;/em&gt; that:
+getting the generated Hugo content actually live, and the real mistakes
+that have already happened doing it.&lt;/p&gt;
+&lt;p&gt;There are two entry points to the exact same underlying code — pick
+whichever fits the situation:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href=&#34;update-from-remote.md&#34;&gt;update-from-remote&lt;/a&gt;&lt;/strong&gt; — sync a remote
+cluster&amp;rsquo;s &lt;code&gt;analyses/&lt;/code&gt; down, merge/scan into the DB, then report +
+deploy, all in one command. Right when there&amp;rsquo;s fresh data to pull in
+first.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Manual two-step&lt;/strong&gt; (used directly against data that&amp;rsquo;s already local,
+e.g. on the reporting host itself): the calling project&amp;rsquo;s own
+&lt;code&gt;regenerate_hugo.py --apply&lt;/code&gt;, then this repo&amp;rsquo;s own &lt;code&gt;deploy_ghpages.py --apply&lt;/code&gt;. Both relay over ssh to the reporting host automatically if
+run from elsewhere. &lt;code&gt;regenerate_hugo.py&lt;/code&gt; isn&amp;rsquo;t part of this repo — it
+lives in the site&amp;rsquo;s own repo (e.g. &lt;code&gt;oceanicu_3d/regenerate_hugo.py&lt;/code&gt;),
+and its own &lt;code&gt;docs/web-regeneration.md&lt;/code&gt; has the full detail for that
+side.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Either path ends up calling &lt;code&gt;cli.reporting:main&lt;/code&gt; (as &lt;code&gt;ocean-reporting&lt;/code&gt; in
+one case, &lt;code&gt;python3 -m cli.reporting&lt;/code&gt; in the other) and this repo&amp;rsquo;s own
+&lt;code&gt;deploy_ghpages.py&lt;/code&gt; directly. A bug or fix in &lt;code&gt;lib/reporting.py&lt;/code&gt; affects
+both equally.&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>NSe</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</link>
-      <pubDate>Mon, 21 Sep 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 22 Sep 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</guid>
       <description>NSe modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>NSe — Future Boundary Conditions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</link>
-      <pubDate>Mon, 21 Sep 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 22 Sep 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</guid>
       <description>&lt;p&gt;Cross-model, cross-scenario summary of NSe&amp;rsquo;s future open-boundary conditions: delta-change temperature/salinity (CMIP6, bias-corrected against the CMEMS Northwest Shelf reanalysis) and tidal elevation/currents (TPXO9 plus the CMIP6 ensemble-mean sea-level trend). Biogeochemical boundaries are not yet included here &amp;ndash; CMIP6 ESM biogeochemistry is considerably simpler than the CMEMS regional product, and whether a delta-change approach is even appropriate for it is still under evaluation (see the feasibility-check section below for the evidence gathered so far).&lt;/p&gt;</description>
     </item>
