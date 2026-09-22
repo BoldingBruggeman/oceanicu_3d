@@ -20,7 +20,10 @@
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</link>
       <pubDate>Tue, 22 Sep 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</guid>
-      <description>&lt;p&gt;Cross-model, cross-scenario summary of NSe&amp;rsquo;s future open-boundary conditions: delta-change temperature/salinity (CMIP6, bias-corrected against the CMEMS Northwest Shelf reanalysis) and tidal elevation/currents (TPXO9 plus the CMIP6 ensemble-mean sea-level trend). Biogeochemical boundaries are not yet included here &amp;ndash; CMIP6 ESM biogeochemistry is considerably simpler than the CMEMS regional product, and whether a delta-change approach is even appropriate for it is still under evaluation (see the feasibility-check section below for the evidence gathered so far).&lt;/p&gt;</description>
+      <description>&lt;p&gt;Cross-model, cross-scenario summary of NSe&amp;rsquo;s future open-boundary conditions: delta-change temperature/salinity (CMIP6, bias-corrected against the CMEMS Northwest Shelf reanalysis), tidal elevation/currents (TPXO9 plus the CMIP6 ensemble-mean sea-level trend), and (as of 2026-09-22) delta-change biogeochemistry &amp;ndash; nitrate, phosphate, silicate, oxygen, dissolved inorganic carbon, and alkalinity &amp;ndash; across all three CMIP6 models and both scenarios (see the bug-fix campaign section below for how that came together).&lt;/p&gt;
+&lt;h2 id=&#34;delta-change-temperature--salinity&#34;&gt;Delta-change (temperature / salinity)&lt;/h2&gt;
+&lt;h3 id=&#34;temperature-thetao&#34;&gt;Temperature (thetao)&lt;/h3&gt;
+&lt;p&gt;&lt;em&gt;Source: AMM7/AMM15 delta-change: GFDL-ESM4/ssp126 [1985-01-01–2014-12-31 vs 2015-01-01–2100-12-31]&lt;/em&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
