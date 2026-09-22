@@ -401,6 +401,21 @@ datasets:
       - dataset_id: "cmems_mod_nws_bgc-dissic_anfc_7km-3D_P1D-m"  # ANFC only (2024-02-28- )
 
   # --- dissolved inorganic carbon, new method (honest ANFC-only window) ---
+  # Segment 7 (Kattegat/Belt Sea) override added 2026-09-22 -- same real gap
+  # already handled for no3/po4/o2/ph above, found this time because the
+  # generated bio boundary comparison (bdy_diagnostics.py's run_bio()) came
+  # back entirely NaN at this segment for dissic. UNLIKE those four, the
+  # Baltic BGC MY product (cmems_mod_bal_bgc_my_P1D-m) does NOT carry dissic
+  # at all (confirmed directly against the live catalogue, 2026-09-22:
+  # cdom/chl/nh4/no3/nppv/o2/o2b/ph/po4/spco2/zsd only) -- ANFC-only here,
+  # same single-scenario shape si's own segment_override already uses for
+  # the same MY-lacks-this-variable reason. Baltic ANFC BGC itself DOES
+  # carry dissic (confirmed live: cmems_mod_bal_bgc_anfc_P1D-m's variable
+  # list includes dissic, real spatial coverage bbox lon 9.0-30.2/lat
+  # 53.0-65.9 comfortably includes segment 7's lon=12.98/lat=54.45-55.35).
+  # talk has NO segment_override -- confirmed the same way: Baltic ANFC
+  # BGC's own variable list has no alkalinity at all, matching the "no
+  # Baltic source" note on talk_old/talk_new below.
   dissic_new:
     category: bio
     output_group: bio_carbon_new
@@ -413,6 +428,12 @@ datasets:
     scenarios:
       - dataset_id: "cmems_mod_nws_bgc-dissic_anfc_7km-3D_P1D-m"  # ANFC only (2024-02-28- )
         start_date: "2024-02-28"
+    segment_overrides:
+      - segments: [7]
+        on_gap: use_default
+        scenarios:
+          - dataset_id: "cmems_mod_bal_bgc_anfc_P1D-m"  # Baltic BGC ANFC (2022-11-01- ); no Baltic MY for dissic
+            start_date: "2024-02-28"
 
   # --- alkalinity, old method (naive, full 2010- request) ---
   talk_old:
