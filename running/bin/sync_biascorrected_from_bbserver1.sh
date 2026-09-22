@@ -1,11 +1,21 @@
 #!/bin/bash
-# Mirror one model/scenario's DISAGGREGATED meteo files (plus the
-# scenario's rivers files, which have no disagg/non-disagg split) from
-# bb-server1's /data/BiasCorrected/CMIP6/ into this HPC's
-# /work/shared/oceanICU/BiasCorrected/CMIP6/. Always pulls historical's
-# meteo too, alongside the requested scenario -- any real run needs both
-# spliced together (see scripts/meteo.py's own historical/scenario
-# splicing), so there is no case where you'd want the scenario without it.
+# Mirror one model/scenario's full set of external forcing from
+# bb-server1 into this HPC's /work/shared/oceanICU/: DISAGGREGATED meteo
+# files, the scenario's rivers files (no disagg/non-disagg split for
+# those), AND the boundaries tree (data/NSe/ -> NSe/, all models/
+# scenarios at once -- see sync_nse_from_bbserver1.sh's own header for
+# why that one isn't scoped by MODEL/SCENARIO the way meteo/rivers are).
+# Always pulls historical's meteo too, alongside the requested scenario
+# -- any real run needs both spliced together (see scripts/meteo.py's
+# own historical/scenario splicing), so there is no case where you'd want
+# the scenario without it.
+#
+# Joined into one script 2026-09-22 (per user request) -- previously two
+# separate scripts (this one for meteo/rivers, sync_nse_from_bbserver1.sh
+# for boundaries) that had to be run separately before every real
+# production run; easy to forget one. This script still calls that one
+# internally (not duplicated) so its own real mirror logic/excludes stay
+# in one place.
 #
 # Run THIS SCRIPT ON THE HPC (scylla) -- bb-server1 has no outbound route
 # to the HPC, but the HPC can reach out to bb-server1, so this must be a
@@ -15,6 +25,9 @@
 #   ./sync_biascorrected_from_bbserver1.sh <MODEL> <SCENARIO> [rsync flags...]
 #   ./sync_biascorrected_from_bbserver1.sh GFDL-ESM4 ssp126
 #   ./sync_biascorrected_from_bbserver1.sh GFDL-ESM4 ssp126 -n   # dry run
+#   ./sync_biascorrected_from_bbserver1.sh GFDL-ESM4 ssp126 --no-boundaries
+#       # meteo/rivers only, skip the (whole-tree, model/scenario-independent)
+#       # boundaries mirror -- e.g. when you know it's already current
 set -euo pipefail
 
 MODEL="${1:-}"
@@ -25,6 +38,17 @@ if [ -z "$MODEL" ] || [ -z "$SCENARIO" ]; then
     exit 1
 fi
 shift 2 || true
+
+SYNC_BOUNDARIES=1
+ARGS=()
+for a in "$@"; do
+    if [ "$a" = "--no-boundaries" ]; then
+        SYNC_BOUNDARIES=0
+    else
+        ARGS+=("$a")
+    fi
+done
+set -- "${ARGS[@]}"
 
 SRC_ROOT="bb-server1:/data/BiasCorrected/CMIP6"
 DEST_ROOT="/work/shared/oceanICU/BiasCorrected/CMIP6"
@@ -65,3 +89,10 @@ sync_rivers() {
 sync_meteo_disagg historical "$@"
 sync_meteo_disagg "$SCENARIO" "$@"
 sync_rivers "$SCENARIO" "$@"
+
+if [ "$SYNC_BOUNDARIES" = "1" ]; then
+    echo "--- boundaries (data/NSe/ -> NSe/, all models/scenarios) ---"
+    "$(dirname "${BASH_SOURCE[0]}")/sync_nse_from_bbserver1.sh" "$@"
+else
+    echo "--- boundaries: skipped (--no-boundaries) ---"
+fi

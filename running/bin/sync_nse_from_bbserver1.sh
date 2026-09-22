@@ -1,6 +1,12 @@
 #!/bin/bash
 # Mirror /data/OceanICU/oceanicu_3d/data/NSe/ (bb-server1) -> /work/shared/oceanICU/NSe/ (this HPC).
 #
+# Called internally by sync_biascorrected_from_bbserver1.sh (which also
+# does meteo/rivers, per model/scenario) -- that's the one real
+# production runs should normally use for "get everything this run
+# needs" in one command; run this one standalone only when you
+# specifically want just the boundaries refreshed.
+#
 # Run THIS SCRIPT ON THE HPC (scylla) -- bb-server1 has no outbound route to
 # the HPC, but the HPC can reach out to bb-server1, so this must be a pull,
 # not a push.
