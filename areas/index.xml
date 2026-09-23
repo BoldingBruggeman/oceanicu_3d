@@ -6,19 +6,19 @@
     <description>Recent content in Modeling Areas on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 22 Sep 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 23 Sep 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/areas/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>NSe</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</link>
-      <pubDate>Tue, 22 Sep 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 23 Sep 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</guid>
       <description>NSe modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>NSe — Future Boundary Conditions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</link>
-      <pubDate>Tue, 22 Sep 2026 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 23 Sep 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</guid>
       <description>&lt;p&gt;Cross-model, cross-scenario summary of NSe&amp;rsquo;s future open-boundary conditions: delta-change temperature/salinity (CMIP6, bias-corrected against the CMEMS Northwest Shelf reanalysis), tidal elevation/currents (TPXO9 plus the CMIP6 ensemble-mean sea-level trend), and (as of 2026-09-22) delta-change biogeochemistry &amp;ndash; nitrate, phosphate, silicate, oxygen, dissolved inorganic carbon, and alkalinity &amp;ndash; across all three CMIP6 models and both scenarios (see the bug-fix campaign section below for how that came together).&lt;/p&gt;
 &lt;h2 id=&#34;delta-change-temperature--salinity&#34;&gt;Delta-change (temperature / salinity)&lt;/h2&gt;
