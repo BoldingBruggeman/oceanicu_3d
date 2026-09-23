@@ -23,13 +23,13 @@ from __future__ import annotations
 # (pygetm_config-free). Putting this import INSIDE configure_fabm instead (as
 # an earlier version of this file did, matching the "keep everything
 # self-contained" convention used for genuinely custom helpers like
-# _add_coord below) gets copied verbatim into the embedded code and executes
+# _ndep_scenario_paths below) gets copied verbatim into the embedded code and executes
 # on the target machine at call time -- a real, reproduced ModuleNotFoundError
 # on a machine with pygetm installed but not pygetm_config (the whole point
 # of --dump-python is a script that only needs the former).
 from pathlib import Path
 
-from pygetm_config.loader import resolve_data_path
+from pygetm_config.loader import expand_year_glob, resolve_data_path
 
 
 def configure_fabm(sim, domain, config: dict) -> None:
@@ -71,15 +71,17 @@ def configure_fabm(sim, domain, config: dict) -> None:
     FABM boundaries, and vice versa -- these two blocks below are
     deliberately independent, not an if/elif.
 
-    NOT YET VERIFIED against real NSe input files (mesh_mask.nc-style grid
-    file, AMM7-EMEP-style N-deposition netCDFs, gelbstoff/CDOM product, WOA
-    tracer climatologies) -- cfg_fabm.py's own inputs are AMM-domain-
-    specific; this port keeps the same dependency names/file-shape
-    expectations, but NSe's own equivalent files need confirming before a
-    real run. The `_add_coord` regridding helper below in particular
-    assumes a `mesh_mask.nc` with `nav_lat`/`nav_lon` 2D coordinate arrays
-    (cfg_fabm.py's own AMM convention) -- verify NSe's own EMEP-equivalent
-    source uses the same shape before trusting this unmodified.
+    NOT YET VERIFIED against real NSe input files (AMM7-EMEP-style
+    N-deposition netCDFs, gelbstoff/CDOM product, WOA tracer
+    climatologies) -- cfg_fabm.py's own inputs are AMM-domain-specific;
+    this port keeps the same dependency names/file-shape expectations,
+    but NSe's own equivalent files need confirming before a real run.
+    The N-deposition files themselves were rewritten 2026-09-23 to carry
+    real `latitude`/`longitude` dimension coordinates directly (same
+    convention as the fish/gelbstoff files below), so no runtime
+    coordinate-reconstruction step (and no `mesh_mask.nc` dependency) is
+    needed for them any more -- that used to live here as a nested
+    `_add_coord` helper.
     """
     import datetime
 
@@ -116,31 +118,6 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # meteo.get("CMIP6")).
     fabm_folder = Path(resolve_data_path(fabm_cfg["folder"]))
 
-    # A routine by Gennadi to make data compatible with the input manager --
-    # nested here (not module-level) since codegen's _emit_script_hook only
-    # embeds the directly-referenced hook function's own source via
-    # inspect.getsource, not any module-level helpers it calls (a real,
-    # confirmed gap -- see driver/scripts/meteo.py's own established
-    # convention of staying fully self-contained for the same reason).
-    def _add_coord(nc):
-        import xarray as xr
-
-        fmesh = xr.open_dataset(fabm_folder / "mesh_mask.nc")
-        nc = nc.drop_vars(("lon", "lat"))
-        nc = nc.rename_dims(x="longitude", y="latitude")
-        lat_AMM = fmesh.nav_lat.data
-        lon_AMM = fmesh.nav_lon.data
-        nc = nc.rename_dims({"t": "time"})
-        nc = nc.rename_vars({"t": "time"})
-        nc = nc.assign_coords(
-            latitude=("latitude", lat_AMM[:, 0]), longitude=("longitude", lon_AMM[0, :])
-        )
-        nc.coords["latitude"] = nc.latitude.assign_attrs(long_name="latitude", units="degrees_north")
-        nc.coords["longitude"] = nc.longitude.assign_attrs(long_name="longitude", units="degrees_east")
-        nc.coords["time"] = nc.time.assign_attrs(long_name="time")
-        nc = nc.fillna(0.0)
-        return nc
-
     # --- ERSEM dependencies (ported from cfg_fabm.py's configure()) ---
     # No BAROTROPIC_3D constant-dependency branch here -- see this
     # function's own docstring for why (BAROCLINIC-only by design, so
@@ -150,15 +127,195 @@ def configure_fabm(sim, domain, config: dict) -> None:
         on_grid=False,
         climatology=True,
     )
-    sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(400.0)
+    # Atmospheric CO2 (2026-09-23): real, time-varying input4MIPs GHG
+    # concentration pathway when boundaries.fabm is CMIP6-scenario-driven
+    # -- reuses that role's own `scenario` rather than a second, separate
+    # scenario field (deliberately coupled, not an oversight: the one real
+    # use case here is a genuine CMIP6 future run, which wants atmosphere
+    # and boundary tracers both matching the same scenario). Falls back to
+    # the old flat 400.0 constant otherwise (WOA/CMEMS boundaries, or no
+    # boundaries.fabm at all -- a near-term/historical run has no real
+    # future scenario to pick a pathway for anyway).
+    #
+    # Source: input4MIPs GHGConcentrations -- the SAME file every CMIP6
+    # model reads identically for a given SSP (real marker-scenario IAM
+    # pairing: UoM-IMAGE-ssp126-1-2-1 / UoM-AIM-ssp370-1-2-1), confirmed
+    # real and correctly scaled 2026-09-23: ssp126 reaches ~446 ppm by
+    # 2100, ssp370 ~873 ppm -- both match the real, independently-known
+    # values for these scenarios. `sector` dim (0/1/2) is global/NH/SH
+    # mean -- confirmed sector=0 is GLOBAL directly: its 2015-01 value,
+    # ~400 ppm, matches the real historical record, with sector 1/2
+    # (NH/SH) both offset from it in the expected direction. Files fetched
+    # via ocean_data.esgf_loader.ESGFLoader.search_input4mips (not a
+    # per-run download -- these are tiny, static-per-scenario files, saved
+    # once to ${GHG_CONCENTRATION_FOLDER}/co2_{scenario}.nc).
+    # Shared by CO2/N2O below -- both read from an input4MIPs GHG
+    # concentration file with the same Global/NH/SH `sector` dim. Index 1
+    # is Northern Hemisphere -- NOT the global mean (index 0) this used to
+    # read -- confirmed directly from the file's own `sector` coordinate
+    # attrs (`ids: 0: Global; 1: Northern Hemisphere; 2: Southern
+    # Hemisphere`), not just inferred from values. NSe is a Northern-
+    # Hemisphere domain, so the NH sector is the physically correct choice
+    # for both CO2 and N2O -- a regional model's air-sea gas flux should
+    # see the atmospheric concentration actually overhead, not a planet-
+    # wide average that's measurably offset from it (NH runs ~1% above
+    # global for CO2, per the real 2015-01 values: NH 403.36 ppm vs.
+    # global 399.99 ppm). Defined once, unconditionally, rather than
+    # nested inside just the CO2 `if` block below: it's used by BOTH
+    # dependencies gated on the SAME co2_scenario check, but a second,
+    # independent-looking `if co2_scenario:` for N2O shouldn't have to
+    # rely on Python's lack of block scoping (and a linter's own
+    # "possibly unbound" flag) to stay correct if the two checks ever
+    # diverge later.
+    def _nh_sector(nc):
+        return nc.isel(sector=1)
 
-    emep_path = fabm_folder / "Ndep/AMM7-EMEP-NDeposition_y????.nc"
-    sim.fabm.get_dependency("N3_flux/flux").set(
-        pygetm.input.from_nc(str(emep_path), "N3_flux", preprocess=_add_coord)
-    )
-    sim.fabm.get_dependency("N4_flux/flux").set(
-        pygetm.input.from_nc(str(emep_path), "N4_flux", preprocess=_add_coord)
-    )
+    fabm_cfg_boundaries = config.get("boundaries", {}).get("fabm") or {}
+    co2_scenario = fabm_cfg_boundaries.get("scenario")
+    if co2_scenario:
+        co2_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
+        co2_path = co2_folder / f"co2_{co2_scenario}.nc"
+
+        sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(
+            pygetm.input.from_nc(
+                str(co2_path), "mole_fraction_of_carbon_dioxide_in_air",
+                preprocess=_nh_sector,
+            ),
+            on_grid=False,
+        )
+    else:
+        sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(400.0)
+
+    # Atmospheric N2O (2026-09-23): a genuinely NEW dependency -- ERSEM's
+    # real nitrous_oxide.F90 module (air-sea N2O flux, on by default via
+    # its own iswN2O switch) registers partial_pressure_of_n2o, units
+    # natm, with NO prior wiring anywhere in this project (unlike CO2,
+    # which at least had a hardcoded constant). Same source/scenario-
+    # coupling logic as CO2 above -- see that dependency's own comment
+    # for the reasoning -- and NO real fallback value when boundaries.fabm
+    # isn't CMIP6-scenario-driven, since (unlike CO2's pre-existing 400.0)
+    # there was never a prior constant to fall back to; simply left unset
+    # in that case, same as any FABM dependency this driver doesn't
+    # provide (pyfabm's own error at initialize() makes an unset,
+    # non-optional dependency loud and immediate, not silently wrong).
+    #
+    # Same input4MIPs source as CO2, same NH sector choice (sector=1, not
+    # global) for the same reason -- confirmed real and correctly scaled
+    # 2026-09-23: NH 2015-01 value is ~328.1 ppb vs. global ~327.8 ppb --
+    # a much smaller NH/global spread than CO2's (N2O is longer-lived and
+    # more evenly mixed), but the same NH value is still the physically
+    # correct one to use for this domain. Units
+    # conversion: input4MIPs reports mole fraction as ppb (units: 1.e-9,
+    # i.e. the raw stored number IS the ppb value); ERSEM wants natm
+    # (nanoatmospheres) -- numerically identical at ~1 atm total surface
+    # pressure (1 ppb x 1 atm = 1e-9 atm = 1 natm), the same standard
+    # approximation FABM's own test harness uses (environment.yaml's
+    # partial_pressure_of_n2o: 335, the same order of magnitude as the
+    # real ~328 ppb 2015 value) -- so the raw file value is used directly,
+    # no scaling factor, same as CO2's own raw-ppm-number convention.
+    if co2_scenario:
+        n2o_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
+        n2o_path = n2o_folder / f"n2o_{co2_scenario}.nc"
+        sim.fabm.get_dependency("partial_pressure_of_n2o").set(
+            pygetm.input.from_nc(
+                str(n2o_path), "mole_fraction_of_nitrous_oxide_in_air",
+                preprocess=_nh_sector,
+            ),
+            on_grid=False,
+        )
+
+    # N-deposition (2026-09-23): switched from the old 30-year climatology
+    # (AMM7-EMEP-NDeposition_y1992..2021, no scenario, one file covers
+    # every run regardless of period) to the new HPC-supplied, scenario-
+    # aware dataset (AMM7_Ndep_BC-EMEP_{historical,ssp126,ssp370}_y{year},
+    # historical 1993-2014 + each scenario's own 2015-2100 -- confirmed
+    # real, different values from the old files for every overlapping
+    # year, not a duplicate) -- but only when boundaries.fabm is actually
+    # CMIP6-scenario-driven (the SAME co2_scenario used for CO2/N2O above,
+    # deliberately coupled for the same reason: a real future run wants
+    # atmosphere, boundary tracers, AND N-deposition all matching one
+    # scenario). Falls back to the old unscenarioed file for a WOA/CMEMS-
+    # boundaries run (or no boundaries.fabm at all), which has no
+    # scenario to pick a new-dataset pathway from and never needs one --
+    # its own period is always within the old dataset's 1992-2021
+    # coverage.
+    #
+    # Both old and new files were rewritten 2026-09-23 to carry real
+    # latitude(y)/longitude(x) dimension coordinates directly (same
+    # convention as the fish/gelbstoff files below) -- backed up first to
+    # /data/FABM/Ndep_backup_20260923_before_coordfix/ on bb-server1. No
+    # preprocess/regridding-helper/mesh_mask.nc dependency needed any
+    # more to read these, unlike before.
+    #
+    # Resolved to only the files this run's own [start, stop) actually
+    # needs via expand_year_glob -- same reasoning and same historical/
+    # scenario splicing shape as meteo.py's own _spliced_paths (see that
+    # function's docstring): handing pygetm.input.from_nc a bare `????`
+    # glob against this folder would also match every OTHER scenario's
+    # files sitting in the same Ndep/ folder, and read far more of a
+    # decades-long archive than any one run needs.
+    NDEP_HIST_CUTOFF_YEAR = 2014  # this dataset's own historical/scenario split -- matches meteo.py's CMIP6 HIST_CUTOFF_YEAR
+
+    runtime_cfg = config.get("runtime") or {}
+    _start = runtime_cfg.get("time")
+    _stop = runtime_cfg.get("stop")
+
+    def _ndep_scenario_paths(scenario: str) -> list:
+        if not _start or not _stop:
+            pattern = str(fabm_folder / f"Ndep/AMM7_Ndep_BC-EMEP_{scenario}_y????.nc")
+            return expand_year_glob(pattern, _start, _stop)
+
+        start_year = datetime.datetime.fromisoformat(_start).year
+        stop_year = datetime.datetime.fromisoformat(_stop).year
+
+        paths = []
+        if start_year <= NDEP_HIST_CUTOFF_YEAR:
+            hist_stop = _stop if stop_year <= NDEP_HIST_CUTOFF_YEAR else f"{NDEP_HIST_CUTOFF_YEAR}-12-31"
+            pattern = str(fabm_folder / "Ndep/AMM7_Ndep_BC-EMEP_historical_y????.nc")
+            paths += expand_year_glob(pattern, _start, hist_stop)
+        if stop_year > NDEP_HIST_CUTOFF_YEAR:
+            scen_start = _start if start_year > NDEP_HIST_CUTOFF_YEAR else f"{NDEP_HIST_CUTOFF_YEAR + 1}-01-01"
+            pattern = str(fabm_folder / f"Ndep/AMM7_Ndep_BC-EMEP_{scenario}_y????.nc")
+            paths += expand_year_glob(pattern, scen_start, _stop)
+        return paths
+
+    if co2_scenario:
+        ndep_paths = _ndep_scenario_paths(co2_scenario)
+        if sim.fabm.has_dependency("N3_flux/flux"):
+            sim.fabm.get_dependency("N3_flux/flux").set(
+                pygetm.input.from_nc(ndep_paths, "N3_flux")
+            )
+        if sim.fabm.has_dependency("N4_flux/flux"):
+            sim.fabm.get_dependency("N4_flux/flux").set(
+                pygetm.input.from_nc(ndep_paths, "N4_flux")
+            )
+    else:
+        emep_pattern = str(fabm_folder / "Ndep/AMM7-EMEP-NDeposition_y????.nc")
+        emep_paths = expand_year_glob(emep_pattern, _start, _stop)
+        if sim.fabm.has_dependency("N3_flux/flux"):
+            sim.fabm.get_dependency("N3_flux/flux").set(
+                pygetm.input.from_nc(emep_paths, "N3_flux")
+            )
+        if sim.fabm.has_dependency("N4_flux/flux"):
+            sim.fabm.get_dependency("N4_flux/flux").set(
+                pygetm.input.from_nc(emep_paths, "N4_flux")
+            )
+
+    # Fish/fishing-pressure dependency (2026-09-23): ported from Ricardo's
+    # manual HPC additions (bb-server1:/tmp/generated_nse_cmems_utils.py,
+    # written directly into a --dump-python'd script rather than this
+    # source file -- folded back in here so it survives the next
+    # regeneration instead of needing to be re-applied by hand each time).
+    # Only relevant to a fabm.yaml that actually includes the mizer/fish
+    # size-spectrum model (fabm_mizer.yaml here, not fabm_ersem.yaml) --
+    # has_dependency guards this the same way the N-deposition
+    # dependencies above now do.
+    if sim.fabm.has_dependency("fish/fishing_pressure"):
+        fish_path = fabm_folder / "fish/fishing_effort_????_AMM7.nc"
+        sim.fabm.get_dependency("fish/fishing_pressure").set(
+            pygetm.input.from_nc(str(fish_path), "tot_EffActiveHours")
+        )
+        sim.logger.info(f"configure_fabm: providing fish/fishing_pressure from {fish_path}")
 
     # --- WOA/CMEMS-sourced FABM tracer initial conditions ---
     # Independent of the dependency setup above -- gated on this driver's
