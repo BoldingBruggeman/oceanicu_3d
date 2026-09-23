@@ -327,9 +327,8 @@ output:
       requires_fabm: true
       time_average: true
     - groups:
-      - fabm_ersem_fish
-      requires_fabm: true
-      active: false  # testing the new group-level active toggle
+      - fabm_mizer
+      requires_fabm_dependency: fish/fishing_pressure
       time_average: true
   - type: netcdf
     netcdf:
@@ -543,5 +542,5 @@ fabm:
   source: ERSEM
   ERSEM:
     folder: ${FABM_ERSEM_FOLDER}
-    file: ${FABM_CONFIG_FOLDER}/fabm_mizer.yaml
+    file: fabm_mizer.yaml
     data_script: ${SCRIPT_FOLDER}/fabm.py:configure_fabm

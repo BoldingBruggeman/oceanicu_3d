@@ -65,13 +65,15 @@ BOUNDARY_FOLDER_FABM_CMIP6: /data/OceanICU/oceanicu_3d/data/NSe/CMIP6
 # {scenario}.nc (tiny, ~300KB each -- see driver/scripts/fabm.py's own
 # configure_fabm for the real path/naming this reads).
 GHG_CONCENTRATION_FOLDER: /data/OceanICU/oceanicu_3d/data/atmos/ghg_concentrations
-# fabm.<source>.file -- the actual FABM model/state-variable definition
-# (fabm_ersem.yaml, fabm_mizer.yaml) is project-specific CONFIG, not
-# shared external reference data, so it does NOT live under /data/FABM
-# (data-only, per-project convention) -- lives in the git-tracked
-# experiments tree instead, so it's versioned and travels with the
-# generated_*.{py,yaml} it's paired with.
-FABM_CONFIG_FOLDER: /data/OceanICU/oceanicu_3d/experiments/NSe
+# fabm.<source>.file (fabm_ersem.yaml, fabm_mizer.yaml) is deliberately a
+# BARE relative filename in the config, not a ${VAR}-resolved path --
+# these are project-specific CONFIG, not shared external data (so they
+# don't live under /data/FABM), and may vary between simulations, so
+# each run gets its OWN copy sitting right next to its own generated_*.
+# {py,yaml} (same directory, same cwd the run itself executes from) --
+# never a single shared path multiple runs would read from. Canonical,
+# git-tracked source to copy from: /data/OceanICU/oceanicu_3d/
+# experiments/NSe/fabm_{ersem,mizer}.yaml.
 
 # data_assignments (radiation.kc2, when ObsKd/space-varying is active)
 KD490_FOLDER: /data/Kd490
