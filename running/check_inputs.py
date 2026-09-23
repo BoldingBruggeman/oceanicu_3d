@@ -266,6 +266,134 @@ def _list_ic_files(config: dict) -> list:
     return [(desc, str(path), path.is_file(), var) for desc, path, var in files]
 
 
+def _list_fabm_files(config: dict, start: str, stop: str, fabm_yaml_path: Optional[str]) -> list:
+    """Mirrors driver/scripts/fabm.py's configure_fabm -- the FABM
+    *dependency* files (gelbstoff, atmospheric CO2/N2O, N-deposition,
+    fish/fishing-pressure), plus boundaries.fabm's own WOA/CMEMS tracer
+    IC files. NOT covered by the plain `fabm` check in check_generated_
+    script (that only confirms the fabm.yaml itself opens) -- these are
+    the real files configure_fabm's own sim.fabm.get_dependency(...).
+    set(...) calls read, previously unchecked by this tool entirely (a
+    genuinely silent gap: this pre-flight could report "ALL CHECKS
+    PASSED" while e.g. the N-deposition or fish files were missing).
+
+    Returns a list of InputCheck objects directly (unlike the other
+    _list_* helpers, which return raw (desc, path, found, var) tuples
+    for the caller to run through _check_file) -- fish/fishing_pressure's
+    own "found but doesn't cover the requested period" case doesn't fit
+    that shared shape (its 4th field is a coverage message, not a
+    variable name to look for inside the file), so this builds its own
+    InputCheck objects throughout instead of half-fitting the other
+    pattern.
+
+    Fish/fishing_pressure is mizer-model-specific (see fabm.py's own
+    has_dependency guard) -- can't check sim.fabm.has_dependency without
+    importing pyfabm (this module deliberately never does), so instead
+    greps `fabm_yaml_path`'s own text for a mizer model reference, same
+    "duplicate rather than import" idiom as everything else here.
+    """
+    fabm_cfg = config.get("fabm") or {}
+    if fabm_cfg.get("source") != "ERSEM":
+        return []
+
+    fabm_folder = Path(_resolve_data_path(fabm_cfg["folder"]))
+    checks: list = []
+
+    def _add(category: str, desc: str, path, var: Optional[str], *, expect_time: bool = True) -> None:
+        path = str(path)
+        ok, detail = _check_file(path, var=var, expect_time=expect_time)
+        checks.append(InputCheck(category, desc, path, ok, detail))
+
+    _add("fabm dependency", "FABM gelbstoff absorption", fabm_folder / "ADY_gle.nc",
+         "gelbstoff_absorption_satellite")
+
+    # Atmospheric CO2/N2O (input4MIPs) -- same co2_scenario coupling as
+    # fabm.py's own CO2/N2O dependencies (boundaries.fabm's own scenario,
+    # truthy-checked directly, not gated on boundaries.fabm.source ==
+    # "CMIP6" -- matches fabm.py exactly, see that function's own
+    # comment for why).
+    fabm_cfg_boundaries = config.get("boundaries", {}).get("fabm") or {}
+    co2_scenario = fabm_cfg_boundaries.get("scenario")
+    if co2_scenario:
+        ghg_folder = Path(_resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
+        _add("fabm dependency", f"FABM atmospheric CO2 ({co2_scenario})",
+             ghg_folder / f"co2_{co2_scenario}.nc", "mole_fraction_of_carbon_dioxide_in_air")
+        _add("fabm dependency", f"FABM atmospheric N2O ({co2_scenario})",
+             ghg_folder / f"n2o_{co2_scenario}.nc", "mole_fraction_of_nitrous_oxide_in_air")
+
+    # N-deposition -- same historical/scenario splice (NDEP_HIST_CUTOFF_
+    # YEAR=2014) as fabm.py's own _ndep_scenario_paths, restricted to
+    # [start, stop] via _expand_year_glob rather than a bare `????` glob
+    # (same reasoning as _list_meteo_files above). Falls back to the old
+    # unscenarioed climatology otherwise, exactly matching fabm.py's own
+    # else branch.
+    NDEP_HIST_CUTOFF_YEAR = 2014
+    start_year = datetime.datetime.fromisoformat(start).year
+    stop_year = datetime.datetime.fromisoformat(stop).year
+
+    def _ndep_segment(desc_suffix: str, pattern: str, seg_start: str, seg_stop: str) -> None:
+        matches = _expand_year_glob(pattern, seg_start, seg_stop)
+        if not matches:
+            checks.append(InputCheck("fabm dependency", f"FABM N-deposition{desc_suffix}", pattern, False, "no files matched"))
+            return
+        for m in matches:
+            _add("fabm dependency", f"FABM N-deposition N3_flux{desc_suffix}", m, "N3_flux")
+            _add("fabm dependency", f"FABM N-deposition N4_flux{desc_suffix}", m, "N4_flux")
+
+    if co2_scenario:
+        if start_year <= NDEP_HIST_CUTOFF_YEAR:
+            hist_stop = stop if stop_year <= NDEP_HIST_CUTOFF_YEAR else f"{NDEP_HIST_CUTOFF_YEAR}-12-31"
+            pattern = str(fabm_folder / "Ndep/AMM7_Ndep_BC-EMEP_historical_y????.nc")
+            _ndep_segment(" (historical)", pattern, start, hist_stop)
+        if stop_year > NDEP_HIST_CUTOFF_YEAR:
+            scen_start = start if start_year > NDEP_HIST_CUTOFF_YEAR else f"{NDEP_HIST_CUTOFF_YEAR + 1}-01-01"
+            pattern = str(fabm_folder / f"Ndep/AMM7_Ndep_BC-EMEP_{co2_scenario}_y????.nc")
+            _ndep_segment(f" ({co2_scenario})", pattern, scen_start, stop)
+    else:
+        pattern = str(fabm_folder / "Ndep/AMM7-EMEP-NDeposition_y????.nc")
+        _ndep_segment(" (legacy)", pattern, start, stop)
+
+    # Fish/fishing-pressure -- only relevant for a mizer-enabled fabm.yaml.
+    # Real coverage is only 1993-2023 (see fishing_effort_????_AMM7.nc on
+    # disk) with no scenario/future extension at all, unlike CO2/N2O/
+    # N-deposition above -- a genuine gap worth surfacing for any run
+    # reaching past 2023, not just a missing-file check.
+    if fabm_yaml_path:
+        try:
+            yaml_text = Path(_resolve_data_path(fabm_yaml_path)).read_text()
+        except OSError:
+            yaml_text = ""
+        if re.search(r"model:\s*mizer/", yaml_text):
+            pattern = str(fabm_folder / "fish/fishing_effort_????_AMM7.nc")
+            matches = _expand_year_glob(pattern, None, None)
+            years = sorted(
+                int(y) for p in matches for y in re.findall(r"fishing_effort_(\d{4})_AMM7\.nc", p)
+            )
+            desc = "FABM fish/fishing_pressure"
+            if not matches:
+                checks.append(InputCheck("fabm dependency", desc, pattern, False, "no files matched"))
+            elif not (years and years[0] <= start_year and stop_year <= years[-1]):
+                span = f"{years[0]}-{years[-1]}" if years else "none"
+                checks.append(InputCheck(
+                    "fabm dependency", desc, pattern, False,
+                    f"only covers {span}, requested {start_year}-{stop_year}",
+                ))
+            else:
+                for m in matches:
+                    _add("fabm dependency", desc, m, "tot_EffActiveHours")
+
+    # boundaries.fabm's own WOA/CMEMS tracer IC files -- mirrors fabm.py's
+    # own "WOA/CMEMS-sourced FABM tracer initial conditions" block.
+    boundaries_fabm_cfg = config.get("boundaries", {}).get("fabm") or {}
+    if boundaries_fabm_cfg.get("source") in ("WOA", "CMEMS"):
+        ic_folder = Path(_resolve_data_path(boundaries_fabm_cfg["folder"]))
+        for tracer, spec in (boundaries_fabm_cfg.get("tracers") or {}).items():
+            _add("fabm dependency", f"FABM boundary IC {tracer}", ic_folder / spec["file"],
+                 spec.get("variable"), expect_time=False)
+
+    return checks
+
+
 def _check_file(path: str, *, var: Optional[str] = None, expect_time: bool = False) -> tuple[bool, str]:
     """Existence + (for .nc files) a real open, to catch truncated/
     corrupt downloads, not just missing files -- plus, cheaply, since
@@ -620,6 +748,24 @@ def check_generated_script(
         else:
             ok, detail = _check_file(resolved)
             inputs.append(InputCheck("fabm", "fabm.yaml", resolved, ok, detail))
+
+    # FABM *dependency* files (gelbstoff/CO2/N2O/N-deposition/fish, plus
+    # boundaries.fabm's own WOA/CMEMS tracer ICs) -- independent of the
+    # bare fabm.yaml-opens check just above. `fabm` (the --fabm override,
+    # if given) is only used here to detect a mizer-enabled fabm.yaml for
+    # the fish/fishing_pressure check; falls back to config's own baked-in
+    # fabm.ERSEM.file when no override was passed, so a plain (non-
+    # overridden) run still gets checked correctly.
+    # NOT fabm_cfg["ERSEM"]["file"] -- validate_config's choice-flattening
+    # (same pitfall fabm.py's own docstring warns about repeatedly) puts
+    # the ACTIVE choice's fields directly on the parent "fabm" dict once
+    # ERSEM is active; "ERSEM" itself only exists as a key for an
+    # INACTIVE alternative.
+    fabm_yaml_for_mizer_check = fabm or (config.get("fabm") or {}).get("file")
+    try:
+        inputs.extend(_list_fabm_files(config, start, stop, fabm_yaml_for_mizer_check))
+    except RuntimeError as exc:
+        inputs.append(InputCheck("fabm dependency", "fabm.folder", "(unresolved)", False, str(exc)))
 
     return CheckReport(inputs=inputs, outputs=outputs)
 
