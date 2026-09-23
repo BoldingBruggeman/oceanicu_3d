@@ -543,5 +543,5 @@ fabm:
   source: ERSEM
   ERSEM:
     folder: ${FABM_ERSEM_FOLDER}
-    file: /data/FABM/fabm_ersem.yaml
+    file: ${FABM_CONFIG_FOLDER}/fabm_ersem.yaml
     data_script: ${SCRIPT_FOLDER}/fabm.py:configure_fabm

@@ -44,14 +44,10 @@ CMIP6_RAW_FOLDER: /data/CMIP6
 RIVER_FOLDER: /data/EMORID
 RIVER_FOLDER_CMIP6: /data/BiasCorrected
 
-# boundaries.fabm / fabm -- FABM is off by default in every nse_*.yaml
-# (fabm.ERSEM.file commented out), and neither of these has a confirmed
-# real path yet: no NSe-domain mesh_mask.nc/EMEP-N-deposition/gelbstoff
-# product or WOA-equivalent BGC tracer files exist to point at. Placeholder
-# values only, unlike every other entry in this file (which are all
-# verified against bb-server1's real layout) -- update once real files
-# exist.
-FABM_ERSEM_FOLDER: /data/FABM/ERSEM
+# boundaries.fabm / fabm -- real files (ADY_gle.nc, Ndep/, woa_{i,n,o,p}.nc)
+# sit directly under /data/FABM, not /data/FABM/ERSEM (that subfolder
+# never existed).
+FABM_ERSEM_FOLDER: /data/FABM
 BOUNDARY_FOLDER_FABM_WOA: /data/FABM/WOA
 BOUNDARY_FOLDER_FABM_CMEMS: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
 # Same root as BOUNDARY_FOLDER_BAROCLINIC_CMIP6 -- bio boundary files
@@ -61,6 +57,21 @@ BOUNDARY_FOLDER_FABM_CMEMS: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
 # BAROCLINIC_CMIP6) to match every other per-role FABM/baroclinic pair
 # above, even though the real value happens to be identical today.
 BOUNDARY_FOLDER_FABM_CMIP6: /data/OceanICU/oceanicu_3d/data/NSe/CMIP6
+# Atmospheric CO2 (and, once wired, N2O) for FABM's mole_fraction_of_
+# carbon_dioxide_in_air/partial_pressure_of_n2o dependencies -- real,
+# verified data (2026-09-23): the input4MIPs GHG concentration pathway,
+# same file for every CMIP6 model, fetched via ocean_data.esgf_loader.
+# ESGFLoader.search_input4mips and saved once per scenario as co2_
+# {scenario}.nc (tiny, ~300KB each -- see driver/scripts/fabm.py's own
+# configure_fabm for the real path/naming this reads).
+GHG_CONCENTRATION_FOLDER: /data/OceanICU/oceanicu_3d/data/atmos/ghg_concentrations
+# fabm.<source>.file -- the actual FABM model/state-variable definition
+# (fabm_ersem.yaml, fabm_mizer.yaml) is project-specific CONFIG, not
+# shared external reference data, so it does NOT live under /data/FABM
+# (data-only, per-project convention) -- lives in the git-tracked
+# experiments tree instead, so it's versioned and travels with the
+# generated_*.{py,yaml} it's paired with.
+FABM_CONFIG_FOLDER: /data/OceanICU/oceanicu_3d/experiments/NSe
 
 # data_assignments (radiation.kc2, when ObsKd/space-varying is active)
 KD490_FOLDER: /data/Kd490

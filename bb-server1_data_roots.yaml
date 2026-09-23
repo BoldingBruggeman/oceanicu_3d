@@ -29,14 +29,9 @@ CMIP6_RAW_FOLDER: /data/CMIP6
 RIVER_FOLDER: /data/EMORID
 RIVER_FOLDER_CMIP6: /data/BiasCorrected
 
-# boundaries.fabm / fabm -- CORRECTED 2026-09-23: real files DO exist
-# (ADY_gle.nc, Ndep/ with 30 years of real AMM7-EMEP N-deposition,
-# mesh_mask.nc, woa_{i,n,o,p}.nc, and a real project fabm.yaml under
-# FABM/FABM/) -- they just sit directly under /data/FABM, not /data/FABM/
-# ERSEM (that subfolder doesn't exist; the earlier claim that "no real
-# files exist yet" was never actually checked against the real disk
-# layout). fabm.ERSEM.file itself should point at /data/FABM/FABM/
-# fabm.yaml, the real project ERSEM config -- not a borrowed placeholder.
+# boundaries.fabm / fabm -- real files (ADY_gle.nc, Ndep/, woa_{i,n,o,p}.nc)
+# sit directly under /data/FABM, not /data/FABM/ERSEM (that subfolder
+# doesn't exist).
 FABM_ERSEM_FOLDER: /data/FABM
 BOUNDARY_FOLDER_FABM_WOA: /data/WOA
 BOUNDARY_FOLDER_FABM_CMEMS: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
@@ -44,6 +39,14 @@ BOUNDARY_FOLDER_FABM_CMIP6: /data/OceanICU/oceanicu_3d/data/NSe/CMIP6
 # Real, downloaded 2026-09-23 (ssp126/ssp370, input4MIPs GHG concentration
 # pathway) -- see driver/scripts/fabm.py's own configure_fabm.
 GHG_CONCENTRATION_FOLDER: /data/FABM/GHGConcentrations
+# fabm.<source>.file -- the actual FABM model/state-variable definition
+# (fabm_ersem.yaml, fabm_mizer.yaml) is project-specific CONFIG, not
+# shared external reference data, so it does NOT live under /data/FABM
+# (data-only, per-project convention) -- moved 2026-09-23 into the
+# git-tracked experiments tree instead (/data/OceanICU/oceanicu_3d's own
+# real, canonical home -- see the "experiments/ relocation" note), so it's
+# versioned and travels with the generated_*.{py,yaml} it's paired with.
+FABM_CONFIG_FOLDER: /data/OceanICU/oceanicu_3d/experiments/NSe
 
 # data_assignments (radiation.kc2, when ObsKd/space-varying is active)
 KD490_FOLDER: /data/Kd490
