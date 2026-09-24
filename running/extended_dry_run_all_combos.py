@@ -1,15 +1,26 @@
 #!/usr/bin/env python
 """Extended-dry-run over all model x scenario x fabm-variant combos.
 
-Generates each combo's script locally (pygetm env), copies it + the right
-fabm.yaml to bb-server1, runs chunk_runner.py --extended-dry-run there,
-prints a one-line-per-combo summary. Also writes a full report per combo
-(<tag>_report.txt) and a combined summary.txt, both left in BB_DIR
+Generates each combo's script locally (pygetm env), stages it + the right
+fabm.yaml on the target host, runs chunk_runner.py --extended-dry-run
+there, prints a one-line-per-combo summary. Also writes a full report per
+combo (<tag>_report.txt) and a combined summary.txt, both left in BB_DIR
 alongside the staged inputs so a run leaves a persistent record.
+
+Target host defaults to bb-server1 (today's known-good paths below), but
+every host-side path is a CLI override -- so once data is mirrored onto
+the HPC (scylla), the same script can target it with
+--host scylla --data-roots-file ... --running-dir ... --fabm-src-dir ...
+without editing this file. Pass --host "$(hostname -s)" (or let --local
+autodetect it) to run entirely on the current machine: staging then
+happens via cp instead of scp, and the dry-run runs via a plain subprocess
+instead of ssh.
 """
 from __future__ import annotations
 
+import argparse
 import collections
+import socket
 import subprocess
 import sys
 import tempfile
@@ -27,11 +38,29 @@ MODELS = ["CNRM-ESM2-1", "GFDL-ESM4", "MPI-ESM1-2-HR"]
 SCENARIOS = ["ssp126", "ssp370"]
 FABM_VARIANTS = {"ersem": "fabm_ersem.yaml", "mizer": "fabm_mizer.yaml"}
 
-BB = "bb-server1"
-BB_DIR = "/tmp/nse_all_combos_dryrun"
-BB_DATA_ROOTS = "/data/OceanICU/oceanicu_3d/experiments/NSe/bb-server1_data_roots.yaml"
-BB_RUNNING = "~/source/repos/OceanICU/oceanicu_3d/running"
-BB_FABM_SRC = "/data/OceanICU/oceanicu_3d/experiments/NSe"
+# bb-server1's known-good paths -- the only host confirmed today.
+DEFAULT_HOST = "bb-server1"
+DEFAULT_DIR = "/tmp/nse_all_combos_dryrun"
+DEFAULT_DATA_ROOTS = "/data/OceanICU/oceanicu_3d/experiments/NSe/bb-server1_data_roots.yaml"
+DEFAULT_RUNNING = "~/source/repos/OceanICU/oceanicu_3d/running"
+DEFAULT_FABM_SRC = "/data/OceanICU/oceanicu_3d/experiments/NSe"
+
+
+def parse_args():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--host", default=DEFAULT_HOST,
+                    help=f"target host to stage/run on (default: {DEFAULT_HOST})")
+    p.add_argument("--local", action="store_true",
+                    help="run directly on this machine (no ssh/scp) instead of over --host; "
+                         "implied automatically if --host matches this machine's own hostname")
+    p.add_argument("--dir", default=DEFAULT_DIR, help="staging dir on the target host")
+    p.add_argument("--data-roots-file", default=DEFAULT_DATA_ROOTS,
+                    help="data-roots yaml on the target host")
+    p.add_argument("--running-dir", default=DEFAULT_RUNNING,
+                    help="running/ dir (holding bin/chunk-runner) on the target host")
+    p.add_argument("--fabm-src-dir", default=DEFAULT_FABM_SRC,
+                    help="dir holding fabm_ersem.yaml/fabm_mizer.yaml on the target host")
+    return p.parse_args()
 
 
 def set_recursive(obj, key, value):
@@ -50,6 +79,11 @@ def run(cmd):
     return subprocess.run(cmd, capture_output=True, text=True)
 
 
+def is_same_host(host: str) -> bool:
+    me = socket.gethostname()
+    return host in (me, me.split(".")[0])
+
+
 def dedup_fails(fails: list) -> list:
     """[FAIL] lines repeat verbatim once per missing year-file -- collapse
     identical lines into one with a count, e.g. 'x85', instead of printing
@@ -59,11 +93,27 @@ def dedup_fails(fails: list) -> list:
 
 
 def main() -> int:
-    run(["ssh", BB, f"mkdir -p {BB_DIR}"])
+    args = parse_args()
+    local = args.local or is_same_host(args.host)
+    host, dir_, data_roots, running_dir, fabm_src = (
+        args.host, args.dir, args.data_roots_file, args.running_dir, args.fabm_src_dir,
+    )
+
+    def run_on_host(shell_cmd: str):
+        if local:
+            return run(["bash", "-c", shell_cmd])
+        return run(["ssh", host, shell_cmd])
+
+    def stage_file(src: Path, dst: str):
+        if local:
+            return run(["cp", str(src), dst])
+        return run(["scp", "-q", str(src), f"{host}:{dst}"])
+
+    run_on_host(f"mkdir -p {dir_}")
     for name in FABM_VARIANTS.values():
-        r = run(["ssh", BB, f"cp {BB_FABM_SRC}/{name} {BB_DIR}/{name}"])
+        r = run_on_host(f"cp {fabm_src}/{name} {dir_}/{name}")
         if r.returncode != 0:
-            print(f"FATAL: couldn't stage {name} on {BB}: {r.stderr}", file=sys.stderr)
+            print(f"FATAL: couldn't stage {name} on {host}: {r.stderr}", file=sys.stderr)
             return 1
 
     tmp = Path(tempfile.mkdtemp(prefix="nse_dryrun_"))
@@ -90,13 +140,13 @@ def main() -> int:
                     continue
 
                 for f in tmp.glob(f"generated_{tag}*"):
-                    run(["scp", "-q", str(f), f"{BB}:{BB_DIR}/"])
+                    stage_file(f, f"{dir_}/")
 
-                r = run(["ssh", BB,
-                          f"cd {BB_DIR} && {BB_RUNNING}/bin/chunk-runner "
-                          f"--extended-dry-run --script generated_{tag}.py "
-                          f"--start {START} --stop {STOP} "
-                          f"--data-roots-file {BB_DATA_ROOTS}"])
+                r = run_on_host(
+                    f"cd {dir_} && {running_dir}/bin/chunk-runner "
+                    f"--extended-dry-run --script generated_{tag}.py "
+                    f"--start {START} --stop {STOP} "
+                    f"--data-roots-file {data_roots}")
                 out = r.stdout + r.stderr
                 fails = dedup_fails([l for l in out.splitlines() if l.startswith("[FAIL]")])
                 status = "OK" if r.returncode == 0 else f"{len(fails)} FAIL KIND(S)"
@@ -105,7 +155,7 @@ def main() -> int:
 
                 report_path = tmp / f"{tag}_report.txt"
                 report_path.write_text(out)
-                run(["scp", "-q", str(report_path), f"{BB}:{BB_DIR}/{tag}_report.txt"])
+                stage_file(report_path, f"{dir_}/{tag}_report.txt")
 
     print("\n=== summary ===")
     summary_lines = []
@@ -118,7 +168,7 @@ def main() -> int:
 
     summary_path = tmp / "summary.txt"
     summary_path.write_text(summary_text)
-    run(["scp", "-q", str(summary_path), f"{BB}:{BB_DIR}/summary.txt"])
+    stage_file(summary_path, f"{dir_}/summary.txt")
 
     return 0 if all(s == "OK" for _, s, _ in results) else 1
 
