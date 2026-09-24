@@ -330,10 +330,6 @@ output:
       - fabm_mizer
       requires_fabm_dependency: fish/fishing_pressure
       time_average: true
-    - groups:
-      - fabm_mizer_diagnostics
-      requires_fabm_dependency: fish/fishing_pressure
-      time_average: true
   - type: netcdf
     netcdf:
       sync_interval: 1
@@ -344,6 +340,9 @@ output:
       start: '2010-01-01'
       stop: '2020-01-01'
     variable_requests:
+    - groups:
+      - fabm_mizer_diagnostics
+      requires_fabm_dependency: fish/fishing_pressure
     - fields:
       - temp
       - salt
