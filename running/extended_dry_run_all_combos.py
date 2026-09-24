@@ -7,13 +7,19 @@ one-line-per-combo summary. Also writes a full report per combo
 (<tag>_report.txt) and a combined summary.txt, both left in BB_DIR
 alongside the staged inputs so a run leaves a persistent record.
 
-fabm_ersem.yaml/fabm_mizer.yaml are read straight from the target host's
-own ${FABM_ERSEM_FOLDER} (via --data-roots-file) -- no staging needed
-(fixed 2026-09-24: check_inputs.py's mizer/fish-pressure check used to
-resolve fabm.ERSEM.file as a bare, cwd-relative filename, requiring a
-copy into the staging dir; it now joins it with the real, already-
-resolved fabm folder instead, same fix applied to oceanicu_driver.py's
-own nclass lookup).
+fabm_ersem.yaml/fabm_mizer.yaml still get staged into --dir, though two
+SEPARATE fabm.yaml lookups no longer need that (fixed 2026-09-24):
+check_inputs.py's mizer/fish-pressure check and oceanicu_driver.py's own
+nclass lookup used to resolve fabm.ERSEM.file as a bare, cwd-relative
+filename; both now join it with the real, already-resolved fabm folder
+instead. The staging copy itself stays required for a THIRD, more
+fundamental reason: `simulation.fabm` (pygetm's own core schema field,
+what actually opens fabm.yaml at real simulation runtime) is bare and
+genuinely, deliberately cwd-relative -- the "each run/chunk keeps its
+own physical copy of fabm.yaml, not a shared reference" convention
+established earlier this project. Confirmed directly: removing the
+staging step broke the "simulation setup / fabm_ersem.yaml" check with
+exactly that missing-file error.
 
 Target host defaults to bb-server1 (today's known-good paths below), but
 every host-side path is a CLI override -- so once data is mirrored onto
@@ -70,6 +76,7 @@ DEFAULT_DATA_ROOTS = "/data/OceanICU/oceanicu_3d/experiments/NSe/bb-server1_data
 # THIS script's own file lives keeps that in sync automatically, and is
 # exactly right for --local (the target IS this machine).
 DEFAULT_RUNNING = str(REPO / "running")
+DEFAULT_FABM_SRC = "/data/OceanICU/oceanicu_3d/experiments/NSe"
 
 
 def parse_args():
@@ -85,6 +92,10 @@ def parse_args():
     p.add_argument("--running-dir", default=DEFAULT_RUNNING,
                     help="running/ dir (holding bin/chunk-runner) on the target host "
                          f"(default: {DEFAULT_RUNNING}, this script's own directory)")
+    p.add_argument("--fabm-src-dir", default=DEFAULT_FABM_SRC,
+                    help="dir holding fabm_ersem.yaml/fabm_mizer.yaml on the target host -- "
+                         "still staged into --dir; simulation.fabm resolves it cwd-relative "
+                         "by deliberate design, see module docstring")
     p.add_argument("--fetch-from", default="",
                     help="instead of generating locally, pull already-generated "
                          "generated_<tag>* files from --fetch-dir on this host (e.g. "
@@ -128,8 +139,8 @@ def dedup_fails(fails: list) -> list:
 def main() -> int:
     args = parse_args()
     local = args.local or is_same_host(args.host)
-    host, dir_, data_roots, running_dir = (
-        args.host, args.dir, args.data_roots_file, args.running_dir,
+    host, dir_, data_roots, running_dir, fabm_src = (
+        args.host, args.dir, args.data_roots_file, args.running_dir, args.fabm_src_dir,
     )
     fetch_from = args.fetch_from
 
@@ -144,6 +155,11 @@ def main() -> int:
         return run(["scp", "-q", str(src), f"{host}:{dst}"])
 
     run_on_host(f"mkdir -p {dir_}")
+    for name in FABM_VARIANTS.values():
+        r = run_on_host(f"cp {fabm_src}/{name} {dir_}/{name}")
+        if r.returncode != 0:
+            print(f"FATAL: couldn't stage {name} on {host}: {r.stderr}", file=sys.stderr)
+            return 1
 
     tmp = Path(tempfile.mkdtemp(prefix="nse_dryrun_"))
     results = []
