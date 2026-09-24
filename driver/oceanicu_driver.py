@@ -406,6 +406,51 @@ def main(argv=None) -> int:
         if fabm_cfg.get("file"):
             raw.setdefault("simulation", {}).setdefault("fabm", fabm_cfg["file"])
 
+    # output.variable_groups.fabm_mizer -- a VECTOR variable (nclass size-
+    # class carbon fields, fish_c1..fish_c<nclass>), not something to
+    # hand-list in every domain config. nclass is read directly from the
+    # configured fabm.yaml itself (instances.<name>.parameters.nclass, for
+    # whichever instance's model starts with "mizer/") when that file is
+    # actually resolvable at generation time -- fabm.ERSEM.file is often a
+    # bare relative filename (resolved properly at the GENERATED SCRIPT's
+    # own runtime, per driver/README.md), so it isn't always reachable from
+    # wherever generation itself runs; falls back to the last known-correct
+    # value (100) with a clear warning if the file can't be found/parsed,
+    # rather than silently guessing. Driven entirely by whether any
+    # output.files variable_requests entry already references the
+    # fabm_mizer group, same "driven by what's already referenced" pattern
+    # as the debug-group injection below -- always OVERWRITES whatever the
+    # raw YAML had there, since this list is derived, never hand-maintained
+    # (same rule as any other code-generated content in this project).
+    if any(
+        "fabm_mizer" in (req.get("groups") or [])
+        for file_entry in raw.get("output", {}).get("files", [])
+        for req in file_entry.get("variable_requests", [])
+    ):
+        _FISH_NCLASS_FALLBACK = 100
+        _nclass = _FISH_NCLASS_FALLBACK
+        # raw (pre-validate_config) still has fabm.<source>.file nested under
+        # its own source label -- choice-flattening onto the parent dict only
+        # happens INSIDE validate_config, not yet at this point.
+        _fabm_file = (fabm.get(fabm_source) or {}).get("file") if fabm_source else None
+        if _fabm_file:
+            try:
+                _fabm_yaml_path = Path(loader.resolve_data_path(_fabm_file))
+                _fabm_yaml = yaml.safe_load(_fabm_yaml_path.read_text())
+                for _inst in (_fabm_yaml.get("instances") or {}).values():
+                    if str(_inst.get("model", "")).startswith("mizer/"):
+                        _nclass = int(_inst["parameters"]["nclass"])
+                        break
+                else:
+                    print(f"WARNING: no mizer instance found in {_fabm_yaml_path} -- "
+                          f"using fabm_mizer nclass={_FISH_NCLASS_FALLBACK}", file=sys.stderr)
+            except (OSError, RuntimeError, KeyError, ValueError, yaml.YAMLError) as exc:
+                print(f"WARNING: couldn't read nclass from fabm.yaml ({exc}) -- "
+                      f"using fabm_mizer nclass={_FISH_NCLASS_FALLBACK}", file=sys.stderr)
+        raw.setdefault("output", {}).setdefault("variable_groups", {})["fabm_mizer"] = [
+            f"fish_c{i}" for i in range(1, _nclass + 1)
+        ]
+
     raw.setdefault("runtime", {})["time"] = args.start
 
     # runtime.debug_output (SCHEMA-ONLY flag, see pygetm-config's own

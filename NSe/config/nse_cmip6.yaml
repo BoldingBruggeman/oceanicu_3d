@@ -265,6 +265,8 @@ output:
     - N5_s_sfl_tot_calculator_result
     - N5_s_bfl_tot_calculator_result
     - N5_s_sms_tot_calculator_result
+    fabm_mizer:  # placeholder -- oceanicu_driver.py overwrites this with fish_c1..fish_c100 at generation time
+    - fish_c1
   files:
   - type: netcdf
     netcdf:
@@ -321,6 +323,10 @@ output:
     - groups:
       - fabm_ersem
       requires_fabm: true
+      time_average: true
+    - groups:
+      - fabm_mizer
+      requires_fabm_dependency: fish/fishing_pressure
       time_average: true
   - type: netcdf
     netcdf:
@@ -392,7 +398,7 @@ boundaries:
       end_date: '21001231'
       model: GFDL-ESM4
   fabm:
-    source: CMEMS
+    source: CMIP6
     CMEMS:
       folder: ${BOUNDARY_FOLDER_FABM_CMEMS}
       climatology: true
@@ -531,7 +537,8 @@ river_discharge:
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
 fabm:
-  source: none
+  source: ERSEM
   ERSEM:
     folder: ${FABM_ERSEM_FOLDER}
+    file: fabm_mizer.yaml
     data_script: ${SCRIPT_FOLDER}/fabm.py:configure_fabm

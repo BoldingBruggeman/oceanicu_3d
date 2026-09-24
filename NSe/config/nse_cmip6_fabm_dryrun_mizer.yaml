@@ -265,10 +265,8 @@ output:
     - N5_s_sfl_tot_calculator_result
     - N5_s_bfl_tot_calculator_result
     - N5_s_sms_tot_calculator_result
-    fabm_mizer:
-    - Y2_c
-    - Y3_c
-    - totally_fake_fish_field_for_testing_active_toggle
+    fabm_mizer:  # placeholder -- oceanicu_driver.py overwrites this with fish_c1..fish_c100 at generation time
+    - fish_c1
   files:
   - type: netcdf
     netcdf:
