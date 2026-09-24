@@ -231,6 +231,12 @@ def _list_river_files(config: dict, start: str, stop: str) -> list:
             model=rcfg.get("model", ""), scenario=rcfg.get("scenario", "")
         )
     filename = rcfg["file"].format(model=rcfg.get("model", ""), scenario=rcfg.get("scenario", ""))
+    # river_discharge.CMIP6.daily -- mirrors driver/scripts/rivers.py's
+    # add_rivers/set_river_data (same flag, same "_daily" insertion before
+    # the noleap suffix) so this checker doesn't report a stale gap once a
+    # config switches to the daily file.
+    if rcfg.get("daily"):
+        filename = filename.removesuffix(".nc") + "_daily.nc"
     if config.get("runtime", {}).get("calendar") == "noleap":
         filename = filename.removesuffix(".nc") + "_noleap.nc"
     path = folder / filename

@@ -445,11 +445,37 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         ),
     )
 
+    # CMIP6-only: river_flows_future_{scenario}.nc is monthly-mean,
+    # timestamped at month-END -- its own real coverage only starts
+    # 2015-01-31, so any run/chunk requesting 2015-01-01 hits a real
+    # ~30-day gap before that first record (found running
+    # running/check_inputs.py's --extended-dry-run, 2026-09-24). ocean-prep's
+    # river-projection --disaggregate now also writes a day-of-year-shaped
+    # daily sibling (river_flows_future_{scenario}_daily.nc, real coverage
+    # starting exactly 2015-01-01) -- this flag switches scripts/rivers.py's
+    # add_rivers/set_river_data to read that file instead. Default False:
+    # existing configs keep reading the monthly file unchanged.
+    _river_cmip6_only = (
+        ParameterSpec(
+            name="daily",
+            type=TypeRef(kind="scalar", scalar_type="bool"),
+            default=False,
+            help=(
+                "read the daily-disaggregated river_flows_future_"
+                "{scenario}_daily.nc instead of the monthly-mean file -- "
+                "closes the monthly file's ~30-day start-of-scenario "
+                "coverage gap (its first record is month-end-stamped, "
+                "2015-01-31, not 2015-01-01)"
+            ),
+            importance=Importance.BASIC,
+        ),
+    )
+
     river_discharge = make_provider_slot(
         "river_discharge",
         {
             "emorid": _river_shared_fields,
-            "CMIP6": _river_shared_fields + _CMIP6_SHARED,
+            "CMIP6": _river_shared_fields + _CMIP6_SHARED + _river_cmip6_only,
         },
         default="emorid",
     )

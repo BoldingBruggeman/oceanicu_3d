@@ -74,6 +74,14 @@ def add_rivers(domain, config: dict):
     # own folder_template.format(model=..., scenario=...)) -- avoids the
     # filename and `scenario:` field ever disagreeing with each other.
     filename = rcfg["file"].format(model=rcfg.get("model", ""), scenario=rcfg.get("scenario", ""))
+    # river_discharge.CMIP6.daily (2026-09-24): switches to the
+    # day-of-year-disaggregated sibling file, whose own real coverage
+    # starts exactly 2015-01-01 -- see set_river_data's docstring below for
+    # why the plain monthly file can't cover that date. "emorid" has no
+    # `daily` field at all (rcfg.get returns None/falsy), so this is a
+    # no-op for that source, same as `folder_template` above.
+    if rcfg.get("daily"):
+        filename = filename.removesuffix(".nc") + "_daily.nc"
     # Inlined rather than a shared helper: pygetm_config.codegen's
     # _emit_script_hook embeds ONE function's source per script/data_script
     # reference (inspect.getsource on just that function, no dependency
@@ -87,7 +95,10 @@ def add_rivers(domain, config: dict):
     # inside derive_data_assignments (per user, 2026-09-15: "do it the way
     # it was done for the boundaries"). Applies to EVERY river source
     # equally, not just CMIP6 -- "emorid"'s own real-observation file needs
-    # the same treatment for a noleap-calendar run.
+    # the same treatment for a noleap-calendar run. Comes AFTER the `daily`
+    # suffix above -- matches the real on-disk naming (river_flows_future_
+    # {scenario}_daily_noleap.nc, confirmed directly against GFDL-ESM4's
+    # noleap files).
     if config.get("runtime", {}).get("calendar") == "noleap":
         filename = filename.removesuffix(".nc") + "_noleap.nc"
     path = folder / filename
@@ -128,11 +139,33 @@ def set_river_data(sim, domain, config: dict) -> int:
     river_discharge.script's own add_rivers (which runs before sim exists).
 
     Salt is set to 0.0 (matching cfg_rivers.py's own
-    river["salt"].set(0.0) -- river water is fresh). FABM biogeochemistry
-    (NO3/NH4/PO4/Si/TALK/DIC, present in the real EMORID file) is NOT wired
-    up here -- this repo has no FABM model configured yet; cfg_rivers.py's
-    own data() only does this when sim.fabm is truthy, so it's a real,
-    deliberate scope limit, not an oversight.
+    river["salt"].set(0.0) -- river water is fresh).
+
+    FABM biogeochemistry (2026-09-23): the real EMORID file has NO3/NH4/
+    PO4/Si/TALK/DIC as raw LOADS (confirmed directly against its own units
+    attrs -- tN/d, tP/d, tSi/d, t/d), not concentrations. An older
+    reference implementation (~/cfg_rivers.py, predates this repo)
+    expected an already-unit-converted "EMORID_1990_2024_concentrations.nc"
+    to exist -- it doesn't on this machine, so conversion happens here
+    instead, at read time, using each river's own historical Q (load ->
+    g/s -> g/m3 via /Q -> mol/m3 via /molar_mass -> mmol/m3 via *1000).
+    Only N3_n/N4_n/N1_p/N5_s (nitrate/ammonium/phosphate/silicate) are set
+    -- mirrors that same reference's own vars2process list, which left
+    O3_TA/O3_c (alkalinity/DIC) commented out: their real EMORID units
+    convention was already flagged there as an unconfirmed guess
+    (molar_mass=1.0, "assuming..."), and both get real boundary values
+    from CMIP6 delta-change instead (see boundaries.fabm.CMIP6), so
+    leaving river-sourced alkalinity/DIC unset is low-stakes.
+
+    No real future-projected nutrient product exists: the CMIP6 river-
+    projection file (river_flows_future_{scenario}.nc) has ONLY Q/Q_mean/
+    regulated_flag (confirmed directly), no nutrient loads at all. So
+    nutrients are ALWAYS read from the real historical EMORID record
+    regardless of river_discharge.source, and simply never updated past
+    that record's own real coverage -- pygetm's TemporalInterpolation
+    holds the last value beyond it, the same "best we can do" precedent
+    already used for CMIP6 biogeochemical boundaries this session (no
+    reliable CMIP6-projected river nutrient forcing is achievable either).
 
     river_discharge.source == "CMIP6" specifically: spliced across the
     same 2014/2015 historical/scenario boundary meteo.py's set_meteo_data
@@ -156,6 +189,23 @@ def set_river_data(sim, domain, config: dict) -> int:
     per-file by-name lookup (same as below) lines up correctly -- still
     done independently per file rather than assumed, same caution as
     the "site_name" vs "name" fallback already applies.
+
+    That splice only helps chunks starting in/before 2014, though -- the
+    HIST_CUTOFF_YEAR check below is on the CHUNK's own start year, so any
+    chunk starting in 2015 (the whole scenario period's own first chunk,
+    typically 2015-01-01) skips the historical splice entirely and reads
+    ONLY the future file, whose first real record doesn't land until
+    2015-01-31 -- a genuine ~30-day pre-first-record gap TemporalInterpolation
+    can't extrapolate across (found running running/check_inputs.py's
+    --extended-dry-run against all 12 NSe/CMIP6 model x scenario x fabm
+    combos, 2026-09-24, on every single one regardless of model).
+    river_discharge.CMIP6.daily=true (see oceanicu_providers.py) is the
+    real fix: ocean-prep's river-projection --disaggregate now also writes
+    a day-of-year-shaped daily sibling whose own first record is exactly
+    2015-01-01, closing this gap at the source rather than patching the
+    splice boundary. Leave `daily` unset/false for configs still reading
+    the plain monthly file (its own first-record timestamp needs a one-off
+    data fix instead -- see running/fix_monthly_river_time.py).
     """
     import contextlib
     import datetime
@@ -170,6 +220,9 @@ def set_river_data(sim, domain, config: dict) -> int:
             model=rcfg.get("model", ""), scenario=rcfg.get("scenario", "")
         )
     filename = rcfg["file"].format(model=rcfg.get("model", ""), scenario=rcfg.get("scenario", ""))
+    # river_discharge.CMIP6.daily -- see add_rivers' own comment above for why.
+    if rcfg.get("daily"):
+        filename = filename.removesuffix(".nc") + "_daily.nc"
     # Inlined, not a shared helper -- see add_rivers' own comment above for why.
     if config.get("runtime", {}).get("calendar") == "noleap":
         filename = filename.removesuffix(".nc") + "_noleap.nc"
@@ -235,4 +288,47 @@ def set_river_data(sim, domain, config: dict) -> int:
             river.flow.set(flow)
             river["salt"].set(0.0)
             n_set += 1
+
+    if getattr(sim, "fabm", None):
+        # Always the real historical file, regardless of river_discharge.
+        # source -- see this function's own docstring for why (no real
+        # future-projected nutrient product exists at all).
+        nutrient_folder = Path(resolve_data_path("${RIVER_FOLDER}"))
+        nutrient_filename = os.environ.get("RIVER_FILE", "EMORID_1990_2024.nc")
+        if config.get("runtime", {}).get("calendar") == "noleap":
+            nutrient_filename = nutrient_filename.removesuffix(".nc") + "_noleap.nc"
+        nutrient_path = nutrient_folder / nutrient_filename
+        # tracer -> (real EMORID load variable, molar mass in g/mol) --
+        # see this function's docstring for why O3_TA/O3_c are excluded.
+        _emorid_nutrient_vars = {
+            "N3_n": ("NO3", 14.0067),
+            "N4_n": ("NH4", 14.0067),
+            "N1_p": ("PO4", 30.9738),
+            "N5_s": ("Si", 28.0855),
+        }
+        n_fabm_set = 0
+        with xr.open_dataset(nutrient_path, engine="netcdf4", decode_times=time_coder) as nds:
+            name_var = next((v for v in ("site_name", "name") if v in nds), None)
+            site_names = nds[name_var].values if name_var else range(nds.sizes["site"])
+            name_to_index = {str(n): i for i, n in enumerate(site_names)}
+            for name, river in sim.rivers.items():
+                idx = name_to_index.get(name)
+                if idx is None:
+                    continue
+                q = nds["Q"].isel(site=idx)
+                # Floor away from 0 before dividing -- a real river can hit
+                # genuinely near-zero flow at low-water; holding a load
+                # constant while dividing by a vanishing Q would otherwise
+                # spike the resulting concentration arbitrarily high.
+                q_safe = q.where(q > 1e-6, 1e-6)
+                for tracer, (file_var, molar_mass) in _emorid_nutrient_vars.items():
+                    if file_var not in nds.data_vars:
+                        continue
+                    load_t_per_day = nds[file_var].isel(site=idx)
+                    # t/day -> g/s -> g/m3 (via /Q) -> mol/m3 (via /molar_mass) -> mmol/m3
+                    conc_mmol_m3 = load_t_per_day * 1e6 / 86400.0 / q_safe / molar_mass * 1000.0
+                    river[tracer].set(conc_mmol_m3)
+                    n_fabm_set += 1
+        sim.logger.info(f"Set FABM river nutrients (N3_n/N4_n/N1_p/N5_s) for {n_fabm_set} river/tracer pairs")
+
     return n_set
