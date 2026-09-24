@@ -45,7 +45,10 @@ PYGETM_PY = "/home/kb/miniconda3/envs/pygetm/bin/python"
 DRIVER = REPO / "driver/oceanicu_driver.py"
 START, STOP = "2015-01-01T00:00:00", "2099-12-31T00:00:00"
 
-MODELS = ["CNRM-ESM2-1", "GFDL-ESM4", "MPI-ESM1-2-HR"]
+# CNRM-ESM2-1 dropped (2026-09-24, per user): its net_sw/net_lw
+# BiasCorrected files will never be complete, so it always fails this
+# check for a reason unrelated to anything this script tests.
+MODELS = ["GFDL-ESM4", "MPI-ESM1-2-HR"]
 SCENARIOS = ["ssp126", "ssp370"]
 FABM_VARIANTS = {"ersem": "fabm_ersem.yaml", "mizer": "fabm_mizer.yaml"}
 
