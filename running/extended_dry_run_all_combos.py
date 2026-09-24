@@ -19,7 +19,11 @@ genuinely, deliberately cwd-relative -- the "each run/chunk keeps its
 own physical copy of fabm.yaml, not a shared reference" convention
 established earlier this project. Confirmed directly: removing the
 staging step broke the "simulation setup / fabm_ersem.yaml" check with
-exactly that missing-file error.
+exactly that missing-file error. Source for that copy is --fabm-yaml-dir
+(renamed from --fabm-src-dir -- confusing name, per user) EXCEPT with
+--fetch-from, where the fabm yaml files are pulled from --fetch-from's
+own --fetch-dir instead (already staged there by that host's own earlier
+orca-generated run) -- --fabm-yaml-dir is ignored in that mode.
 
 Target host defaults to bb-server1 (today's known-good paths below), but
 every host-side path is a CLI override -- so once data is mirrored onto
@@ -76,7 +80,7 @@ DEFAULT_DATA_ROOTS = "/data/OceanICU/oceanicu_3d/experiments/NSe/bb-server1_data
 # THIS script's own file lives keeps that in sync automatically, and is
 # exactly right for --local (the target IS this machine).
 DEFAULT_RUNNING = str(REPO / "running")
-DEFAULT_FABM_SRC = "/data/OceanICU/oceanicu_3d/experiments/NSe"
+DEFAULT_FABM_YAML_DIR = "/data/OceanICU/oceanicu_3d/experiments/NSe"
 
 
 def parse_args():
@@ -92,16 +96,18 @@ def parse_args():
     p.add_argument("--running-dir", default=DEFAULT_RUNNING,
                     help="running/ dir (holding bin/chunk-runner) on the target host "
                          f"(default: {DEFAULT_RUNNING}, this script's own directory)")
-    p.add_argument("--fabm-src-dir", default=DEFAULT_FABM_SRC,
-                    help="dir holding fabm_ersem.yaml/fabm_mizer.yaml on the target host -- "
-                         "still staged into --dir; simulation.fabm resolves it cwd-relative "
-                         "by deliberate design, see module docstring")
+    p.add_argument("--fabm-yaml-dir", default=DEFAULT_FABM_YAML_DIR,
+                    help="dir holding the real fabm_ersem.yaml/fabm_mizer.yaml on the target "
+                         "host -- copied into --dir; simulation.fabm resolves it cwd-relative "
+                         "by deliberate design, see module docstring. Ignored with --fetch-from "
+                         "(fetched from there instead, since --fetch-from's own --fetch-dir "
+                         "already has them staged from its own earlier run)")
     p.add_argument("--fetch-from", default="",
                     help="instead of generating locally, pull already-generated "
-                         "generated_<tag>* files from --fetch-dir on this host (e.g. "
-                         "bb-server1, once orca has generated+staged them there) -- "
-                         "for running this script's check step on a host with no "
-                         "pygetm-config of its own")
+                         "generated_<tag>* files (and fabm_ersem.yaml/fabm_mizer.yaml) from "
+                         "--fetch-dir on this host (e.g. bb-server1, once orca has "
+                         "generated+staged them there) -- for running this script's check "
+                         "step on a host with no pygetm-config of its own")
     p.add_argument("--fetch-dir", default=DEFAULT_DIR,
                     help="dir on --fetch-from holding the already-generated files")
     return p.parse_args()
@@ -139,8 +145,8 @@ def dedup_fails(fails: list) -> list:
 def main() -> int:
     args = parse_args()
     local = args.local or is_same_host(args.host)
-    host, dir_, data_roots, running_dir, fabm_src = (
-        args.host, args.dir, args.data_roots_file, args.running_dir, args.fabm_src_dir,
+    host, dir_, data_roots, running_dir, fabm_yaml_dir = (
+        args.host, args.dir, args.data_roots_file, args.running_dir, args.fabm_yaml_dir,
     )
     fetch_from = args.fetch_from
 
@@ -155,13 +161,24 @@ def main() -> int:
         return run(["scp", "-q", str(src), f"{host}:{dst}"])
 
     run_on_host(f"mkdir -p {dir_}")
+    tmp = Path(tempfile.mkdtemp(prefix="nse_dryrun_"))
+
     for name in FABM_VARIANTS.values():
-        r = run_on_host(f"cp {fabm_src}/{name} {dir_}/{name}")
+        if fetch_from:
+            # Already staged there by fetch_from's own earlier (orca ->
+            # that host) run -- pull it down then stage onward via the
+            # same helper used for generated_* files below, rather than
+            # copying from a local fabm-yaml-dir this machine may not have.
+            local_copy = tmp / name
+            r = run(["scp", "-q", f"{fetch_from}:{args.fetch_dir}/{name}", str(local_copy)])
+            if r.returncode == 0:
+                r = stage_file(local_copy, f"{dir_}/{name}")
+        else:
+            r = run_on_host(f"cp {fabm_yaml_dir}/{name} {dir_}/{name}")
         if r.returncode != 0:
             print(f"FATAL: couldn't stage {name} on {host}: {r.stderr}", file=sys.stderr)
             return 1
 
-    tmp = Path(tempfile.mkdtemp(prefix="nse_dryrun_"))
     results = []
     for model in MODELS:
         for scenario in SCENARIOS:
