@@ -267,6 +267,8 @@ output:
     - N5_s_sms_tot_calculator_result
     fabm_mizer:  # placeholder -- oceanicu_driver.py overwrites this with fish_c1..fish_c100 at generation time
     - fish_c1
+    fabm_mizer_diagnostics:
+    - fish_totlandings
   files:
   - type: netcdf
     netcdf:
@@ -326,6 +328,10 @@ output:
       time_average: true
     - groups:
       - fabm_mizer
+      requires_fabm_dependency: fish/fishing_pressure
+      time_average: true
+    - groups:
+      - fabm_mizer_diagnostics
       requires_fabm_dependency: fish/fishing_pressure
       time_average: true
   - type: netcdf
