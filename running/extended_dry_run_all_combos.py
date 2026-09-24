@@ -1,20 +1,29 @@
 #!/usr/bin/env python
 """Extended-dry-run over all model x scenario x fabm-variant combos.
 
-Generates each combo's script locally (pygetm env), stages it + the right
-fabm.yaml on the target host, runs chunk_runner.py --extended-dry-run
-there, prints a one-line-per-combo summary. Also writes a full report per
-combo (<tag>_report.txt) and a combined summary.txt, both left in BB_DIR
+Generates each combo's script locally (pygetm env), stages it on the
+target host, runs chunk_runner.py --extended-dry-run there, prints a
+one-line-per-combo summary. Also writes a full report per combo
+(<tag>_report.txt) and a combined summary.txt, both left in BB_DIR
 alongside the staged inputs so a run leaves a persistent record.
+
+fabm_ersem.yaml/fabm_mizer.yaml are read straight from the target host's
+own ${FABM_ERSEM_FOLDER} (via --data-roots-file) -- no staging needed
+(fixed 2026-09-24: check_inputs.py's mizer/fish-pressure check used to
+resolve fabm.ERSEM.file as a bare, cwd-relative filename, requiring a
+copy into the staging dir; it now joins it with the real, already-
+resolved fabm folder instead, same fix applied to oceanicu_driver.py's
+own nclass lookup).
 
 Target host defaults to bb-server1 (today's known-good paths below), but
 every host-side path is a CLI override -- so once data is mirrored onto
 the HPC (scylla), the same script can target it with
---host scylla --data-roots-file ... --running-dir ... --fabm-src-dir ...
-without editing this file. Pass --host "$(hostname -s)" (or let --local
-autodetect it) to run entirely on the current machine: staging then
-happens via cp instead of scp, and the dry-run runs via a plain subprocess
-instead of ssh.
+--host scylla --data-roots-file ... without editing this file. Pass
+--host "$(hostname -s)" (or let --local autodetect it) to run entirely
+on the current machine: staging then happens via cp instead of scp, and
+the dry-run runs via a plain subprocess instead of ssh. --running-dir
+defaults to this script's own directory (Path(__file__).parent) --
+override only if the target's running/ checkout sits somewhere else.
 
 Generation (--dump-python) needs a pygetm-config environment, which
 bb-server1/scylla don't have and, per the user (2026-09-24), never will --
@@ -56,8 +65,11 @@ FABM_VARIANTS = {"ersem": "fabm_ersem.yaml", "mizer": "fabm_mizer.yaml"}
 DEFAULT_HOST = "bb-server1"
 DEFAULT_DIR = "/tmp/nse_all_combos_dryrun"
 DEFAULT_DATA_ROOTS = "/data/OceanICU/oceanicu_3d/experiments/NSe/bb-server1_data_roots.yaml"
-DEFAULT_RUNNING = "~/source/repos/OceanICU/oceanicu_3d/running"
-DEFAULT_FABM_SRC = "/data/OceanICU/oceanicu_3d/experiments/NSe"
+# Not hardcoded: the checkout path is confirmed identical on every real
+# machine this has run on (orca, bb-server1) -- deriving it from where
+# THIS script's own file lives keeps that in sync automatically, and is
+# exactly right for --local (the target IS this machine).
+DEFAULT_RUNNING = str(REPO / "running")
 
 
 def parse_args():
@@ -71,9 +83,8 @@ def parse_args():
     p.add_argument("--data-roots-file", default=DEFAULT_DATA_ROOTS,
                     help="data-roots yaml on the target host")
     p.add_argument("--running-dir", default=DEFAULT_RUNNING,
-                    help="running/ dir (holding bin/chunk-runner) on the target host")
-    p.add_argument("--fabm-src-dir", default=DEFAULT_FABM_SRC,
-                    help="dir holding fabm_ersem.yaml/fabm_mizer.yaml on the target host")
+                    help="running/ dir (holding bin/chunk-runner) on the target host "
+                         f"(default: {DEFAULT_RUNNING}, this script's own directory)")
     p.add_argument("--fetch-from", default="",
                     help="instead of generating locally, pull already-generated "
                          "generated_<tag>* files from --fetch-dir on this host (e.g. "
@@ -117,8 +128,8 @@ def dedup_fails(fails: list) -> list:
 def main() -> int:
     args = parse_args()
     local = args.local or is_same_host(args.host)
-    host, dir_, data_roots, running_dir, fabm_src = (
-        args.host, args.dir, args.data_roots_file, args.running_dir, args.fabm_src_dir,
+    host, dir_, data_roots, running_dir = (
+        args.host, args.dir, args.data_roots_file, args.running_dir,
     )
     fetch_from = args.fetch_from
 
@@ -133,11 +144,6 @@ def main() -> int:
         return run(["scp", "-q", str(src), f"{host}:{dst}"])
 
     run_on_host(f"mkdir -p {dir_}")
-    for name in FABM_VARIANTS.values():
-        r = run_on_host(f"cp {fabm_src}/{name} {dir_}/{name}")
-        if r.returncode != 0:
-            print(f"FATAL: couldn't stage {name} on {host}: {r.stderr}", file=sys.stderr)
-            return 1
 
     tmp = Path(tempfile.mkdtemp(prefix="nse_dryrun_"))
     results = []

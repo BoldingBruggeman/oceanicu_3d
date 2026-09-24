@@ -272,6 +272,20 @@ def _list_ic_files(config: dict) -> list:
     return [(desc, str(path), path.is_file(), var) for desc, path, var in files]
 
 
+def _resolve_fabm_yaml(fabm_yaml_path: str, fabm_folder: Path) -> str:
+    """fabm_yaml_path is normally config['fabm']['file'] -- a bare filename
+    (e.g. "fabm_ersem.yaml"), same as oceanicu_driver.py's own generation-
+    time nclass lookup reads -- resolved against the REAL fabm folder
+    (fabm_folder, already absolute via ${FABM_ERSEM_FOLDER}), not the
+    process's cwd. `--fabm` can instead pass an explicit absolute/`${VAR}`
+    path by hand; that case is left untouched (folder-joining a path that's
+    already rooted elsewhere would be wrong)."""
+    p = Path(fabm_yaml_path)
+    if p.is_absolute() or "$" in fabm_yaml_path:
+        return fabm_yaml_path
+    return str(fabm_folder / fabm_yaml_path)
+
+
 def _list_fabm_files(config: dict, start: str, stop: str, fabm_yaml_path: Optional[str]) -> list:
     """Mirrors driver/scripts/fabm.py's configure_fabm -- the FABM
     *dependency* files (gelbstoff, atmospheric CO2/N2O, N-deposition,
@@ -366,7 +380,8 @@ def _list_fabm_files(config: dict, start: str, stop: str, fabm_yaml_path: Option
     # reaching past 2023, not just a missing-file check.
     if fabm_yaml_path:
         try:
-            yaml_text = Path(_resolve_data_path(fabm_yaml_path)).read_text()
+            yaml_text = Path(_resolve_data_path(
+                _resolve_fabm_yaml(fabm_yaml_path, fabm_folder))).read_text()
         except OSError:
             yaml_text = ""
         if re.search(r"model:\s*mizer/", yaml_text):
@@ -748,7 +763,11 @@ def check_generated_script(
 
     if fabm:
         try:
-            resolved = _resolve_data_path(fabm)
+            fabm_cfg_for_path = config.get("fabm") or {}
+            candidate = fabm
+            if fabm_cfg_for_path.get("folder"):
+                candidate = _resolve_fabm_yaml(fabm, Path(_resolve_data_path(fabm_cfg_for_path["folder"])))
+            resolved = _resolve_data_path(candidate)
         except RuntimeError as exc:
             inputs.append(InputCheck("fabm", "fabm.yaml", fabm, False, str(exc)))
         else:

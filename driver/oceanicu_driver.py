@@ -410,13 +410,15 @@ def main(argv=None) -> int:
     # class carbon fields, fish_c1..fish_c<nclass>), not something to
     # hand-list in every domain config. nclass is read directly from the
     # configured fabm.yaml itself (instances.<name>.parameters.nclass, for
-    # whichever instance's model starts with "mizer/") when that file is
-    # actually resolvable at generation time -- fabm.ERSEM.file is often a
-    # bare relative filename (resolved properly at the GENERATED SCRIPT's
-    # own runtime, per driver/README.md), so it isn't always reachable from
-    # wherever generation itself runs; falls back to the last known-correct
-    # value (100) with a clear warning if the file can't be found/parsed,
-    # rather than silently guessing. Driven entirely by whether any
+    # whichever instance's model starts with "mizer/"). fabm.ERSEM.file is
+    # a bare filename -- joined with fabm.ERSEM.folder (both siblings on
+    # raw's pre-flattened fabm[fabm_source] dict) so this doesn't depend on
+    # generation happening to run from the fabm folder's own directory
+    # (was cwd-relative until 2026-09-24, breaking for any other cwd --
+    # same fix applied to check_inputs.py's mirror of this same lookup).
+    # Still falls back to the last known-correct value (100) with a clear
+    # warning if the file can't be found/parsed, rather than silently
+    # guessing. Driven entirely by whether any
     # output.files variable_requests entry already references the
     # fabm_mizer group, same "driven by what's already referenced" pattern
     # as the debug-group injection below -- always OVERWRITES whatever the
@@ -432,10 +434,16 @@ def main(argv=None) -> int:
         # raw (pre-validate_config) still has fabm.<source>.file nested under
         # its own source label -- choice-flattening onto the parent dict only
         # happens INSIDE validate_config, not yet at this point.
-        _fabm_file = (fabm.get(fabm_source) or {}).get("file") if fabm_source else None
+        _fabm_source_cfg = (fabm.get(fabm_source) or {}) if fabm_source else {}
+        _fabm_file = _fabm_source_cfg.get("file")
         if _fabm_file:
             try:
-                _fabm_yaml_path = Path(loader.resolve_data_path(_fabm_file))
+                _fabm_file_resolved = _fabm_file
+                if (_fabm_source_cfg.get("folder") and not Path(_fabm_file).is_absolute()
+                        and "$" not in _fabm_file):
+                    _fabm_file_resolved = str(
+                        Path(loader.resolve_data_path(_fabm_source_cfg["folder"])) / _fabm_file)
+                _fabm_yaml_path = Path(loader.resolve_data_path(_fabm_file_resolved))
                 _fabm_yaml = yaml.safe_load(_fabm_yaml_path.read_text())
                 for _inst in (_fabm_yaml.get("instances") or {}).values():
                     if str(_inst.get("model", "")).startswith("mizer/"):
