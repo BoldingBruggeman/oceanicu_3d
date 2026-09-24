@@ -16,24 +16,16 @@ autodetect it) to run entirely on the current machine: staging then
 happens via cp instead of scp, and the dry-run runs via a plain subprocess
 instead of ssh.
 
-Generation (--dump-python) needs a pygetm-config environment, which the
-check/target host may not have (running/check_inputs.py deliberately
-doesn't import pygetm/pygetm-config at all -- see its own docstring).
---gen-host relays that ONE step over ssh/scp to a machine that does have
-it (defaults to "", meaning generate locally, today's behavior).
-
-Checked directly 2026-09-24: this does NOT yet make bb-server1 usable as
---gen-host for a scylla-orchestrated run -- ssh reachability is right
-(scylla -> bb-server1 works; the reverse doesn't), but pygetm_config is
-missing from EVERY one of bb-server1's 10 conda envs (copernicusmarine,
-eat, fabmos, ocean-plot, ocean-stack, oceanval, parsac, pygetm,
-pygetm-adaptive, stats -- checked each directly), including the "pygetm"
-one this script's own PYGETM_PY default points at. --gen-host's ssh/scp
-relay mechanics are real and exercised (tested against bb-server1 as
-both --gen-host and --host at once), but bb-server1 needs a pygetm-config
-install (see pygetm-config's own setup docs) before it can actually BE a
---gen-host for anything. Until then, orca (where pygetm-config IS
-installed) stays the only real generation host.
+Generation (--dump-python) needs a pygetm-config environment, which
+bb-server1/scylla don't have and, per the user (2026-09-24), never will --
+pygetm-config only ever runs on orca. The real pickup chain instead: orca
+generates + stages onto bb-server1 (today's default --host behavior,
+unchanged, no flags needed), and scylla -- confirmed able to ssh to
+bb-server1, not the reverse -- separately PULLS those already-generated
+files from there with --fetch-from bb-server1, then runs the check
+locally (--host "$(hostname -s)" --local) against its own local data,
+once that's in place. --fetch-from is a plain pull (scp from
+--fetch-dir on that host); it does NOT run pygetm-config anywhere.
 """
 from __future__ import annotations
 
@@ -63,15 +55,6 @@ DEFAULT_DIR = "/tmp/nse_all_combos_dryrun"
 DEFAULT_DATA_ROOTS = "/data/OceanICU/oceanicu_3d/experiments/NSe/bb-server1_data_roots.yaml"
 DEFAULT_RUNNING = "~/source/repos/OceanICU/oceanicu_3d/running"
 DEFAULT_FABM_SRC = "/data/OceanICU/oceanicu_3d/experiments/NSe"
-DEFAULT_GEN_DIR = "/tmp/nse_all_combos_dryrun_gen"
-DEFAULT_GEN_REPO = "~/source/repos/OceanICU/oceanicu_3d"
-# NOT bb-server1-ready as-is: this path exists there (it's a real conda
-# env) but pygetm_config isn't installed in it, or in any of bb-server1's
-# other 9 envs (checked directly 2026-09-24) -- see this module's own
-# docstring. Left as the orca-side default since --gen-host defaults to
-# "" (no relay) and a caller pointing --gen-host elsewhere needs to pass
-# --gen-pygetm-py for that host explicitly anyway.
-DEFAULT_GEN_PYGETM_PY = PYGETM_PY
 
 
 def parse_args():
@@ -88,16 +71,14 @@ def parse_args():
                     help="running/ dir (holding bin/chunk-runner) on the target host")
     p.add_argument("--fabm-src-dir", default=DEFAULT_FABM_SRC,
                     help="dir holding fabm_ersem.yaml/fabm_mizer.yaml on the target host")
-    p.add_argument("--gen-host", default="",
-                    help="run --dump-python generation over ssh on this host instead of "
-                         "locally (default: generate locally, on whichever machine runs "
-                         "this script) -- for when --host/this machine has no pygetm-config "
-                         "environment of its own")
-    p.add_argument("--gen-dir", default=DEFAULT_GEN_DIR, help="scratch dir on --gen-host")
-    p.add_argument("--gen-repo", default=DEFAULT_GEN_REPO,
-                    help="oceanicu_3d code checkout on --gen-host (for driver/oceanicu_driver.py)")
-    p.add_argument("--gen-pygetm-py", default=DEFAULT_GEN_PYGETM_PY,
-                    help="pygetm-config python interpreter path on --gen-host")
+    p.add_argument("--fetch-from", default="",
+                    help="instead of generating locally, pull already-generated "
+                         "generated_<tag>* files from --fetch-dir on this host (e.g. "
+                         "bb-server1, once orca has generated+staged them there) -- "
+                         "for running this script's check step on a host with no "
+                         "pygetm-config of its own")
+    p.add_argument("--fetch-dir", default=DEFAULT_DIR,
+                    help="dir on --fetch-from holding the already-generated files")
     return p.parse_args()
 
 
@@ -136,7 +117,7 @@ def main() -> int:
     host, dir_, data_roots, running_dir, fabm_src = (
         args.host, args.dir, args.data_roots_file, args.running_dir, args.fabm_src_dir,
     )
-    gen_host = "" if is_same_host(args.gen_host) else args.gen_host
+    fetch_from = args.fetch_from
 
     def run_on_host(shell_cmd: str):
         if local:
@@ -155,9 +136,6 @@ def main() -> int:
             print(f"FATAL: couldn't stage {name} on {host}: {r.stderr}", file=sys.stderr)
             return 1
 
-    if gen_host:
-        run(["ssh", gen_host, f"mkdir -p {args.gen_dir}"])
-
     tmp = Path(tempfile.mkdtemp(prefix="nse_dryrun_"))
     results = []
     for model in MODELS:
@@ -166,33 +144,29 @@ def main() -> int:
                 tag = f"{model}_{scenario}_{variant}"
                 print(f"--- {tag} ---")
 
-                cfg = yaml.safe_load(BASE_CONFIG.read_text())
-                set_recursive(cfg, "model", model)
-                set_recursive(cfg, "scenario", scenario)
-                cfg["fabm"]["ERSEM"]["file"] = fabm_file
-                cfg_path = tmp / f"{tag}.yaml"
-                cfg_path.write_text(yaml.safe_dump(cfg, sort_keys=False))
+                if fetch_from:
+                    r = run(["scp", "-q", f"{fetch_from}:{args.fetch_dir}/generated_{tag}*", f"{tmp}/"])
+                    if r.returncode != 0:
+                        results.append((tag, "FETCH-FAIL", [r.stderr.strip()[-200:]]))
+                        continue
+                else:
+                    cfg = yaml.safe_load(BASE_CONFIG.read_text())
+                    set_recursive(cfg, "model", model)
+                    set_recursive(cfg, "scenario", scenario)
+                    cfg["fabm"]["ERSEM"]["file"] = fabm_file
+                    cfg_path = tmp / f"{tag}.yaml"
+                    cfg_path.write_text(yaml.safe_dump(cfg, sort_keys=False))
 
-                script_path = tmp / f"generated_{tag}.py"
-                if not gen_host:
+                    script_path = tmp / f"generated_{tag}.py"
                     r = run([PYGETM_PY, str(DRIVER), str(cfg_path),
                              "--start", START, "--stop", STOP,
                              "--dump-python", str(script_path)])
-                else:
-                    r = run(["scp", "-q", str(cfg_path), f"{gen_host}:{args.gen_dir}/"])
-                    if r.returncode == 0:
-                        r = run(["ssh", gen_host,
-                                 f"{args.gen_pygetm_py} {args.gen_repo}/driver/oceanicu_driver.py "
-                                 f"{args.gen_dir}/{tag}.yaml --start {START} --stop {STOP} "
-                                 f"--dump-python {args.gen_dir}/generated_{tag}.py"])
-                    if r.returncode == 0:
-                        r = run(["scp", "-q", f"{gen_host}:{args.gen_dir}/generated_{tag}*", f"{tmp}/"])
-                if r.returncode != 0:
-                    # A single-item list, not a bare string -- the summary
-                    # printer below does `for f in fails:`, which would
-                    # otherwise iterate the string character-by-character.
-                    results.append((tag, "GENERATE-FAIL", [r.stderr.strip()[-200:]]))
-                    continue
+                    if r.returncode != 0:
+                        # A single-item list, not a bare string -- the summary
+                        # printer below does `for f in fails:`, which would
+                        # otherwise iterate the string character-by-character.
+                        results.append((tag, "GENERATE-FAIL", [r.stderr.strip()[-200:]]))
+                        continue
 
                 for f in tmp.glob(f"generated_{tag}*"):
                     stage_file(f, f"{dir_}/")
