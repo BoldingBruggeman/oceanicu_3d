@@ -142,6 +142,29 @@ def dedup_fails(fails: list) -> list:
     return [f"{line}  (x{n})" if n > 1 else line for line, n in counts.items()]
 
 
+def scan_data_roots(data_roots_file: str, run_on_host) -> list:
+    """Every value in a real data_roots.yaml is an existing folder on the
+    target host, EXCEPT OUTPUT_FOLDER (deliberately '.') and any other
+    non-absolute value -- those are skipped, not checked. Returns
+    [(VAR_NAME, path), ...] for each absolute path that isn't a real
+    directory there. Catches a stale/wrong data-roots-file up front,
+    before spending time generating anything against it."""
+    r = run_on_host(f"cat {data_roots_file}")
+    if r.returncode != 0:
+        return [("(file itself)", f"{data_roots_file}: {r.stderr.strip() or 'not readable'}")]
+    try:
+        roots = yaml.safe_load(r.stdout) or {}
+    except yaml.YAMLError as exc:
+        return [("(file itself)", f"{data_roots_file}: couldn't parse as YAML ({exc})")]
+    missing = []
+    for name, path in roots.items():
+        if not isinstance(path, str) or not path.startswith("/"):
+            continue
+        if run_on_host(f"test -d {path}").returncode != 0:
+            missing.append((name, path))
+    return missing
+
+
 def main() -> int:
     args = parse_args()
     local = args.local or is_same_host(args.host)
@@ -159,6 +182,14 @@ def main() -> int:
         if local:
             return run(["cp", str(src), dst])
         return run(["scp", "-q", str(src), f"{host}:{dst}"])
+
+    missing_roots = scan_data_roots(data_roots, run_on_host)
+    if missing_roots:
+        print(f"FATAL: {data_roots} on {host} references {len(missing_roots)} "
+              f"non-existent folder(s):", file=sys.stderr)
+        for name, path in missing_roots:
+            print(f"    {name}: {path}", file=sys.stderr)
+        return 1
 
     run_on_host(f"mkdir -p {dir_}")
     tmp = Path(tempfile.mkdtemp(prefix="nse_dryrun_"))
