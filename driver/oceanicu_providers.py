@@ -1067,6 +1067,51 @@ def derive_data_assignments(config: dict) -> list[dict]:
                 _fabm_folder = _fabm_folder / boundaries_fabm["folder_template"].format(
                     model=boundaries_fabm.get("model", ""), scenario=boundaries_fabm.get("scenario", "")
                 )
+            # Historical/scenario splice (2026-09-25, per user), same trick
+            # as boundaries.baroclinic/barotropic's own CMIP6 branches above
+            # -- FABM nutrient boundaries had none until now, a real gap
+            # found running the extended-dry-run over a pre-2015 period.
+            # Per-tracer historical source, NOT the raw CMIP6 historical
+            # experiment used first (rejected, per user: CMEMS is the more
+            # correct real-observation source for this bridge period):
+            #   no3/po4/si/o2: real, already-dated CMEMS reanalysis --
+            #     bio_daily_20100101_20141231.nc, a pre-trimmed slice of
+            #     BOUNDARY_FOLDER_FABM_CMEMS's own bio_daily_2010-01-01_to_
+            #     2026-08-17.nc (trimmed to avoid overlapping the scenario
+            #     file's own 2015+ coverage, which would break
+            #     TemporalInterpolation's monotonic-time assumption --
+            #     same reason baroclinic/barotropic's own historical files
+            #     are dedicated 2010-2014-only files, not full-length ones).
+            #   dissic/talk: no real CMEMS coverage exists that far back
+            #     (bio_carbon_new only starts 2024-07-29) -- instead a
+            #     day-of-year climatology built from that real ~2-year
+            #     record (bio_carbon_climatology_cycled_20100101_
+            #     20141231.nc, generated 2026-09-25; Feb 29 -- absent from
+            #     the source window entirely -- falls back to Feb 28,
+            #     same convention ocean-prep's own delta_change.py.
+            #     _analog_date uses for an analogous gap).
+            # BOUNDARY_FOLDER_FABM_CMEMS stays an UNRESOLVED "${VAR}"
+            # literal here, like every other folder in this whole function
+            # -- derive_data_assignments runs at GENERATION time (always on
+            # orca, which never has this data or a matching data-roots-file),
+            # not at the generated script's own runtime; os.environ.get
+            # here was a real, caught bug (found 2026-09-25 testing this
+            # exact splice) -- it read as unset during generation, silently
+            # falling through to the plain single-file (no splice) case.
+            # `Path("${VAR}") / "name"` still does plain string-join (no
+            # actual filesystem resolution happens until the generated
+            # script's own resolve_data_path(...) call, baked in later by
+            # codegen), so this is safe.
+            _cmems_fabm_folder = Path("${BOUNDARY_FOLDER_FABM_CMEMS}")
+            _fabm_hist_files = {
+                "no3": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
+                "po4": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
+                "si": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
+                "o2": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
+                "dissic": _cmems_fabm_folder / "bio_carbon_climatology_cycled_20100101_20141231.nc",
+                "talk": _cmems_fabm_folder / "bio_carbon_climatology_cycled_20100101_20141231.nc",
+            }
+            _fabm_is_cmip6 = boundaries_fabm_source == "CMIP6"
             for _tracer, _spec in _fabm_tracers.items():
                 # boundary_condition_type is optional per-tracer -- defaults
                 # to SPONGE (cfg_fabm.py's own real, only-ever-used value)
@@ -1092,11 +1137,14 @@ def derive_data_assignments(config: dict) -> list[dict]:
                         "'variable' (only ZERO_GRADIENT can omit them -- SPONGE/CLAMPED "
                         "both read real prescribed values at the boundary)"
                     )
+                _fabm_file = str(_fabm_folder / _spec["file"])
+                if _fabm_is_cmip6 and _spec["variable"] in _fabm_hist_files:
+                    _fabm_file = [str(_fabm_hist_files[_spec["variable"]]), _fabm_file]
                 entries.append(
                     {
                         "target": f"open_boundary.{_tracer}.values",
                         "kind": "file",
-                        "file": str(_fabm_folder / _spec["file"]),
+                        "file": _fabm_file,
                         "variable": _spec["variable"],
                         **_fabm_grid_kwargs,
                     }
