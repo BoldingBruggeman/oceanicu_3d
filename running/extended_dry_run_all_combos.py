@@ -62,7 +62,12 @@ REPO = Path(__file__).resolve().parents[1]
 BASE_CONFIG = REPO / "NSe/config/nse_cmip6_fabm_dryrun.yaml"
 PYGETM_PY = "/home/kb/miniconda3/envs/pygetm/bin/python"
 DRIVER = REPO / "driver/oceanicu_driver.py"
-START, STOP = "2015-01-01T00:00:00", "2099-12-31T00:00:00"
+# Full scenario period by default -- override with --start/--stop for a
+# narrower window (e.g. reaching back into the pre-2015 historical period,
+# or restricted to whatever BiasCorrected years are actually staged on a
+# storage-limited host like scylla today). Drives BOTH generation and the
+# check itself, same as a real run's own start/stop would.
+DEFAULT_START, DEFAULT_STOP = "2015-01-01T00:00:00", "2099-12-31T00:00:00"
 
 # CNRM-ESM2-1 dropped (2026-09-24, per user): its net_sw/net_lw
 # BiasCorrected files will never be complete, so it always fails this
@@ -115,6 +120,13 @@ def parse_args():
                          "step on a host with no pygetm-config of its own")
     p.add_argument("--fetch-dir", default=DEFAULT_DIR,
                     help="dir on --fetch-from holding the already-generated files")
+    p.add_argument("--start", default=DEFAULT_START,
+                    help=f"period start, ISO 8601 (default: {DEFAULT_START}) -- drives both "
+                         "generation and the check; set earlier to also exercise the "
+                         "pre-2015 historical splice, or narrower to match whatever "
+                         "BiasCorrected years are actually staged on the target host")
+    p.add_argument("--stop", default=DEFAULT_STOP,
+                    help=f"period stop, ISO 8601 (default: {DEFAULT_STOP})")
     return p.parse_args()
 
 
@@ -177,6 +189,7 @@ def main() -> int:
         args.host, args.dir, args.data_roots_file, args.running_dir, args.fabm_yaml_dir,
     )
     fetch_from = args.fetch_from
+    start, stop = args.start, args.stop
 
     def run_on_host(shell_cmd: str):
         if local:
@@ -237,7 +250,7 @@ def main() -> int:
 
                     script_path = tmp / f"generated_{tag}.py"
                     r = run([PYGETM_PY, str(DRIVER), str(cfg_path),
-                             "--start", START, "--stop", STOP,
+                             "--start", start, "--stop", stop,
                              "--dump-python", str(script_path)])
                     if r.returncode != 0:
                         # A single-item list, not a bare string -- the summary
@@ -252,7 +265,7 @@ def main() -> int:
                 r = run_on_host(
                     f"cd {dir_} && {running_dir}/bin/chunk-runner "
                     f"--extended-dry-run --script generated_{tag}.py "
-                    f"--start {START} --stop {STOP} "
+                    f"--start {start} --stop {stop} "
                     f"--data-roots-file {data_roots}")
                 out = r.stdout + r.stderr
                 fails = dedup_fails([l for l in out.splitlines() if l.startswith("[FAIL]")])
