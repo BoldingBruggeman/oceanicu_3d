@@ -56,7 +56,7 @@ open_boundaries:
   type_2d: FLATHER_TRANSPORT
 simulation:
   runtype: BAROCLINIC
-  gotm: ${GOTM_FOLDER}/gotm.yaml
+  gotm: gotm.yaml
   Dcrit: 0.5
   Dmin: 0.1
   advection_scheme: SUPERBEE

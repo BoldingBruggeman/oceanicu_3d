@@ -70,6 +70,11 @@ START, STOP = "2015-01-01T00:00:00", "2099-12-31T00:00:00"
 MODELS = ["GFDL-ESM4", "MPI-ESM1-2-HR"]
 SCENARIOS = ["ssp126", "ssp370"]
 FABM_VARIANTS = {"ersem": "fabm_ersem.yaml", "mizer": "fabm_mizer.yaml"}
+# gotm.yaml joins fabm_ersem.yaml/fabm_mizer.yaml here (2026-09-25, per
+# user: "treat gotm.yaml as fabm.yaml") -- simulation.gotm is now also a
+# bare, cwd-relative filename, so it needs the same per-run staging copy,
+# from the same --fabm-yaml-dir (both sit side by side in experiments/NSe/).
+STATIC_YAML_FILES = [*FABM_VARIANTS.values(), "gotm.yaml"]
 
 # bb-server1's known-good paths -- the only host confirmed today.
 DEFAULT_HOST = "bb-server1"
@@ -194,7 +199,7 @@ def main() -> int:
     run_on_host(f"mkdir -p {dir_}")
     tmp = Path(tempfile.mkdtemp(prefix="nse_dryrun_"))
 
-    for name in FABM_VARIANTS.values():
+    for name in STATIC_YAML_FILES:
         if fetch_from:
             # Already staged there by fetch_from's own earlier (orca ->
             # that host) run -- pull it down then stage onward via the

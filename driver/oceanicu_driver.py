@@ -292,13 +292,19 @@ def main(argv=None) -> int:
     # simulation.gotm: run_model.py always passes gotm=Path("gotm.yaml") to
     # Simulation() -- a real, non-trivial GOTM turbulence-closure config
     # (turb_method/tke_method/len_scale_method/stab_method/turb_param), not
-    # pyGETM's own internal k-epsilon defaults. gotm.yaml is a fixed project
-    # asset (lives at the oceanicu_3d repo root, one level up from this
-    # file). `simulation.gotm` is already a real schema `path`-kind field,
-    # so writing "${GOTM_FOLDER}/gotm.yaml" here is enough on its own --
-    # loader._coerce_value already calls resolve_data_path on it.
+    # pyGETM's own internal k-epsilon defaults. Bare filename (2026-09-25,
+    # per user: "treat gotm.yaml as fabm.yaml") -- resolved cwd-relative at
+    # the generated script's own runtime, same "each run keeps its own
+    # physical copy sitting next to its own generated_*.{py,yaml}"
+    # convention fabm.ERSEM.file already uses, and the SAME convention
+    # every older (pre-pygetm-config) experiment folder under experiments/
+    # already has its own gotm.yaml copy for (AMM7/ENA4/ENA8/NS's own
+    # Baseline/TPXO9/etc. run dirs -- confirmed directly, ${GOTM_FOLDER}
+    # was a newer, single-shared-file simplification specific to the
+    # oceanicu_driver.py-generated family, now reverted). No longer a
+    # "path"-kind ${VAR} reference -- was "${GOTM_FOLDER}/gotm.yaml".
     if not (raw.get("simulation") or {}).get("gotm"):
-        raw.setdefault("simulation", {})["gotm"] = "${GOTM_FOLDER}/gotm.yaml"
+        raw.setdefault("simulation", {})["gotm"] = "gotm.yaml"
 
     # hydrography.<source>.data_script's own schema default (see
     # oceanicu_providers.py) isn't auto-injected either (same reasoning as
