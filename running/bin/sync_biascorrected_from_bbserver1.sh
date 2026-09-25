@@ -32,19 +32,26 @@
 # pull, not a push.
 #
 # Usage:
-#   ./sync_biascorrected_from_bbserver1.sh <MODEL> <SCENARIO> [--setup NAME] [rsync flags...]
+#   ./sync_biascorrected_from_bbserver1.sh <MODEL> <SCENARIO> [--setup NAME] [--start-year Y --stop-year Y] [rsync flags...]
 #   ./sync_biascorrected_from_bbserver1.sh GFDL-ESM4 ssp126             # --setup defaults to NSe
 #   ./sync_biascorrected_from_bbserver1.sh GFDL-ESM4 ssp126 --setup AMM7
 #   ./sync_biascorrected_from_bbserver1.sh GFDL-ESM4 ssp126 -n          # dry run
 #   ./sync_biascorrected_from_bbserver1.sh GFDL-ESM4 ssp126 --no-boundaries
 #       # meteo/rivers only, skip the (whole-tree, model/scenario-independent)
 #       # boundaries mirror -- e.g. when you know it's already current
+#   ./sync_biascorrected_from_bbserver1.sh GFDL-ESM4 ssp126 --start-year 2015 --stop-year 2020
+#       # meteo only: just those years' per-year disagg files (both from
+#       # historical/ and the scenario/ -- whichever actually has files in
+#       # that range; the other's call just transfers nothing). Rivers/
+#       # boundaries are unaffected -- storage-limited hosts (2026-09-25,
+#       # per user) still get those in full; only meteo has per-year files
+#       # worth restricting like this.
 set -euo pipefail
 
 MODEL="${1:-}"
 SCENARIO="${2:-}"
 if [ -z "$MODEL" ] || [ -z "$SCENARIO" ]; then
-    echo "Usage: $0 <MODEL> <SCENARIO> [--setup NAME] [rsync flags...]" >&2
+    echo "Usage: $0 <MODEL> <SCENARIO> [--setup NAME] [--start-year Y --stop-year Y] [rsync flags...]" >&2
     echo "  e.g.: $0 GFDL-ESM4 ssp126" >&2
     exit 1
 fi
@@ -52,15 +59,24 @@ shift 2 || true
 
 SYNC_BOUNDARIES=1
 SETUP="NSe"
+START_YEAR=""
+STOP_YEAR=""
 ARGS=()
 while [ $# -gt 0 ]; do
     case "$1" in
         --no-boundaries) SYNC_BOUNDARIES=0; shift ;;
         --setup) SETUP="$2"; shift 2 ;;
+        --start-year) START_YEAR="$2"; shift 2 ;;
+        --stop-year) STOP_YEAR="$2"; shift 2 ;;
         *) ARGS+=("$1"); shift ;;
     esac
 done
 set -- "${ARGS[@]}"
+
+if { [ -n "$START_YEAR" ] && [ -z "$STOP_YEAR" ]; } || { [ -z "$START_YEAR" ] && [ -n "$STOP_YEAR" ]; }; then
+    echo "ERROR: --start-year and --stop-year must be given together." >&2
+    exit 1
+fi
 
 SRC_ROOT="bb-server1:/data/BiasCorrected/CMIP6"
 DEST_ROOT="/work/shared/oceanICU/BiasCorrected/CMIP6"
@@ -70,9 +86,18 @@ sync_meteo_disagg() {
     shift
     local dest="$DEST_ROOT/$MODEL/$experiment/meteo/"
     mkdir -p "$dest"
-    echo "--- $MODEL/$experiment/meteo (disagg only) ---"
+    local includes=() year_desc="" y
+    if [ -n "$START_YEAR" ]; then
+        for ((y = START_YEAR; y <= STOP_YEAR; y++)); do
+            includes+=(--include="*_disagg_${y}.nc")
+        done
+        year_desc=", years $START_YEAR-$STOP_YEAR"
+    else
+        includes=(--include='*_disagg_*.nc')
+    fi
+    echo "--- $MODEL/$experiment/meteo (disagg only$year_desc) ---"
     rsync -avh --progress --stats \
-        --include='*_disagg_*.nc' --exclude='*' \
+        "${includes[@]}" --exclude='*' \
         "$@" \
         "$SRC_ROOT/$MODEL/$experiment/meteo/" "$dest"
 }
