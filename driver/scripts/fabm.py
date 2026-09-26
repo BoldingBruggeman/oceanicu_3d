@@ -127,49 +127,42 @@ def configure_fabm(sim, domain, config: dict) -> None:
         on_grid=False,
         climatology=True,
     )
-    # Atmospheric CO2 (2026-09-23): real, time-varying input4MIPs GHG
-    # concentration pathway when boundaries.fabm is CMIP6-scenario-driven
-    # -- reuses that role's own `scenario` rather than a second, separate
-    # scenario field (deliberately coupled, not an oversight: the one real
-    # use case here is a genuine CMIP6 future run, which wants atmosphere
-    # and boundary tracers both matching the same scenario). Falls back to
-    # the old flat 400.0 constant otherwise (WOA/CMEMS boundaries, or no
-    # boundaries.fabm at all -- a near-term/historical run has no real
-    # future scenario to pick a pathway for anyway).
+    # Atmospheric CO2 (2026-09-23, upgraded to real latitude variation
+    # 2026-09-26): real, time-varying input4MIPs GHG concentration pathway
+    # when boundaries.fabm is CMIP6-scenario-driven -- reuses that role's
+    # own `scenario` rather than a second, separate scenario field
+    # (deliberately coupled, not an oversight: the one real use case here
+    # is a genuine CMIP6 future run, which wants atmosphere and boundary
+    # tracers both matching the same scenario). Falls back to the old flat
+    # 400.0 constant otherwise (WOA/CMEMS boundaries, or no boundaries.fabm
+    # at all -- a near-term/historical run has no real future scenario to
+    # pick a pathway for anyway; the input4MIPs *historical* GHG
+    # concentration product also isn't available via this project's own
+    # ESGF search as of 2026-09-26 -- checked directly, only ScenarioMIP/
+    # DAMIP/AerChemMIP source_ids are indexed -- so there is no real
+    # historical pathway to fall back to here regardless).
     #
-    # Source: input4MIPs GHGConcentrations -- the SAME file every CMIP6
-    # model reads identically for a given SSP (real marker-scenario IAM
-    # pairing: UoM-IMAGE-ssp126-1-2-1 / UoM-AIM-ssp370-1-2-1), confirmed
-    # real and correctly scaled 2026-09-23: ssp126 reaches ~446 ppm by
-    # 2100, ssp370 ~873 ppm -- both match the real, independently-known
-    # values for these scenarios. `sector` dim (0/1/2) is global/NH/SH
-    # mean -- confirmed sector=0 is GLOBAL directly: its 2015-01 value,
-    # ~400 ppm, matches the real historical record, with sector 1/2
-    # (NH/SH) both offset from it in the expected direction. Files fetched
-    # via ocean_data.esgf_loader.ESGFLoader.search_input4mips (not a
-    # per-run download -- these are tiny, static-per-scenario files, saved
-    # once to ${GHG_CONCENTRATION_FOLDER}/co2_{scenario}.nc).
-    # Shared by CO2/N2O below -- both read from an input4MIPs GHG
-    # concentration file with the same Global/NH/SH `sector` dim. Index 1
-    # is Northern Hemisphere -- NOT the global mean (index 0) this used to
-    # read -- confirmed directly from the file's own `sector` coordinate
-    # attrs (`ids: 0: Global; 1: Northern Hemisphere; 2: Southern
-    # Hemisphere`), not just inferred from values. NSe is a Northern-
-    # Hemisphere domain, so the NH sector is the physically correct choice
-    # for both CO2 and N2O -- a regional model's air-sea gas flux should
-    # see the atmospheric concentration actually overhead, not a planet-
-    # wide average that's measurably offset from it (NH runs ~1% above
-    # global for CO2, per the real 2015-01 values: NH 403.36 ppm vs.
-    # global 399.99 ppm). Defined once, unconditionally, rather than
-    # nested inside just the CO2 `if` block below: it's used by BOTH
-    # dependencies gated on the SAME co2_scenario check, but a second,
-    # independent-looking `if co2_scenario:` for N2O shouldn't have to
-    # rely on Python's lack of block scoping (and a linter's own
-    # "possibly unbound" flag) to stay correct if the two checks ever
-    # diverge later.
-    def _nh_sector(nc):
-        return nc.isel(sector=1)
-
+    # Source: input4MIPs GHGConcentrations, grid_label gn-15x360deg (real
+    # 15-degree latitude-band zonal means, confirmed real CF lat
+    # coordinate -- no _add_coord needed), subset to the 3 bands
+    # overlapping AMM7's own real extent (37.5/52.5/67.5 N -- a superset
+    # of NSe specifically, so the same files serve every AMM7-derived
+    # setup) and broadcast across 2 identical lon points (the real file
+    # has no lon dim at all -- a true zonal mean; broadcasting sidesteps
+    # any question about whether on_grid=False needs one). Downloaded via
+    # ocean_data.esgf_loader.ESGFLoader.search_input4mips + running/../
+    # download_ghg_15deg.py (saved alongside the data in
+    # ${GHG_CONCENTRATION_FOLDER}/download_ghg_15deg.py) -- not a per-run
+    # download, these are tiny, static-per-scenario files, saved once to
+    # ${GHG_CONCENTRATION_FOLDER}/{co2,n2o}_{scenario}_15deg.nc. Upgrade
+    # from the earlier flat single-NH-mean-value approach (which read the
+    # SAME source's own gr1-GMNHSH grid_label, sector=1): on_grid=False
+    # now genuinely interpolates by latitude across the domain's own real
+    # grid, rather than collapsing to one constant value everywhere --
+    # physically more correct, and the whole reason for this upgrade. The
+    # older gr1-GMNHSH files ({co2,n2o}_{scenario}.nc, no _15deg suffix)
+    # are left in place, unused by this function -- kept per user,
+    # 2026-09-26, not deleted.
     fabm_cfg_boundaries = config.get("boundaries", {}).get("fabm") or {}
     co2_scenario = fabm_cfg_boundaries.get("scenario")
     # has_dependency guards this the same way N-deposition/fish/
@@ -181,46 +174,40 @@ def configure_fabm(sim, domain, config: dict) -> None:
     if sim.fabm.has_dependency("mole_fraction_of_carbon_dioxide_in_air"):
         if co2_scenario:
             co2_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
-            co2_path = co2_folder / f"co2_{co2_scenario}.nc"
+            co2_path = co2_folder / f"co2_{co2_scenario}_15deg.nc"
 
             sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(
-                pygetm.input.from_nc(
-                    str(co2_path), "mole_fraction_of_carbon_dioxide_in_air",
-                    preprocess=_nh_sector,
-                ),
+                pygetm.input.from_nc(str(co2_path), "mole_fraction_of_carbon_dioxide_in_air"),
                 on_grid=False,
             )
             sim.logger.info(f"configure_fabm: providing mole_fraction_of_carbon_dioxide_in_air from {co2_path}")
         else:
             sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(400.0)
 
-    # Atmospheric N2O (2026-09-23): a genuinely NEW dependency -- ERSEM's
-    # real nitrous_oxide.F90 module (air-sea N2O flux, on by default via
-    # its own iswN2O switch) registers partial_pressure_of_n2o, units
-    # natm, with NO prior wiring anywhere in this project (unlike CO2,
-    # which at least had a hardcoded constant). Same source/scenario-
-    # coupling logic as CO2 above -- see that dependency's own comment
-    # for the reasoning -- and NO real fallback value when boundaries.fabm
-    # isn't CMIP6-scenario-driven, since (unlike CO2's pre-existing 400.0)
-    # there was never a prior constant to fall back to; simply left unset
-    # in that case, same as any FABM dependency this driver doesn't
-    # provide (pyfabm's own error at initialize() makes an unset,
-    # non-optional dependency loud and immediate, not silently wrong).
+    # Atmospheric N2O (2026-09-23, upgraded to real latitude variation
+    # 2026-09-26): a genuinely NEW dependency -- ERSEM's real
+    # nitrous_oxide.F90 module (air-sea N2O flux, on by default via its
+    # own iswN2O switch) registers partial_pressure_of_n2o, units natm,
+    # with NO prior wiring anywhere in this project before this session
+    # (unlike CO2, which at least had a hardcoded constant). Same source/
+    # scenario-coupling logic and grid_label/lat-band/lon-broadcast setup
+    # as CO2 above -- see that dependency's own comment for the full
+    # reasoning -- and NO real fallback value when boundaries.fabm isn't
+    # CMIP6-scenario-driven, since (unlike CO2's pre-existing 400.0) there
+    # was never a prior constant to fall back to; simply left unset in
+    # that case, same as any FABM dependency this driver doesn't provide
+    # (pyfabm's own error at initialize() makes an unset, non-optional
+    # dependency loud and immediate, not silently wrong).
     #
-    # Same input4MIPs source as CO2, same NH sector choice (sector=1, not
-    # global) for the same reason -- confirmed real and correctly scaled
-    # 2026-09-23: NH 2015-01 value is ~328.1 ppb vs. global ~327.8 ppb --
-    # a much smaller NH/global spread than CO2's (N2O is longer-lived and
-    # more evenly mixed), but the same NH value is still the physically
-    # correct one to use for this domain. Units
-    # conversion: input4MIPs reports mole fraction as ppb (units: 1.e-9,
-    # i.e. the raw stored number IS the ppb value); ERSEM wants natm
-    # (nanoatmospheres) -- numerically identical at ~1 atm total surface
-    # pressure (1 ppb x 1 atm = 1e-9 atm = 1 natm), the same standard
-    # approximation FABM's own test harness uses (environment.yaml's
-    # partial_pressure_of_n2o: 335, the same order of magnitude as the
-    # real ~328 ppb 2015 value) -- so the raw file value is used directly,
-    # no scaling factor, same as CO2's own raw-ppm-number convention.
+    # Units conversion: input4MIPs reports mole fraction as ppb (units:
+    # 1.e-9, i.e. the raw stored number IS the ppb value); ERSEM wants
+    # natm (nanoatmospheres) -- numerically identical at ~1 atm total
+    # surface pressure (1 ppb x 1 atm = 1e-9 atm = 1 natm), the same
+    # standard approximation FABM's own test harness uses
+    # (environment.yaml's partial_pressure_of_n2o: 335, the same order of
+    # magnitude as the real ~328 ppb 2015 value) -- so the raw file value
+    # is used directly, no scaling factor, same as CO2's own raw-ppm-
+    # number convention.
     # has_dependency guards this the same way CO2 above (and N-deposition/
     # fish/fishing_pressure below) do -- ERSEM's nitrous_oxide module
     # (iswN2O) may be off, or absent from a given fabm.yaml entirely, in
@@ -230,12 +217,9 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # initialize()-time error is the intended signal for that case.
     if co2_scenario and sim.fabm.has_dependency("partial_pressure_of_n2o"):
         n2o_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
-        n2o_path = n2o_folder / f"n2o_{co2_scenario}.nc"
+        n2o_path = n2o_folder / f"n2o_{co2_scenario}_15deg.nc"
         sim.fabm.get_dependency("partial_pressure_of_n2o").set(
-            pygetm.input.from_nc(
-                str(n2o_path), "mole_fraction_of_nitrous_oxide_in_air",
-                preprocess=_nh_sector,
-            ),
+            pygetm.input.from_nc(str(n2o_path), "mole_fraction_of_nitrous_oxide_in_air"),
             on_grid=False,
         )
         sim.logger.info(f"configure_fabm: providing partial_pressure_of_n2o from {n2o_path}")
