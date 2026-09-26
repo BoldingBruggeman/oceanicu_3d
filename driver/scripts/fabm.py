@@ -172,19 +172,27 @@ def configure_fabm(sim, domain, config: dict) -> None:
 
     fabm_cfg_boundaries = config.get("boundaries", {}).get("fabm") or {}
     co2_scenario = fabm_cfg_boundaries.get("scenario")
-    if co2_scenario:
-        co2_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
-        co2_path = co2_folder / f"co2_{co2_scenario}.nc"
+    # has_dependency guards this the same way N-deposition/fish/
+    # fishing_pressure below do -- a fabm.yaml without ERSEM's carbonate
+    # module (iswCO2 off, or a model without it at all) has no such
+    # dependency to set at all; get_dependency on a genuinely-absent name
+    # raises, so this must be checked, not assumed present just because
+    # every fabm.yaml tested so far happens to have it on.
+    if sim.fabm.has_dependency("mole_fraction_of_carbon_dioxide_in_air"):
+        if co2_scenario:
+            co2_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
+            co2_path = co2_folder / f"co2_{co2_scenario}.nc"
 
-        sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(
-            pygetm.input.from_nc(
-                str(co2_path), "mole_fraction_of_carbon_dioxide_in_air",
-                preprocess=_nh_sector,
-            ),
-            on_grid=False,
-        )
-    else:
-        sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(400.0)
+            sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(
+                pygetm.input.from_nc(
+                    str(co2_path), "mole_fraction_of_carbon_dioxide_in_air",
+                    preprocess=_nh_sector,
+                ),
+                on_grid=False,
+            )
+            sim.logger.info(f"configure_fabm: providing mole_fraction_of_carbon_dioxide_in_air from {co2_path}")
+        else:
+            sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(400.0)
 
     # Atmospheric N2O (2026-09-23): a genuinely NEW dependency -- ERSEM's
     # real nitrous_oxide.F90 module (air-sea N2O flux, on by default via
@@ -213,7 +221,14 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # partial_pressure_of_n2o: 335, the same order of magnitude as the
     # real ~328 ppb 2015 value) -- so the raw file value is used directly,
     # no scaling factor, same as CO2's own raw-ppm-number convention.
-    if co2_scenario:
+    # has_dependency guards this the same way CO2 above (and N-deposition/
+    # fish/fishing_pressure below) do -- ERSEM's nitrous_oxide module
+    # (iswN2O) may be off, or absent from a given fabm.yaml entirely, in
+    # which case there is no such dependency to set. Per this function's
+    # own earlier comment, still deliberately left UNSET (no call, no
+    # constant fallback) when co2_scenario is falsy -- pyfabm's own
+    # initialize()-time error is the intended signal for that case.
+    if co2_scenario and sim.fabm.has_dependency("partial_pressure_of_n2o"):
         n2o_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
         n2o_path = n2o_folder / f"n2o_{co2_scenario}.nc"
         sim.fabm.get_dependency("partial_pressure_of_n2o").set(
@@ -223,6 +238,7 @@ def configure_fabm(sim, domain, config: dict) -> None:
             ),
             on_grid=False,
         )
+        sim.logger.info(f"configure_fabm: providing partial_pressure_of_n2o from {n2o_path}")
 
     # N-deposition (2026-09-23): switched from the old 30-year climatology
     # (AMM7-EMEP-NDeposition_y1992..2021, no scenario, one file covers
