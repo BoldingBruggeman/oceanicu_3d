@@ -175,6 +175,19 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # own CMIP6 branches already use (see oceanicu_providers.py).
     fabm_cfg_boundaries = config.get("boundaries", {}).get("fabm") or {}
     co2_scenario = fabm_cfg_boundaries.get("scenario")
+    # Calendar match: bias-corrected meteo (bc_correct) runs a standard
+    # calendar, but CMIP6-raw (runtime.calendar: noleap, e.g. GFDL-ESM4)
+    # doesn't -- pygetm.input.from_nc splices files strictly by real date,
+    # so a standard-calendar GHG file would misalign against a noleap
+    # simulation clock. Same "_noleap" suffix-selection pattern already
+    # used for CMIP6 boundaries (oceanicu_providers.py's derive_data_
+    # assignments) -- inlined here rather than shared, per this codebase's
+    # own script-hook self-containment constraint (each hook's body is
+    # embedded verbatim via inspect.getsource, with no visibility of
+    # sibling module-level helpers).
+    _calendar_suffix = (
+        "_noleap" if config.get("runtime", {}).get("calendar") == "noleap" else ""
+    )
     # has_dependency guards this the same way N-deposition/fish/
     # fishing_pressure below do -- a fabm.yaml without ERSEM's carbonate
     # module (iswCO2 off, or a model without it at all) has no such
@@ -183,9 +196,9 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # every fabm.yaml tested so far happens to have it on.
     if sim.fabm.has_dependency("mole_fraction_of_carbon_dioxide_in_air"):
         ghg_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
-        co2_hist_path = ghg_folder / "co2_historical_15deg.nc"
+        co2_hist_path = ghg_folder / f"co2_historical_15deg{_calendar_suffix}.nc"
         if co2_scenario:
-            co2_scen_path = ghg_folder / f"co2_{co2_scenario}_15deg.nc"
+            co2_scen_path = ghg_folder / f"co2_{co2_scenario}_15deg{_calendar_suffix}.nc"
             sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(
                 pygetm.input.from_nc(
                     [str(co2_hist_path), str(co2_scen_path)],
@@ -233,9 +246,9 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # which case there is no such dependency to set.
     if sim.fabm.has_dependency("partial_pressure_of_n2o"):
         ghg_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
-        n2o_hist_path = ghg_folder / "n2o_historical_15deg.nc"
+        n2o_hist_path = ghg_folder / f"n2o_historical_15deg{_calendar_suffix}.nc"
         if co2_scenario:
-            n2o_scen_path = ghg_folder / f"n2o_{co2_scenario}_15deg.nc"
+            n2o_scen_path = ghg_folder / f"n2o_{co2_scenario}_15deg{_calendar_suffix}.nc"
             sim.fabm.get_dependency("partial_pressure_of_n2o").set(
                 pygetm.input.from_nc(
                     [str(n2o_hist_path), str(n2o_scen_path)],
