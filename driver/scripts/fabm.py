@@ -322,26 +322,46 @@ def configure_fabm(sim, domain, config: dict) -> None:
             paths += expand_year_glob(pattern, scen_start, _stop)
         return paths
 
+    # Both the old (AMM7-EMEP-NDeposition_y????.nc) and new
+    # (AMM7_Ndep_BC-EMEP_*) N-dep products are ~39% NaN (land-masked) on
+    # their own (y, x) grid -- fine on THEIR own grid, but NSe's own
+    # coastline doesn't exactly match this product's land mask: running
+    # the real t01E combo hit "Field N3_flux_flux has 2617 non-finite
+    # values" at sim.start() (confirmed directly via getm-dump.nc: 2638 of
+    # NSe's own WET grid cells sit on a NaN cell here, scattered all along
+    # the coast -- Danish/German Baltic, Scottish west coast, Norwegian
+    # fjords -- not a handful of edge artifacts, a systematic coastline-
+    # resolution mismatch). Fixed 2026-09-30 by rewriting every real
+    # /data/FABM/Ndep/*.nc file on bb-server1 (originals backed up to
+    # Ndep_backup_20260930_before_coastalfill/, mirroring the SAME 2026-
+    # 09-23 coordinate-fix precedent on these same files) to ADD
+    # N3_flux_ff/N4_flux_ff -- nearest-valid-neighbor fill of the NaN cells
+    # (scipy.ndimage.distance_transform_edt's own return_indices=True
+    # mode), alongside the untouched original N3_flux/N4_flux -- read
+    # those "_ff" variables here instead, rather than a per-run preprocess
+    # step (an earlier version of this fix, converted to this form per
+    # user: baked into the data once, matching how every other derived
+    # Ndep/GHG product in this project is handled).
     if co2_scenario:
         ndep_paths = _ndep_scenario_paths(co2_scenario)
         if sim.fabm.has_dependency("N3_flux/flux"):
             sim.fabm.get_dependency("N3_flux/flux").set(
-                pygetm.input.from_nc(ndep_paths, "N3_flux")
+                pygetm.input.from_nc(ndep_paths, "N3_flux_ff")
             )
         if sim.fabm.has_dependency("N4_flux/flux"):
             sim.fabm.get_dependency("N4_flux/flux").set(
-                pygetm.input.from_nc(ndep_paths, "N4_flux")
+                pygetm.input.from_nc(ndep_paths, "N4_flux_ff")
             )
     else:
         emep_pattern = str(fabm_folder / "Ndep/AMM7-EMEP-NDeposition_y????.nc")
         emep_paths = expand_year_glob(emep_pattern, _start, _stop)
         if sim.fabm.has_dependency("N3_flux/flux"):
             sim.fabm.get_dependency("N3_flux/flux").set(
-                pygetm.input.from_nc(emep_paths, "N3_flux")
+                pygetm.input.from_nc(emep_paths, "N3_flux_ff")
             )
         if sim.fabm.has_dependency("N4_flux/flux"):
             sim.fabm.get_dependency("N4_flux/flux").set(
-                pygetm.input.from_nc(emep_paths, "N4_flux")
+                pygetm.input.from_nc(emep_paths, "N4_flux_ff")
             )
 
     # Fish/fishing-pressure dependency (2026-09-23): ported from Ricardo's
