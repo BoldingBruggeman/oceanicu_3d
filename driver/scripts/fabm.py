@@ -163,6 +163,16 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # older gr1-GMNHSH files ({co2,n2o}_{scenario}.nc, no _15deg suffix)
     # are left in place, unused by this function -- kept per user,
     # 2026-09-26, not deleted.
+    # Historical (1990-2014, real input4MIPs UoM-CMIP-1-2-0, gn-15x360deg
+    # -- same AMM7 lat-band subset, added 2026-09-26 per user) is now
+    # ALWAYS available, CMIP6-scenario-driven or not -- so it replaces the
+    # old flat 400.0 constant fallback entirely (no longer needed) for a
+    # WOA/CMEMS-boundaries or no-boundaries.fabm run, and gets spliced
+    # with the scenario file (no time overlap: historical ends exactly
+    # 2014-12, every scenario file starts exactly 2015-01) for a genuine
+    # CMIP6-scenario run, via pygetm.input.from_nc's own multi-file-list
+    # support -- same splice mechanism boundaries.baroclinic/barotropic's
+    # own CMIP6 branches already use (see oceanicu_providers.py).
     fabm_cfg_boundaries = config.get("boundaries", {}).get("fabm") or {}
     co2_scenario = fabm_cfg_boundaries.get("scenario")
     # has_dependency guards this the same way N-deposition/fish/
@@ -172,32 +182,41 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # raises, so this must be checked, not assumed present just because
     # every fabm.yaml tested so far happens to have it on.
     if sim.fabm.has_dependency("mole_fraction_of_carbon_dioxide_in_air"):
+        ghg_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
+        co2_hist_path = ghg_folder / "co2_historical_15deg.nc"
         if co2_scenario:
-            co2_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
-            co2_path = co2_folder / f"co2_{co2_scenario}_15deg.nc"
-
+            co2_scen_path = ghg_folder / f"co2_{co2_scenario}_15deg.nc"
             sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(
-                pygetm.input.from_nc(str(co2_path), "mole_fraction_of_carbon_dioxide_in_air"),
+                pygetm.input.from_nc(
+                    [str(co2_hist_path), str(co2_scen_path)],
+                    "mole_fraction_of_carbon_dioxide_in_air",
+                ),
                 on_grid=False,
             )
-            sim.logger.info(f"configure_fabm: providing mole_fraction_of_carbon_dioxide_in_air from {co2_path}")
+            sim.logger.info(
+                f"configure_fabm: providing mole_fraction_of_carbon_dioxide_in_air "
+                f"from {co2_hist_path} + {co2_scen_path}"
+            )
         else:
-            sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(400.0)
+            sim.fabm.get_dependency("mole_fraction_of_carbon_dioxide_in_air").set(
+                pygetm.input.from_nc(str(co2_hist_path), "mole_fraction_of_carbon_dioxide_in_air"),
+                on_grid=False,
+            )
+            sim.logger.info(f"configure_fabm: providing mole_fraction_of_carbon_dioxide_in_air from {co2_hist_path}")
 
-    # Atmospheric N2O (2026-09-23, upgraded to real latitude variation
-    # 2026-09-26): a genuinely NEW dependency -- ERSEM's real
+    # Atmospheric N2O (2026-09-23, upgraded to real latitude variation +
+    # historical 2026-09-26): a genuinely NEW dependency -- ERSEM's real
     # nitrous_oxide.F90 module (air-sea N2O flux, on by default via its
     # own iswN2O switch) registers partial_pressure_of_n2o, units natm,
     # with NO prior wiring anywhere in this project before this session
     # (unlike CO2, which at least had a hardcoded constant). Same source/
-    # scenario-coupling logic and grid_label/lat-band/lon-broadcast setup
-    # as CO2 above -- see that dependency's own comment for the full
-    # reasoning -- and NO real fallback value when boundaries.fabm isn't
-    # CMIP6-scenario-driven, since (unlike CO2's pre-existing 400.0) there
-    # was never a prior constant to fall back to; simply left unset in
-    # that case, same as any FABM dependency this driver doesn't provide
-    # (pyfabm's own error at initialize() makes an unset, non-optional
-    # dependency loud and immediate, not silently wrong).
+    # scenario-coupling and historical/scenario splice as CO2 above -- see
+    # that dependency's own comment for the full reasoning. Historical
+    # being real and always-available now (see CO2's own comment) means
+    # this dependency is finally set for a non-CMIP6-scenario run too --
+    # previously left entirely unset there (no prior constant existed to
+    # fall back to at all, unlike CO2's 400.0), now uses the historical
+    # file alone, same as CO2's own non-scenario branch.
     #
     # Units conversion: input4MIPs reports mole fraction as ppb (units:
     # 1.e-9, i.e. the raw stored number IS the ppb value); ERSEM wants
@@ -211,18 +230,29 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # has_dependency guards this the same way CO2 above (and N-deposition/
     # fish/fishing_pressure below) do -- ERSEM's nitrous_oxide module
     # (iswN2O) may be off, or absent from a given fabm.yaml entirely, in
-    # which case there is no such dependency to set. Per this function's
-    # own earlier comment, still deliberately left UNSET (no call, no
-    # constant fallback) when co2_scenario is falsy -- pyfabm's own
-    # initialize()-time error is the intended signal for that case.
-    if co2_scenario and sim.fabm.has_dependency("partial_pressure_of_n2o"):
-        n2o_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
-        n2o_path = n2o_folder / f"n2o_{co2_scenario}_15deg.nc"
-        sim.fabm.get_dependency("partial_pressure_of_n2o").set(
-            pygetm.input.from_nc(str(n2o_path), "mole_fraction_of_nitrous_oxide_in_air"),
-            on_grid=False,
-        )
-        sim.logger.info(f"configure_fabm: providing partial_pressure_of_n2o from {n2o_path}")
+    # which case there is no such dependency to set.
+    if sim.fabm.has_dependency("partial_pressure_of_n2o"):
+        ghg_folder = Path(resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
+        n2o_hist_path = ghg_folder / "n2o_historical_15deg.nc"
+        if co2_scenario:
+            n2o_scen_path = ghg_folder / f"n2o_{co2_scenario}_15deg.nc"
+            sim.fabm.get_dependency("partial_pressure_of_n2o").set(
+                pygetm.input.from_nc(
+                    [str(n2o_hist_path), str(n2o_scen_path)],
+                    "mole_fraction_of_nitrous_oxide_in_air",
+                ),
+                on_grid=False,
+            )
+            sim.logger.info(
+                f"configure_fabm: providing partial_pressure_of_n2o from "
+                f"{n2o_hist_path} + {n2o_scen_path}"
+            )
+        else:
+            sim.fabm.get_dependency("partial_pressure_of_n2o").set(
+                pygetm.input.from_nc(str(n2o_hist_path), "mole_fraction_of_nitrous_oxide_in_air"),
+                on_grid=False,
+            )
+            sim.logger.info(f"configure_fabm: providing partial_pressure_of_n2o from {n2o_hist_path}")
 
     # N-deposition (2026-09-23): switched from the old 30-year climatology
     # (AMM7-EMEP-NDeposition_y1992..2021, no scenario, one file covers
