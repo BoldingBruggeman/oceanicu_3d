@@ -102,6 +102,20 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         "PYGETM_CONFIG_DATA_ASSIGNMENTS_DERIVERS",
         f"{Path(__file__)}:derive_data_assignments",
     )
+    # Same setdefault, same caveat (TUI/web's pre-built schema.json path
+    # doesn't run this function either -- export explicitly there too):
+    # bridges fabm.ERSEM.file (this project's own custom "fabm" role) to
+    # simulation.fabm (pygetm-config's core field, what codegen._emit_
+    # simulation actually bakes into the Simulation() call) -- see
+    # derive_config_value_overrides's own docstring for why this needs to
+    # be a real deriver, not just oceanicu_driver.py's own main() setting
+    # it by hand (real gap, caught 2026-09-26: that only ever helped
+    # oceanicu_driver.py's own entrypoint, not plain `pygetm-config run`/
+    # `dump-python` or the TUI).
+    os.environ.setdefault(
+        "PYGETM_CONFIG_VALUE_DERIVERS",
+        f"{Path(__file__)}:derive_config_value_overrides",
+    )
 
     _hydrography_data_script = (
         ParameterSpec(
@@ -671,6 +685,31 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         "boundaries.fabm": boundary_fabm,
         "fabm": fabm,
     }
+
+
+# ----------------------------------------------------------------------
+# config-value deriver -- registered via PYGETM_CONFIG_VALUE_DERIVERS
+# (pygetm_config.providers.derive_config_value_overrides), so ALL THREE
+# generation modes (oceanicu_driver.py direct/--dump-python, TUI/web
+# 'Generate script') get the SAME simulation.fabm value -- not just
+# whichever ran oceanicu_driver.py's own main() (real gap, caught
+# 2026-09-26: setting fabm.ERSEM.file in the TUI alone produced a
+# generated script whose fabm= always fell back to None, since only
+# oceanicu_driver.py's main() ever bridged fabm.ERSEM.file to
+# simulation.fabm by hand -- the TUI's "Generate script" path never ran
+# that code at all).
+#
+# Reads the VALIDATED, choice-flattened config shape, same as
+# derive_data_assignments below -- config['fabm']['file'] directly, not
+# config['fabm']['ERSEM']['file'] (see that function's own comment on
+# why). Must stay pygetm-free (codegen.py calls this too, at GENERATION
+# time) and side-effect-free (returns overrides for the caller to apply/
+# consult, never mutates `config`).
+def derive_config_value_overrides(config: dict) -> dict:
+    fabm_cfg = config.get("fabm") or {}
+    if fabm_cfg.get("source") == "ERSEM" and fabm_cfg.get("file"):
+        return {"simulation.fabm": fabm_cfg["file"]}
+    return {}
 
 
 # ----------------------------------------------------------------------

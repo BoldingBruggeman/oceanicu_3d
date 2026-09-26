@@ -394,12 +394,19 @@ def main(argv=None) -> int:
 
     # fabm.<source>'s own schema default (fabm.data_script) isn't
     # auto-injected either (same reasoning as river_discharge.script/
-    # data_script/meteo.data_script above). Propagate fabm.<source>.file
-    # into simulation.fabm (pygetm.Simulation's own fabm= constructor
-    # kwarg, see run_model.py's `fabm=cfg.fabm.file`) -- setdefault, not
-    # overwrite: a config that already sets simulation.fabm directly wins.
-    # A config with no `fabm:` section at all is unaffected (simulation.fabm
-    # stays unset/false, matching current behavior -- FABM off by default).
+    # data_script/meteo.data_script above).
+    #
+    # Propagating fabm.<source>.file into simulation.fabm (pygetm.
+    # Simulation's own fabm= constructor kwarg) used to happen here too --
+    # removed 2026-09-26: only ever helped THIS entrypoint (oceanicu_
+    # driver.py's own main()), not plain `pygetm-config run`/`dump-python`
+    # or the TUI/web frontend's "Generate script", which never run this
+    # function at all. Now a real, generic pygetm-config extension point
+    # instead (PYGETM_CONFIG_VALUE_DERIVERS -- see oceanicu_providers.
+    # derive_config_value_overrides and register_oceanicu_providers' own
+    # setdefault for it), consulted by codegen._emit_simulation/loader.
+    # build_simulation themselves, so every entrypoint gets the same
+    # effective simulation.fabm value.
     fabm = raw.get("fabm") or {}
     fabm_source = fabm.get("source")
     if fabm_source == "ERSEM":
@@ -408,9 +415,6 @@ def main(argv=None) -> int:
             fabm_cfg["data_script"] = "${SCRIPT_FOLDER}/fabm.py:configure_fabm"
         fabm[fabm_source] = fabm_cfg
         raw["fabm"] = fabm
-
-        if fabm_cfg.get("file"):
-            raw.setdefault("simulation", {}).setdefault("fabm", fabm_cfg["file"])
 
     # output.variable_groups.fabm_mizer -- a VECTOR variable (nclass size-
     # class carbon fields, fish_c1..fish_c<nclass>), not something to
