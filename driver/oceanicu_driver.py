@@ -239,7 +239,7 @@ def main(argv=None) -> int:
     # explicitly -- see driver/README.md's own TUI launch instructions.
     os.environ.setdefault(
         "PYGETM_CONFIG_PROVIDERS",
-        f"{Path(__file__).parent / 'oceanicu_providers.py'}:register_oceanicu_providers",
+        f"{Path(__file__).resolve().parent / 'oceanicu_providers.py'}:register_oceanicu_providers",
     )
 
     # SCRIPT_FOLDER/GOTM_FOLDER, same setdefault-after-apply_data_roots
@@ -256,8 +256,8 @@ def main(argv=None) -> int:
     # checkout location -- a $VAR template survives that round-trip the same
     # way data files do (loader.resolve_data_path, and providers.
     # load_dotted_target for .script/.data_script/post_data_script targets).
-    os.environ.setdefault("SCRIPT_FOLDER", str(Path(__file__).parent / "scripts"))
-    os.environ.setdefault("GOTM_FOLDER", str(Path(__file__).parent.parent))
+    os.environ.setdefault("SCRIPT_FOLDER", str(Path(__file__).resolve().parent / "scripts"))
+    os.environ.setdefault("GOTM_FOLDER", str(Path(__file__).resolve().parent.parent))
 
     schema = build_schema()
 
