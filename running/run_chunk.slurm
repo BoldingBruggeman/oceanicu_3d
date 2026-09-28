@@ -109,10 +109,6 @@ fi
 # only after the `cd "$SCRIPT_DIR"` a few lines down has already happened.
 SCRIPT_DIR="${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR not set -- sbatch must be invoked from inside the directory run_chunk.slurm/chunk_runner.py/experiment_tracking.py actually live in}"
 SELF="$SCRIPT_DIR/run_chunk.slurm"
-
-source ~/.bashrc
-conda activate pygetm
-
 export OMP_NUM_THREADS=1
 export SRUN_CPUS_PER_TASK=$SLURM_CPUS_PER_TASK
 
@@ -125,6 +121,14 @@ module load hdf5-parallel/1.14.5-${prgenv}-${vprgenv}
 module load netcdf-hdf5parallel/4.9.2-${prgenv}-${vprgenv}
 module load intel_ipp_intel64/latest
 export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi2.so
+#export I_MPI_ASYNC_PROGRESS=1
+#export MPI4PY_RC_THREADS=true
+#export MPI4PY_RC_THREAD_LEVEL=multiple
+
+#source /users/modellers/rict/.bashrc
+source /scyllapfs/sw/miniforge3/etc/profile.d/conda.sh
+conda activate pygetm
+
 
 cd "$SCRIPT_DIR" || exit 1
 
