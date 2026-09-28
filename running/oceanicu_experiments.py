@@ -349,7 +349,7 @@ def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
     return 0
 
 
-_STAGE_DEFAULT_INCLUDES = ["generated*.py", "generated*.yaml"]
+_STAGE_DEFAULT_INCLUDES = ["generated*.py", "generated*.yaml", "gotm.yaml", "fabm*.yaml"]
 _STAGE_DEFAULT_EXCLUDE_DIRS = ["__pycache__"]
 _STAGE_DEFAULT_EXCLUDE_PATTERNS = ["*.nc"]
 
@@ -394,8 +394,12 @@ def cmd_stage(args: argparse.Namespace) -> int:
     bin/pull_experiment_files.sh) using the same --include/--exclude
     pattern as here, kept small deliberately (see EXPERIMENT_TRACKING.md
     "Command queue") -- filtered to only the files that actually matter
-    (driver script, utils module, config -- --include patterns, default
-    generated*.py/generated*.yaml) -- never the whole directory verbatim,
+    (driver script, utils module, config, plus the run's own gotm.yaml/
+    fabm*.yaml -- see driver/scripts/fabm.py's own comments on why those
+    two are bare, cwd-relative filenames rather than resolve_data_path'd
+    ${VAR} references, and so need their own real per-run copy -- --include
+    patterns, default generated*.py/generated*.yaml/gotm.yaml/fabm*.yaml)
+    -- never the whole directory verbatim,
     since a real experiment_root commonly has __pycache__/, logs, restart
     files, and NetCDF output alongside the 2-3 files it actually needs
     (see this project's own NSe/experiments tree). For a later queued
@@ -412,7 +416,8 @@ def cmd_stage(args: argparse.Namespace) -> int:
 
     --exclude (default *.nc) is a belt-and-braces guard, not the actual
     mechanism keeping output data out -- the default --include list is
-    already a whitelist (generated*.py/generated*.yaml only), so *.nc
+    already a whitelist (generated*.py/generated*.yaml/gotm.yaml/fabm*.yaml
+    only), so *.nc
     never matches it and is already excluded by the trailing catch-all
     below. This exists for the case where --include is later widened
     (e.g. to *) and this experiment_root already has real NetCDF output
@@ -973,7 +978,8 @@ def main() -> int:
     # or out of existence, or relocate/rename it. ------------------------
     st = sub.add_parser(
         "stage",
-        help="rsync (filtered by --include, default generated*.py/generated*.yaml) an "
+        help="rsync (filtered by --include, default generated*.py/generated*.yaml/gotm.yaml/"
+             "fabm*.yaml) an "
              "experiment's generated files directly into its real, resolved experiment_root "
              "(see OCEANICU_EXPERIMENT_ROOT_BASE), for a later --queue'd add to pick up "
              "(see EXPERIMENT_TRACKING.md \"Command queue\") -- doesn't touch any registry, no "
@@ -989,7 +995,8 @@ def main() -> int:
                          "matching --include are actually copied, so real clutter "
                          "alongside them (__pycache__, logs, ...) is left behind")
     st.add_argument("--include", action="append", default=None, metavar="PATTERN",
-                    help="rsync include pattern, repeatable (default: generated*.py, generated*.yaml)")
+                    help="rsync include pattern, repeatable (default: generated*.py, generated*.yaml, "
+                         "gotm.yaml, fabm*.yaml)")
     st.add_argument("--exclude-dir", action="append", default=list(_STAGE_DEFAULT_EXCLUDE_DIRS),
                     metavar="NAME", help="subdirectory name to exclude entirely, repeatable "
                                           "(default: __pycache__)")

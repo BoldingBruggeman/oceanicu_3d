@@ -1137,8 +1137,9 @@ experiment is actually running, real chunk output (logs, restarts,
 ```bash
 oceanicu-experiments stage --experiment-root NSe/CMIP6/CNRM-ESM2-1/ssp126/run02 \
     --source-dir /wherever/you/generated/the/driver/script
-    # --include defaults to generated*.py, generated*.yaml; --exclude-dir
-    # defaults to __pycache__; --exclude defaults to *.nc
+    # --include defaults to generated*.py, generated*.yaml, gotm.yaml,
+    # fabm*.yaml; --exclude-dir defaults to __pycache__; --exclude defaults
+    # to *.nc
 ```
 
 This `rsync`s (filtered by `--include`/`--exclude-dir`/`--exclude`, so
@@ -1172,7 +1173,8 @@ distinct contents, no overwrite.
 **`--exclude` (default `*.nc`) is a belt-and-braces guard, not the
 actual mechanism keeping real output data out of what gets synced
 between machines.** The default `--include` list is already a whitelist
-(only `generated*.py`/`generated*.yaml` ever match), so a stray NetCDF
+(only `generated*.py`/`generated*.yaml`/`gotm.yaml`/`fabm*.yaml` ever
+match), so a stray NetCDF
 output file sitting next to a driver script -- a near-certainty here,
 since `stage`'s destination IS the real experiment directory, which
 fills up with exactly that once the experiment is actually running --
@@ -1193,6 +1195,7 @@ filter as `stage`'s own, shown just below):
 ```bash
 rsync -a ~/hpc_commands/ bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands/
 rsync -a --include 'generated*.py' --include 'generated*.yaml' \
+    --include 'gotm.yaml' --include 'fabm*.yaml' \
     --include '*/' --exclude '*' ~/experiments/ \
     bb-server1:/data/OceanICU/oceanicu_3d/experiments/
 ```
@@ -1205,7 +1208,8 @@ see "Keeping bb-server1's copy of the registry up to date"):
 ```bash
 OCEANICU_EXPERIMENT_ROOT_BASE=/local/path/experiments \
     bin/pull_experiment_files.sh bb-server1:/data/OceanICU/oceanicu_3d/experiments
-    # same generated*.py/generated*.yaml filter as `stage` itself, no
+    # same generated*.py/generated*.yaml/gotm.yaml/fabm*.yaml filter as
+    # `stage` itself, no
     # --delete, so nothing already present (including the registry DB and
     # real chunk output sitting in this same tree) is ever touched beyond
     # what it pulls in.
@@ -1509,6 +1513,38 @@ found.
 Run this *alongside*, not instead of, the plain cron above -- if the
 watcher or `inotifywait` itself turns out not to work as expected, the
 periodic push still covers you.
+
+## Pushing getm*.log files to bb-server1
+
+Every chunk writes its own `getm*.log` alongside the driver script, in
+the experiment's own directory -- useful for a post-mortem regardless
+of whether the chunk succeeded or failed, but only if it actually
+reaches bb-server1 (or a workstation) rather than staying stuck on the
+HPC. `push_experiment_logs.sh` (`running/bin`) rsyncs `getm*.log` files
+out to bb-server1, mirroring `OCEANICU_EXPERIMENT_ROOT_BASE`'s own
+`NSe/{CMEMS,WOA,CMIP6,...}/<model>/<scenario>/<run>/` structure exactly
+-- the same shape `stage`/`pull_experiment_files.sh` already use for
+driver scripts, just a different file pattern and the opposite
+direction.
+
+**Not** triggered from inside `run_chunk.slurm` itself, on either
+success or failure -- that script runs on a **compute node**, which
+cannot reach bb-server1 any more than it can `ssh` to its own login
+node (confirmed 2026-08-29, see the registry-push section above). A
+periodic login-node cron covers "on finish, success or failure" well
+enough instead: `getm*.log` is meaningful either way, so there's no
+exit-code-aware logic to get right in the job script at all --
+
+```bash
+# on the login node
+*/15 * * * * OCEANICU_EXPERIMENT_ROOT_BASE=/path/experiments /path/to/oceanicu_3d/running/bin/push_experiment_logs.sh
+```
+
+Same `-u` (update) convention as `pull_experiment_files.sh`'s own use of
+it -- skips anything newer on bb-server1 than here. Doesn't touch
+anything else in the tree (driver scripts, real `.nc` output, restarts)
+-- `--include 'getm*.log'` is a strict whitelist, same shape as every
+other sync in this pipeline.
 
 ## What's not built yet
 

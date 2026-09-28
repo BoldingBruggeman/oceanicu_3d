@@ -8,8 +8,9 @@
 #       /path/pull_experiment_files.sh bb-server1:/data/OceanICU/oceanicu_3d/experiments
 #
 # Same --include/--exclude filter as `oceanicu-experiments stage` itself
-# (generated*.py/generated*.yaml only, everything else excluded --
-# EXPERIMENT_TRACKING.md "Command queue") -- deliberately a strict
+# (generated*.py/generated*.yaml/gotm.yaml/fabm*.yaml only, everything
+# else excluded -- EXPERIMENT_TRACKING.md "Command queue") -- deliberately
+# a strict
 # whitelist, not a general directory sync: the remote side of this same
 # path is also where real chunk output (logs, restarts, *.nc results)
 # lives once an experiment is actually running, and none of that may
@@ -53,6 +54,7 @@ mkdir -p "$OCEANICU_EXPERIMENT_ROOT_BASE"
 
 result=$(rsync -au -i --prune-empty-dirs \
     --include 'generated*.py' --include 'generated*.yaml' \
+    --include 'gotm.yaml' --include 'fabm*.yaml' \
     --include '*/' --exclude '*' \
     "${remote%/}/" "${OCEANICU_EXPERIMENT_ROOT_BASE%/}/")
 

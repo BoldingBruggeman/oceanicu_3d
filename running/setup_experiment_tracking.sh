@@ -198,6 +198,16 @@ case "$role" in
         echo "  can't confirm a job is dead (unavailable, or ambiguous), a chunk is only"
         echo "  ever reaped once its start_time is >4 days old -- never a false positive"
         echo "  from a merely-slow squeue or a brief network blip."
+        echo
+        echo "Optional FIFTH cron, on the LOGIN NODE specifically (it needs outbound"
+        echo "reach; compute nodes don't have it, same restriction as the registry push"
+        echo "above) -- pushes getm*.log files out to bb-server1 on a schedule, mirroring"
+        echo "this tree's own NSe/{CMEMS,WOA,CMIP6,...}/ structure. Not triggered from"
+        echo "run_chunk.slurm itself on chunk finish -- that runs on a compute node,"
+        echo "same reach restriction -- so a periodic push is what covers 'on finish,"
+        echo "success or failure' here, see push_experiment_logs.sh's own header:"
+        echo "  crontab -e   # on the login node -- then add a line like:"
+        echo "  */15 * * * * OCEANICU_EXPERIMENT_ROOT_BASE=$path $scripts_dir/bin/push_experiment_logs.sh >> $queue_dir/push_experiment_logs.log 2>&1"
         ;;
     relay)
         # Same two independent paths as hpc, same reasoning: hpc_commands/
@@ -238,6 +248,7 @@ case "$role" in
         echo "and whatever was actually passed above):"
         echo "  rsync -a <local-queue-dir>/ bb-server1:$queue_dir/"
         echo "  rsync -a --include 'generated*.py' --include 'generated*.yaml' \\"
+        echo "      --include 'gotm.yaml' --include 'fabm*.yaml' \\"
         echo "      --include '*/' --exclude '*' <local-experiment-root>/ \\"
         echo "      bb-server1:$path/"
         ;;
@@ -264,6 +275,7 @@ case "$role" in
         echo "this project's current convention, ask whoever set up relay if unsure):"
         echo "  rsync -a $queue_dir/ bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands/"
         echo "  rsync -a --include 'generated*.py' --include 'generated*.yaml' \\"
+        echo "      --include 'gotm.yaml' --include 'fabm*.yaml' \\"
         echo "      --include '*/' --exclude '*' $path/ \\"
         echo "      bb-server1:/data/OceanICU/oceanicu_3d/experiments/"
         ;;
