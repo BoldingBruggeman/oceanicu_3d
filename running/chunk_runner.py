@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import shutil
 import socket
 import sqlite3
 import subprocess
@@ -366,6 +367,27 @@ def _main_tracked(args: argparse.Namespace) -> int:
             print(f"{chunk_dir} already exists -- archiving aside as {archived.name}")
             chunk_dir.rename(archived)
         chunk_dir.mkdir(parents=True)
+
+        # simulation.gotm/simulation.fabm are bare, cwd-relative filenames
+        # in the generated script's own source (resolve_data_path('gotm.
+        # yaml')/('fabm_ersem.yaml'), no ${VAR} to resolve against
+        # experiment_root the way script/config/data_roots_file above just
+        # were) -- deliberate, "each run/chunk keeps its own physical copy,
+        # not a shared reference" (see driver/scripts/fabm.py's own
+        # comments). But the chunk subprocess below runs with cwd=
+        # chunk_dir, several levels below experiment_root -- a real,
+        # reported bug: gotm.yaml/fabm_ersem.yaml sitting only in
+        # experiment_root (where `stage`/pull_experiment_files.sh put
+        # them) are invisible from inside chunk_dir, so pygetm.simulation.
+        # Simulation's own GOTM(gotm) raised "Configuration file gotm.yaml
+        # does not exist" even though the file is right there one level
+        # up. Copied fresh into EVERY chunk_dir here, matching stage's own
+        # gotm.yaml/fabm*.yaml whitelist exactly -- missing entirely for a
+        # FABM-off experiment (glob matches nothing), not an error.
+        for name in ("gotm.yaml", *[p.name for p in experiment_root.glob("fabm*.yaml")]):
+            src = experiment_root / name
+            if src.is_file():
+                shutil.copy2(src, chunk_dir / name)
 
         load_restart = None
         load_restart_time = None
