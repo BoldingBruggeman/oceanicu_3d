@@ -1,10 +1,11 @@
 #!/bin/bash
-# push_experiment_logs.sh -- push getm*.log files out to bb-server1,
-# mirroring OCEANICU_EXPERIMENT_ROOT_BASE's own relative structure (the
-# same NSe/{CMEMS,WOA,CMIP6,...}/<model>/<scenario>/<run>/ layout already
-# used on the HPC). Run this on the LOGIN NODE ONLY (it needs outbound
-# reach -- compute nodes don't have it; confirmed 2026-08-29, directly by
-# PML, see push_registry_snapshot.sh's own header) -- e.g. via cron:
+# push_experiment_logs.sh -- push getm*.log files (and getm-dump.nc, when
+# present) out to bb-server1, mirroring OCEANICU_EXPERIMENT_ROOT_BASE's own
+# relative structure (the same NSe/{CMEMS,WOA,CMIP6,...}/<model>/<scenario>/
+# <run>/ layout already used on the HPC). Run this on the LOGIN NODE ONLY
+# (it needs outbound reach -- compute nodes don't have it; confirmed
+# 2026-08-29, directly by PML, see push_registry_snapshot.sh's own header)
+# -- e.g. via cron:
 #
 #   */15 * * * * OCEANICU_EXPERIMENT_ROOT_BASE=/path/experiments \
 #       push_experiment_logs.sh
@@ -16,13 +17,20 @@
 # aware logic in the job script: getm*.log exists and is meaningful
 # either way, so there's nothing to special-case.
 #
+# getm-dump.nc -- pygetm's own dump_on_error output, a fixed filename
+# written into the chunk's own cwd on a NaN/crash (see nc_nan_scan.py's
+# own docstring) -- is included alongside the logs, per user, 2026-09-28:
+# its mere PRESENCE already signals a failure worth knowing about
+# remotely, without needing to inspect the log text itself.
+#
 # Same --include/--prune-empty-dirs shape as pull_experiment_files.sh,
-# reversed in direction -- getm*.log only, everything else (driver
-# scripts, *.nc output, restarts) excluded, so this never duplicates
-# what `stage`/pull_experiment_files.sh or a real output sync already
-# handle. -u (update): skip any file newer on bb-server1 than here --
-# harmless here (nobody edits a log on arrival) but cheap, consistent
-# insurance, same as pull_experiment_files.sh's own use of it.
+# reversed in direction -- getm*.log/getm-dump.nc only, everything else
+# (driver scripts, real *.nc output, restarts) excluded, so this never
+# duplicates what `stage`/pull_experiment_files.sh or a real output sync
+# already handle. -u (update): skip any file newer on bb-server1 than
+# here -- harmless here (nobody edits a log or a crash dump on arrival)
+# but cheap, consistent insurance, same as pull_experiment_files.sh's own
+# use of it.
 #
 # *.attempt-<timestamp>/ directories (chunk_runner.py's own archived-
 # aside prior attempts at a chunk, see its chunk_dir.rename() -- one
@@ -41,6 +49,7 @@ dest="${1:-bb-server1:/data/OceanICU/oceanicu_3d/experiments}"
 result=$(rsync -au -i --prune-empty-dirs \
     --exclude '*.attempt-*/' \
     --include 'getm*.log' \
+    --include 'getm-dump.nc' \
     --include '*/' --exclude '*' \
     "${OCEANICU_EXPERIMENT_ROOT_BASE%/}/" "${dest%/}/")
 
