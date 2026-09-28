@@ -112,14 +112,24 @@ SELF="$SCRIPT_DIR/run_chunk.slurm"
 export OMP_NUM_THREADS=1
 export SRUN_CPUS_PER_TASK=$SLURM_CPUS_PER_TASK
 
-# ~/.bashrc defines the `module` command (via environment-modules/Lmod's
-# own init script) -- fd9f27e dropped this line while fixing conda
-# activation (moving `source .../conda.sh; conda activate pygetm` down
-# past the module-load block instead), leaving `module` undefined here:
-# a real, reported failure ("module: command not found", every module
-# purge/load line). Restored just for that purpose -- conda activation
-# stays exactly where fd9f27e put it below, this doesn't undo that fix.
-source ~/.bashrc
+# module (defined by ~/.bashrc, via environment-modules/Lmod's own init
+# script) is NOT sourced here on purpose -- per user, 2026-09-28,
+# sourcing ~/.bashrc from INSIDE this job script is problematic for a
+# manual `sbatch run_chunk.slurm` invocation (root cause not fully
+# understood, but reproducible). Every real entry point already has it
+# covered from OUTSIDE instead: a manual sbatch inherits it from the
+# submitter's own already-bashrc'd interactive shell; oceanicu_
+# experiments.py's cmd_submit_chunk explicitly sources ~/.bashrc itself
+# before calling sbatch, for the cron/queue-triggered path (a minimal
+# environment with none of ~/.bashrc's effects, unlike an interactive
+# shell) -- see that function's own comment. --export=ALL (below and in
+# this script's own self-resubmission) propagates whichever of those
+# two already got it right, so `module` is defined by the time this
+# script runs regardless of which path started the chain. If `module:
+# command not found` ever reappears, check the ACTUAL submission path
+# first -- this is the second time that exact symptom traces back to a
+# missing source ~/.bashrc, just relocated once already (fd9f27e ->
+# here -> now moved out to cmd_submit_chunk).
 
 module purge
 prgenv=igi

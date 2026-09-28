@@ -102,6 +102,7 @@ from __future__ import annotations
 import argparse
 import os
 import secrets
+import shlex
 import shutil
 import subprocess
 import sys
@@ -692,25 +693,50 @@ def cmd_submit_chunk(args: argparse.Namespace) -> int:
     environment (ALL, prefix), exactly matching how run_chunk.slurm's
     own self-resubmission never re-specifies it either. Set up once via
     the HPC's own cron/shell environment, not re-plumbed per
-    submission."""
+    submission.
+
+    Sources ~/.bashrc itself, in THIS process, before calling sbatch --
+    per user, 2026-09-28: run_chunk.slurm used to do this internally,
+    but that broke a manual `sbatch run_chunk.slurm` invocation (root
+    cause not fully understood, but reproducible), so it was moved out
+    to here instead. This path is the one that actually needs it: when
+    triggered via --queue, the process calling this is get_commands_and_
+    update_registry.py under cron, which has none of ~/.bashrc's
+    effects (module/conda) the way an interactive login shell does --
+    --export=ALL then carries THIS process's own (now-sourced)
+    environment into the job. A manual sbatch run_chunk.slurm by hand
+    never goes through this function at all, so it's unaffected either
+    way."""
     script_dir = Path(__file__).resolve().parent
     run_chunk = script_dir / "run_chunk.slurm"
     if not run_chunk.is_file():
         print(f"ERROR: {run_chunk} not found -- submit-chunk only works on a machine with "
               f"run_chunk.slurm actually deployed (the HPC).", file=sys.stderr)
         return 1
-    try:
-        result = subprocess.run(
-            ["sbatch", f"--export=ALL,EXPERIMENT_ID={args.experiment_id}", str(run_chunk)],
-            cwd=script_dir, capture_output=True, text=True,
-        )
-    except FileNotFoundError:
-        print("ERROR: sbatch not found -- submit-chunk only works on a machine that's actually "
-              "part of the SLURM cluster (the HPC), not orca/bb-server1. Queue it with --queue "
-              "instead, for get_commands_and_update_registry.py to apply on HPC.", file=sys.stderr)
-        return 1
+    sbatch_cmd = (
+        f"sbatch --export=ALL,EXPERIMENT_ID={shlex.quote(args.experiment_id)} "
+        f"{shlex.quote(str(run_chunk))}"
+    )
+    # bash -c, not a direct ["sbatch", ...] argv, specifically so
+    # `source ~/.bashrc` runs first in the SAME shell that then execs
+    # sbatch (see this function's own docstring) -- means a missing
+    # sbatch binary now surfaces as a real bash "command not found"
+    # (rc=127) caught by the generic returncode check below, not a
+    # Python-level FileNotFoundError the way a direct ["sbatch", ...]
+    # argv would have raised.
+    result = subprocess.run(
+        ["bash", "-c", f"source ~/.bashrc && {sbatch_cmd}"],
+        cwd=script_dir, capture_output=True, text=True,
+    )
     if result.returncode != 0:
-        print(f"ERROR: sbatch failed (rc={result.returncode}): {result.stderr.strip()}", file=sys.stderr)
+        stderr = result.stderr.strip()
+        if "sbatch" in stderr and "not found" in stderr:
+            print("ERROR: sbatch not found -- submit-chunk only works on a machine that's "
+                  "actually part of the SLURM cluster (the HPC), not orca/bb-server1. Queue it "
+                  "with --queue instead, for get_commands_and_update_registry.py to apply on "
+                  "HPC.", file=sys.stderr)
+        else:
+            print(f"ERROR: sbatch failed (rc={result.returncode}): {stderr}", file=sys.stderr)
         return 1
     print(result.stdout.strip())
     return 0
