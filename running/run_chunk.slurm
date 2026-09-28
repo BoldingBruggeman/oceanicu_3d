@@ -112,6 +112,15 @@ SELF="$SCRIPT_DIR/run_chunk.slurm"
 export OMP_NUM_THREADS=1
 export SRUN_CPUS_PER_TASK=$SLURM_CPUS_PER_TASK
 
+# ~/.bashrc defines the `module` command (via environment-modules/Lmod's
+# own init script) -- fd9f27e dropped this line while fixing conda
+# activation (moving `source .../conda.sh; conda activate pygetm` down
+# past the module-load block instead), leaving `module` undefined here:
+# a real, reported failure ("module: command not found", every module
+# purge/load line). Restored just for that purpose -- conda activation
+# stays exactly where fd9f27e put it below, this doesn't undo that fix.
+source ~/.bashrc
+
 module purge
 prgenv=igi
 vprgenv=2024.1
