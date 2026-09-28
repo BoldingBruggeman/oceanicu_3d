@@ -102,6 +102,7 @@ from __future__ import annotations
 import argparse
 import os
 import secrets
+import shlex
 import shutil
 import subprocess
 import sys
@@ -692,25 +693,50 @@ def cmd_submit_chunk(args: argparse.Namespace) -> int:
     environment (ALL, prefix), exactly matching how run_chunk.slurm's
     own self-resubmission never re-specifies it either. Set up once via
     the HPC's own cron/shell environment, not re-plumbed per
-    submission."""
+    submission.
+
+    Sources ~/.bashrc itself, in THIS process, before calling sbatch --
+    per user, 2026-09-28: run_chunk.slurm used to do this internally,
+    but that broke a manual `sbatch run_chunk.slurm` invocation (root
+    cause not fully understood, but reproducible), so it was moved out
+    to here instead. This path is the one that actually needs it: when
+    triggered via --queue, the process calling this is get_commands_and_
+    update_registry.py under cron, which has none of ~/.bashrc's
+    effects (module/conda) the way an interactive login shell does --
+    --export=ALL then carries THIS process's own (now-sourced)
+    environment into the job. A manual sbatch run_chunk.slurm by hand
+    never goes through this function at all, so it's unaffected either
+    way."""
     script_dir = Path(__file__).resolve().parent
     run_chunk = script_dir / "run_chunk.slurm"
     if not run_chunk.is_file():
         print(f"ERROR: {run_chunk} not found -- submit-chunk only works on a machine with "
               f"run_chunk.slurm actually deployed (the HPC).", file=sys.stderr)
         return 1
-    try:
-        result = subprocess.run(
-            ["sbatch", f"--export=ALL,EXPERIMENT_ID={args.experiment_id}", str(run_chunk)],
-            cwd=script_dir, capture_output=True, text=True,
-        )
-    except FileNotFoundError:
-        print("ERROR: sbatch not found -- submit-chunk only works on a machine that's actually "
-              "part of the SLURM cluster (the HPC), not orca/bb-server1. Queue it with --queue "
-              "instead, for get_commands_and_update_registry.py to apply on HPC.", file=sys.stderr)
-        return 1
+    sbatch_cmd = (
+        f"sbatch --export=ALL,EXPERIMENT_ID={shlex.quote(args.experiment_id)} "
+        f"{shlex.quote(str(run_chunk))}"
+    )
+    # bash -c, not a direct ["sbatch", ...] argv, specifically so
+    # `source ~/.bashrc` runs first in the SAME shell that then execs
+    # sbatch (see this function's own docstring) -- means a missing
+    # sbatch binary now surfaces as a real bash "command not found"
+    # (rc=127) caught by the generic returncode check below, not a
+    # Python-level FileNotFoundError the way a direct ["sbatch", ...]
+    # argv would have raised.
+    result = subprocess.run(
+        ["bash", "-c", f"source ~/.bashrc && {sbatch_cmd}"],
+        cwd=script_dir, capture_output=True, text=True,
+    )
     if result.returncode != 0:
-        print(f"ERROR: sbatch failed (rc={result.returncode}): {result.stderr.strip()}", file=sys.stderr)
+        stderr = result.stderr.strip()
+        if "sbatch" in stderr and "not found" in stderr:
+            print("ERROR: sbatch not found -- submit-chunk only works on a machine that's "
+                  "actually part of the SLURM cluster (the HPC), not orca/bb-server1. Queue it "
+                  "with --queue instead, for get_commands_and_update_registry.py to apply on "
+                  "HPC.", file=sys.stderr)
+        else:
+            print(f"ERROR: sbatch failed (rc={result.returncode}): {stderr}", file=sys.stderr)
         return 1
     print(result.stdout.strip())
     return 0
@@ -728,24 +754,37 @@ def cmd_pull_code(args: argparse.Namespace) -> int:
     its own docstring: "this file never needs updating when a new
     oceanicu_experiments.py subcommand is added").
 
-    Deliberately just `git pull`, not `--ff-only` or anything more
-    opinionated -- if the HPC-side checkout ever has real local commits
-    of its own (e.g. a hand-edited driver script fix, same real scenario
-    pull_experiment_files.sh's own -u guards against for a different
-    file), a plain pull's own merge/conflict behavior surfaces that
-    loudly rather than silently overwriting it."""
+    Explicitly `origin claude` -- every real checkout this project uses
+    (orca, bb-server1, shark) is on the `claude` branch, not whatever a
+    bare `git pull` would fall back to via the checkout's own upstream
+    tracking config (which may be unset or pointed at `main` on a
+    checkout set up differently, e.g. the HPC's). `--ff-only` is
+    deliberately NOT used -- if the HPC-side checkout ever has real
+    local commits of its own (e.g. a hand-edited driver script fix,
+    same real scenario pull_experiment_files.sh's own -u guards against
+    for a different file), a plain (non-ff-only) pull's own merge/
+    conflict behavior surfaces that loudly rather than silently
+    overwriting it."""
     repo_root = Path(__file__).resolve().parent.parent
     if not (repo_root / ".git").is_dir():
         print(f"ERROR: {repo_root} is not a git checkout -- pull-code only works where "
               f"oceanicu_3d itself was cloned with git (the HPC's own checkout).", file=sys.stderr)
         return 1
-    result = subprocess.run(["git", "-C", str(repo_root), "pull"], capture_output=True, text=True)
+    result = subprocess.run(["git", "-C", str(repo_root), "pull", "origin", "claude"], capture_output=True, text=True)
     output = (result.stdout + result.stderr).strip()
+    if result.returncode != 0:
+        # The DETAIL goes to stderr here specifically because
+        # get_commands_and_update_registry.py's own dispatch captures
+        # THIS process's stderr into the queue entry's "note" on failure
+        # (stdout on success) -- an earlier version of this printed the
+        # real git output to stdout unconditionally and only a bare,
+        # detail-free "git pull failed (rc=1)" to stderr, so a real
+        # failure's own cause never made it into the applied-queue_kb-
+        # *.yaml report at all (confirmed directly, 2026-09-28).
+        print(f"ERROR: git pull failed (rc={result.returncode}): {output}", file=sys.stderr)
+        return 1
     if output:
         print(output)
-    if result.returncode != 0:
-        print(f"ERROR: git pull failed (rc={result.returncode})", file=sys.stderr)
-        return 1
     return 0
 
 
