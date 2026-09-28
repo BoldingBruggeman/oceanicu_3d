@@ -240,7 +240,7 @@ output:
     bottom_variables_3d:
     - temp
     - salt
-    fabm_ersem:
+    fabm_ersem_3D:
     - P1_c
     - P2_c
     - P3_c
@@ -250,10 +250,11 @@ output:
     - N4_n
     - N1_p
     - N5_s
+    - O3_c
+    fabm_ersem_2D:
     - Q6_c
     - Y2_c
     - Y3_c
-    - O3_c
     - O3_fair
     - Q7_c
     - Q6_pen_depth_c
@@ -263,9 +264,27 @@ output:
     - N5_s_sms
     - N5_s_sfl
     - N5_s_bfl
+    fabm_ersem_diag: # these can't be sliced in output
     - N5_s_sfl_tot_calculator_result
     - N5_s_bfl_tot_calculator_result
     - N5_s_sms_tot_calculator_result
+    fabm_mizer:  # placeholder -- oceanicu_driver.py overwrites this with fish_c1..fish_c100 at generation time
+    - fish_c1
+    - fish_c_tot
+    - fish_c_pel
+    - fish_c_dem
+    - fish_demPOC
+    - fish_demDIC
+    - fish_total_ben_prey
+    - fish_w_int_diag
+    - fish_c_size1
+    - fish_c_size2
+    - fish_c_size3
+    - fish_c_lfi
+    fabm_mizer_fishing:
+    - fish_totlandings
+    - fish_demlandings
+    - fish_pellandings
   files:
   - type: netcdf
     netcdf:
@@ -320,8 +339,14 @@ output:
       - surface_variables_3d
       time_average: true
     - groups:
-      - fabm_ersem
+      - fabm_ersem_3D
+      - fabm_ersem_2D
+      - fabm_ersem_diag
       requires_fabm: true
+      time_average: true
+    - groups:
+      - fabm_mizer
+      requires_fabm_dependency: fish/fishing_pressure
       time_average: true
   - type: netcdf
     netcdf:
@@ -333,6 +358,9 @@ output:
       start: '2010-01-01'
       stop: '2020-01-01'
     variable_requests:
+    - groups:
+      - fabm_mizer_fishing
+      requires_fabm_dependency: fish/fishing_pressure
     - fields:
       - temp
       - salt
