@@ -193,6 +193,30 @@ def set_meteo_data(sim, domain, config: dict) -> None:
     _start = runtime_cfg.get("time")
     _stop = runtime_cfg.get("stop")
 
+    # Real bug, confirmed directly on a real HPC run (2026-09-27):
+    # config['runtime']['time'] is THIS chunk's own restart point (set
+    # from args.start at every invocation -- see oceanicu_driver.py's own
+    # raw.setdefault("runtime", {})["stop"]/["time"] and codegen.py's
+    # equivalent), not the overall experiment's original start. A chunk
+    # that happens to restart exactly at HIST_CUTOFF_YEAR+1's own Jan 1
+    # midnight (chunk_runner.py's own annual chunking always lands a
+    # later chunk exactly there once realigned) then has start_year >
+    # HIST_CUTOFF_YEAR, so the plain `start_year <= HIST_CUTOFF_YEAR`
+    # check below wrongly excludes historical entirely -- leaving no
+    # record before the scenario file's own first one. The scenario
+    # (bias-corrected, disaggregated) files' own first real record is at
+    # NOON, not midnight (daily-mean convention) -- confirmed directly:
+    # "Cannot interpolate ... to value at 2015-01-01 00:00:00, because
+    # time series starts only at 2015-01-01 12:00:00" -- so there is no
+    # earlier bracketing point at all without historical's own Dec 31
+    # (also noon) record right before it. Symmetric to expand_year_glob's
+    # own documented "stop at midnight Jan 1 still needs that year's
+    # file" allowance, just on the start side of the historical/scenario
+    # seam specifically (the only boundary this splice ever has).
+    _start_is_new_year_right_after_cutoff = bool(_start) and datetime.datetime.fromisoformat(_start) == datetime.datetime(
+        HIST_CUTOFF_YEAR + 1, 1, 1
+    )
+
     def _experiment_folder(experiment: str) -> Path:
         if folder_template:
             return folder_root / folder_template.format(model=model, scenario=experiment)
@@ -219,6 +243,13 @@ def set_meteo_data(sim, domain, config: dict) -> None:
             hist_stop = _stop if stop_year <= HIST_CUTOFF_YEAR else f"{HIST_CUTOFF_YEAR}-12-31"
             pattern = str(_experiment_folder("historical") / filename_template.format(exp="historical"))
             paths += expand_year_glob(pattern, _start, hist_stop)
+        elif _start_is_new_year_right_after_cutoff:
+            # This chunk's own start IS the seam itself -- see this
+            # function's own comment above. Only HIST_CUTOFF_YEAR's own
+            # file is needed, for its last (Dec, noon) record to bracket
+            # against scenario's own first (Jan 1, noon) record.
+            pattern = str(_experiment_folder("historical") / filename_template.format(exp="historical"))
+            paths += expand_year_glob(pattern, f"{HIST_CUTOFF_YEAR}-01-01", f"{HIST_CUTOFF_YEAR}-12-31")
         if stop_year > HIST_CUTOFF_YEAR:
             scen_start = _start if start_year > HIST_CUTOFF_YEAR else f"{HIST_CUTOFF_YEAR + 1}-01-01"
             pattern = str(_experiment_folder(scenario) / filename_template.format(exp=scenario))
@@ -278,7 +309,7 @@ def set_meteo_data(sim, domain, config: dict) -> None:
         start_year = datetime.datetime.fromisoformat(_start).year
         stop_year = datetime.datetime.fromisoformat(_stop).year
         paths = []
-        if start_year <= HIST_CUTOFF_YEAR:
+        if start_year <= HIST_CUTOFF_YEAR or _start_is_new_year_right_after_cutoff:
             paths += _one("historical")
         if stop_year > HIST_CUTOFF_YEAR:
             paths += _one(scenario)

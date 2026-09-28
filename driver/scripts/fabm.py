@@ -303,6 +303,19 @@ def configure_fabm(sim, domain, config: dict) -> None:
     _start = runtime_cfg.get("time")
     _stop = runtime_cfg.get("stop")
 
+    # Same real bug as meteo.py's own _spliced_paths (confirmed directly
+    # on a real HPC run, 2026-09-27, for the meteo case -- see that
+    # function's own comment for the full story): config['runtime']
+    # ['time'] is THIS chunk's own restart point, not the overall
+    # experiment's original start, so a chunk restarting exactly at
+    # NDEP_HIST_CUTOFF_YEAR+1's own Jan 1 midnight wrongly excludes
+    # historical below, even though it's still needed to bracket a
+    # request at that exact instant against the scenario file's own
+    # first (mid-January monthly-mean) record.
+    _start_is_new_year_right_after_cutoff = bool(_start) and datetime.datetime.fromisoformat(_start) == datetime.datetime(
+        NDEP_HIST_CUTOFF_YEAR + 1, 1, 1
+    )
+
     def _ndep_scenario_paths(scenario: str) -> list:
         if not _start or not _stop:
             pattern = str(fabm_folder / f"Ndep/AMM7_Ndep_BC-EMEP_{scenario}_y????.nc")
@@ -316,6 +329,9 @@ def configure_fabm(sim, domain, config: dict) -> None:
             hist_stop = _stop if stop_year <= NDEP_HIST_CUTOFF_YEAR else f"{NDEP_HIST_CUTOFF_YEAR}-12-31"
             pattern = str(fabm_folder / "Ndep/AMM7_Ndep_BC-EMEP_historical_y????.nc")
             paths += expand_year_glob(pattern, _start, hist_stop)
+        elif _start_is_new_year_right_after_cutoff:
+            pattern = str(fabm_folder / "Ndep/AMM7_Ndep_BC-EMEP_historical_y????.nc")
+            paths += expand_year_glob(pattern, f"{NDEP_HIST_CUTOFF_YEAR}-01-01", f"{NDEP_HIST_CUTOFF_YEAR}-12-31")
         if stop_year > NDEP_HIST_CUTOFF_YEAR:
             scen_start = _start if start_year > NDEP_HIST_CUTOFF_YEAR else f"{NDEP_HIST_CUTOFF_YEAR + 1}-01-01"
             pattern = str(fabm_folder / f"Ndep/AMM7_Ndep_BC-EMEP_{scenario}_y????.nc")
