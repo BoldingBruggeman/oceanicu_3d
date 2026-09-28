@@ -767,11 +767,19 @@ def cmd_pull_code(args: argparse.Namespace) -> int:
         return 1
     result = subprocess.run(["git", "-C", str(repo_root), "pull"], capture_output=True, text=True)
     output = (result.stdout + result.stderr).strip()
+    if result.returncode != 0:
+        # The DETAIL goes to stderr here specifically because
+        # get_commands_and_update_registry.py's own dispatch captures
+        # THIS process's stderr into the queue entry's "note" on failure
+        # (stdout on success) -- an earlier version of this printed the
+        # real git output to stdout unconditionally and only a bare,
+        # detail-free "git pull failed (rc=1)" to stderr, so a real
+        # failure's own cause never made it into the applied-queue_kb-
+        # *.yaml report at all (confirmed directly, 2026-09-28).
+        print(f"ERROR: git pull failed (rc={result.returncode}): {output}", file=sys.stderr)
+        return 1
     if output:
         print(output)
-    if result.returncode != 0:
-        print(f"ERROR: git pull failed (rc={result.returncode})", file=sys.stderr)
-        return 1
     return 0
 
 
