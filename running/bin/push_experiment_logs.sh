@@ -24,6 +24,13 @@
 # harmless here (nobody edits a log on arrival) but cheap, consistent
 # insurance, same as pull_experiment_files.sh's own use of it.
 #
+# *.attempt-<timestamp>/ directories (chunk_runner.py's own archived-
+# aside prior attempts at a chunk, see its chunk_dir.rename() -- one
+# gets created every time a chunk is retried) are excluded -- per user,
+# 2026-09-28: only the live/current attempt's own logs are worth syncing
+# across, not every superseded retry's. This --exclude must come BEFORE
+# the --include '*/' below (rsync stops at the first matching rule).
+#
 # Usage: OCEANICU_EXPERIMENT_ROOT_BASE=/path/experiments push_experiment_logs.sh [dest]
 # dest defaults to bb-server1:/data/OceanICU/oceanicu_3d/experiments
 set -eu
@@ -32,6 +39,7 @@ set -eu
 dest="${1:-bb-server1:/data/OceanICU/oceanicu_3d/experiments}"
 
 result=$(rsync -au -i --prune-empty-dirs \
+    --exclude '*.attempt-*/' \
     --include 'getm*.log' \
     --include '*/' --exclude '*' \
     "${OCEANICU_EXPERIMENT_ROOT_BASE%/}/" "${dest%/}/")
