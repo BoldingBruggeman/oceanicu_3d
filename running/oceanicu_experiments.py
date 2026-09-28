@@ -754,18 +754,23 @@ def cmd_pull_code(args: argparse.Namespace) -> int:
     its own docstring: "this file never needs updating when a new
     oceanicu_experiments.py subcommand is added").
 
-    Deliberately just `git pull`, not `--ff-only` or anything more
-    opinionated -- if the HPC-side checkout ever has real local commits
-    of its own (e.g. a hand-edited driver script fix, same real scenario
-    pull_experiment_files.sh's own -u guards against for a different
-    file), a plain pull's own merge/conflict behavior surfaces that
-    loudly rather than silently overwriting it."""
+    Explicitly `origin claude` -- every real checkout this project uses
+    (orca, bb-server1, shark) is on the `claude` branch, not whatever a
+    bare `git pull` would fall back to via the checkout's own upstream
+    tracking config (which may be unset or pointed at `main` on a
+    checkout set up differently, e.g. the HPC's). `--ff-only` is
+    deliberately NOT used -- if the HPC-side checkout ever has real
+    local commits of its own (e.g. a hand-edited driver script fix,
+    same real scenario pull_experiment_files.sh's own -u guards against
+    for a different file), a plain (non-ff-only) pull's own merge/
+    conflict behavior surfaces that loudly rather than silently
+    overwriting it."""
     repo_root = Path(__file__).resolve().parent.parent
     if not (repo_root / ".git").is_dir():
         print(f"ERROR: {repo_root} is not a git checkout -- pull-code only works where "
               f"oceanicu_3d itself was cloned with git (the HPC's own checkout).", file=sys.stderr)
         return 1
-    result = subprocess.run(["git", "-C", str(repo_root), "pull"], capture_output=True, text=True)
+    result = subprocess.run(["git", "-C", str(repo_root), "pull", "origin", "claude"], capture_output=True, text=True)
     output = (result.stdout + result.stderr).strip()
     if result.returncode != 0:
         # The DETAIL goes to stderr here specifically because
