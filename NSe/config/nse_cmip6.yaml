@@ -239,7 +239,7 @@ output:
     bottom_variables_3d:
     - temp
     - salt
-    fabm_ersem:
+    fabm_ersem_3D:
     - P1_c
     - P2_c
     - P3_c
@@ -249,26 +249,60 @@ output:
     - N4_n
     - N1_p
     - N5_s
+    - R1_c
+    - R2_c
+    - R4_c
+    - R6_c
+    - R8_c
+    - O3_c
+    - O3_TA
+    - Z4_c
+    - Z5_c
+    - Z6_c
+    - B1_c   
+    fabm_ersem_2D:
+    - O3_fair
+    - Q7_c
     - Q6_c
     - Y2_c
     - Y3_c
-    - O3_c
-    - O3_fair
-    - Q7_c
-    - Q6_pen_depth_c
-    - ben_col_D1m
-    - ben_col_D2m
-    - N5_s_bdy
-    - N5_s_sms
-    - N5_s_sfl
-    - N5_s_bfl
-    - N5_s_sfl_tot_calculator_result
-    - N5_s_bfl_tot_calculator_result
-    - N5_s_sms_tot_calculator_result
+    - Y4_c
+    - G2_o
+    - G3_c
+    fabm_ersem_diag: # these can't be sliced in output
+    - O3_pCO2
+    - ph_sf_result
+    - phytoplankton_netPI_result
+    - total_phytoplankton_chl_result
+    - total_zooplankton_carbon_result
+    - total_phytoplankton_carbon_result
+    - total_smallzooplankton_carbon_result
+    - Z4_fzooc_result
+    - Z4_fphytoc_result
+    - Z4_fsmallzooc_result
+    - phytoplankton_loss_to_labile_DOC_result
+    - phytoplankton_loss_to_POC_result
+    - phytoplankton_loss_to_non_labile_DOC_result
+    - net_PelBen_POC_result
+    - Z4_fZIO3c
+    - Z4_fZIRDc
     fabm_mizer:  # placeholder -- oceanicu_driver.py overwrites this with fish_c1..fish_c100 at generation time
     - fish_c1
-    fabm_mizer_diagnostics:
+    - fish_c_tot
+    - fish_c_pel
+    - fish_c_dem
+    - fish_demPOC
+    - fish_demDIC
+    - fish_total_ben_prey
+    - fish_w_int_diag
+    - fish_c_size1
+    - fish_c_size2
+    - fish_c_size3
+    - fish_c_lfi
+    fabm_mizer_fishing:
     - fish_totlandings
+    - fish_demlandings
+    - fish_pellandings
   files:
   - type: netcdf
     netcdf:
