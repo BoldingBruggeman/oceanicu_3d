@@ -119,7 +119,6 @@ export SRUN_CPUS_PER_TASK=$SLURM_CPUS_PER_TASK
 # a real, reported failure ("module: command not found", every module
 # purge/load line). Restored just for that purpose -- conda activation
 # stays exactly where fd9f27e put it below, this doesn't undo that fix.
-source ~/.bashrc
 
 module purge
 prgenv=igi
