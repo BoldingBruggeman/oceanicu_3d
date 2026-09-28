@@ -716,6 +716,39 @@ def cmd_submit_chunk(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_pull_code(args: argparse.Namespace) -> int:
+    """`git pull` the oceanicu_3d checkout this script itself lives in --
+    for queuing a code update (e.g. a chunk_runner.py/run_chunk.slurm fix)
+    from orca/bb-server1 via --queue, when nobody's logged into the HPC
+    directly to run it by hand. Same shape as cmd_submit_chunk's own
+    exception to "nothing here touches the registry" -- no rt.connect(),
+    no DB read/write of any kind, --db/--dry-run don't apply. Applied via
+    get_commands_and_update_registry.py's own generic --queue dispatch,
+    same as any other subcommand -- no special-casing needed there (see
+    its own docstring: "this file never needs updating when a new
+    oceanicu_experiments.py subcommand is added").
+
+    Deliberately just `git pull`, not `--ff-only` or anything more
+    opinionated -- if the HPC-side checkout ever has real local commits
+    of its own (e.g. a hand-edited driver script fix, same real scenario
+    pull_experiment_files.sh's own -u guards against for a different
+    file), a plain pull's own merge/conflict behavior surfaces that
+    loudly rather than silently overwriting it."""
+    repo_root = Path(__file__).resolve().parent.parent
+    if not (repo_root / ".git").is_dir():
+        print(f"ERROR: {repo_root} is not a git checkout -- pull-code only works where "
+              f"oceanicu_3d itself was cloned with git (the HPC's own checkout).", file=sys.stderr)
+        return 1
+    result = subprocess.run(["git", "-C", str(repo_root), "pull"], capture_output=True, text=True)
+    output = (result.stdout + result.stderr).strip()
+    if output:
+        print(output)
+    if result.returncode != 0:
+        print(f"ERROR: git pull failed (rc={result.returncode})", file=sys.stderr)
+        return 1
+    return 0
+
+
 def _trim_updated_at(rows: list) -> list:
     """updated_at is stored+returned as a full ISO-8601 timestamp with UTC
     offset (e.g. '2026-09-08T07:18:48+00:00') -- display-only trim down to
@@ -1100,6 +1133,14 @@ def main() -> int:
                           "--dry-run don't apply. Only actually works run on the HPC itself, with "
                           "run_chunk.slurm deployed alongside this script, same as every other "
                           "SLURM-only command here.")
+
+    pc = sub.add_parser(
+        "pull-code",
+        help="git pull the oceanicu_3d checkout this script itself lives in -- for queuing a "
+             "code update (e.g. a chunk_runner.py fix) via --queue when nobody's logged into "
+             "the HPC directly. Never touches the registry -- --db/--dry-run don't apply.",
+    )
+    _add_common(pc); pc.set_defaults(func=cmd_pull_code)
 
     pa = sub.add_parser("pause"); _add_common(pa); pa.set_defaults(func=cmd_pause)
     g1 = pa.add_mutually_exclusive_group(required=True)
