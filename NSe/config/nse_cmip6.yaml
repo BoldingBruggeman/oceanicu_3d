@@ -251,6 +251,7 @@ output:
     - N5_s
     - R1_c
     - R2_c
+    - R3_c
     - R4_c
     - R6_c
     - R8_c
@@ -271,6 +272,7 @@ output:
     - G3_c
     fabm_ersem_diag: # these can't be sliced in output
     - O3_pCO2
+    - O3_pH
     - ph_sf_result
     - phytoplankton_netPI_result
     - total_phytoplankton_chl_result
@@ -286,6 +288,14 @@ output:
     - net_PelBen_POC_result
     - Z4_fZIO3c
     - Z4_fZIRDc
+    - B1_fB1O3c # bacteria fluxes for Helen P. PML
+    - B1_fRPB1c
+    - B1_fB1R3c
+    - B1_fB1R1c
+    - B1_fB1R2c
+    - B1_fR1B1c
+    - B1_fR2B1c
+    - B1_fR3B1c
     fabm_mizer:  # placeholder -- oceanicu_driver.py overwrites this with fish_c1..fish_c100 at generation time
     - fish_c1
     - fish_c_tot
@@ -299,6 +309,10 @@ output:
     - fish_c_size2
     - fish_c_size3
     - fish_c_lfi
+    - fish_prey5_c_sms
+    - fish_predation_on_phytoplankton_result
+    - fish_predation_on_smallzoo_result
+    - fish_predation_on_benthos_result
     fabm_mizer_fishing:
     - fish_totlandings
     - fish_demlandings
@@ -358,10 +372,13 @@ output:
       time_average: true
     - groups:
       - fabm_ersem_3D
+      - fabm_ersem_2D
+      - fabm_yaml_diag
       requires_fabm: true
       time_average: true
     - groups:
       - fabm_mizer
+      - fabm_mizer_fishing
       requires_fabm_dependency: fish/fishing_pressure
       time_average: true
   - type: netcdf
@@ -377,6 +394,19 @@ output:
     - groups:
       - fabm_mizer_fishing
       requires_fabm_dependency: fish/fishing_pressure
+    - groups: 
+      - fabm_ersem_2D
+      requires_fabm: true
+    - groups:
+      - fabm_ersem_3D
+      requires_fabm: true
+      z_index: -1
+      generate_unique_name: true
+    - groups:
+      - fabm_ersem_3D
+      requires_fabm: true
+      z_index: 0
+      generate_unique_name: true
     - fields:
       - temp
       - salt
