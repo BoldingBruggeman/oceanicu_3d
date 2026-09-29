@@ -725,8 +725,20 @@ def cmd_submit_chunk(args: argparse.Namespace) -> int:
     # (rc=127) caught by the generic returncode check below, not a
     # Python-level FileNotFoundError the way a direct ["sbatch", ...]
     # argv would have raised.
+    #
+    # `;`, NOT `&&`, between the source and sbatch -- real, reproduced
+    # failure (2026-09-29): ~/.bashrc on scylla exits non-zero for some
+    # still-unclear reason (silently -- no output on either stream), and
+    # `&&` let that alone block sbatch from ever running at all, with
+    # nothing to show for it ("ERROR: sbatch failed (rc=1):" and nothing
+    # after the colon, even after fixing the separate stdout/stderr
+    # reporting gap this same day). Whatever conda/module state ~/.bashrc
+    # manages to set up before hitting that point still ends up in THIS
+    # shell's environment regardless of its own final exit code, and
+    # that's the only reason it's sourced here at all -- sbatch's own
+    # success/failure is what actually matters, not bashrc's.
     result = subprocess.run(
-        ["bash", "-c", f"source ~/.bashrc && {sbatch_cmd}"],
+        ["bash", "-c", f"source ~/.bashrc; {sbatch_cmd}"],
         cwd=script_dir, capture_output=True, text=True,
     )
     if result.returncode != 0:
