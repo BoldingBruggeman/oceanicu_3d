@@ -99,3 +99,47 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
 
     sim.temp[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
     sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
+
+    # --- ERSEM state restart-style initial condition ---
+    # Lives HERE, not in scripts/fabm.py's own configure_fabm, for a real
+    # reason: configure_fabm runs on EVERY chunk unconditionally (its
+    # dependency setup -- atmospheric CO2/N2O, N-deposition, fish pressure
+    # -- is real, time-varying forcing that every chunk needs, restart or
+    # not), whereas this hook (hydrography.data_script) is only ever
+    # called for a genuine fresh start -- the call site itself skips it
+    # entirely under `if not args.load_restart:` (see this function's own
+    # docstring). Putting the restart-IC load there would have silently
+    # re-applied it on every continuation chunk too. Piggybacking on this
+    # existing fresh-start-only gate avoids needing a new, separately-
+    # gated hook (and the pygetm-config codegen changes that would need).
+    #
+    # fabm.ERSEM.restart_file points at a real pygetm restart-format
+    # NetCDF (add_restart()/load_restart() shape) -- e.g. bb-server1:/tmp/
+    # restart_ersem.nc, which per user (2026-09-30) ALSO carries
+    # temperature/salinity/other physical fields (confirmed directly: 210
+    # data_vars, most physical -- hnt/zt/U/V/pk/qk/... -- alongside 74
+    # real ERSEM-shaped ones like N1_p/N3_n/R1_c). sim.load_restart()
+    # loads every field present in sim.output_manager.fields flagged
+    # _part_of_state and RAISES if one is missing from the file -- so
+    # narrowing that dict to just the FABM state variable names first
+    # means only those are looked for/loaded; the file's own temp/salt
+    # (already set above, from WOA/CMEMS) are excluded from the narrowed
+    # dict and never touched, regardless of being present in the file.
+    # `if sim.fabm:` guards this explicitly (redundant with configure_fabm's
+    # own internal check on the SAME condition, but this hook has no such
+    # check of its own otherwise -- per user, 2026-09-30).
+    if sim.fabm:
+        fabm_cfg = config.get("fabm") or {}
+        restart_file = fabm_cfg.get("restart_file")
+        if restart_file:
+            restart_path = resolve_data_path(restart_file)
+            fabm_state_names = {var.name for var in sim.fabm.state_variables}
+            all_fields = sim.output_manager.fields
+            sim.output_manager.fields = {
+                name: field for name, field in all_fields.items() if name in fabm_state_names
+            }
+            try:
+                sim.load_restart(restart_path)
+            finally:
+                sim.output_manager.fields = all_fields
+            sim.logger.info(f"set_hydrography_ic: seeded FABM state from {restart_path}")
