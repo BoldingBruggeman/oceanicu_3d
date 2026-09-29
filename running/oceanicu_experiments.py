@@ -730,14 +730,21 @@ def cmd_submit_chunk(args: argparse.Namespace) -> int:
         cwd=script_dir, capture_output=True, text=True,
     )
     if result.returncode != 0:
-        stderr = result.stderr.strip()
-        if "sbatch" in stderr and "not found" in stderr:
+        # Combined stdout+stderr, same fix as cmd_pull_code's own (2026-09-28):
+        # get_commands_and_update_registry.py's dispatch captures ONLY this
+        # process's stderr into the queue entry's "note" on failure -- a
+        # version that printed sbatch's real error to stdout and only a
+        # bare "rc=1" to stderr surfaced exactly that useless, detail-free
+        # note in production (confirmed directly, 2026-09-29: "ERROR: sbatch
+        # failed (rc=1):" with nothing after the colon).
+        output = (result.stdout + result.stderr).strip()
+        if "sbatch" in output and "not found" in output:
             print("ERROR: sbatch not found -- submit-chunk only works on a machine that's "
                   "actually part of the SLURM cluster (the HPC), not orca/bb-server1. Queue it "
                   "with --queue instead, for get_commands_and_update_registry.py to apply on "
                   "HPC.", file=sys.stderr)
         else:
-            print(f"ERROR: sbatch failed (rc={result.returncode}): {stderr}", file=sys.stderr)
+            print(f"ERROR: sbatch failed (rc={result.returncode}): {output}", file=sys.stderr)
         return 1
     print(result.stdout.strip())
     return 0
