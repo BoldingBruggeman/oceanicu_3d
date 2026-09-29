@@ -69,7 +69,7 @@ def _parse_date(s: str, calendar: str):
     return cftime.datetime.strptime(s, "%Y-%m-%d", calendar=calendar)
 
 
-def _advance_date(start, kind: str, multiplier: int, stop_date=None):
+def _advance_date(start, kind: str, multiplier: int, is_first_chunk: bool = False):
     if kind == "daily":
         return start + timedelta(days=multiplier)
     if kind == "monthly":
@@ -78,38 +78,27 @@ def _advance_date(start, kind: str, multiplier: int, stop_date=None):
         yy += mm // 12
         mm = mm % 12 + 1
         return start.replace(year=yy, month=mm)
-    # annual (default): every chunk boundary should land on a real
-    # calendar-year edge (Jan 1) once things get going. If *start* isn't
-    # already Jan 1 (e.g. initial_date 2010-01-02, or a spin-up beginning
-    # in December), the multiplier is ignored for this one call --
-    # instead of a near-full-length chunk permanently offset by whatever
-    # day-of-year start happened to land on (the real bug this replaces:
-    # start.replace(year=start.year+multiplier) preserves start's own
-    # month/day, and the old code only checked stop.month != 1, so a
-    # start that already happened to be in January -- just not day 1 --
-    # never got caught at all, e.g. 2010-01-02 -> 2020-01-02, forever
-    # offset by one day, confirmed against a real chunk 0 row), this call
-    # returns a SHORT realignment chunk stopping at the very next Jan 1.
-    # Every following call then starts from a clean Jan 1, so the
-    # multiplier applies normally from then on -- no bookkeeping needed
-    # beyond this function always being handed whatever the previous
-    # chunk's own stop was.
-    if start.month != 1 or start.day != 1:
-        full_multiple = start.replace(year=start.year + multiplier)
-        # Realigning only matters to protect FUTURE chunks landing on
-        # Jan 1 -- if running the full multiplier from *start* as-is
-        # would already reach/exceed stop_date, this chunk is the LAST
-        # one regardless (the caller caps stop at stop_date right after
-        # this call returns), so there's no future chunk left to protect
-        # the alignment for. Real case, 2026-09-30, per user: chunk 7
-        # ends 2090-01-02 (itself never realigned -- it predates this
-        # fix), stop_date=2099-12-31, multiplier=10 -- realigning would
-        # have produced a short 2090-01-02->2091-01-01 chunk 8 followed
-        # by an oddly-sized 2091-01-01->2099-12-31 chunk 9, for no real
-        # benefit (nothing follows chunk 9 to protect). Skipping it here
-        # instead gives one clean final chunk, 2090-01-02->2099-12-31.
-        if stop_date is not None and full_multiple >= stop_date:
-            return full_multiple
+    # annual (default): a SPINUP-only realignment. Only the very first
+    # chunk of an experiment can legitimately start off a real calendar-
+    # year edge (initial_date itself, e.g. 2010-01-02) -- every chunk
+    # after that starts from the PREVIOUS chunk's own recorded stop, which
+    # (once the first chunk has realigned) is always already Jan 1 from
+    # then on, so `start.month != 1 or start.day != 1` is naturally always
+    # False for chunk 1 onward in a well-behaved experiment. is_first_chunk
+    # (start == initial_date, checked by the caller) restricts the
+    # realignment to that one legitimate case -- NOT "any later chunk that
+    # happens to still be unaligned" (a real, reproduced miscalibration,
+    # 2026-09-30, per user: run01's chunks 0-7 all predate this fix
+    # entirely and were never aligned in the first place -- every one of
+    # them shares the same inherited day-2 offset. Applying this check
+    # unconditionally at chunk 8 re-triggered on that inherited offset as
+    # if chunk 8 were itself a fresh spinup, producing a short
+    # 2090-01-02->2091-01-01 chunk 8 followed by an oddly-sized
+    # 2091-01-01->2099-12-31 chunk 9 -- neither chunk is a spinup, so
+    # neither should have been touched at all; chunk 8 should just be a
+    # normal full-multiplier chunk, 2090-01-02->2100-01-02 (then capped to
+    # stop_date=2099-12-31 by the caller, same as any other chunk).
+    if is_first_chunk and (start.month != 1 or start.day != 1):
         return start.replace(year=start.year + 1, month=1, day=1)
     return start.replace(year=start.year + multiplier)
 
@@ -318,7 +307,13 @@ def _main_tracked(args: argparse.Namespace) -> int:
             rt.recompute_experiment_status(conn, args.experiment_id)
             return 1
 
-        stop = _advance_date(start, experiment["chunk_kind"], experiment["chunk_multiplier"], stop_date)
+        # next_chunk_start falls back to initial_date itself only when
+        # NOTHING has run yet (see its own docstring) -- so this equality
+        # is exactly "is this the very first chunk," the one legitimate
+        # case _advance_date's own Jan-1 spinup realignment should apply
+        # to (see that function's own docstring).
+        is_first_chunk = start_str == experiment["initial_date"]
+        stop = _advance_date(start, experiment["chunk_kind"], experiment["chunk_multiplier"], is_first_chunk)
         if stop > stop_date:
             stop = stop_date
 
