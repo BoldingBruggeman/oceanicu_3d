@@ -101,6 +101,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import secrets
 import shlex
 import shutil
@@ -1008,6 +1009,101 @@ def cmd_reset(args: argparse.Namespace) -> int:
     return 0
 
 
+_CHUNK_DIR_RE = re.compile(r"^(?P<num>\d{3})_(?P<start>\d{8})_(?P<end>\d{8})$")
+
+
+def cmd_recover_chunks(args: argparse.Namespace) -> int:
+    """Rebuild chunk history rows for an experiment whose registry chunk
+    records were dropped by accident (`reset`/`rerun --from-scratch` run
+    against the wrong experiment, or one chunk too many) while the real
+    chunk_dir output on disk survived untouched -- rerun_from never
+    deletes files, only registry rows (see its own docstring).
+
+    Reconstructs chunks 0 .. --up-to-chunk - 1 as 'done', one at a time
+    in order (each chunk's load_restart is the previous one's own
+    save_restart, same as a real run), by parsing start/stop straight
+    from each chunk_dir's own name (NNN_STARTDATE_ENDDATE -- ground
+    truth, not recomputed from initial_date/chunk_kind/chunk_multiplier)
+    and computing the restart file chunk_runner.py itself would have
+    written (restart_<config-stem>_<stop>.nc, see its own save_restart
+    construction) -- REFUSING to record a chunk as done unless that
+    exact file actually exists, so this never fabricates a done row for
+    a chunk that didn't really produce usable restart output.
+
+    Chunk --up-to-chunk itself (and anything after) is left completely
+    untouched. Idempotent: chunk indices already present in the
+    registry are skipped, not re-inserted or errored on -- safe to
+    re-run after fixing whatever stopped an earlier attempt partway
+    through. Queueable like any other command here (--queue) for when
+    the files/registry live on a machine nobody's logged into directly --
+    this only ever reads chunk_dir names/restart files and writes
+    registry rows, no sbatch, so it needs no --dry-run special-case
+    (the generic scratch-DB one already covers it, same as `add`)."""
+    with rt.connect(args.db) as conn:
+        experiment = rt.get_experiment(conn, args.experiment_id)
+        if experiment is None:
+            print(f"ERROR: no such experiment_id: {args.experiment_id!r}", file=sys.stderr)
+            return 1
+
+        experiment_root = Path(rt.resolve_experiment_root(experiment["experiment_root"]))
+        setup_name = Path(experiment["config"]).stem
+        existing = {row["chunk_index"] for row in rt.list_chunks(conn, args.experiment_id)}
+
+        chunks_on_disk: dict[int, Path] = {}
+        for child in sorted(experiment_root.iterdir()):
+            if not child.is_dir():
+                continue
+            m = _CHUNK_DIR_RE.match(child.name)
+            if m:
+                chunks_on_disk[int(m["num"])] = child
+
+        missing = [i for i in range(args.up_to_chunk) if i not in chunks_on_disk]
+        if missing:
+            print(f"ERROR: no chunk_dir on disk for chunk index(es) {missing} under {experiment_root} "
+                  f"-- refusing to fabricate a 'done' row for a chunk that was never actually run.",
+                  file=sys.stderr)
+            return 1
+
+        user = rt._current_user()
+        load_restart = None
+        for i in range(args.up_to_chunk):
+            chunk_dir = chunks_on_disk[i]
+            if i in existing:
+                print(f"chunk {i}: already in the registry -- skipping")
+                row = rt.get_chunk(conn, args.experiment_id, i)
+                if row is None:
+                    print(f"ERROR: chunk {i} was just listed as existing but get_chunk found nothing "
+                          f"-- registry changed underneath this command, retry.", file=sys.stderr)
+                    return 1
+                load_restart = row["save_restart"]
+                continue
+
+            m = _CHUNK_DIR_RE.match(chunk_dir.name)
+            assert m is not None  # guaranteed by the chunks_on_disk scan above
+            start = f"{m['start'][:4]}-{m['start'][4:6]}-{m['start'][6:]}"
+            stop = f"{m['end'][:4]}-{m['end'][4:6]}-{m['end'][6:]}"
+            save_restart = str(chunk_dir / f"restart_{setup_name}_{m['end']}.nc")
+
+            if not Path(save_restart).is_file():
+                print(f"ERROR: chunk {i} ({chunk_dir.name}) has no restart file at {save_restart} "
+                      f"-- refusing to record it as done. Fix or remove this chunk_dir, or lower "
+                      f"--up-to-chunk, then retry.", file=sys.stderr)
+                return 1
+
+            print(f"chunk {i}: {start} -> {stop}  load_restart={load_restart}  save_restart={save_restart}")
+            rt.start_chunk(
+                conn, experiment_id=args.experiment_id, chunk_index=i,
+                start=start, stop=stop, chunk_dir=str(chunk_dir),
+                load_restart=load_restart, save_restart=save_restart, user=user,
+            )
+            rt.finish_chunk(conn, experiment_id=args.experiment_id, chunk_index=i, exit_code=0, user=user)
+            load_restart = save_restart
+
+    print(f"{args.experiment_id}: chunks 0..{args.up_to_chunk - 1} recorded as done -- "
+          f"next submission starts chunk {args.up_to_chunk}")
+    return 0
+
+
 def _add_common(sp: argparse.ArgumentParser) -> None:
     """Give a subparser its own --db/--dry-run so they work AFTER the
     subcommand too (e.g. `oceanicu_experiments.py list --db X`), not just before.
@@ -1321,6 +1417,17 @@ def main() -> int:
                      help="allow resetting while a chunk is still marked running -- scancels "
                           "the live job first (same as kill), then proceeds. Without this, "
                           "reset refuses outright while the experiment is in_progress.")
+
+    rc = sub.add_parser(
+        "recover-chunks",
+        help="rebuild registry chunk rows from real chunk_dir output on disk, for when "
+             "reset/rerun --from-scratch dropped chunk history by accident. See its own "
+             "docstring for exactly what it does and doesn't touch.",
+    )
+    _add_common(rc); rc.set_defaults(func=cmd_recover_chunks)
+    rc.add_argument("--experiment-id", required=True)
+    rc.add_argument("--up-to-chunk", type=int, required=True, metavar="N",
+                     help="replay chunks 0..N-1 as done; chunk N itself is left untouched")
 
     args = p.parse_args()
 
