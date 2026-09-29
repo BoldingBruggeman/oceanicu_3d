@@ -61,44 +61,48 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
 
     hydro = config["hydrography"]
     source = hydro.get("source")
-    if source not in ("WOA", "CMEMS"):
-        return
+    # NOT a bare `if source not in (...): return` any more (2026-09-30, per
+    # user) -- that used to skip the ERSEM restart block below outright for
+    # "constant" hydrography, even though the two are independent (T/S IC
+    # source has no bearing on whether a FABM restart IC should apply).
+    # Scoped to just the WOA/CMEMS T/S block instead, so "constant"
+    # hydrography still falls through to the restart block further down.
+    if source in ("WOA", "CMEMS"):
+        # runtime.time is deliberately never in the static config (start/stop
+        # are per-invocation, not per-setup -- see nse_from_oceanicu.yaml's own
+        # header comment) -- both oceanicu_driver.py's live path and codegen's
+        # generated scripts fill it in from --start before this hook ever runs
+        # (`config.setdefault('runtime', {})['time'] = args.start`), but only if
+        # --start was actually given somewhere (at generation time, baked into
+        # the script's own --start default, or at the script's own invocation).
+        # A bare KeyError here (real, reproduced case: a --dry-run invocation
+        # with no --start anywhere) gave no hint why; this hook's own monthly-
+        # climatology index pick genuinely can't proceed without a real date.
+        time = config.get("runtime", {}).get("time")
+        if time is None:
+            raise RuntimeError(
+                "hydrography's monthly-climatology initial condition needs a real start time, but "
+                "runtime.time isn't set anywhere -- pass --start explicitly (either when generating "
+                "this script, or when running it)."
+            )
+        if isinstance(time, str):
+            time = datetime.datetime.fromisoformat(time)
+        imonth = time.month - 1
 
-    # runtime.time is deliberately never in the static config (start/stop
-    # are per-invocation, not per-setup -- see nse_from_oceanicu.yaml's own
-    # header comment) -- both oceanicu_driver.py's live path and codegen's
-    # generated scripts fill it in from --start before this hook ever runs
-    # (`config.setdefault('runtime', {})['time'] = args.start`), but only if
-    # --start was actually given somewhere (at generation time, baked into
-    # the script's own --start default, or at the script's own invocation).
-    # A bare KeyError here (real, reproduced case: a --dry-run invocation
-    # with no --start anywhere) gave no hint why; this hook's own monthly-
-    # climatology index pick genuinely can't proceed without a real date.
-    time = config.get("runtime", {}).get("time")
-    if time is None:
-        raise RuntimeError(
-            "hydrography's monthly-climatology initial condition needs a real start time, but "
-            "runtime.time isn't set anywhere -- pass --start explicitly (either when generating "
-            "this script, or when running it)."
-        )
-    if isinstance(time, str):
-        time = datetime.datetime.fromisoformat(time)
-    imonth = time.month - 1
+        folder = Path(resolve_data_path(hydro["folder"]))
+        if source == "WOA":
+            salt_file, salt_var = folder / "woa_s.nc", "s_an"
+            temp_file, temp_var = folder / "woa_t.nc", "t_an"
+        else:  # CMEMS
+            salt_file, salt_var = folder / "so_2025_monthly_ic.nc", "so_ff"
+            temp_file, temp_var = folder / "thetao_2025_monthly_ic.nc", "thetao_ff"
 
-    folder = Path(resolve_data_path(hydro["folder"]))
-    if source == "WOA":
-        salt_file, salt_var = folder / "woa_s.nc", "s_an"
-        temp_file, temp_var = folder / "woa_t.nc", "t_an"
-    else:  # CMEMS
-        salt_file, salt_var = folder / "so_2025_monthly_ic.nc", "so_ff"
-        temp_file, temp_var = folder / "thetao_2025_monthly_ic.nc", "thetao_ff"
+        sim.salt.set(pygetm.input.from_nc(salt_file, salt_var).isel(time=imonth), on_grid=False)
+        sim.temp.set(pygetm.input.from_nc(temp_file, temp_var).isel(time=imonth), on_grid=False)
+        #sim.density.convert_ts(sim.salt, sim.temp)
 
-    sim.salt.set(pygetm.input.from_nc(salt_file, salt_var).isel(time=imonth), on_grid=False)
-    sim.temp.set(pygetm.input.from_nc(temp_file, temp_var).isel(time=imonth), on_grid=False)
-    #sim.density.convert_ts(sim.salt, sim.temp)
-
-    sim.temp[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
-    sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
+        sim.temp[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
+        sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
 
     # --- ERSEM state restart-style initial condition ---
     # Lives HERE, not in scripts/fabm.py's own configure_fabm, for a real
