@@ -661,6 +661,26 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                     ),
                     importance=Importance.BASIC,
                 ),
+                ParameterSpec(
+                    name="restart_file",
+                    type=TypeRef(kind="path", nullable=True),
+                    default=None,
+                    help=(
+                        "optional pygetm restart-format NetCDF (written by add_restart()/"
+                        "read by load_restart() -- NOT a plain forcing/climatology file) "
+                        "to seed FABM's OWN state variables from, independent of a real "
+                        "continuation restart -- e.g. a converged 'perpetual ERSEM' state "
+                        "reused across short test runs that otherwise start fresh "
+                        "physically. Read by scripts/fabm.py's own configure_fabm, which "
+                        "temporarily narrows sim.output_manager.fields to just the FABM "
+                        "state variable names before calling sim.load_restart() -- "
+                        "physical fields (temp/salt/u/v/...) are never touched. Leave "
+                        "unset for a normal run (FABM tracers keep their own fabm.yaml "
+                        "initial_value, or whatever boundaries.fabm.<source> IC already "
+                        "sets)."
+                    ),
+                    importance=Importance.BASIC,
+                ),
             ),
         },
         default="ERSEM",

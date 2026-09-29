@@ -465,3 +465,38 @@ def configure_fabm(sim, domain, config: dict) -> None:
             sim[tracer].set(
                 pygetm.input.from_nc(ic_folder / spec["file"], spec["variable"]).isel(time=imonth)
             )
+
+    # --- ERSEM state restart-style initial condition ---
+    # Independent of the WOA/CMEMS per-tracer IC block above (and typically
+    # used INSTEAD of it) -- seeds FABM's own state from a real pygetm
+    # restart-format file (written by add_restart()/read by load_restart(),
+    # NOT a plain forcing/climatology file), e.g. a converged "perpetual
+    # ERSEM" state reused across short test runs that otherwise start fresh
+    # physically. Ported from Ricardo's manual HPC testing (bb-server1:
+    # /tmp/read_restart.py's own args.perpetual_ersem branch, 2026-09-29),
+    # folded back in here so it survives regeneration.
+    #
+    # sim.load_restart() (see its own docstring) loads every field in
+    # sim.output_manager.fields flagged _part_of_state, and raises if any
+    # of them is missing from the file -- fine for a REAL restart (which
+    # has every physical + FABM field), but restart_file here typically has
+    # ONLY the FABM ones. Narrowing output_manager.fields to just the FABM
+    # state variable names first means load_restart only looks for (and
+    # only requires) those -- physical fields (temp/salt/u/v/...) are
+    # excluded from the narrowed dict, so they're untouched, left exactly
+    # as whatever earlier IC/data_assignments step already set them to.
+    # Restored unconditionally via try/finally so a failed load can't leave
+    # output_manager permanently missing every non-FABM field.
+    restart_file = fabm_cfg.get("restart_file")
+    if restart_file:
+        restart_path = resolve_data_path(restart_file)
+        fabm_state_names = {var.name for var in sim.fabm.state_variables}
+        all_fields = sim.output_manager.fields
+        sim.output_manager.fields = {
+            name: field for name, field in all_fields.items() if name in fabm_state_names
+        }
+        try:
+            sim.load_restart(restart_path)
+        finally:
+            sim.output_manager.fields = all_fields
+        sim.logger.info(f"configure_fabm: seeded FABM state from {restart_path}")
