@@ -69,7 +69,7 @@ def _parse_date(s: str, calendar: str):
     return cftime.datetime.strptime(s, "%Y-%m-%d", calendar=calendar)
 
 
-def _advance_date(start, kind: str, multiplier: int):
+def _advance_date(start, kind: str, multiplier: int, stop_date=None):
     if kind == "daily":
         return start + timedelta(days=multiplier)
     if kind == "monthly":
@@ -95,6 +95,21 @@ def _advance_date(start, kind: str, multiplier: int):
     # beyond this function always being handed whatever the previous
     # chunk's own stop was.
     if start.month != 1 or start.day != 1:
+        full_multiple = start.replace(year=start.year + multiplier)
+        # Realigning only matters to protect FUTURE chunks landing on
+        # Jan 1 -- if running the full multiplier from *start* as-is
+        # would already reach/exceed stop_date, this chunk is the LAST
+        # one regardless (the caller caps stop at stop_date right after
+        # this call returns), so there's no future chunk left to protect
+        # the alignment for. Real case, 2026-09-30, per user: chunk 7
+        # ends 2090-01-02 (itself never realigned -- it predates this
+        # fix), stop_date=2099-12-31, multiplier=10 -- realigning would
+        # have produced a short 2090-01-02->2091-01-01 chunk 8 followed
+        # by an oddly-sized 2091-01-01->2099-12-31 chunk 9, for no real
+        # benefit (nothing follows chunk 9 to protect). Skipping it here
+        # instead gives one clean final chunk, 2090-01-02->2099-12-31.
+        if stop_date is not None and full_multiple >= stop_date:
+            return full_multiple
         return start.replace(year=start.year + 1, month=1, day=1)
     return start.replace(year=start.year + multiplier)
 
@@ -303,7 +318,7 @@ def _main_tracked(args: argparse.Namespace) -> int:
             rt.recompute_experiment_status(conn, args.experiment_id)
             return 1
 
-        stop = _advance_date(start, experiment["chunk_kind"], experiment["chunk_multiplier"])
+        stop = _advance_date(start, experiment["chunk_kind"], experiment["chunk_multiplier"], stop_date)
         if stop > stop_date:
             stop = stop_date
 
