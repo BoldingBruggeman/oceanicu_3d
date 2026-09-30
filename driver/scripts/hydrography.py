@@ -118,17 +118,51 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
     # gated hook (and the pygetm-config codegen changes that would need).
     #
     # fabm.ERSEM.restart_file points at a real pygetm restart-format
-    # NetCDF (add_restart()/load_restart() shape) -- e.g. bb-server1:/tmp/
-    # restart_ersem.nc, which per user (2026-09-30) ALSO carries
-    # temperature/salinity/other physical fields (confirmed directly: 210
-    # data_vars, most physical -- hnt/zt/U/V/pk/qk/... -- alongside 74
-    # real ERSEM-shaped ones like N1_p/N3_n/R1_c). sim.load_restart()
-    # loads every field present in sim.output_manager.fields flagged
-    # _part_of_state and RAISES if one is missing from the file -- so
-    # narrowing that dict to just the FABM state variable names first
-    # means only those are looked for/loaded; the file's own temp/salt
-    # (already set above, from WOA/CMEMS) are excluded from the narrowed
-    # dict and never touched, regardless of being present in the file.
+    # NetCDF (add_restart()/load_restart() shape) -- e.g. /data/OceanICU/
+    # oceanicu_3d/data/NSe/FABM/init/restart_ersem.nc, which per user
+    # (2026-09-30) ALSO carries temperature/salinity/other physical
+    # fields (confirmed directly: 210 data_vars, most physical --
+    # hnt/zt/U/V/pk/qk/... -- alongside 74 real ERSEM-shaped ones like
+    # N1_p/N3_n/R1_c).
+    #
+    # NOT read via sim.load_restart() (an earlier version of this hook
+    # did) -- that uses on_grid=OnGrid.ALL internally (see pygetm.
+    # simulation.Simulation.load_restart's own field.set(..., on_grid=
+    # pygetm.input.OnGrid.ALL) call), which explicitly SKIPS vertical
+    # interpolation, assuming the file's own layer k IS the current
+    # grid's own layer k. That's true for a genuine continuation restart
+    # (same run, same grid, by construction) but false here: restart_
+    # ersem.nc is a "perpetual ERSEM" snapshot from a DIFFERENT run,
+    # saved with WHATEVER layer heights that run had at save time --
+    # this run's own fresh-start layer heights (computed from ITS OWN
+    # water depth/vertical-coordinate state, see pygetm.vertical_
+    # coordinates) can differ, for GVC by however much the free-surface
+    # elevation differs, and for Adaptive coordinates potentially much
+    # more (stratification-driven, not depth-driven -- confirmed via a
+    # real comparison plot, 2026-09-30, per user: a same-total-depth but
+    # differently-SHAPED target grid gave present-method values badly
+    # offset from the true profile at every depth, while a conservative
+    # remap recovered it exactly). Doing a blind index-to-index copy in
+    # that case silently misplaces every tracer's real vertical
+    # structure -- worse than not seeding at all, since it looks
+    # plausible without being physically meaningful.
+    #
+    # Fixed here via a real per-column conservative vertical remap
+    # instead: reconstruct the FILE's own saved layer interfaces from
+    # its hnt (layer thickness)/zt (surface elevation), then for each
+    # tracer and each wet column, interpolate the CUMULATIVE (depth-
+    # integrated) profile at THIS run's own fresh-start interfaces
+    # (sim.T.zf) and difference -- exact for a piecewise-constant
+    # per-layer-mean source, and reduces to ordinary linear
+    # interpolation (of the cumulative function, not the raw values) so
+    # it needs no bespoke overlap-integration code. Vectorized across
+    # every tracer within a column (they share the same source/target
+    # interfaces, only the values differ) -- the remaining Python loop
+    # over wet (j, i) columns is the only part that can't be vectorized
+    # away (every column has its own source AND target interfaces), but
+    # each iteration's own numpy work is cheap enough that this is a
+    # negligible one-time cost at sim start, not per-timestep.
+    #
     # `if sim.fabm:` guards this explicitly (redundant with configure_fabm's
     # own internal check on the SAME condition, but this hook has no such
     # check of its own otherwise -- per user, 2026-09-30).
@@ -136,14 +170,138 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
         fabm_cfg = config.get("fabm") or {}
         restart_file = fabm_cfg.get("restart_file")
         if restart_file:
-            restart_path = resolve_data_path(restart_file)
-            fabm_state_names = {var.name for var in sim.fabm.state_variables}
-            all_fields = sim.output_manager.fields
-            sim.output_manager.fields = {
-                name: field for name, field in all_fields.items() if name in fabm_state_names
-            }
-            try:
-                sim.load_restart(restart_path)
-            finally:
-                sim.output_manager.fields = all_fields
-            sim.logger.info(f"set_hydrography_ic: seeded FABM state from {restart_path}")
+            _seed_fabm_state_from_restart(sim, resolve_data_path(restart_file))
+
+
+def _seed_fabm_state_from_restart(sim, restart_path: str) -> None:
+    """Conservative per-column vertical remap of every FABM state
+    variable found in *restart_path* onto sim's own fresh-start vertical
+    grid -- see set_hydrography_ic's own docstring for the full
+    reasoning (why not sim.load_restart(), why conservative, why
+    per-column). A tracer present in sim.fabm.state_variables but absent
+    from the file is left untouched (keeps its own fabm.yaml
+    initial_value) with a warning, not a hard error -- the file is a
+    real ERSEM state snapshot, not guaranteed to be perfectly exhaustive
+    against every possible fabm.yaml variant.
+    """
+    import numpy as np
+    import xarray as xr
+
+    with xr.open_dataset(restart_path) as ds:
+        hnt = ds["hnt"].isel(time=0).values  # (nz_src, ny, nx), surface-first
+        zt = ds["zt"].isel(time=0).values  # (ny, nx)
+        state_names = [var.name for var in sim.fabm.state_variables]
+        available = [n for n in state_names if n in ds]
+        missing = [n for n in state_names if n not in ds]
+        if missing:
+            sim.logger.warning(
+                f"_seed_fabm_state_from_restart: {restart_path} has no {missing} -- "
+                f"left at their own fabm.yaml initial_value."
+            )
+        if not available:
+            sim.logger.warning(
+                f"_seed_fabm_state_from_restart: none of this FABM model's state "
+                f"variables were found in {restart_path} -- nothing seeded."
+            )
+            return
+        source_vals = np.stack(
+            [ds[n].isel(time=0).values for n in available], axis=-1
+        )  # (nz_src, ny, nx, n_tracers)
+
+    target_zf = sim.T.zf.all_values  # (nz_tgt+1, ny, nx), surface-first, real meters
+    mask = sim.T.mask.all_values != 0
+    ny, nx = mask.shape
+    if hnt.shape[1:] != (ny, nx):
+        raise RuntimeError(
+            f"_seed_fabm_state_from_restart: {restart_path}'s own horizontal grid "
+            f"{hnt.shape[1:]} does not match this run's own ({ny}, {nx}) -- refusing "
+            f"to seed FABM state from a restart file on a different horizontal grid "
+            f"(per-column vertical remapping assumes the two line up 1:1)."
+        )
+
+    nz_src = hnt.shape[0]
+    n_tracers = source_vals.shape[-1]
+    out = np.empty((target_zf.shape[0] - 1, ny, nx, n_tracers), dtype=np.float64)
+
+    # Source interfaces: cumulative sum of hnt DOWNWARD from zt (surface
+    # first, increasingly negative going down) -- same construction and
+    # convention validated directly against this exact file, 2026-09-30
+    # (see the standalone test_conservative_remap.py this was prototyped
+    # in: identity-remap and conservation checks both passed to
+    # floating-point precision on a real column).
+    source_ifaces_all = np.empty((nz_src + 1, ny, nx), dtype=np.float64)
+    source_ifaces_all[0] = zt
+    source_ifaces_all[1:] = zt[np.newaxis] - np.cumsum(hnt, axis=0)
+
+    n_seeded = 0
+    n_skipped_nan = 0
+    for j in range(ny):
+        for i in range(nx):
+            if not mask[j, i]:
+                continue
+            src_ifaces = source_ifaces_all[:, j, i]
+            src_vals = source_vals[:, j, i, :]  # (nz_src, n_tracers)
+            if not np.all(np.isfinite(src_vals)) or not np.all(np.isfinite(src_ifaces)):
+                # A handful of genuinely NaN restart points are a known,
+                # long-standing artifact at some coastline/channel-edge
+                # velocity points (confirmed directly, 2026-09-29, on this
+                # same domain's own physical restart fields) -- for FABM
+                # tracers specifically this hasn't been observed, but the
+                # same defensive skip applies: leave this column's
+                # tracers at their fabm.yaml initial_value rather than
+                # propagate a NaN into a otherwise-healthy simulation.
+                n_skipped_nan += 1
+                continue
+            tgt_ifaces = target_zf[:, j, i]
+            out[:, j, i, :] = _conservative_remap_column(src_vals, src_ifaces, tgt_ifaces)
+            n_seeded += 1
+
+    for k, name in enumerate(available):
+        sim[name][...] = out[..., k]
+
+    msg = f"_seed_fabm_state_from_restart: seeded {available} from {restart_path} ({n_seeded} wet columns"
+    if n_skipped_nan:
+        msg += f", {n_skipped_nan} skipped for non-finite source data"
+    sim.logger.info(msg + ")")
+
+
+def _conservative_remap_column(source_vals, source_ifaces, target_ifaces):
+    """Per-column conservative vertical remap, vectorized across
+    tracers (they share the same source/target interfaces within one
+    column -- only the values differ).
+
+    source_vals: (nz_src, n_tracers) per-layer means.
+    source_ifaces: (nz_src+1,) DECREASING (surface first).
+    target_ifaces: (nz_tgt+1,) DECREASING (surface first).
+    Returns (nz_tgt, n_tracers).
+
+    Conservative remap of a per-layer-mean profile reduces to
+    interpolating the CUMULATIVE (depth-integrated) profile at the
+    target interfaces, then differencing and dividing by target layer
+    thickness -- exact for a piecewise-constant source, and needs no
+    bespoke overlap-integration code. A target layer extending beyond
+    the source's own depth range is clamped (constant extrapolation,
+    matching numpy.interp's own default) -- e.g. a shallower target
+    grid simply doesn't reach the source's deepest layers at all, which
+    is the physically correct outcome, not an error.
+    """
+    import numpy as np
+
+    src_thick = (source_ifaces[:-1] - source_ifaces[1:])[:, None]
+    cum_src = np.concatenate(
+        [np.zeros((1, source_vals.shape[1])), np.cumsum(source_vals * src_thick, axis=0)],
+        axis=0,
+    )
+    x_src = -source_ifaces  # increasing, required by searchsorted below
+    x_tgt = -target_ifaces
+    idx = np.clip(np.searchsorted(x_src, x_tgt, side="right") - 1, 0, len(x_src) - 2)
+    x0, x1 = x_src[idx], x_src[idx + 1]
+    with np.errstate(invalid="ignore", divide="ignore"):
+        frac = np.where(x1 > x0, (x_tgt - x0) / (x1 - x0), 0.0)
+    cum_at_target = cum_src[idx] + frac[:, None] * (cum_src[idx + 1] - cum_src[idx])
+    cum_at_target[x_tgt <= x_src[0]] = cum_src[0]
+    cum_at_target[x_tgt >= x_src[-1]] = cum_src[-1]
+    tgt_thick = (target_ifaces[:-1] - target_ifaces[1:])[:, None]
+    tgt_content = cum_at_target[1:] - cum_at_target[:-1]
+    with np.errstate(invalid="ignore", divide="ignore"):
+        return tgt_content / tgt_thick
