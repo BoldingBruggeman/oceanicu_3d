@@ -238,22 +238,72 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
         # restart_ersem.nc holds this run's FULL global (yt, xt) domain --
         # under real MPI spatial decomposition, THIS rank's own sim.T only
         # covers one local tile of it, so the file must be sliced down to
-        # match before comparing/using its arrays. sim.T.tiling.
-        # subdomain2rawslices() (pygetm.parallel.Tiling -- confirmed via
-        # pygetm/domain.py's own scatter/gather code as the mechanism
-        # pygetm.input.HorizontalInterpolation relies on for its own
-        # per-rank reads of WOA/CMEMS-style forcing) gives exactly this
-        # rank's own (yslice, xslice) in GLOBAL index space, with no halo (the
-        # defaults, halox_sub=haloy_sub=0, matching .values below). For a
-        # serial run (or MPI with no real decomposition, ncol=nrow=1) this
-        # reduces to the whole domain -- confirmed 2026-09-30 against a real
-        # single-rank run, so this is a strict generalization, not a
-        # separate code path.
+        # match before comparing/using its arrays. sim.T.tiling (pygetm.
+        # parallel.Tiling -- confirmed via pygetm/domain.py's own scatter/
+        # gather code as the mechanism pygetm.input.HorizontalInterpolation
+        # relies on for its own per-rank reads of WOA/CMEMS-style forcing).
+        #
+        # subdomain2rawslices() alone is NOT enough: pygetm's real load-
+        # balanced decomposition (Tiling.autodetect, max_protrude=0.5 by
+        # default) allows a tile to protrude PAST the true coastline/global
+        # edge by design (to keep tile sizes uniform while skipping
+        # all-land tiles for load balancing) -- hit for real on bb-server1,
+        # 2026-09-30, NP=183: one edge rank's raw x-slice landed entirely
+        # beyond the file's own 257-wide global array, giving a silent
+        # zero-width slice (55, 0) instead of that rank's real local width
+        # (55, 52). subdomain2slices() is the version that actually
+        # accounts for this: it returns the CLIPPED (always in-bounds)
+        # global slice to read, the matching slice into this rank's own
+        # FULL local (ny_sub, nx_sub) tile shape to place it at, and that
+        # local shape itself -- exactly the local/global pair pygetm's own
+        # gather/scatter code uses for the same reason.
         tiling = getattr(sim.T, "tiling", None)
-        yslice, xslice = (tiling.subdomain2rawslices() if tiling is not None else (slice(None), slice(None)))
+        ny_sub = nx_sub = None
+        if tiling is not None:
+            local_slice, global_slice, local_shape, _ = tiling.subdomain2slices()
+            _, yslice_l, xslice_l = local_slice
+            _, yslice_g, xslice_g = global_slice
+            ny_sub, nx_sub = local_shape
+            # subdomain2slices() does NOT guard against a tile with ZERO real
+            # overlap with the global domain -- it silently returns a
+            # nonsensical negative-width local slice instead of raising
+            # (confirmed directly, 2026-09-30, forcing a deliberately fully-
+            # protruding tile). A tile that protrudes THAT much shouldn't
+            # occur under Tiling.autodetect's own max_protrude cap in
+            # practice, but check explicitly rather than trust it blindly.
+            if yslice_g.stop <= yslice_g.start or xslice_g.stop <= xslice_g.start:
+                sim.logger.warning(
+                    f"_seed_fabm_state_from_restart: this rank's own tile has no real "
+                    f"overlap with {restart_path}'s global domain -- nothing seeded "
+                    f"here, FABM state keeps its own fabm.yaml initial_value for this "
+                    f"rank."
+                )
+                return
+        else:
+            yslice_l = xslice_l = yslice_g = xslice_g = slice(None)
+
+        def _embed_local(arr_glob: "np.ndarray") -> "np.ndarray":
+            """Place a globally-clipped read (last two dims = the overlap
+            with this rank's own tile) into a NaN-filled array shaped like
+            this rank's own FULL local tile. The protruding remainder (this
+            tile's own footprint that reaches past the true global domain)
+            is left NaN -- always land/masked in practice (that's the
+            whole point of max_protrude's load-balancing), and the wet-
+            column loop below already treats non-finite source data as
+            "skip this column" regardless of why it's non-finite.
+            """
+            if tiling is None:
+                return arr_glob
+            assert ny_sub is not None and nx_sub is not None
+            out = np.full(arr_glob.shape[:-2] + (ny_sub, nx_sub), np.nan)
+            out[..., yslice_l, xslice_l] = arr_glob
+            return out
+
         with xr.open_dataset(restart_path) as ds:
-            hnt = ds["hnt"].isel(time=0, yt=yslice, xt=xslice).values  # (nz_src, ny, nx), surface-first
-            zt = ds["zt"].isel(time=0, yt=yslice, xt=xslice).values  # (ny, nx)
+            hnt_glob = ds["hnt"].isel(time=0, yt=yslice_g, xt=xslice_g).values  # (nz_src, ny_g, nx_g), surface-first
+            zt_glob = ds["zt"].isel(time=0, yt=yslice_g, xt=xslice_g).values  # (ny_g, nx_g)
+            hnt = _embed_local(hnt_glob)
+            zt = _embed_local(zt_glob)
             state_names = [var.name for var in sim.fabm.state_variables]
             available = [n for n in state_names if n in ds]
             missing = [n for n in state_names if n not in ds]
@@ -277,21 +327,33 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
             # rather than assuming sim.fabm.state_variables is pelagic-only
             # (an earlier version of this code did, and np.stack failed
             # outright mixing (nz, ny, nx) and (ny, nx) arrays together).
+            # Compared against hnt_glob's own (clipped, not-yet-embedded)
+            # shape -- every real variable in the file shares that same
+            # clipped extent.
             pelagic = [
                 n for n in available
-                if ds[n].isel(time=0, yt=yslice, xt=xslice).shape == hnt.shape
+                if ds[n].isel(time=0, yt=yslice_g, xt=xslice_g).shape == hnt_glob.shape
             ]
             benthic = [n for n in available if n not in pelagic]
             if pelagic:
+                # Embed EACH tracer individually (last two dims still (y, x)
+                # at that point) before stacking a new tracer axis onto the
+                # end -- embedding the already-stacked array instead would
+                # embed against the wrong last-two-dims (n_tracers, not x).
                 source_vals = np.stack(
-                    [ds[n].isel(time=0, yt=yslice, xt=xslice).values for n in pelagic], axis=-1
+                    [
+                        _embed_local(ds[n].isel(time=0, yt=yslice_g, xt=xslice_g).values)
+                        for n in pelagic
+                    ],
+                    axis=-1,
                 )  # (nz_src, ny, nx, n_tracers)
             if benthic:
                 # No vertical structure at all -- a straight horizontal copy,
                 # same convention as the horizontal-grid check just below
                 # (per-column remapping assumes file and run line up 1:1).
                 benthic_vals = {
-                    n: ds[n].isel(time=0, yt=yslice, xt=xslice).values for n in benthic
+                    n: _embed_local(ds[n].isel(time=0, yt=yslice_g, xt=xslice_g).values)
+                    for n in benthic
                 }
 
         # `.values` (no halo), NOT `.all_values` -- restart_ersem.nc's own
