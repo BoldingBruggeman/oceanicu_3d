@@ -235,9 +235,25 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
 
         source_vals = None
         benthic_vals = {}
+        # restart_ersem.nc holds this run's FULL global (yt, xt) domain --
+        # under real MPI spatial decomposition, THIS rank's own sim.T only
+        # covers one local tile of it, so the file must be sliced down to
+        # match before comparing/using its arrays. sim.T.tiling.
+        # subdomain2rawslices() (pygetm.parallel.Tiling -- confirmed via
+        # pygetm/domain.py's own scatter/gather code as the mechanism
+        # pygetm.input.HorizontalInterpolation relies on for its own
+        # per-rank reads of WOA/CMEMS-style forcing) gives exactly this
+        # rank's own (yslice, xslice) in GLOBAL index space, with no halo (the
+        # defaults, halox_sub=haloy_sub=0, matching .values below). For a
+        # serial run (or MPI with no real decomposition, ncol=nrow=1) this
+        # reduces to the whole domain -- confirmed 2026-09-30 against a real
+        # single-rank run, so this is a strict generalization, not a
+        # separate code path.
+        tiling = getattr(sim.T, "tiling", None)
+        yslice, xslice = (tiling.subdomain2rawslices() if tiling is not None else (slice(None), slice(None)))
         with xr.open_dataset(restart_path) as ds:
-            hnt = ds["hnt"].isel(time=0).values  # (nz_src, ny, nx), surface-first
-            zt = ds["zt"].isel(time=0).values  # (ny, nx)
+            hnt = ds["hnt"].isel(time=0, yt=yslice, xt=xslice).values  # (nz_src, ny, nx), surface-first
+            zt = ds["zt"].isel(time=0, yt=yslice, xt=xslice).values  # (ny, nx)
             state_names = [var.name for var in sim.fabm.state_variables]
             available = [n for n in state_names if n in ds]
             missing = [n for n in state_names if n not in ds]
@@ -261,17 +277,22 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
             # rather than assuming sim.fabm.state_variables is pelagic-only
             # (an earlier version of this code did, and np.stack failed
             # outright mixing (nz, ny, nx) and (ny, nx) arrays together).
-            pelagic = [n for n in available if ds[n].isel(time=0).shape == hnt.shape]
+            pelagic = [
+                n for n in available
+                if ds[n].isel(time=0, yt=yslice, xt=xslice).shape == hnt.shape
+            ]
             benthic = [n for n in available if n not in pelagic]
             if pelagic:
                 source_vals = np.stack(
-                    [ds[n].isel(time=0).values for n in pelagic], axis=-1
+                    [ds[n].isel(time=0, yt=yslice, xt=xslice).values for n in pelagic], axis=-1
                 )  # (nz_src, ny, nx, n_tracers)
             if benthic:
                 # No vertical structure at all -- a straight horizontal copy,
                 # same convention as the horizontal-grid check just below
                 # (per-column remapping assumes file and run line up 1:1).
-                benthic_vals = {n: ds[n].isel(time=0).values for n in benthic}
+                benthic_vals = {
+                    n: ds[n].isel(time=0, yt=yslice, xt=xslice).values for n in benthic
+                }
 
         # `.values` (no halo), NOT `.all_values` -- restart_ersem.nc's own
         # hnt/zt were written from the halo-free interior (its real domain
@@ -280,22 +301,16 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
         # 2026-09-30: file (251, 257) vs `.all_values` (255, 261) -- exactly
         # halo=2 on each side). See pygetm.core.Array's own `.mask`/`.values`
         # properties (halo-excluded) vs `.all_mask`/`.all_values` (halo-
-        # included). NOTE: this still assumes ONE process owns the WHOLE
-        # domain (true for a serial run, or MPI launched without real
-        # spatial decomposition) -- a genuinely domain-decomposed run would
-        # need this restart file's data sliced per-rank against the
-        # domain's own tiling offsets first, which this does not do.
+        # included).
         mask = sim.T.mask.values != 0
         ny, nx = mask.shape
         if hnt.shape[1:] != (ny, nx):
             raise RuntimeError(
                 f"_seed_fabm_state_from_restart: {restart_path}'s own horizontal grid "
-                f"{hnt.shape[1:]} does not match this run's own ({ny}, {nx}) -- refusing "
-                f"to seed FABM state from a restart file on a different horizontal grid "
-                f"(per-column vertical remapping assumes the two line up 1:1 -- if this run "
-                f"is truly MPI-decomposed across multiple ranks, each rank's own local grid "
-                f"is smaller than the restart file's global one, which this code does not "
-                f"yet handle)."
+                f"{hnt.shape[1:]} (this rank's own slice) does not match this run's own "
+                f"({ny}, {nx}) -- refusing to seed FABM state from a restart file on a "
+                f"different horizontal grid (per-column vertical remapping assumes the "
+                f"two line up 1:1)."
             )
 
         n_seeded = 0
