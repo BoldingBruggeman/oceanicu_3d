@@ -612,6 +612,7 @@ river_discharge:
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
 fabm:
   source: ERSEM
+  restart_file: ${FABM_RESTART_FOLDER}/restart_ersem.nc
   ERSEM:
     folder: ${FABM_ERSEM_FOLDER}
     file: fabm_ersem.yaml
