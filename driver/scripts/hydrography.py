@@ -273,14 +273,29 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
                 # (per-column remapping assumes file and run line up 1:1).
                 benthic_vals = {n: ds[n].isel(time=0).values for n in benthic}
 
-        mask = sim.T.mask.all_values != 0
+        # `.values` (no halo), NOT `.all_values` -- restart_ersem.nc's own
+        # hnt/zt were written from the halo-free interior (its real domain
+        # shape), matching this run's own `.values`; `.all_values` is
+        # bigger by 2*halo in each direction (confirmed on bb-server1,
+        # 2026-09-30: file (251, 257) vs `.all_values` (255, 261) -- exactly
+        # halo=2 on each side). See pygetm.core.Array's own `.mask`/`.values`
+        # properties (halo-excluded) vs `.all_mask`/`.all_values` (halo-
+        # included). NOTE: this still assumes ONE process owns the WHOLE
+        # domain (true for a serial run, or MPI launched without real
+        # spatial decomposition) -- a genuinely domain-decomposed run would
+        # need this restart file's data sliced per-rank against the
+        # domain's own tiling offsets first, which this does not do.
+        mask = sim.T.mask.values != 0
         ny, nx = mask.shape
         if hnt.shape[1:] != (ny, nx):
             raise RuntimeError(
                 f"_seed_fabm_state_from_restart: {restart_path}'s own horizontal grid "
                 f"{hnt.shape[1:]} does not match this run's own ({ny}, {nx}) -- refusing "
                 f"to seed FABM state from a restart file on a different horizontal grid "
-                f"(per-column vertical remapping assumes the two line up 1:1)."
+                f"(per-column vertical remapping assumes the two line up 1:1 -- if this run "
+                f"is truly MPI-decomposed across multiple ranks, each rank's own local grid "
+                f"is smaller than the restart file's global one, which this code does not "
+                f"yet handle)."
             )
 
         n_seeded = 0
@@ -288,7 +303,7 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
         if pelagic:
             import pygetm.constants
 
-            target_zf = sim.T.zf.all_values  # (nz_tgt+1, ny, nx), surface-first, real meters
+            target_zf = sim.T.zf.values  # (nz_tgt+1, ny, nx), surface-first, real meters -- see mask's own .values comment above (no halo, matching the restart file)
             nz_src = hnt.shape[0]
             n_tracers = source_vals.shape[-1]
             # FILL_VALUE, not np.empty's uninitialized garbage -- a dry (masked-
