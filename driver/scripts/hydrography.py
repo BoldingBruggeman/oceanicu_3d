@@ -233,6 +233,8 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
             with np.errstate(invalid="ignore", divide="ignore"):
                 return tgt_content / tgt_thick
 
+        source_vals = None
+        benthic_vals = {}
         with xr.open_dataset(restart_path) as ds:
             hnt = ds["hnt"].isel(time=0).values  # (nz_src, ny, nx), surface-first
             zt = ds["zt"].isel(time=0).values  # (ny, nx)
@@ -250,11 +252,27 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
                     f"variables were found in {restart_path} -- nothing seeded."
                 )
                 return
-            source_vals = np.stack(
-                [ds[n].isel(time=0).values for n in available], axis=-1
-            )  # (nz_src, ny, nx, n_tracers)
+            # A real ERSEM restart carries BOTH pelagic (z-resolved) and
+            # BENTHIC (sediment, no z dimension at all -- e.g. Q1_c/Q6_*/
+            # K1_p/H1_c/Y2_c/...) state variables (confirmed directly
+            # against restart_ersem.nc, 2026-09-30: Q1_c etc. are (ny, nx),
+            # not (nz, ny, nx)). Only pelagic tracers have any vertical
+            # structure to remap -- split on each variable's own shape
+            # rather than assuming sim.fabm.state_variables is pelagic-only
+            # (an earlier version of this code did, and np.stack failed
+            # outright mixing (nz, ny, nx) and (ny, nx) arrays together).
+            pelagic = [n for n in available if ds[n].isel(time=0).shape == hnt.shape]
+            benthic = [n for n in available if n not in pelagic]
+            if pelagic:
+                source_vals = np.stack(
+                    [ds[n].isel(time=0).values for n in pelagic], axis=-1
+                )  # (nz_src, ny, nx, n_tracers)
+            if benthic:
+                # No vertical structure at all -- a straight horizontal copy,
+                # same convention as the horizontal-grid check just below
+                # (per-column remapping assumes file and run line up 1:1).
+                benthic_vals = {n: ds[n].isel(time=0).values for n in benthic}
 
-        target_zf = sim.T.zf.all_values  # (nz_tgt+1, ny, nx), surface-first, real meters
         mask = sim.T.mask.all_values != 0
         ny, nx = mask.shape
         if hnt.shape[1:] != (ny, nx):
@@ -265,50 +283,68 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
                 f"(per-column vertical remapping assumes the two line up 1:1)."
             )
 
-        nz_src = hnt.shape[0]
-        n_tracers = source_vals.shape[-1]
-        out = np.empty((target_zf.shape[0] - 1, ny, nx, n_tracers), dtype=np.float64)
-
-        # Source interfaces: cumulative sum of hnt DOWNWARD from zt (surface
-        # first, increasingly negative going down) -- same construction and
-        # convention validated directly against this exact file, 2026-09-30
-        # (see the standalone test_conservative_remap.py this was prototyped
-        # in: identity-remap and conservation checks both passed to
-        # floating-point precision on a real column).
-        source_ifaces_all = np.empty((nz_src + 1, ny, nx), dtype=np.float64)
-        source_ifaces_all[0] = zt
-        source_ifaces_all[1:] = zt[np.newaxis] - np.cumsum(hnt, axis=0)
-
         n_seeded = 0
         n_skipped_nan = 0
-        for j in range(ny):
-            for i in range(nx):
-                if not mask[j, i]:
-                    continue
-                src_ifaces = source_ifaces_all[:, j, i]
-                src_vals = source_vals[:, j, i, :]  # (nz_src, n_tracers)
-                if not np.all(np.isfinite(src_vals)) or not np.all(np.isfinite(src_ifaces)):
-                    # A handful of genuinely NaN restart points are a known,
-                    # long-standing artifact at some coastline/channel-edge
-                    # velocity points (confirmed directly, 2026-09-29, on this
-                    # same domain's own physical restart fields) -- for FABM
-                    # tracers specifically this hasn't been observed, but the
-                    # same defensive skip applies: leave this column's
-                    # tracers at their fabm.yaml initial_value rather than
-                    # propagate a NaN into a otherwise-healthy simulation.
-                    n_skipped_nan += 1
-                    continue
-                tgt_ifaces = target_zf[:, j, i]
-                out[:, j, i, :] = _conservative_remap_column(src_vals, src_ifaces, tgt_ifaces)
-                n_seeded += 1
+        if pelagic:
+            import pygetm.constants
 
-        for k, name in enumerate(available):
-            sim[name][...] = out[..., k]
+            target_zf = sim.T.zf.all_values  # (nz_tgt+1, ny, nx), surface-first, real meters
+            nz_src = hnt.shape[0]
+            n_tracers = source_vals.shape[-1]
+            # FILL_VALUE, not np.empty's uninitialized garbage -- a dry (masked-
+            # out) or NaN-skipped column is never written into `out` below, and
+            # leftover memory content is NOT guaranteed to be NaN (real bug hit
+            # 2026-09-30: a previous process's pygetm.constants.FILL_VALUE
+            # happened to still be sitting in that memory, finite and thus
+            # invisible to the loop's own isfinite() skip logic, silently
+            # corrupting dry-column output). Same convention as this hook's own
+            # WOA/CMEMS temp/salt masking above.
+            out = np.full((target_zf.shape[0] - 1, ny, nx, n_tracers), pygetm.constants.FILL_VALUE, dtype=np.float64)
 
-        msg = f"_seed_fabm_state_from_restart: seeded {available} from {restart_path} ({n_seeded} wet columns"
-        if n_skipped_nan:
-            msg += f", {n_skipped_nan} skipped for non-finite source data"
-        sim.logger.info(msg + ")")
+            # Source interfaces: cumulative sum of hnt DOWNWARD from zt
+            # (surface first, increasingly negative going down) -- same
+            # construction and convention validated directly against this
+            # exact file, 2026-09-30 (see the standalone test_conservative_
+            # remap.py this was prototyped in: identity-remap and
+            # conservation checks both passed to floating-point precision
+            # on a real column).
+            source_ifaces_all = np.empty((nz_src + 1, ny, nx), dtype=np.float64)
+            source_ifaces_all[0] = zt
+            source_ifaces_all[1:] = zt[np.newaxis] - np.cumsum(hnt, axis=0)
+
+            for j in range(ny):
+                for i in range(nx):
+                    if not mask[j, i]:
+                        continue
+                    src_ifaces = source_ifaces_all[:, j, i]
+                    src_vals = source_vals[:, j, i, :]  # (nz_src, n_tracers)
+                    if not np.all(np.isfinite(src_vals)) or not np.all(np.isfinite(src_ifaces)):
+                        # A handful of genuinely NaN restart points are a known,
+                        # long-standing artifact at some coastline/channel-edge
+                        # velocity points (confirmed directly, 2026-09-29, on this
+                        # same domain's own physical restart fields) -- for FABM
+                        # tracers specifically this hasn't been observed, but the
+                        # same defensive skip applies: leave this column's
+                        # tracers at their fabm.yaml initial_value rather than
+                        # propagate a NaN into a otherwise-healthy simulation.
+                        n_skipped_nan += 1
+                        continue
+                    tgt_ifaces = target_zf[:, j, i]
+                    out[:, j, i, :] = _conservative_remap_column(src_vals, src_ifaces, tgt_ifaces)
+                    n_seeded += 1
+
+            for k, name in enumerate(pelagic):
+                sim[name][...] = out[..., k]
+
+        for name in benthic:
+            sim[name][...] = benthic_vals[name]
+
+        msg = (
+            f"_seed_fabm_state_from_restart: seeded pelagic {pelagic} ({n_seeded} wet columns"
+            + (f", {n_skipped_nan} skipped for non-finite source data" if n_skipped_nan else "")
+            + f") and benthic {benthic} (direct horizontal copy) from {restart_path}"
+        )
+        sim.logger.info(msg)
 
     if sim.fabm:
         fabm_cfg = config.get("fabm") or {}
