@@ -258,6 +258,19 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
         # FULL local (ny_sub, nx_sub) tile shape to place it at, and that
         # local shape itself -- exactly the local/global pair pygetm's own
         # gather/scatter code uses for the same reason.
+        # `.values` (no halo), NOT `.all_values` -- restart_ersem.nc's own
+        # hnt/zt were written from the halo-free interior (its real domain
+        # shape), matching this run's own `.values`; `.all_values` is
+        # bigger by 2*halo in each direction (confirmed on bb-server1,
+        # 2026-09-30: file (251, 257) vs `.all_values` (255, 261) -- exactly
+        # halo=2 on each side). See pygetm.core.Array's own `.mask`/`.values`
+        # properties (halo-excluded) vs `.all_mask`/`.all_values` (halo-
+        # included). Computed up front (independent of the restart file
+        # itself) since both the pelagic and benthic fallback logic below
+        # need it.
+        mask = sim.T.mask.values != 0
+        ny, nx = mask.shape
+
         tiling = getattr(sim.T, "tiling", None)
         ny_sub = nx_sub = None
         if tiling is not None:
@@ -350,6 +363,7 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
                 )  # (nz_src, ny, nx, n_tracers)
             if benthic:
                 import pygetm.constants
+                from scipy import ndimage
 
                 # No vertical structure at all -- a straight horizontal copy,
                 # same convention as the horizontal-grid check just below
@@ -358,28 +372,41 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
                 # long-standing artifact at some coastline/channel-edge
                 # cells (confirmed directly, 2026-09-30: restart_ersem.nc's
                 # own zt/hnt are ALSO NaN at those exact points, so it's a
-                # gap in the file itself, not specific to any one tracer) --
-                # the pelagic path already guards against this per-column
-                # (skips a column with non-finite source data); benthic has
-                # no such column-level concept, so guard per-cell instead,
-                # same FILL_VALUE convention as pelagic's own dry cells.
+                # gap in the file itself, not specific to any one tracer).
+                #
+                # A WET (active) cell with bad source data must NOT fall
+                # back to pygetm.constants.FILL_VALUE -- that's a sentinel
+                # for cells the model never touches (masked/dry); writing
+                # it into a genuinely active cell instead means FABM's own
+                # biogeochemistry integrates that physically-absurd
+                # concentration forward like any other -- confirmed
+                # directly, 2026-09-30: a real run passed IC-time check_
+                # finite fine (FILL_VALUE is merely a large finite number)
+                # but failed at istep=40 with several pelagic AND benthic
+                # tracers newly non-finite, traced back to exactly this.
+                #
+                # Filled instead from the NEAREST valid (wet, finite) cell
+                # of the SAME tracer (per user, 2026-09-30) -- preserves
+                # local spatial structure (a coastal cell gets a value
+                # close to its real neighbors), unlike a flat domain-wide
+                # default. Standard nearest-fill recipe: distance_
+                # transform_edt on the invalid mask, with return_indices,
+                # gives each invalid cell's nearest valid cell's own index.
+                # Only genuinely dry cells (mask False) get FILL_VALUE,
+                # matching this hook's own WOA/CMEMS temp/salt masking.
                 for n in benthic:
                     arr = _embed_local(ds[n].isel(time=0, yt=yslice_g, xt=xslice_g).values)
-                    bad = ~np.isfinite(arr)
+                    bad = mask & ~np.isfinite(arr)
                     n_benthic_nan += int(bad.sum())
-                    arr[bad] = pygetm.constants.FILL_VALUE
+                    valid = mask & np.isfinite(arr)
+                    if bad.any() and valid.any():
+                        jj, ii = ndimage.distance_transform_edt(
+                            ~valid, return_distances=False, return_indices=True
+                        )
+                        arr[bad] = arr[jj[bad], ii[bad]]
+                    arr[~mask] = pygetm.constants.FILL_VALUE
                     benthic_vals[n] = arr
 
-        # `.values` (no halo), NOT `.all_values` -- restart_ersem.nc's own
-        # hnt/zt were written from the halo-free interior (its real domain
-        # shape), matching this run's own `.values`; `.all_values` is
-        # bigger by 2*halo in each direction (confirmed on bb-server1,
-        # 2026-09-30: file (251, 257) vs `.all_values` (255, 261) -- exactly
-        # halo=2 on each side). See pygetm.core.Array's own `.mask`/`.values`
-        # properties (halo-excluded) vs `.all_mask`/`.all_values` (halo-
-        # included).
-        mask = sim.T.mask.values != 0
-        ny, nx = mask.shape
         if hnt.shape[1:] != (ny, nx):
             raise RuntimeError(
                 f"_seed_fabm_state_from_restart: {restart_path}'s own horizontal grid "
@@ -393,19 +420,27 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
         n_skipped_nan = 0
         if pelagic:
             import pygetm.constants
+            from scipy import ndimage
 
             target_zf = sim.T.zf.values  # (nz_tgt+1, ny, nx), surface-first, real meters -- see mask's own .values comment above (no halo, matching the restart file)
             nz_src = hnt.shape[0]
             n_tracers = source_vals.shape[-1]
-            # FILL_VALUE, not np.empty's uninitialized garbage -- a dry (masked-
-            # out) or NaN-skipped column is never written into `out` below, and
-            # leftover memory content is NOT guaranteed to be NaN (real bug hit
-            # 2026-09-30: a previous process's pygetm.constants.FILL_VALUE
-            # happened to still be sitting in that memory, finite and thus
-            # invisible to the loop's own isfinite() skip logic, silently
-            # corrupting dry-column output). Same convention as this hook's own
-            # WOA/CMEMS temp/salt masking above.
-            out = np.full((target_zf.shape[0] - 1, ny, nx, n_tracers), pygetm.constants.FILL_VALUE, dtype=np.float64)
+            # NaN, not np.empty's uninitialized garbage nor pygetm.constants.
+            # FILL_VALUE -- a dry (masked-out) or NaN-skipped column is never
+            # written into `out` in the loop below on its own, so it needs a
+            # defined placeholder here. NaN specifically (not FILL_VALUE):
+            # FILL_VALUE is a large but FINITE sentinel meant only for cells
+            # the model never touches (masked/dry) -- writing it into a
+            # genuinely ACTIVE wet column instead means FABM's own
+            # biogeochemistry integrates that physically-absurd concentration
+            # forward like any other value, and reliably diverges to NaN
+            # within a few timesteps (real bug hit 2026-09-30: a run passed
+            # IC-time check_finite fine but failed at istep=40 with several
+            # tracers newly non-finite, traced back to exactly this). NaN
+            # placeholders here get properly resolved below instead --
+            # nearest-valid-neighbor fill for wet columns, real FILL_VALUE
+            # only for genuinely dry ones.
+            out = np.full((target_zf.shape[0] - 1, ny, nx, n_tracers), np.nan, dtype=np.float64)
 
             # Source interfaces: cumulative sum of hnt DOWNWARD from zt
             # (surface first, increasingly negative going down) -- same
@@ -418,6 +453,7 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
             source_ifaces_all[0] = zt
             source_ifaces_all[1:] = zt[np.newaxis] - np.cumsum(hnt, axis=0)
 
+            valid_col = np.zeros((ny, nx), dtype=bool)
             for j in range(ny):
                 for i in range(nx):
                     if not mask[j, i]:
@@ -427,17 +463,32 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
                     if not np.all(np.isfinite(src_vals)) or not np.all(np.isfinite(src_ifaces)):
                         # A handful of genuinely NaN restart points are a known,
                         # long-standing artifact at some coastline/channel-edge
-                        # velocity points (confirmed directly, 2026-09-29, on this
-                        # same domain's own physical restart fields) -- for FABM
-                        # tracers specifically this hasn't been observed, but the
-                        # same defensive skip applies: leave this column's
-                        # tracers at their fabm.yaml initial_value rather than
-                        # propagate a NaN into a otherwise-healthy simulation.
+                        # cells (confirmed directly, 2026-09-30: restart_ersem.
+                        # nc's own zt/hnt are ALSO NaN at those exact points).
+                        # Resolved below via nearest-valid-neighbor fill, not
+                        # here -- this loop only tracks which columns COULDN'T
+                        # be remapped directly.
                         n_skipped_nan += 1
                         continue
                     tgt_ifaces = target_zf[:, j, i]
                     out[:, j, i, :] = _conservative_remap_column(src_vals, src_ifaces, tgt_ifaces)
+                    valid_col[j, i] = True
                     n_seeded += 1
+
+            # Wet columns with bad source data: fall back to the NEAREST
+            # valid wet column's own remapped profile (per user, 2026-09-30)
+            # -- preserves local spatial structure (a coastal cell gets a
+            # value close to its real neighbors), unlike a flat domain-wide
+            # default. Standard nearest-fill recipe: distance_transform_edt
+            # on the invalid mask, with return_indices, gives each invalid
+            # cell's nearest valid cell's own index.
+            fill_wet = mask & ~valid_col
+            if fill_wet.any() and valid_col.any():
+                jj, ii = ndimage.distance_transform_edt(
+                    ~valid_col, return_distances=False, return_indices=True
+                )
+                out[:, fill_wet, :] = out[:, jj[fill_wet], ii[fill_wet], :]
+            out[:, ~mask, :] = pygetm.constants.FILL_VALUE  # dry cells only
 
             for k, name in enumerate(pelagic):
                 sim[name][...] = out[..., k]
@@ -447,9 +498,9 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
 
         msg = (
             f"_seed_fabm_state_from_restart: seeded pelagic {pelagic} ({n_seeded} wet columns"
-            + (f", {n_skipped_nan} skipped for non-finite source data" if n_skipped_nan else "")
+            + (f", {n_skipped_nan} filled from nearest valid neighbor" if n_skipped_nan else "")
             + f") and benthic {benthic} (direct horizontal copy"
-            + (f", {n_benthic_nan} non-finite cells set to FILL_VALUE" if n_benthic_nan else "")
+            + (f", {n_benthic_nan} filled from nearest valid neighbor" if n_benthic_nan else "")
             + f") from {restart_path}"
         )
         sim.logger.info(msg)
