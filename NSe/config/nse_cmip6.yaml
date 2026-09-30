@@ -373,6 +373,7 @@ output:
     - groups:
       - fabm_ersem_3D
       - fabm_ersem_2D
+      - fabm_ersem_diag
       requires_fabm: true
       time_average: true
     - groups:
