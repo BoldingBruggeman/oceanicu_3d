@@ -235,6 +235,7 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
 
         source_vals = None
         benthic_vals = {}
+        n_benthic_nan = 0
         # restart_ersem.nc holds this run's FULL global (yt, xt) domain --
         # under real MPI spatial decomposition, THIS rank's own sim.T only
         # covers one local tile of it, so the file must be sliced down to
@@ -348,13 +349,26 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
                     axis=-1,
                 )  # (nz_src, ny, nx, n_tracers)
             if benthic:
+                import pygetm.constants
+
                 # No vertical structure at all -- a straight horizontal copy,
                 # same convention as the horizontal-grid check just below
                 # (per-column remapping assumes file and run line up 1:1).
-                benthic_vals = {
-                    n: _embed_local(ds[n].isel(time=0, yt=yslice_g, xt=xslice_g).values)
-                    for n in benthic
-                }
+                # A handful of genuinely NaN restart points are a known,
+                # long-standing artifact at some coastline/channel-edge
+                # cells (confirmed directly, 2026-09-30: restart_ersem.nc's
+                # own zt/hnt are ALSO NaN at those exact points, so it's a
+                # gap in the file itself, not specific to any one tracer) --
+                # the pelagic path already guards against this per-column
+                # (skips a column with non-finite source data); benthic has
+                # no such column-level concept, so guard per-cell instead,
+                # same FILL_VALUE convention as pelagic's own dry cells.
+                for n in benthic:
+                    arr = _embed_local(ds[n].isel(time=0, yt=yslice_g, xt=xslice_g).values)
+                    bad = ~np.isfinite(arr)
+                    n_benthic_nan += int(bad.sum())
+                    arr[bad] = pygetm.constants.FILL_VALUE
+                    benthic_vals[n] = arr
 
         # `.values` (no halo), NOT `.all_values` -- restart_ersem.nc's own
         # hnt/zt were written from the halo-free interior (its real domain
@@ -434,7 +448,9 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
         msg = (
             f"_seed_fabm_state_from_restart: seeded pelagic {pelagic} ({n_seeded} wet columns"
             + (f", {n_skipped_nan} skipped for non-finite source data" if n_skipped_nan else "")
-            + f") and benthic {benthic} (direct horizontal copy) from {restart_path}"
+            + f") and benthic {benthic} (direct horizontal copy"
+            + (f", {n_benthic_nan} non-finite cells set to FILL_VALUE" if n_benthic_nan else "")
+            + f") from {restart_path}"
         )
         sim.logger.info(msg)
 
