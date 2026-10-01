@@ -490,6 +490,21 @@ def _sorted_integrals_with(integrals: list, *keys: str) -> list:
     return rows
 
 
+def _ols(xs: list, ys: list) -> tuple:
+    """Plain least-squares (slope, intercept) of ys against xs -- same
+    stdlib-only approach as _linear_trend above, just without that one's
+    significance test (a visual trendline, not a statistical claim)."""
+    n = len(xs)
+    x_mean = sum(xs) / n
+    y_mean = sum(ys) / n
+    var = sum((x - x_mean) ** 2 for x in xs)
+    if not var:
+        return 0.0, y_mean
+    cov = sum((x - x_mean) * (y - y_mean) for x, y in zip(xs, ys))
+    slope = cov / var
+    return slope, y_mean - slope * x_mean
+
+
 def plot_nutrients(integrals: list, out_path: Path) -> None:
     """Domain-mean silicate/phosphorus/nitrogen (left axis) and carbon
     (right axis) vs. simulated date, from "Integrals over global domain"
@@ -537,7 +552,9 @@ def plot_nutrients(integrals: list, out_path: Path) -> None:
 
 def plot_ts(integrals: list, out_path: Path) -> None:
     """Domain-mean absolute salinity and conservative temperature (two
-    y-axes) vs. simulated date, from the same log blocks as plot_nutrients."""
+    y-axes) vs. simulated date, from the same log blocks as plot_nutrients,
+    each with its own linear (OLS) trendline, dashed, same color as its
+    own series -- per user, 2026-10-01."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -547,18 +564,40 @@ def plot_ts(integrals: list, out_path: Path) -> None:
         print("no integral readings with salt/temp found -- skipping T/S plot", file=sys.stderr)
         return
     dates = [r.sim for r in rows]
+    salt_vals = [r.values["salt"] for r in rows]
+    temp_vals = [r.values["temp"] for r in rows]
+    # Days since the first reading -- a plain numeric x for the OLS fit;
+    # dates themselves aren't arithmetic. Slope is then naturally
+    # per-day, reported per-year below (x365.25) since that's the more
+    # readable unit over a multi-year run.
+    x_days = [(d - dates[0]).days for d in dates]
 
     fig, ax1 = plt.subplots(figsize=(10, 5))
-    ax1.plot(dates, [r.values["salt"] for r in rows], color="#4a7ab8", label="salinity")
+    ax1.plot(dates, salt_vals, color="#4a7ab8", label="salinity")
     ax1.set_xlabel("simulated date")
     ax1.set_ylabel("mean absolute salinity (g kg-1)", color="#4a7ab8")
     ax1.tick_params(axis="y", labelcolor="#4a7ab8")
     ax1.grid(True, alpha=0.3)
 
     ax2 = ax1.twinx()
-    ax2.plot(dates, [r.values["temp"] for r in rows], color="#d9822b", label="temperature")
+    ax2.plot(dates, temp_vals, color="#d9822b", label="temperature")
     ax2.set_ylabel("mean conservative temperature (deg C)", color="#d9822b")
     ax2.tick_params(axis="y", labelcolor="#d9822b")
+
+    if len(rows) >= 2:
+        dates_fit = [dates[0], dates[-1]]
+        slope_s, intercept_s = _ols(x_days, salt_vals)
+        ax1.plot(dates_fit, [intercept_s + slope_s * x_days[0], intercept_s + slope_s * x_days[-1]],
+                  color="#4a7ab8", linestyle="--", linewidth=1.5,
+                  label=f"salinity trend: {slope_s * 365.25:+.4g}/yr")
+        slope_t, intercept_t = _ols(x_days, temp_vals)
+        ax2.plot(dates_fit, [intercept_t + slope_t * x_days[0], intercept_t + slope_t * x_days[-1]],
+                  color="#d9822b", linestyle="--", linewidth=1.5,
+                  label=f"temperature trend: {slope_t * 365.25:+.4g}/yr")
+
+        lines1, labels1 = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax1.legend(lines1 + lines2, labels1 + labels2, loc="best", fontsize=9)
 
     fig.suptitle("Domain-mean salinity/temperature vs. simulated date")
     fig.tight_layout()
