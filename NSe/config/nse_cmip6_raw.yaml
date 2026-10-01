@@ -500,7 +500,7 @@ river_discharge:
   source: CMIP6
   emorid:
     folder: ${RIVER_FOLDER}
-    file: EMORID_1990_2024.nc
+    file: EMORID_1993_2024_conc_nemo_TALK_DIC.nc
     threshold: 0.0
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data

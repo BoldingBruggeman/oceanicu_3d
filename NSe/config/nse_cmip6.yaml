@@ -583,16 +583,17 @@ meteo:
   Fluxes: {}
 river_discharge:
   # emorid alone (no CMIP6 splice) would leave a run with no valid river
-  # data at all once it runs past EMORID_1990_2024.nc's own real coverage
-  # (this scenario runs to 2099) -- CMIP6 gets the same historical+scenario
-  # splice as meteo/boundaries (add_rivers/set_river_data auto-includes the
-  # real EMORID historical file for any [start, stop] reaching back before
-  # 2015), same as nse_cmip6_raw.yaml already does correctly. No noleap
-  # suffix needed here (standard calendar, unlike the raw variant).
+  # data at all once it runs past EMORID_1993_2024_conc_nemo_TALK_DIC.nc's
+  # own real coverage (2024-12-31; this scenario runs to 2099) -- CMIP6
+  # gets the same historical+future splice as meteo/boundaries
+  # (set_river_data's own hist_cutoff, discovered from that file's own
+  # real last day, not a hardcoded date -- see its docstring), same as
+  # nse_cmip6_raw.yaml already does correctly. No noleap suffix needed
+  # here (standard calendar, unlike the raw variant).
   source: CMIP6
   emorid:
     folder: ${RIVER_FOLDER}
-    file: EMORID_1990_2024.nc
+    file: EMORID_1993_2024_conc_nemo_TALK_DIC.nc
     threshold: 0
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
