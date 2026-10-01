@@ -191,13 +191,16 @@ def set_river_data(sim, domain, config: dict) -> int:
     silently break TemporalInterpolation's monotonic-time assumption at
     the seam).
 
-    Known gap, not yet addressed: no "_noleap" sibling of
-    EMORID_1993_2024_conc_nemo_TALK_DIC.nc exists yet (unlike the older
-    EMORID_1990_2024_noleap.nc) -- a run with runtime.calendar: noleap
-    (only ever GFDL-ESM4 CMIP6-raw today) will hit a loud FileNotFoundError
-    here rather than a silent wrong answer, which is the right failure mode
-    until that sibling exists, but it does mean this doesn't yet work for
-    that one combination.
+    EMORID_1993_2024_conc_nemo_TALK_DIC_noleap.nc (2026-10-01) is built the
+    same way EMORID_1990_2024_noleap.nc already was: every real Feb 29 row
+    DROPPED (8 of them, 1993-2024 -- unlike a monthly-mean file, where
+    relabeling Feb 29 as Feb 28 is lossless, a real daily value would
+    otherwise just vanish silently), remaining dates relabeled onto a
+    cftime.DatetimeNoLeap axis. Validated directly: real values on either
+    side of a dropped Feb 29 are unchanged, and runtime.calendar: noleap
+    now splices 1993-2099 with zero gaps at all (not even the GFDL-ESM4
+    calendar-native 2-day Feb28->Mar1 jump the standard-calendar splice
+    has, since both segments share the same noleap calendar here).
 
     ${RIVER_FOLDER}/RIVER_FILE are the SEPARATE machine-configured env
     var/name for the real historical file (see machines.yaml) --
