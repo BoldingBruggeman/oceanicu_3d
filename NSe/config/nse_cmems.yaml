@@ -384,6 +384,12 @@ hydrography:
     salt: 36
 boundaries:
   barotropic:
+    # Pure CMEMS setup (2026-10-01, per user: "there should be no CMIP6
+    # config in a CMEMS setup") -- the CMIP6 sub-block is a different
+    # role's alternate choice (used by nse_cmip6.yaml/nse_cmip6_raw.yaml
+    # instead), not a CMEMS concern; dropped here (same removal applied
+    # throughout this file: meteo.CMIP6/CMIP6-raw, river_discharge.CMIP6,
+    # boundaries.baroclinic.CMIP6 below).
     source: CMEMS
     TPXO:
       tpxo_folder: ${TPXO_FOLDER}
@@ -393,15 +399,10 @@ boundaries:
       filename_template: hourly_{start_date}_to_{end_date}.nc
       start_date: '2010-01-01'
       end_date: '2026-08-17'
-    CMIP6:
-      folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}
-      folder_template: '{setup}/CMIP6/{model}/{scenario}'
-      filename_template: '{start_date}_to_{end_date}.nc'
-      model: MPI-ESM1-2-HR
-      scenario: ssp585
-      start_date: '2024-03-01'
-      end_date: '2026-01-01'
   baroclinic:
+    # Same "no CMIP6 config" removal as barotropic above. WOA kept (not a
+    # CMIP6 concern -- a genuinely separate, real alternate choice for
+    # this role).
     source: CMEMS
     WOA:
       folder: ${BOUNDARY_FOLDER_BAROCLINIC_WOA}
@@ -411,56 +412,67 @@ boundaries:
       filename_template: daily_{start_date}_to_{end_date}.nc
       start_date: '2010-01-01'
       end_date: '2026-08-17'
-    CMIP6:
-      folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}
-      folder_template: '{model}/{scenario}/bdy'
-      filename_template: bdy_3d_{variable}_{start_date}_{end_date}.nc
-      model: MPI-ESM1-2-HR
-      scenario: ssp126
-      start_date: '20150101'
-      end_date: '21001231'
   fabm:
-    source: WOA
-    WOA:
-      folder: ${BOUNDARY_FOLDER_FABM_WOA}
+    # CMEMS, not WOA (2026-10-01, per user) -- a CMEMS setup should read
+    # real CMEMS biogeochemistry at this boundary, not a WOA climatology.
+    # Real DAILY product (per user, 2026-10-01), not the monthly
+    # climatology -- bio_daily_2010-01-01_to_2026-08-17.nc, confirmed
+    # directly on bb-server1 to carry no3/po4/si/o2 (time, nbdyp, depth),
+    # same variable names already used below. climatology: false (not the
+    # default already, but explicit here since this is a deliberate
+    # correction away from the climatology file) -- read as a real,
+    # non-cycling time series, same on_grid=True/climatology=False
+    # treatment boundaries.baroclinic's own real CMEMS T/S read already
+    # gets (oceanicu_providers.py's derive_data_assignments).
+    source: CMEMS
+    CMEMS:
+      folder: ${BOUNDARY_FOLDER_FABM_CMEMS}
+      climatology: false
+      # tracers[*].file/variable below are the real, nbdyp-shaped
+      # (boundary-point-only) daily product -- correct for the SPONGE
+      # boundary read but NOT usable as a full-domain initial condition
+      # (confirmed directly on bb-server1, via ncdump -h, for every CMEMS/
+      # CMIP6 bio product that exists in this project today -- bio_daily
+      # and bio_monthly_climatology.nc are BOTH boundary-point-shaped).
+      # ic_folder/ic_file/ic_variable (see each tracer's own OPTIONAL
+      # ic_file/ic_variable keys below, and oceanicu_providers.py's own
+      # ic_folder ParameterSpec comment) are deliberately left UNSET here
+      # (2026-10-01, per user) -- a CMEMS setup's FABM IC should come from
+      # a genuinely grid-shaped CMEMS-sourced product once one exists
+      # (there isn't one yet; so_2025_monthly_ic.nc/thetao_2025_monthly_
+      # ic.nc are the real precedent for what that would look like for
+      # bio variables too), NOT silently substituted with WOA's own
+      # climatology just because that's the only grid-shaped thing
+      # currently on disk -- that's a real, deliberate modeling choice for
+      # whoever runs this, not a default to bake in silently. Until then,
+      # unlisted tracers simply keep their own fabm.yaml-declared
+      # initial_value (same as any tracer not covered by `tracers` at
+      # all) -- UNLESS fabm.ERSEM.restart_file (below) is set, which takes
+      # priority regardless.
       tracers:
         N3_n:
-          file: woa_n.nc
-          variable: n_an
+          file: bio_daily_2010-01-01_to_2026-08-17.nc
+          variable: no3
           boundary_condition_type: SPONGE
         N1_p:
-          file: woa_p.nc
-          variable: p_an
+          file: bio_daily_2010-01-01_to_2026-08-17.nc
+          variable: po4
           boundary_condition_type: SPONGE
         N5_s:
-          file: woa_i.nc
-          variable: i_an
+          file: bio_daily_2010-01-01_to_2026-08-17.nc
+          variable: si
           boundary_condition_type: SPONGE
         O2_o:
-          file: woa_o.nc
-          variable: o_an
+          file: bio_daily_2010-01-01_to_2026-08-17.nc
+          variable: o2
           boundary_condition_type: SPONGE
 meteo:
+  # ERA5 only -- no CMIP6/CMIP6-raw (2026-10-01, per user: "there should
+  # be no CMIP6 config in a CMEMS setup").
   source: ERA5
   ERA5:
     folder: ${ERA5_FOLDER}
     evaporation: true
-    data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
-  CMIP6-raw:
-    folder: ${CMIP6_RAW_FOLDER}
-    folder_template: '{model}/{scenario}'
-    scenario: ssp126
-    evaporation: true
-    radiation_source: components
-    data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
-    model: GFDL-ESM4
-  CMIP6:
-    folder: ${CMIP6_FOLDER}
-    folder_template: CMIP6/{model}/{scenario}/meteo
-    model: MPI-ESM1-2-HR
-    scenario: ssp126
-    evaporation: true
-    radiation_source: pseudo_tcc
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
   # folder deliberately left unset (an empty mapping, NOT omitted -- see
   # ChoiceSpec's own nested-vs-flat handling in yaml_parse._validate_choice:
@@ -471,24 +483,38 @@ meteo:
   # static constant values (also needs simulation.airsea.type: Fluxes).
   Fluxes: {}
 river_discharge:
+  # emorid only -- no CMIP6 sub-block (2026-10-01, per user: "there should
+  # be no CMIP6 config in a CMEMS setup"). A CMEMS run never extends past
+  # EMORID's own real coverage the way a CMIP6 scenario run does, so there
+  # is no real future-splice use case here to keep this dormant for.
   source: emorid
   emorid:
     folder: ${RIVER_FOLDER}
-    file: EMORID_1990_2024.nc
-    threshold: 0
-    script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
-    data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
-  CMIP6:
-    folder: ${RIVER_FOLDER_CMIP6}
-    folder_template: CMIP6/{model}/{scenario}/rivers
-    model: MPI-ESM1-2-HR
-    scenario: ssp126
-    file: river_flows_future_{scenario}.nc
+    file: EMORID_1993_2024_conc_nemo_TALK_DIC.nc
     threshold: 0
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
 fabm:
-  source: none
+  # ERSEM pelagic spin-up (2026-10-01): enabled, with the same restart-
+  # based vertical remap nse_cmip6.yaml already uses (hydrography.py's
+  # _seed_fabm_state_from_restart) to seed FABM state from the perpetual-
+  # ERSEM restart snapshot at the run's own start, same as that config.
+  #
+  # restart_file left explicitly null here (2026-10-01, per user -- a YAML
+  # comment doesn't survive the generation round-trip into the companion
+  # generated_*_config.yaml, so a commented-out line is invisible in the
+  # file actually edited between runs; an explicit null IS kept, visible,
+  # and still reads as "unset" to scripts/hydrography.py's own
+  # fabm_cfg.get("restart_file") falsy check). This is round 1 of a
+  # perpetual spin-up cycle (see docs/conservative-vertical-remap.md's own
+  # "Why this exists" section): no restart_ersem.nc exists yet. Edit the
+  # companion generated_*_config.yaml directly to set this to
+  # ${FABM_RESTART_FOLDER}/restart_ersem.nc (read LIVE at runtime, no
+  # regeneration needed) once round 1 has produced one via --save-restart,
+  # for round 2 onward.
+  source: ERSEM
   ERSEM:
     folder: ${FABM_ERSEM_FOLDER}
+    restart_file: null
+    file: fabm_ersem.yaml
     data_script: ${SCRIPT_FOLDER}/fabm.py:configure_fabm

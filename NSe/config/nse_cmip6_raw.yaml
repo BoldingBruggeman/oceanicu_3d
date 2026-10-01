@@ -518,6 +518,14 @@ river_discharge:
     # on top -- ocean-prep writes river_flows_future_{scenario}_daily_
     # noleap.nc alongside it for GFDL-ESM4.
     daily: true
+    # Beyond EMORID's own real coverage (2024-12-31), river nutrients are
+    # held at this monthly climatology rather than a flat last-value hold
+    # -- real, baseline-dependent (5yr/10yr/full) differences at some
+    # stations, see set_river_data's docstring. 5yr (2020-2024) is the
+    # default; this is explicit here since this scenario runs to 2099,
+    # decades past the real record. Calendar-agnostic (no noleap sibling
+    # needed for this file, unlike `file` above).
+    nutrient_climatology: 5yr
     threshold: 0.0
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data

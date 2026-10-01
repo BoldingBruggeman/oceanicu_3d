@@ -608,6 +608,13 @@ river_discharge:
     # by reading the day-of-year-disaggregated _daily.nc sibling instead
     # (see oceanicu_providers.py's river_discharge.CMIP6.daily docstring).
     daily: true
+    # Beyond EMORID's own real coverage (2024-12-31), river nutrients are
+    # held at this monthly climatology rather than a flat last-value hold
+    # -- real, baseline-dependent (5yr/10yr/full) differences at some
+    # stations, see set_river_data's docstring. 5yr (2020-2024) is the
+    # default; this is explicit here since this scenario runs to 2099,
+    # decades past the real record.
+    nutrient_climatology: 5yr
     threshold: 0
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data

@@ -263,11 +263,11 @@ output:
     - N5_s_sms
     - N5_s_sfl
     - N5_s_bfl
-    fabm_ersem_diag: # these can't be sliced in output
+    fabm_ersem_diag:
     - N5_s_sfl_tot_calculator_result
     - N5_s_bfl_tot_calculator_result
     - N5_s_sms_tot_calculator_result
-    fabm_mizer:  # placeholder -- oceanicu_driver.py overwrites this with fish_c1..fish_c100 at generation time
+    fabm_mizer:
     - fish_c1
     - fish_c_tot
     - fish_c_pel
@@ -306,7 +306,7 @@ output:
       sync_interval: 1
       default_dtype: float32
       format: NETCDF4
-      active: false
+      active: true
     variable_requests:
     - groups:
       - tidal
@@ -320,6 +320,7 @@ output:
       sync_interval: 1
       default_dtype: float32
       format: NETCDF4
+      active: false
     variable_requests:
     - groups:
       - barotropic_2d
@@ -331,6 +332,7 @@ output:
       sync_interval: 1
       default_dtype: float32
       format: NETCDF4
+      active: false
     variable_requests:
     - groups:
       - baroclinic_3d
@@ -356,6 +358,7 @@ output:
       path: surf_bott_daily.nc
       start: '2010-01-01'
       stop: '2020-01-01'
+      active: false
     variable_requests:
     - groups:
       - fabm_mizer_fishing
@@ -384,9 +387,6 @@ hydrography:
     salt: 36
 boundaries:
   barotropic:
-    # No CMIP6 config (2026-10-01, same cleanup as nse_cmems.yaml, per
-    # user) -- CMEMS kept (a genuinely separate, real alternate choice for
-    # this role, not a CMIP6 concern).
     source: TPXO
     TPXO:
       tpxo_folder: ${TPXO_FOLDER}
@@ -396,8 +396,15 @@ boundaries:
       filename_template: hourly_{start_date}_to_{end_date}.nc
       start_date: '2024-03-02'
       end_date: '2026-01-01'
+    CMIP6:
+      folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}
+      folder_template: '{setup}/CMIP6/{model}/{scenario}'
+      filename_template: '{start_date}_to_{end_date}.nc'
+      model: MPI-ESM1-2-HR
+      scenario: ssp585
+      start_date: '2024-03-01'
+      end_date: '2026-01-01'
   baroclinic:
-    # Same "no CMIP6 config" removal as barotropic above.
     source: WOA
     WOA:
       folder: ${BOUNDARY_FOLDER_BAROCLINIC_WOA}
@@ -407,6 +414,14 @@ boundaries:
       filename_template: daily_{start_date}_to_{end_date}.nc
       start_date: '2010-01-01'
       end_date: '2026-08-17'
+    CMIP6:
+      folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}
+      folder_template: '{model}/{scenario}/bdy'
+      filename_template: bdy_3d_{variable}_{start_date}_{end_date}.nc
+      model: MPI-ESM1-2-HR
+      scenario: ssp126
+      start_date: '20150101'
+      end_date: '21001231'
   fabm:
     source: WOA
     WOA:
@@ -429,36 +444,50 @@ boundaries:
           variable: o_an
           boundary_condition_type: SPONGE
 meteo:
-  # source must match simulation.airsea.type below: ERA5 needs airsea.
-  # type: FluxesFromMeteo; Fluxes needs airsea.type: Fluxes -- switch both
-  # `source:` here and `type:` below together. No CMIP6/CMIP6-raw config
-  # (2026-10-01, same cleanup as nse_cmems.yaml, per user) -- both also
-  # need FluxesFromMeteo, same as ERA5, if ever reinstated.
   source: ERA5
   ERA5:
     folder: ${ERA5_FOLDER}
     evaporation: true
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
-  # folder deliberately left unset (an empty mapping, NOT omitted -- see
-  # ChoiceSpec's own nested-vs-flat handling in yaml_parse._validate_choice:
-  # a bare `Fluxes:` with nothing under it parses as YAML null, not an
-  # empty dict, which breaks the nested-form detection there). Inactive
-  # for now (source: ERA5 above is active) -- set source: Fluxes and a
-  # real folder here (flux_taux_????.nc/flux_tauy_????.nc/flux_sp_????.nc/
-  # flux_shf_????.nc/flux_swr_????.nc/flux_pe_????.nc must all exist
-  # there) to switch to Fluxes' "from file" method; source: Fluxes with
-  # this left empty gives Fluxes' own static constant values instead
-  # (also needs simulation.airsea.type: Fluxes below to match).
+  CMIP6-raw:
+    folder: ${CMIP6_RAW_FOLDER}
+    folder_template: '{model}/{scenario}'
+    scenario: ssp126
+    evaporation: true
+    radiation_source: components
+    data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
+    model: GFDL-ESM4
+  CMIP6:
+    folder: ${CMIP6_FOLDER}
+    folder_template: CMIP6/{model}/{scenario}/meteo
+    model: MPI-ESM1-2-HR
+    scenario: ssp126
+    evaporation: true
+    radiation_source: pseudo_tcc
+    data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
   Fluxes: {}
 river_discharge:
-  # emorid only -- no CMIP6 sub-block (2026-10-01, same cleanup as
-  # nse_cmems.yaml, per user). No real future-splice use case for this
-  # config either way.
   source: emorid
   emorid:
     folder: ${RIVER_FOLDER}
     file: EMORID_1993_2024_conc_nemo_TALK_DIC.nc
     threshold: 0
+    script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
+    data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
+  CMIP6:
+    folder: ${RIVER_FOLDER_CMIP6}
+    folder_template: CMIP6/{model}/{scenario}/rivers
+    model: MPI-ESM1-2-HR
+    scenario: ssp126
+    file: river_flows_future_{scenario}.nc
+    threshold: 0
+    # Baseline period for the monthly nutrient climatology used beyond
+    # EMORID's own real coverage (2024-12-31) when source: CMIP6 is
+    # active -- see oceanicu_providers.py's river_discharge.CMIP6.
+    # nutrient_climatology / scripts/rivers.py's set_river_data docstring.
+    # Inactive here (source: emorid above), kept for parity with the
+    # other NSe configs and so switching source needs no further edit.
+    nutrient_climatology: 5yr
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
 fabm:
