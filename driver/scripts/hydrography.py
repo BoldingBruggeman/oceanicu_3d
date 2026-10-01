@@ -49,6 +49,15 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
     function has to opt into that explicitly (a project-specific script
     hook, not core pygetm-config code going through loader._coerce_value's
     generic "path" TypeKind handling).
+
+    Also home to the ONE-TIME FABM tracer initial condition (2026-10-01,
+    moved here from scripts/fabm.py's own configure_fabm) -- either the
+    ERSEM restart-style seed (fabm.ERSEM.restart_file) or, failing that,
+    the WOA/CMEMS climatology pick, mirroring the T/S IC above but driven
+    by boundaries.fabm's OWN, independently-configured source, not
+    hydrography's -- see that block's own comment further down for the
+    full reasoning (including the real restart_file-vs-climatology
+    perpetual-spin-up state machine this supports).
     """
     import datetime
 
@@ -510,3 +519,92 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
         restart_file = fabm_cfg.get("restart_file")
         if restart_file:
             _seed_fabm_state_from_restart(sim, resolve_data_path(restart_file))
+        else:
+            # --- WOA/CMEMS-sourced FABM tracer initial conditions ---
+            # Moved here from scripts/fabm.py's own configure_fabm
+            # (2026-10-01, real bug hit directly) -- that function runs on
+            # EVERY chunk unconditionally (see this function's own
+            # docstring just above, re: why the restart-style IC lives here
+            # and not there), so a one-time climatology-pick IC left there
+            # would silently re-apply on every restart-continuation chunk
+            # too, overwriting whatever real, evolved state a genuine
+            # continuation just loaded. This hook is only ever called on a
+            # genuine fresh start (gated at the call site, `if not args.
+            # load_restart:` -- see this function's own docstring), so it's
+            # the correct home for ANY one-time FABM IC, restart-file-
+            # sourced (above) or climatology-sourced (below) alike.
+            #
+            # Independent of hydrography's own T/S source above -- this is
+            # boundaries.fabm's own, separately-configured source (per
+            # user, 2026-10-01: a WOA-sourced setup needs this exact same
+            # restart-vs-climatology choice for a perpetual spin-up too,
+            # same as CMEMS; the two roles are independently configured on
+            # purpose, see oceanicu_providers.py's own boundary_fabm role
+            # comment). So this does NOT reuse the `imonth`/`time` computed
+            # in the `source in ("WOA", "CMEMS")` block above (that's
+            # hydrography's OWN source, e.g. "constant", which could differ
+            # and might not even have run) -- computed independently here,
+            # exactly mirroring what configure_fabm used to do.
+            #
+            # restart_file vs this climatology branch is a real, intended
+            # perpetual-spin-up state machine, not an either/or default
+            # (per user, 2026-10-01): the FIRST spin-up cycle has no
+            # restart_ersem.nc yet (climatology IC, this branch), and every
+            # SUBSEQUENT cycle re-seeds from the previous cycle's own
+            # ending state instead (restart_file, set above) -- both
+            # fabm.ERSEM.restart_file and boundaries.fabm.<source>.ic_folder/
+            # tracers are read LIVE from the companion generated_*_config.
+            # yaml at runtime (confirmed directly), so switching between
+            # cycles only needs editing that file, not regenerating.
+            boundaries_fabm_cfg = config.get("boundaries", {}).get("fabm") or {}
+            if boundaries_fabm_cfg.get("source") in ("WOA", "CMEMS"):
+                time = config.get("runtime", {}).get("time")
+                if time is None:
+                    raise RuntimeError(
+                        "the FABM tracer initial condition needs a real start time, but "
+                        "runtime.time isn't set anywhere -- pass --start explicitly (either "
+                        "when generating this script, or when running it)."
+                    )
+                if isinstance(time, str):
+                    time = datetime.datetime.fromisoformat(time)
+                imonth = time.month - 1
+
+                # WOA: spec["file"]/spec["variable"] themselves (already
+                # grid-shaped, same file the boundary uses) under this
+                # choice's own `folder`. CMEMS: NOT spec["file"]/
+                # spec["variable"] (the real nbdyp-shaped boundary-forcing
+                # product/variable name) -- every CMEMS/CMIP6 bio product
+                # in this project turned out to be boundary-point-shaped,
+                # confirmed directly on bb-server1 (ncdump -h), including
+                # bio_monthly_climatology.nc, which an earlier version of
+                # this code wrongly assumed was grid-shaped. There is no
+                # genuinely grid-shaped CMEMS/CMIP6 biogeochemistry product
+                # anywhere in this project's data -- WOA's own global
+                # climatology is the only one, so each tracer's own
+                # OPTIONAL ic_file/ic_variable (under this choice's own
+                # ic_folder, e.g. ${BOUNDARY_FOLDER_FABM_WOA}) is expected
+                # to point at THAT (e.g. woa_n.nc/n_an), same real files/
+                # variable names boundaries.fabm.WOA's own `tracers`
+                # already uses -- see ic_folder's own ParameterSpec comment
+                # in oceanicu_providers.py. Neither available -> leave that
+                # tracer alone, same as any tracer not listed in `tracers`
+                # at all: it keeps its own fabm.yaml-declared initial_value.
+                is_cmems = boundaries_fabm_cfg.get("source") == "CMEMS"
+                own_folder = Path(resolve_data_path(boundaries_fabm_cfg["folder"]))
+                ic_folder = (
+                    Path(resolve_data_path(boundaries_fabm_cfg["ic_folder"]))
+                    if is_cmems and boundaries_fabm_cfg.get("ic_folder")
+                    else own_folder
+                )
+                for tracer, spec in (boundaries_fabm_cfg.get("tracers") or {}).items():
+                    if is_cmems:
+                        ic_filename = spec.get("ic_file")
+                        ic_variable = spec.get("ic_variable")
+                    else:
+                        ic_filename = spec["file"]
+                        ic_variable = spec["variable"]
+                    if not ic_filename or not ic_variable:
+                        continue
+                    sim[tracer].set(
+                        pygetm.input.from_nc(ic_folder / ic_filename, ic_variable).isel(time=imonth)
+                    )

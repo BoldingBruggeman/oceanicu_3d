@@ -483,6 +483,36 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
             ),
             importance=Importance.BASIC,
         ),
+        # No real future-projected nutrient product exists (see
+        # set_river_data's docstring) -- flow gets the real splice above,
+        # but nutrients beyond EMORID's own real coverage (2024-12-31) are
+        # held at a MONTHLY CLIMATOLOGY built from that same real record,
+        # not a real projection. Three pre-generated baseline variants sit
+        # in ${RIVER_FOLDER} (EMORID_nutrient_climatology_monthly_{this}.
+        # nc, site x month=12, all 6 tracers) -- 5yr/10yr/full differ
+        # materially at some stations (confirmed 2026-10-01: AURAJOKI's
+        # NO3 and Adour's Si both show real, baseline-dependent shifts, not
+        # just noise), so this is a real modeling choice, not cosmetic.
+        # Day-of-year climatology was ALSO generated and compared (noisier,
+        # especially for Si -- fewer real samples per calendar day than
+        # per calendar month) but dropped entirely: per user, 2026-10-01,
+        # pygetm's own climatology support only handles 12 monthly records,
+        # not 366 daily ones.
+        ParameterSpec(
+            name="nutrient_climatology",
+            type=TypeRef(kind="scalar", scalar_type="str"),
+            default="5yr",
+            choices=("5yr", "10yr", "full"),
+            help=(
+                "baseline period for the monthly river-nutrient climatology "
+                "used beyond EMORID's own real record (2024-12-31) -- "
+                "'5yr'=2020-2024, '10yr'=2015-2024, 'full'=1993-2024. Flow "
+                "itself is unaffected (always the real CMIP6 projection, "
+                "see `daily` above); this only governs how nutrient "
+                "concentrations are extended into the future."
+            ),
+            importance=Importance.BASIC,
+        ),
     )
 
     river_discharge = make_provider_slot(
@@ -544,7 +574,16 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         "pygetm/tracer.py's own Tracer.__init__) and their fabm.yaml-declared "
         "initial_value for the interior IC -- not every FABM state variable needs "
         "an explicit boundary/IC override. `file` is resolved relative to this "
-        "choice's own `folder`.",
+        "choice's own `folder`.\n\n"
+        "ic_file/ic_variable (2026-10-01): OPTIONAL, CMEMS-only, free keys in "
+        "this same per-tracer mapping (no separate ParameterSpec needed -- this "
+        "field's own type is already a generic string mapping) -- a separate, "
+        "grid-shaped file/variable for this tracer's one-time initial condition, "
+        "resolved against the CMEMS choice's own sibling `ic_folder` field, NOT "
+        "`folder`/`variable` (the real boundary-forcing product/variable name, "
+        "not usable as a full-domain IC -- see `ic_folder`'s own comment in "
+        "oceanicu_providers.py for why). Read by scripts/hydrography.py's own "
+        "set_hydrography_ic, not here.",
         importance=Importance.BASIC,
     )
 
@@ -585,6 +624,58 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                     "each.",
                     importance=Importance.ADVANCED,
                 ),
+                # Separate from `tracers[*].file` (2026-10-01, real bug hit
+                # directly, twice): that field is a real, nbdyp-shaped
+                # (boundary-points-only) product -- correct for the SPONGE
+                # boundary read, but structurally unusable as a full-domain
+                # initial condition (no horizontal grid dimension for
+                # pygetm.input's own vertical_interpolation to find). First
+                # attempt pointed a (then-named) `ic_file` at bio_monthly_
+                # climatology.nc instead, on the assumption that file was a
+                # full regional grid (matching the OLD, never-actually-run
+                # CMEMS fabm boundary design this replaced) -- confirmed
+                # directly on bb-server1 (ncdump -h) that it is ALSO
+                # (time=12, nbdyp=310, depth=57): every CMEMS bio product in
+                # this project turned out to be boundary-point-shaped, none
+                # usable as a full-domain IC. There is no genuinely
+                # grid-shaped CMEMS/CMIP6 biogeochemistry product anywhere
+                # in this project's data (confirmed directly, same session)
+                # -- WOA's own global climatology (/data/FABM/woa_{n,p,i,
+                # o}.nc) is the only one, so it's the fallback IC source
+                # here too, same as WOA's own tracers[*].file already is
+                # for ITS own boundary+IC. ic_folder (this field) + each
+                # tracer's own OPTIONAL ic_file/ic_variable (free keys in
+                # `tracers[*]`, no separate ParameterSpec needed -- that
+                # field's own type is already a generic string mapping)
+                # point at WOA's real per-tracer file/variable naming
+                # (woa_n.nc/n_an, woa_p.nc/p_an, woa_i.nc/i_an, woa_o.nc/
+                # o_an -- same convention boundaries.fabm.WOA's own
+                # `tracers` already uses) -- deliberately NOT reusing
+                # `folder` (this choice's own boundary-forcing folder) nor
+                # `tracers[*].variable` (this choice's own boundary
+                # variable name, e.g. "no3", which doesn't match WOA's
+                # "n_an" convention). Neither ic_folder nor a tracer's own
+                # ic_file/ic_variable set -> no explicit tracer IC is set
+                # from this source at all (see scripts/hydrography.py's
+                # own set_hydrography_ic for the fallback -- either fabm.
+                # ERSEM.restart_file's seed, if configured, or (absent that
+                # too) each tracer's own fabm.yaml-declared initial_value,
+                # same as any tracer not listed in `tracers` at all).
+                ParameterSpec(
+                    name="ic_folder",
+                    type=TypeRef(kind="scalar", scalar_type="str", nullable=True),
+                    default=None,
+                    help="OPTIONAL: folder for a separate, grid-shaped (NOT "
+                    "boundary-point-shaped) initial-condition read per "
+                    "tracer -- see each tracer's own OPTIONAL ic_file/"
+                    "ic_variable keys in `tracers`, and this field's own "
+                    "comment in oceanicu_providers.py for why this can't "
+                    "just reuse `folder`/`tracers[*].variable`. Typically "
+                    "${BOUNDARY_FOLDER_FABM_WOA}, reusing WOA's own real "
+                    "per-tracer files (no genuinely grid-shaped CMEMS/CMIP6 "
+                    "biogeochemistry product exists in this project).",
+                    importance=Importance.BASIC,
+                ),
                 _fabm_tracers_param,
             ),
             # CMIP6: same real time series shape as CMEMS (on_grid=True,
@@ -597,7 +688,49 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
             # return`); CMIP6 delta-change output has no equivalent
             # "monthly_ic" snapshot file convention. See scripts/fabm.py's
             # own configure_fabm docstring for the matching IC-side gate.
-            "CMIP6": _CMIP6_SHARED + (_fabm_tracers_param,),
+            "CMIP6": _CMIP6_SHARED + (_fabm_tracers_param,) + (
+                # dissic/talk's own pre-2015 historical-bridge source
+                # (derive_data_assignments' own _fabm_hist_files dict,
+                # below) -- no3/po4/si/o2 always use the real bio_daily_
+                # 20100101_20141231.nc slice, unaffected by this field.
+                # Two real methods now exist (2026-10-01, per user: "we
+                # might want to use both methods later"), kept available
+                # side by side rather than one replacing the other:
+                #   cycled_climatology (default, unchanged behavior) --
+                #     a flat day-of-year climatology cycled from the real
+                #     ~2-year ANFC record, no secular trend. Generated by
+                #     a since-deleted scratchpad script (2026-09-25); the
+                #     file itself (bio_carbon_climatology_cycled_
+                #     20100101_20141231.nc) still exists.
+                #   pml_trend -- a real secular-trend extrapolation
+                #     (Atlantic/NW-shelf segments) + a real salinity
+                #     regression (Baltic segment 7), both reusing
+                #     published coefficients from Partridge et al. (PML,
+                #     Dec 2025) directly rather than independently
+                #     re-fitting our own (confirmed 2026-10-01: our own
+                #     regional GLODAP subset is too sparse for that --
+                #     see docs/pml-amm7-ersem-comparison.md and
+                #     ocean-prep/cli/derive_historical_dic_ta.py, the
+                #     script that builds bio_carbon_pml_trend_
+                #     20100101_20141231.nc). Default stays
+                #     cycled_climatology (unchanged, already-proven
+                #     behavior) until pml_trend has been validated
+                #     against a real run -- an explicit opt-in, not a
+                #     silent switch.
+                ParameterSpec(
+                    name="dic_ta_historical_method",
+                    type=TypeRef(kind="scalar", scalar_type="str"),
+                    default="cycled_climatology",
+                    choices=("cycled_climatology", "pml_trend"),
+                    help="which pre-2015 historical-bridge source dissic/talk use -- "
+                    "'cycled_climatology' (default, flat day-of-year climatology, no "
+                    "trend) or 'pml_trend' (real secular-trend extrapolation + Baltic "
+                    "salinity regression, Partridge et al. 2025's own published "
+                    "coefficients -- see docs/pml-amm7-ersem-comparison.md). Only "
+                    "affects dissic/talk; no3/po4/si/o2 are unaffected either way.",
+                    importance=Importance.BASIC,
+                ),
+            ),
         },
         default="WOA",
     )
@@ -1167,13 +1300,20 @@ def derive_data_assignments(config: dict) -> list[dict]:
             # script's own resolve_data_path(...) call, baked in later by
             # codegen), so this is safe.
             _cmems_fabm_folder = Path("${BOUNDARY_FOLDER_FABM_CMEMS}")
+            # dissic/talk's own historical-bridge file -- see this choice's
+            # own dic_ta_historical_method ParameterSpec comment above for
+            # the two available methods and why both are kept.
+            _dic_ta_hist_file = {
+                "cycled_climatology": "bio_carbon_climatology_cycled_20100101_20141231.nc",
+                "pml_trend": "bio_carbon_pml_trend_20100101_20141231.nc",
+            }[boundaries_fabm.get("dic_ta_historical_method", "cycled_climatology")]
             _fabm_hist_files = {
                 "no3": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
                 "po4": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
                 "si": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
                 "o2": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
-                "dissic": _cmems_fabm_folder / "bio_carbon_climatology_cycled_20100101_20141231.nc",
-                "talk": _cmems_fabm_folder / "bio_carbon_climatology_cycled_20100101_20141231.nc",
+                "dissic": _cmems_fabm_folder / _dic_ta_hist_file,
+                "talk": _cmems_fabm_folder / _dic_ta_hist_file,
             }
             _fabm_is_cmip6 = boundaries_fabm_source == "CMIP6"
             for _tracer, _spec in _fabm_tracers.items():
