@@ -12,7 +12,7 @@ chunks against each other.
 **These logs are rsynced down from the HPC, not written locally**, so an
 early pass of this analysis (chunks 000-002 only) carried an explicit
 caveat about drawing conclusions past chunk 002. Re-run
-(`running/analyze_chunk_pace.py`, see below) whenever more has synced.
+(`running/analyze_logs.py`, see below) whenever more has synced.
 
 ## Findings (chunks 000-019, 2010-2069)
 
@@ -102,7 +102,7 @@ cutoff). Every other year is compared against that fixed baseline mean:
   ![Chunk pace vs. fixed baseline, with the [rest] linear trend](chunk-pace-trend.png)
 
   Regenerate with:
-  `python running/analyze_chunk_pace.py <run_dir> --plot chunk-pace-trend.png`
+  `python running/analyze_logs.py <run_dir> --plot chunk-pace-trend.png`
 
 2015-01-01 is exactly the historical -> SSP-scenario forcing boundary for
 this CMIP6-raw setup (`meteo.source: CMIP6-raw`, model `GFDL-ESM4`,
@@ -364,7 +364,7 @@ disk saturating at 16 writers. So:
 ## Re-running this analysis
 
 ```bash
-python running/analyze_chunk_pace.py <local_run01_mirror> [--csv out.csv]
+python running/analyze_logs.py <local_run01_mirror> [--csv out.csv]
 ```
 
 The baseline (first 5 chronological complete years) is fixed in the

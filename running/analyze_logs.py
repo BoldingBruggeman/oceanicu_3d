@@ -29,11 +29,11 @@ this script after the next sync to get an updated picture.
 
 Usage
 -----
-    python running/analyze_chunk_pace.py <run_dir> [--csv OUT.csv]
+    python running/analyze_logs.py <run_dir> [--csv OUT.csv]
 
     # e.g. against a local rsync mirror of
     # bb-server1:/data/OceanICU/oceanicu_3d/experiments/NSe/CMIP6_raw/run01
-    python running/analyze_chunk_pace.py /path/to/local/mirror/run01
+    python running/analyze_logs.py /path/to/local/mirror/run01
 """
 
 from __future__ import annotations
