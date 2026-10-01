@@ -62,11 +62,41 @@ _START_RE = re.compile(
     r"^(?P<wall>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+ - "
     r"Starting simulation at (?P<simdate>\d{4}-\d{2}-\d{2}) (?P<simtime>\d{2}:\d{2}:\d{2})$"
 )
+# "Integrals over global domain:" block -- one line per quantity, e.g.
+#   2026-10-01 06:14:56,542 -   total silicate: 1.8e+15 mmol m-3 m3 (mean total silicate: 28.6 mmol m-3)
+#   2026-10-01 06:14:56,543 -   salt: 2.2e+18 g (mean absolute salinity: 34.6 g kg-1)
+# Only the "(mean ...: VALUE ...)" part is captured (the DOMAIN MEAN, not
+# the raw total) -- that's what's actually comparable across chunks of
+# different lengths. The "volume"/"mean elevation" line has no label this
+# dict recognizes, so it's dropped automatically, per user (2026-10-01).
+_INTEGRAL_RE = re.compile(
+    r"^(?P<wall>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}),\d+ -\s+.*\(mean (?P<label>[a-zA-Z ]+): "
+    r"(?P<value>[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?) "
+)
+_INTEGRAL_LABELS = {
+    "total silicate": "silicate",
+    "total phosphorus": "phosphorus",
+    "total nitrogen": "nitrogen",
+    "total carbon": "carbon",
+    "absolute salinity": "salt",
+    "conservative temperature": "temp",
+}
 # Chunk directory name: NNN_STARTDATE_ENDDATE[.attempt-TIMESTAMP]
 _CHUNK_DIR_RE = re.compile(r"^(?P<num>\d{3})_(?P<start>\d{8})_(?P<end>\d{8})(?:\.attempt-(?P<attempt>\d{8}T\d{6}))?$")
 
 _WALL_FMT = "%Y-%m-%d %H:%M:%S"
 _SIM_FMT = "%Y-%m-%d %H:%M:%S"
+
+
+@dataclass
+class IntegralReading:
+    """One "Integrals over global domain" block -- domain-mean values,
+    attributed to the most recent simulated-date checkpoint seen before it
+    (sim is None only if the block appears before any checkpoint line at
+    all, e.g. right at chunk start)."""
+    wall: datetime
+    sim: Optional[datetime]
+    values: dict  # {"silicate"|"phosphorus"|"nitrogen"|"carbon"|"salt"|"temp": value}
 
 
 @dataclass
@@ -83,24 +113,39 @@ class ChunkResult:
     main_loop_seconds: Optional[float] = None
     year_seconds: dict = field(default_factory=dict)  # {year: wall seconds spent simulating that year}
     year_partial: set = field(default_factory=set)    # years whose data may be incomplete so far
+    integrals: list = field(default_factory=list)     # list[IntegralReading], in file order
 
 
-def _parse_log(path: Path) -> tuple[list[tuple[datetime, datetime]], Optional[datetime], Optional[float]]:
-    """Return (checkpoints, sim_start, main_loop_seconds).
+def _parse_log(path: Path) -> tuple[list[tuple[datetime, datetime]], Optional[datetime], Optional[float], list]:
+    """Return (checkpoints, sim_start, main_loop_seconds, integrals).
 
     checkpoints is a list of (wall_dt, sim_dt) pairs in file order, taken
     from every simulated-date progress line found (not just year
     boundaries) -- finer granularity makes per-year splits robust even if
     a chunk's report interval never happens to land exactly on Jan 1.
+
+    integrals is a list[IntegralReading] -- one per "Integrals over global
+    domain" block found, each block's several lines (one per quantity,
+    all sharing the same wall-clock second) collapsed into a single
+    reading. Attributed to the most recent checkpoint's simulated date
+    seen so far in the same single pass over the file.
     """
     checkpoints: list[tuple[datetime, datetime]] = []
     sim_start: Optional[datetime] = None
     main_loop_seconds: Optional[float] = None
+    integrals: list[IntegralReading] = []
+    last_sim: Optional[datetime] = None
+    pending_wall: Optional[datetime] = None
+    pending_values: dict = {}
 
     try:
         text = path.read_text(errors="replace")
     except OSError:
-        return checkpoints, sim_start, main_loop_seconds
+        return checkpoints, sim_start, main_loop_seconds, integrals
+
+    def _flush_pending():
+        if pending_wall is not None and pending_values:
+            integrals.append(IntegralReading(wall=pending_wall, sim=last_sim, values=dict(pending_values)))
 
     for line in text.splitlines():
         m = _START_RE.match(line)
@@ -116,8 +161,22 @@ def _parse_log(path: Path) -> tuple[list[tuple[datetime, datetime]], Optional[da
             wall_dt = datetime.strptime(m["wall"], _WALL_FMT)
             sim_dt = datetime.strptime(f"{m['simdate']} {m['simtime']}", _SIM_FMT)
             checkpoints.append((wall_dt, sim_dt))
+            last_sim = sim_dt
+            continue
+        m = _INTEGRAL_RE.match(line)
+        if m:
+            key = _INTEGRAL_LABELS.get(m["label"])
+            if key is None:
+                continue  # e.g. "elevation" (the volume line) -- not tracked
+            wall_dt = datetime.strptime(m["wall"], _WALL_FMT)
+            if pending_wall is not None and wall_dt != pending_wall:
+                _flush_pending()
+                pending_values = {}
+            pending_wall = wall_dt
+            pending_values[key] = float(m["value"])
 
-    return checkpoints, sim_start, main_loop_seconds
+    _flush_pending()
+    return checkpoints, sim_start, main_loop_seconds, integrals
 
 
 def _bucket_by_year(checkpoints: list[tuple[datetime, datetime]]) -> dict[int, float]:
@@ -176,9 +235,10 @@ def analyze_run_dir(run_dir: Path) -> list[ChunkResult]:
 
         log_path = chosen / "getm-0000.log"
         if log_path.exists() and log_path.stat().st_size > 0:
-            checkpoints, sim_start, main_loop_seconds = _parse_log(log_path)
+            checkpoints, sim_start, main_loop_seconds, integrals = _parse_log(log_path)
             result.sim_start = sim_start
             result.main_loop_seconds = main_loop_seconds
+            result.integrals = integrals
             if checkpoints:
                 result.start_wall = checkpoints[0][0]
                 result.wall_last, result.sim_last = checkpoints[-1]
@@ -202,7 +262,7 @@ def analyze_run_dir(run_dir: Path) -> list[ChunkResult]:
                     continue
                 alt_log = alt / "getm-0000.log"
                 if alt_log.exists() and alt_log.stat().st_size > 0:
-                    checkpoints, sim_start, main_loop_seconds = _parse_log(alt_log)
+                    checkpoints, sim_start, main_loop_seconds, integrals = _parse_log(alt_log)
                     if checkpoints:
                         result = ChunkResult(
                             num=num, dirname=alt.name, path=alt,
@@ -210,6 +270,7 @@ def analyze_run_dir(run_dir: Path) -> list[ChunkResult]:
                         )
                         result.sim_start = sim_start
                         result.main_loop_seconds = main_loop_seconds
+                        result.integrals = integrals
                         result.start_wall = checkpoints[0][0]
                         result.wall_last, result.sim_last = checkpoints[-1]
                         result.year_seconds = _bucket_by_year(checkpoints)
@@ -419,6 +480,87 @@ def plot_pace(summary: PaceSummary, out_path: Path) -> None:
     print(f"wrote {out_path}")
 
 
+def _sorted_integrals_with(integrals: list, *keys: str) -> list:
+    """integrals rows that have every one of *keys* and a known simulated
+    date, sorted by that date -- the common filter+sort both plots below
+    need before they can line up x values with each of their own series.
+    """
+    rows = [r for r in integrals if r.sim is not None and all(k in r.values for k in keys)]
+    rows.sort(key=lambda r: r.sim)
+    return rows
+
+
+def plot_nutrients(integrals: list, out_path: Path) -> None:
+    """Domain-mean silicate/phosphorus/nitrogen (left axis) and carbon
+    (right axis) vs. simulated date, from "Integrals over global domain"
+    log blocks. Per user, 2026-10-01 -- volume/elevation deliberately not
+    tracked here."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    rows = _sorted_integrals_with(integrals, "silicate", "phosphorus", "nitrogen", "carbon")
+    if not rows:
+        print("no integral readings with silicate/phosphorus/nitrogen/carbon found -- skipping nutrients plot", file=sys.stderr)
+        return
+    dates = [r.sim for r in rows]
+
+    fig, ax1 = plt.subplots(figsize=(10, 5))
+    ax1.plot(dates, [r.values["silicate"] for r in rows], color="#4a7ab8", label="silicate")
+    ax1.plot(dates, [r.values["phosphorus"] for r in rows], color="#4a8b5c", label="phosphorus")
+    ax1.plot(dates, [r.values["nitrogen"] for r in rows], color="#d9822b", label="nitrogen")
+    ax1.set_xlabel("simulated date")
+    ax1.set_ylabel("mean total silicate / phosphorus / nitrogen (mmol m-3)")
+    ax1.grid(True, alpha=0.3)
+
+    ax2 = ax1.twinx()
+    ax2.plot(dates, [r.values["carbon"] for r in rows], color="#b23a48", label="carbon")
+    ax2.set_ylabel("mean total carbon (mmol m-3)", color="#b23a48")
+    ax2.tick_params(axis="y", labelcolor="#b23a48")
+
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc="best", fontsize=9)
+
+    fig.suptitle("Domain-mean nutrient/carbon totals vs. simulated date")
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=150)
+    plt.close(fig)
+    print(f"wrote {out_path}")
+
+
+def plot_ts(integrals: list, out_path: Path) -> None:
+    """Domain-mean absolute salinity and conservative temperature (two
+    y-axes) vs. simulated date, from the same log blocks as plot_nutrients."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    rows = _sorted_integrals_with(integrals, "salt", "temp")
+    if not rows:
+        print("no integral readings with salt/temp found -- skipping T/S plot", file=sys.stderr)
+        return
+    dates = [r.sim for r in rows]
+
+    fig, ax1 = plt.subplots(figsize=(10, 5))
+    ax1.plot(dates, [r.values["salt"] for r in rows], color="#4a7ab8", label="salinity")
+    ax1.set_xlabel("simulated date")
+    ax1.set_ylabel("mean absolute salinity (g kg-1)", color="#4a7ab8")
+    ax1.tick_params(axis="y", labelcolor="#4a7ab8")
+    ax1.grid(True, alpha=0.3)
+
+    ax2 = ax1.twinx()
+    ax2.plot(dates, [r.values["temp"] for r in rows], color="#d9822b", label="temperature")
+    ax2.set_ylabel("mean conservative temperature (deg C)", color="#d9822b")
+    ax2.tick_params(axis="y", labelcolor="#d9822b")
+
+    fig.suptitle("Domain-mean salinity/temperature vs. simulated date")
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=150)
+    plt.close(fig)
+    print(f"wrote {out_path}")
+
+
 def write_csv(results: list[ChunkResult], out_path: Path) -> None:
     with open(out_path, "w", newline="") as f:
         writer = csv_module.writer(f)
@@ -441,6 +583,12 @@ def main() -> int:
     parser.add_argument("--csv", type=Path, default=None, help="Also write per-chunk/per-year rows to this CSV file")
     parser.add_argument("--plot", type=Path, default=None,
                          help="Also write a PNG plot of per-year pace + the [rest] linear trend")
+    parser.add_argument("--plot-nutrients", type=Path, default=None,
+                         help="Also write a PNG plot of domain-mean silicate/phosphorus/nitrogen "
+                              "(left axis) and carbon (right axis) vs. simulated date")
+    parser.add_argument("--plot-ts", type=Path, default=None,
+                         help="Also write a PNG plot of domain-mean salinity and temperature "
+                              "(two y-axes) vs. simulated date")
     args = parser.parse_args()
 
     if not args.run_dir.is_dir():
@@ -460,6 +608,12 @@ def main() -> int:
             print("error: no complete years to plot", file=sys.stderr)
             return 1
         plot_pace(summary, args.plot)
+    if args.plot_nutrients or args.plot_ts:
+        all_integrals = [reading for r in results for reading in r.integrals]
+        if args.plot_nutrients:
+            plot_nutrients(all_integrals, args.plot_nutrients)
+        if args.plot_ts:
+            plot_ts(all_integrals, args.plot_ts)
     return 0
 
 
