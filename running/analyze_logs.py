@@ -494,7 +494,13 @@ def plot_nutrients(integrals: list, out_path: Path) -> None:
     """Domain-mean silicate/phosphorus/nitrogen (left axis) and carbon
     (right axis) vs. simulated date, from "Integrals over global domain"
     log blocks. Per user, 2026-10-01 -- volume/elevation deliberately not
-    tracked here."""
+    tracked here.
+
+    A pure PHYSICAL run (no FABM) never logs these quantities at all --
+    that's not an error, just nothing to plot, so this prints a notice
+    and returns rather than raising (see the `if not rows` check below).
+    plot_ts's own salt/temp are unaffected, since those ARE always
+    logged regardless of whether FABM is active."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -585,7 +591,9 @@ def main() -> int:
                          help="Also write a PNG plot of per-year pace + the [rest] linear trend")
     parser.add_argument("--plot-nutrients", type=Path, default=None,
                          help="Also write a PNG plot of domain-mean silicate/phosphorus/nitrogen "
-                              "(left axis) and carbon (right axis) vs. simulated date")
+                              "(left axis) and carbon (right axis) vs. simulated date -- skipped "
+                              "with a notice, not an error, for a pure physical run (no FABM), "
+                              "which never logs these at all")
     parser.add_argument("--plot-ts", type=Path, default=None,
                          help="Also write a PNG plot of domain-mean salinity and temperature "
                               "(two y-axes) vs. simulated date")
