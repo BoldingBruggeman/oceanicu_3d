@@ -428,6 +428,20 @@ boundaries:
     CMEMS:
       folder: ${BOUNDARY_FOLDER_FABM_CMEMS}
       climatology: false
+      # O3_c (DIC)/O3_TA (alkalinity): ADDED 2026-10-02, real gap hit
+      # directly on a genuine NSe/CMEMS 2010-2011 run -- without these,
+      # DIC/TA simply had no boundary at all. Real coverage of
+      # bio_carbon_new only starts 2024-07-29 (confirmed directly --
+      # NOT 2024-02-28, an earlier stale assumption), a decade past this
+      # run's own 2010-2011 period, so the historical-bridge splice
+      # (dic_ta_historical_method, below) is NOT optional here the way
+      # it is for CMIP6 -- every CMEMS run starting before 2024-07-29
+      # needs it. pml_trend explicit (not the cycled_climatology
+      # default) -- that method has no CMEMS-range (2010-01-01 to
+      # 2024-07-28) bridge file built; see oceanicu_providers.py's own
+      # ValueError guard for what happens if cycled_climatology is
+      # selected here anyway.
+      dic_ta_historical_method: pml_trend
       # tracers[*].file/variable below are the real, nbdyp-shaped
       # (boundary-point-only) daily product -- correct for the SPONGE
       # boundary read but NOT usable as a full-domain initial condition
@@ -465,6 +479,14 @@ boundaries:
         O2_o:
           file: bio_daily_2010-01-01_to_2026-08-17.nc
           variable: o2
+          boundary_condition_type: SPONGE
+        O3_c:
+          file: bio_carbon_new_2024-07-29_to_2026-08-17.nc
+          variable: dissic
+          boundary_condition_type: SPONGE
+        O3_TA:
+          file: bio_carbon_new_2024-07-29_to_2026-08-17.nc
+          variable: talk
           boundary_condition_type: SPONGE
 meteo:
   # ERA5 only -- no CMIP6/CMIP6-raw (2026-10-01, per user: "there should
