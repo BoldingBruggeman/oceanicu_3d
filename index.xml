@@ -6,20 +6,24 @@
     <description>Recent content on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 28 Sep 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 05 Oct 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>NSe — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</link>
-      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 05 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</guid>
       <description>&lt;h1 id=&#34;nse-analysis-overview&#34;&gt;NSe Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NSe&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
 &lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
-&lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
 &lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
-&lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
-&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/&#34;&gt;WOA-tidal&lt;/a&gt;&lt;/strong&gt; — 2010
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/#year-2010&#34;&gt;2010&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-ssp126/&#34;&gt;ssp126&lt;/a&gt;&lt;/strong&gt; — 2010-2049
@@ -30,7 +34,11 @@
 &lt;/ul&gt;
 &lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
 &lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
-&lt;p&gt;&lt;em&gt;No horizontal bottom-layer validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;</description>
+&lt;p&gt;&lt;em&gt;No horizontal bottom-layer validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
+&lt;h2 id=&#34;gridded-3d-validation&#34;&gt;Gridded 3D Validation&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No gridded 3D profile validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>Tidal Analysis</title>
@@ -574,19 +582,89 @@ both equally.&lt;/p&gt;</description>
     <item>
       <title>NSe</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</link>
-      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 05 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</guid>
       <description>NSe modeling area — validation results and experiment overview.</description>
     </item>
     <item>
+      <title>NSe - WOA-tidal - Tidal Analysis</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/</link>
+      <pubDate>Mon, 05 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/</guid>
+      <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
+&lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-05
+&lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
+&lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
+&lt;h3 id=&#34;year-2010&#34;&gt;Year 2010&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — model amplitude and phase&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-woa-tidal/physics/pyGETM/2010/tidal/K1_model_amp_phase.png&#34;&gt;
+&lt;em&gt;K₁ (lunar-solar diurnal) — model amplitude and phase&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;K₂ (lunar-solar semi-diurnal) — model amplitude and phase&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-woa-tidal/physics/pyGETM/2010/tidal/K2_model_amp_phase.png&#34;&gt;
+&lt;em&gt;K₂ (lunar-solar semi-diurnal) — model amplitude and phase&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;M₂ (principal lunar semi-diurnal) — model amplitude and phase&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-woa-tidal/physics/pyGETM/2010/tidal/M2_model_amp_phase.png&#34;&gt;
+&lt;em&gt;M₂ (principal lunar semi-diurnal) — model amplitude and phase&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>NSe — Future Boundary Conditions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</link>
-      <pubDate>Mon, 28 Sep 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 05 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</guid>
       <description>&lt;p&gt;Cross-model, cross-scenario summary of NSe&amp;rsquo;s future open-boundary conditions: delta-change temperature/salinity (CMIP6, bias-corrected against the CMEMS Northwest Shelf reanalysis), tidal elevation/currents (TPXO9 plus the CMIP6 ensemble-mean sea-level trend), and (as of 2026-09-22) delta-change biogeochemistry &amp;ndash; nitrate, phosphate, silicate, oxygen, dissolved inorganic carbon, and alkalinity &amp;ndash; across all three CMIP6 models and both scenarios (see the bug-fix campaign section below for how that came together).&lt;/p&gt;
 &lt;h2 id=&#34;delta-change-temperature--salinity&#34;&gt;Delta-change (temperature / salinity)&lt;/h2&gt;
 &lt;h3 id=&#34;temperature-thetao&#34;&gt;Temperature (thetao)&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;Source: AMM7/AMM15 delta-change: GFDL-ESM4/ssp126 [1985-01-01–2014-12-31 vs 2015-01-01–2100-12-31]&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Regridding</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</link>
+      <pubDate>Mon, 05 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</guid>
+      <description>&lt;h1 id=&#34;regridding-user-guide&#34;&gt;Regridding User Guide&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;ocean_data.regridding&lt;/code&gt; provides xESMF-based regridding with automatic
+weight-file caching, domain subsetting, and coordinate name normalisation.
+The &lt;code&gt;regrid&lt;/code&gt; command (&lt;code&gt;cli/regrid.py&lt;/code&gt;) exposes the same functionality as a
+command-line tool. ocean-post re-exports the same API from
+&lt;code&gt;ocean_post.regridding&lt;/code&gt; for backward compatibility; import from
+&lt;code&gt;ocean_data.regridding&lt;/code&gt; in new code.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;contents&#34;&gt;Contents&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;#1-introduction&#34;&gt;Introduction&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#2-installation-and-setup&#34;&gt;Installation and setup&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#3-command-line-interface&#34;&gt;Command-line interface&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#31-basic-usage&#34;&gt;Basic usage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#32-selecting-variables&#34;&gt;Selecting variables&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#33-choosing-the-regrid-method&#34;&gt;Choosing the regrid method&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#34-the---target-variable-flag&#34;&gt;The &amp;ndash;target-variable flag&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#35-weight-caching&#34;&gt;Weight caching&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#36-global-source-grids&#34;&gt;Global source grids&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#37-skipping-domain-subsetting&#34;&gt;Skipping domain subsetting&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#4-python-api&#34;&gt;Python API&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#41-regridmanager&#34;&gt;RegridManager&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#42-regrid&#34;&gt;.regrid()&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#43-subset_to_target_domain&#34;&gt;.subset_to_target_domain()&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#44-regrid_data&#34;&gt;regrid_data()&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#45-open_with_chunks&#34;&gt;open_with_chunks()&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#5-weight-caching&#34;&gt;Weight caching&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#6-regridding-methods&#34;&gt;Regridding methods&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#7-coordinate-name-handling&#34;&gt;Coordinate name handling&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#8-domain-subsetting&#34;&gt;Domain subsetting&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#9-unit-conversion&#34;&gt;Unit conversion&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#10-troubleshooting&#34;&gt;Troubleshooting&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;1-introduction&#34;&gt;1. Introduction&lt;/h2&gt;
+&lt;p&gt;Regridding maps data from one spatial grid to another — for example
+interpolating a global 0.25° satellite observation product onto a regional
+1 km model grid, or the other way round, before computing validation
+statistics.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

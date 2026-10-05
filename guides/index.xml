@@ -6,7 +6,7 @@
     <description>Recent content in Guides on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 05 Oct 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/guides/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Tidal Analysis</title>
@@ -546,6 +546,57 @@ side.&lt;/li&gt;
 one case, &lt;code&gt;python3 -m cli.reporting&lt;/code&gt; in the other) and this repo&amp;rsquo;s own
 &lt;code&gt;deploy_ghpages.py&lt;/code&gt; directly. A bug or fix in &lt;code&gt;lib/reporting.py&lt;/code&gt; affects
 both equally.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Regridding</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</link>
+      <pubDate>Mon, 05 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</guid>
+      <description>&lt;h1 id=&#34;regridding-user-guide&#34;&gt;Regridding User Guide&lt;/h1&gt;
+&lt;p&gt;&lt;code&gt;ocean_data.regridding&lt;/code&gt; provides xESMF-based regridding with automatic
+weight-file caching, domain subsetting, and coordinate name normalisation.
+The &lt;code&gt;regrid&lt;/code&gt; command (&lt;code&gt;cli/regrid.py&lt;/code&gt;) exposes the same functionality as a
+command-line tool. ocean-post re-exports the same API from
+&lt;code&gt;ocean_post.regridding&lt;/code&gt; for backward compatibility; import from
+&lt;code&gt;ocean_data.regridding&lt;/code&gt; in new code.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;contents&#34;&gt;Contents&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&#34;#1-introduction&#34;&gt;Introduction&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#2-installation-and-setup&#34;&gt;Installation and setup&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#3-command-line-interface&#34;&gt;Command-line interface&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#31-basic-usage&#34;&gt;Basic usage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#32-selecting-variables&#34;&gt;Selecting variables&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#33-choosing-the-regrid-method&#34;&gt;Choosing the regrid method&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#34-the---target-variable-flag&#34;&gt;The &amp;ndash;target-variable flag&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#35-weight-caching&#34;&gt;Weight caching&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#36-global-source-grids&#34;&gt;Global source grids&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#37-skipping-domain-subsetting&#34;&gt;Skipping domain subsetting&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#4-python-api&#34;&gt;Python API&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;#41-regridmanager&#34;&gt;RegridManager&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#42-regrid&#34;&gt;.regrid()&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#43-subset_to_target_domain&#34;&gt;.subset_to_target_domain()&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#44-regrid_data&#34;&gt;regrid_data()&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#45-open_with_chunks&#34;&gt;open_with_chunks()&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#5-weight-caching&#34;&gt;Weight caching&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#6-regridding-methods&#34;&gt;Regridding methods&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#7-coordinate-name-handling&#34;&gt;Coordinate name handling&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#8-domain-subsetting&#34;&gt;Domain subsetting&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#9-unit-conversion&#34;&gt;Unit conversion&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;#10-troubleshooting&#34;&gt;Troubleshooting&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;1-introduction&#34;&gt;1. Introduction&lt;/h2&gt;
+&lt;p&gt;Regridding maps data from one spatial grid to another — for example
+interpolating a global 0.25° satellite observation product onto a regional
+1 km model grid, or the other way round, before computing validation
+statistics.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
