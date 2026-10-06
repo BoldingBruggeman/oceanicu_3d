@@ -6,12 +6,12 @@
     <description>Recent content in Validations on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 05 Oct 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 06 Oct 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/validations/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>NSe — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</link>
-      <pubDate>Mon, 05 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</guid>
       <description>&lt;h1 id=&#34;nse-analysis-overview&#34;&gt;NSe Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NSe&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -19,13 +19,7 @@
 &lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/&#34;&gt;WOA-tidal&lt;/a&gt;&lt;/strong&gt; — 2010&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/#year-2010&#34;&gt;2010&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/&#34;&gt;CMEMS-tidal&lt;/a&gt;&lt;/strong&gt; — 2011&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/&#34;&gt;CMEMS/tidal&lt;/a&gt;&lt;/strong&gt; — 2011&lt;/p&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -61,12 +55,18 @@
 &lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011&#34;&gt;2011&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/&#34;&gt;WOA/tidal&lt;/a&gt;&lt;/strong&gt; — 2010&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/#year-2010&#34;&gt;2010&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-ssp126/&#34;&gt;ssp126&lt;/a&gt;&lt;/strong&gt; — 2010-2049
+&lt;li&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmip6-raw-gfdl-esm4-ssp126-run01/&#34;&gt;CMIP6_raw/GFDL-ESM4-ssp126/run01&lt;/a&gt;&lt;/strong&gt; — 2010-2049
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-ssp126/#year-2010-2049&#34;&gt;2010-2049&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmip6-raw-gfdl-esm4-ssp126-run01/#year-2010-2049&#34;&gt;2010-2049&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
@@ -75,43 +75,43 @@
 &lt;p&gt;&lt;em&gt;No horizontal bottom-layer validation has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
-      <title>NSe - CMEMS-tidal - Tidal Analysis</title>
+      <title>NSe - CMEMS/tidal - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/</link>
-      <pubDate>Mon, 05 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-05
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-06
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
 &lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-tidal/physics/pyGETM/2011/tidal/gesla_station_map.png&#34;&gt;
 &lt;em&gt;GESLA tide gauge station locations&lt;/em&gt;&lt;/p&gt;
 &lt;h3 id=&#34;year-2011&#34;&gt;Year 2011&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-tidal/physics/pyGETM/2011/tidal/K1_gesla_comparison.png&#34;&gt;
-&lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — model amplitude and phase&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-tidal/physics/pyGETM/2011/tidal/K1_model_amp_phase.png&#34;&gt;
-&lt;em&gt;K₁ (lunar-solar diurnal) — model amplitude and phase&lt;/em&gt;&lt;/p&gt;</description>
+&lt;em&gt;K₁ (lunar-solar diurnal) — model amplitude and phase&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-tidal/physics/pyGETM/2011/tidal/K1_gesla_comparison.png&#34;&gt;
+&lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
-      <title>NSe - WOA-tidal - Tidal Analysis</title>
+      <title>NSe - WOA/tidal - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/</link>
-      <pubDate>Mon, 05 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Tue, 06 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-05
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-06
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;year-2010&#34;&gt;Year 2010&lt;/h3&gt;
 &lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — model amplitude and phase&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-woa-tidal/physics/pyGETM/2010/tidal/K1_model_amp_phase.png&#34;&gt;
 &lt;em&gt;K₁ (lunar-solar diurnal) — model amplitude and phase&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;K₂ (lunar-solar semi-diurnal) — model amplitude and phase&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-woa-tidal/physics/pyGETM/2010/tidal/K2_model_amp_phase.png&#34;&gt;
-&lt;em&gt;K₂ (lunar-solar semi-diurnal) — model amplitude and phase&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;M₂ (principal lunar semi-diurnal) — model amplitude and phase&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-woa-tidal/physics/pyGETM/2010/tidal/M2_model_amp_phase.png&#34;&gt;
-&lt;em&gt;M₂ (principal lunar semi-diurnal) — model amplitude and phase&lt;/em&gt;&lt;/p&gt;</description>
+&lt;p&gt;&lt;img alt=&#34;O₁ (principal lunar diurnal) — model amplitude and phase&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-woa-tidal/physics/pyGETM/2010/tidal/O1_model_amp_phase.png&#34;&gt;
+&lt;em&gt;O₁ (principal lunar diurnal) — model amplitude and phase&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;P₁ (principal solar diurnal) — model amplitude and phase&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-woa-tidal/physics/pyGETM/2010/tidal/P1_model_amp_phase.png&#34;&gt;
+&lt;em&gt;P₁ (principal solar diurnal) — model amplitude and phase&lt;/em&gt;&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
