@@ -466,3 +466,11 @@ fabm:
   ERSEM:
     folder: ${FABM_ERSEM_FOLDER}
     data_script: ${SCRIPT_FOLDER}/fabm.py:configure_fabm
+    # 2026-10-07, per user -- same reasoning as nse_cmems.yaml's own
+    # ghg_scenario comment: splices co2/n2o_ssp245_15deg.nc + the matching
+    # Ndep ssp245 files past the real historical files' 2014-12 end, for
+    # whenever add_experiments.py's --type E/EM* flips fabm.source to
+    # ERSEM (this base config's own source: none above leaves FABM off by
+    # default, so this is inert until then). ssp245 picked arbitrarily --
+    # see nse_cmems.yaml's own comment for why the choice barely matters.
+    ghg_scenario: ssp245

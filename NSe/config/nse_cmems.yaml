@@ -540,3 +540,16 @@ fabm:
     restart_file: null
     file: fabm_ersem.yaml
     data_script: ${SCRIPT_FOLDER}/fabm.py:configure_fabm
+    # 2026-10-07, per user: splices co2_ssp245_15deg.nc/n2o_ssp245_15deg.nc
+    # (+ the matching Ndep/AMM7_Ndep_BC-EMEP_ssp245_y????.nc files) in past
+    # the real historical files' own 2014-12 end -- otherwise any run past
+    # 2015-01-01 (e.g. the validation/production --kind periods, which go
+    # to 2024/2099) raises at FABM setup (scripts/fabm.py's own loud
+    # ghg_scenario check). ssp245 picked arbitrarily -- the 4 SSPs barely
+    # diverge before ~2030 (calibrated to the same real near-term
+    # trajectory), and CMEMS's own real boundary/meteo/river data don't
+    # reach anywhere near far enough into any SSP's actual divergence
+    # period for the choice to matter here. Harmless for the registered
+    # spinup experiment itself (2010-2011, never reaches 2015) -- the
+    # splice is transparent for a run that never advances into it.
+    ghg_scenario: ssp245

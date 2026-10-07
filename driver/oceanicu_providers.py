@@ -1387,20 +1387,35 @@ def derive_data_assignments(config: dict) -> list[dict]:
             # needs no bridge file set (empty dict) -- it's a global
             # climatology, not a real time series with any coverage gap
             # to bridge.
-            _fabm_hist_files = {
-                "CMIP6": {
+            # NOT a single dict literal keyed by boundaries_fabm_source (a
+            # real bug hit directly, 2026-10-07, generating a genuine NSe/
+            # WOA/validation/E combo -- WOA's own ERSEM-enabled boundaries.
+            # fabm.WOA branch reaches this code too, now that
+            # add_experiments.py supports it): a dict literal's values are
+            # ALL evaluated eagerly, regardless of which key is later
+            # looked up -- so the CMEMS/CMIP6 branches' own `_cmems_fabm_
+            # folder / _dic_ta_hist_file` crashed with `Path / None` for
+            # WOA even though neither branch is WOA's own and `.get(...,
+            # {})` would have returned {} for it. Only construct the
+            # branch that actually matches.
+            if boundaries_fabm_source == "CMIP6":
+                _fabm_hist_files = {
                     "no3": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
                     "po4": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
                     "si": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
                     "o2": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
                     "dissic": _cmems_fabm_folder / _dic_ta_hist_file,
                     "talk": _cmems_fabm_folder / _dic_ta_hist_file,
-                },
-                "CMEMS": {
+                }
+            elif boundaries_fabm_source == "CMEMS":
+                _fabm_hist_files = {
                     "dissic": _cmems_fabm_folder / _dic_ta_hist_file,
                     "talk": _cmems_fabm_folder / _dic_ta_hist_file,
-                },
-            }.get(boundaries_fabm_source, {})
+                }
+            else:
+                # WOA -- no bridge file needed (global climatology, not a
+                # real time series with any coverage gap to bridge).
+                _fabm_hist_files = {}
             for _tracer, _spec in _fabm_tracers.items():
                 # boundary_condition_type is optional per-tracer -- defaults
                 # to SPONGE (cfg_fabm.py's own real, only-ever-used value)
