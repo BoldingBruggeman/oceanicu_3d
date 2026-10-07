@@ -155,10 +155,10 @@ data_assignments:
   constant_value: 0.7
 - target: simulation.radiation.kc1
   kind: constant
-  constant_value: 0.54
+  constant_value: 1.85
 - target: simulation.radiation.kc2
   kind: constant
-  constant_value: 3.23
+  constant_value: 0.2
 - target: open_boundary.temp
   kind: boundary_type
   boundary_condition_type: SPONGE
