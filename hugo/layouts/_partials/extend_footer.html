@@ -1,0 +1,5 @@
+{{- /* Footer custom content area start */ -}}
+{{- if not .Date.IsZero }}
+<span> · Page generated {{ .Date.Format "2006-01-02" }}</span>
+{{- end }}
+{{- /* Footer custom content area end */ -}}
