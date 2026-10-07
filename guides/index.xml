@@ -253,17 +253,15 @@ Config and guides are at &lt;code&gt;ocean-prep/config/bc_correct_example.yaml&l
       <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/river-projection/</guid>
       <description>&lt;h1 id=&#34;river-flow-and-nutrient-load-projection-guide&#34;&gt;River Flow and Nutrient Load Projection Guide&lt;/h1&gt;
 &lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;Not verified against the current checkout (2026-10-06).&lt;/strong&gt; This guide&amp;rsquo;s
-generator command, &lt;code&gt;river-projection&lt;/code&gt;, and its config,
-&lt;code&gt;config/river_projection.yaml&lt;/code&gt;, were not found in this repo — only
-&lt;code&gt;river-diagnostics&lt;/code&gt; (&lt;code&gt;cli/river_diagnostics.py&lt;/code&gt;) exists as a console
-script, and it has no shipped example config either. The projection logic
-may have moved (e.g. into &lt;code&gt;ocean-prep&lt;/code&gt;&amp;rsquo;s bias-correction/river pipeline) or
-been renamed; this page was not rewritten blind to guess which. Treat the
-&lt;code&gt;river-projection&lt;/code&gt; commands below as historical until someone confirms
-where that step now lives. The &lt;code&gt;river-diagnostics&lt;/code&gt; command lines were
-corrected for the current &lt;code&gt;--analyses-dir&lt;/code&gt; behaviour (no &lt;code&gt;./analyses&lt;/code&gt;
-fallback) but not otherwise re-verified.&lt;/p&gt;</description>
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;river-projection&lt;/code&gt; (stage 1, below) lives in &lt;code&gt;ocean-prep&lt;/code&gt;&lt;/strong&gt;, alongside
+&lt;code&gt;bc-correct&lt;/code&gt;/&lt;code&gt;bc-diagnostics&lt;/code&gt; — install and run it from the &lt;code&gt;ocean-prep&lt;/code&gt;
+repo (&lt;code&gt;cli/river_projection.py&lt;/code&gt;), with its config at
+&lt;code&gt;ocean-prep/config/river_projection_example.yaml&lt;/code&gt;. &lt;code&gt;river-diagnostics&lt;/code&gt;
+(stage 2) stays in &lt;code&gt;ocean-post&lt;/code&gt;. Confirmed 2026-10-07; this page previously
+referenced a &lt;code&gt;config/river_projection.yaml&lt;/code&gt; in &lt;code&gt;ocean-post&lt;/code&gt; that was never
+there, and the real tool and config were found in &lt;code&gt;ocean-prep&lt;/code&gt; instead. No
+project-specific copy of the config exists yet in this checkout — the only
+one found is &lt;code&gt;ocean-prep&lt;/code&gt;&amp;rsquo;s own example.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Update From Remote</title>
