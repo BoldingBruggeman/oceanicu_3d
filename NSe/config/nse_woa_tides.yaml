@@ -111,16 +111,16 @@ simulation:
   airsea:
     type: FluxesFromMeteo
     Fluxes:
-      taux: 0.0
-      tauy: 0.0
+      taux: 0.01
+      tauy: 0.01
       sp: 101325.0
-      shf: 0.0
-      swr: 0.0
       pe: 0.0
+      shf: -50.0
+      swr: 50.0
     FluxesFromMeteo:
-      shortwave_method: NET_FLUX
-      longwave_method: NET_FLUX
-      humidity_measure: SPECIFIC_HUMIDITY
+      shortwave_method: ROSATI_MIYAKODA
+      longwave_method: CLARK
+      humidity_measure: DEW_POINT_TEMPERATURE
       calculate_evaporation: true
       albedo_method: PAYNE
   radiation:
@@ -155,10 +155,10 @@ data_assignments:
   constant_value: 0.7
 - target: simulation.radiation.kc1
   kind: constant
-  constant_value: 1.85
+  constant_value: 0.54
 - target: simulation.radiation.kc2
   kind: constant
-  constant_value: 0.2
+  constant_value: 3.23
 - target: open_boundary.temp
   kind: boundary_type
   boundary_condition_type: SPONGE
@@ -249,54 +249,25 @@ output:
     - N4_n
     - N1_p
     - N5_s
-    - R1_c
-    - R2_c
-    - R3_c
-    - R4_c
-    - R6_c
-    - R8_c
     - O3_c
-    - O3_TA
-    - Z4_c
-    - Z5_c
-    - Z6_c
-    - B1_c   
     fabm_ersem_2D:
-    - O3_fair
-    - Q7_c
     - Q6_c
     - Y2_c
     - Y3_c
-    - Y4_c
-    - G2_o
-    - G3_c
-    fabm_ersem_diag: # these can't be sliced in output
-    - O3_pCO2
-    - O3_pH
-    - ph_sf_result
-    - phytoplankton_netPI_result
-    - total_phytoplankton_chl_result
-    - total_zooplankton_carbon_result
-    - total_phytoplankton_carbon_result
-    - total_smallzooplankton_carbon_result
-    - Z4_fzooc_result
-    - Z4_fphytoc_result
-    - Z4_fsmallzooc_result
-    - phytoplankton_loss_to_labile_DOC_result
-    - phytoplankton_loss_to_POC_result
-    - phytoplankton_loss_to_non_labile_DOC_result
-    - net_PelBen_POC_result
-    - Z4_fZIO3c
-    - Z4_fZIRDc
-    - B1_fB1O3c # bacteria fluxes for Helen P. PML
-    - B1_fRPB1c
-    - B1_fB1R3c
-    - B1_fB1R1c
-    - B1_fB1R2c
-    - B1_fR1B1c
-    - B1_fR2B1c
-    - B1_fR3B1c
-    fabm_mizer:  # placeholder -- oceanicu_driver.py overwrites this with fish_c1..fish_c100 at generation time
+    - O3_fair
+    - Q7_c
+    - Q6_pen_depth_c
+    - ben_col_D1m
+    - ben_col_D2m
+    - N5_s_bdy
+    - N5_s_sms
+    - N5_s_sfl
+    - N5_s_bfl
+    fabm_ersem_diag:
+    - N5_s_sfl_tot_calculator_result
+    - N5_s_bfl_tot_calculator_result
+    - N5_s_sms_tot_calculator_result
+    fabm_mizer:
     - fish_c1
     - fish_c_tot
     - fish_c_pel
@@ -309,10 +280,6 @@ output:
     - fish_c_size2
     - fish_c_size3
     - fish_c_lfi
-    - fish_prey5_c_sms
-    - fish_predation_on_phytoplankton_result
-    - fish_predation_on_smallzoo_result
-    - fish_predation_on_benthos_result
     fabm_mizer_fishing:
     - fish_totlandings
     - fish_demlandings
@@ -339,7 +306,7 @@ output:
       sync_interval: 1
       default_dtype: float32
       format: NETCDF4
-      active: false
+      active: true
     variable_requests:
     - groups:
       - tidal
@@ -353,6 +320,7 @@ output:
       sync_interval: 1
       default_dtype: float32
       format: NETCDF4
+      active: false
     variable_requests:
     - groups:
       - barotropic_2d
@@ -364,6 +332,7 @@ output:
       sync_interval: 1
       default_dtype: float32
       format: NETCDF4
+      active: false
     variable_requests:
     - groups:
       - baroclinic_3d
@@ -378,7 +347,6 @@ output:
       time_average: true
     - groups:
       - fabm_mizer
-      - fabm_mizer_fishing
       requires_fabm_dependency: fish/fishing_pressure
       time_average: true
   - type: netcdf
@@ -390,23 +358,11 @@ output:
       path: surf_bott_daily.nc
       start: '2010-01-01'
       stop: '2020-01-01'
+      active: false
     variable_requests:
     - groups:
       - fabm_mizer_fishing
       requires_fabm_dependency: fish/fishing_pressure
-    - groups: 
-      - fabm_ersem_2D
-      requires_fabm: true
-    - groups:
-      - fabm_ersem_3D
-      requires_fabm: true
-      z_index: -1
-      generate_unique_name: true
-    - groups:
-      - fabm_ersem_3D
-      requires_fabm: true
-      z_index: 0
-      generate_unique_name: true
     - fields:
       - temp
       - salt
@@ -431,7 +387,7 @@ hydrography:
     salt: 36
 boundaries:
   barotropic:
-    source: CMIP6
+    source: TPXO
     TPXO:
       tpxo_folder: ${TPXO_FOLDER}
     CMEMS:
@@ -442,14 +398,14 @@ boundaries:
       end_date: '2026-01-01'
     CMIP6:
       folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}
-      folder_template: '{model}/{scenario}/bdy'
-      filename_template: bdy_2d_{start_date}_{end_date}.nc
-      scenario: ssp126
-      start_date: '20150101'
-      end_date: '21001231'
-      model: GFDL-ESM4
+      folder_template: '{setup}/CMIP6/{model}/{scenario}'
+      filename_template: '{start_date}_to_{end_date}.nc'
+      model: MPI-ESM1-2-HR
+      scenario: ssp585
+      start_date: '2024-03-01'
+      end_date: '2026-01-01'
   baroclinic:
-    source: CMIP6
+    source: WOA
     WOA:
       folder: ${BOUNDARY_FOLDER_BAROCLINIC_WOA}
     CMEMS:
@@ -462,32 +418,12 @@ boundaries:
       folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}
       folder_template: '{model}/{scenario}/bdy'
       filename_template: bdy_3d_{variable}_{start_date}_{end_date}.nc
+      model: MPI-ESM1-2-HR
       scenario: ssp126
       start_date: '20150101'
       end_date: '21001231'
-      model: GFDL-ESM4
   fabm:
-    source: CMIP6
-    CMEMS:
-      folder: ${BOUNDARY_FOLDER_FABM_CMEMS}
-      climatology: true
-      tracers:
-        N3_n:
-          file: bio_monthly_climatology.nc
-          variable: no3
-          boundary_condition_type: SPONGE
-        N1_p:
-          file: bio_monthly_climatology.nc
-          variable: po4
-          boundary_condition_type: SPONGE
-        N5_s:
-          file: bio_monthly_climatology.nc
-          variable: si
-          boundary_condition_type: SPONGE
-        O2_o:
-          file: bio_monthly_climatology.nc
-          variable: o2
-          boundary_condition_type: SPONGE
+    source: WOA
     WOA:
       folder: ${BOUNDARY_FOLDER_FABM_WOA}
       tracers:
@@ -507,52 +443,8 @@ boundaries:
           file: woa_o.nc
           variable: o_an
           boundary_condition_type: SPONGE
-    # Real generated boundary files (2026-09-21/22, GFDL-ESM4/ssp126 only
-    # so far) -- oceanicu_providers.derive_data_assignments already had
-    # this branch wired (on_grid=True, climatology=False, folder_template
-    # model/scenario resolution) before any real file existed to point at;
-    # `file` per tracer is a literal name here (not templated), same as
-    # CMEMS's own tracers[*].file above -- matches what's actually on disk
-    # today, not a naming convention to rely on holding for other models/
-    # scenarios without checking again. method: deltachange chosen as the
-    # default since it's the only one of the 3 generation methods that
-    # exists for all 6 variables (direct bias-correction only exists for
-    # talk/dissic so far) -- see analyses/areas/NSe/boundaries_bio/ for the
-    # per-segment comparison between methods. O3_c/O3_TA (dissic/talk) are
-    # NEW here -- CMEMS/WOA above never had them (no real boundary file
-    # existed for either until this session).
-    CMIP6:
-      folder: ${BOUNDARY_FOLDER_FABM_CMIP6}
-      folder_template: '{model}/{scenario}/bdy'
-      model: GFDL-ESM4
-      scenario: ssp126
-      tracers:
-        N3_n:
-          file: bdy_3d_no3_deltachange_20150101_21001231.nc
-          variable: no3
-          boundary_condition_type: SPONGE
-        N1_p:
-          file: bdy_3d_po4_deltachange_20150101_21001231.nc
-          variable: po4
-          boundary_condition_type: SPONGE
-        N5_s:
-          file: bdy_3d_si_deltachange_20150101_21001231.nc
-          variable: si
-          boundary_condition_type: SPONGE
-        O2_o:
-          file: bdy_3d_o2_deltachange_20150101_21001231.nc
-          variable: o2
-          boundary_condition_type: SPONGE
-        O3_c:
-          file: bdy_3d_dissic_deltachange_20150101_21001231.nc
-          variable: dissic
-          boundary_condition_type: SPONGE
-        O3_TA:
-          file: bdy_3d_talk_deltachange_20150101_21001231.nc
-          variable: talk
-          boundary_condition_type: SPONGE
 meteo:
-  source: CMIP6
+  source: ERA5
   ERA5:
     folder: ${ERA5_FOLDER}
     evaporation: true
@@ -568,29 +460,14 @@ meteo:
   CMIP6:
     folder: ${CMIP6_FOLDER}
     folder_template: CMIP6/{model}/{scenario}/meteo
+    model: MPI-ESM1-2-HR
     scenario: ssp126
     evaporation: true
-    radiation_source: net
+    radiation_source: pseudo_tcc
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
-    model: GFDL-ESM4
-  # folder deliberately left unset (an empty mapping, NOT omitted -- see
-  # ChoiceSpec's own nested-vs-flat handling in yaml_parse._validate_choice:
-  # a bare `Fluxes:` with nothing under it parses as YAML null, not an
-  # empty dict, which breaks the nested-form detection there). Inactive
-  # for now -- set source: Fluxes and a real folder here to switch to
-  # Fluxes' "from file" method, or leave the folder empty for its own
-  # static constant values (also needs simulation.airsea.type: Fluxes).
   Fluxes: {}
 river_discharge:
-  # emorid alone (no CMIP6 splice) would leave a run with no valid river
-  # data at all once it runs past EMORID_1993_2024_conc_nemo_TALK_DIC.nc's
-  # own real coverage (2024-12-31; this scenario runs to 2099) -- CMIP6
-  # gets the same historical+future splice as meteo/boundaries
-  # (set_river_data's own hist_cutoff, discovered from that file's own
-  # real last day, not a hardcoded date -- see its docstring), same as
-  # nse_cmip6_raw.yaml already does correctly. No noleap suffix needed
-  # here (standard calendar, unlike the raw variant).
-  source: CMIP6
+  source: emorid
   emorid:
     folder: ${RIVER_FOLDER}
     file: EMORID_1993_2024_conc_nemo_TALK_DIC.nc
@@ -600,28 +477,21 @@ river_discharge:
   CMIP6:
     folder: ${RIVER_FOLDER_CMIP6}
     folder_template: CMIP6/{model}/{scenario}/rivers
-    model: GFDL-ESM4
+    model: MPI-ESM1-2-HR
     scenario: ssp126
     file: river_flows_future_{scenario}.nc
-    # daily: river_flows_future_{scenario}.nc is monthly-mean, first record
-    # 2015-01-31 -- closes a real ~30-day start-of-scenario coverage gap
-    # by reading the day-of-year-disaggregated _daily.nc sibling instead
-    # (see oceanicu_providers.py's river_discharge.CMIP6.daily docstring).
-    daily: true
-    # Beyond EMORID's own real coverage (2024-12-31), river nutrients are
-    # held at this monthly climatology rather than a flat last-value hold
-    # -- real, baseline-dependent (5yr/10yr/full) differences at some
-    # stations, see set_river_data's docstring. 5yr (2020-2024) is the
-    # default; this is explicit here since this scenario runs to 2099,
-    # decades past the real record.
-    nutrient_climatology: 5yr
     threshold: 0
+    # Baseline period for the monthly nutrient climatology used beyond
+    # EMORID's own real coverage (2024-12-31) when source: CMIP6 is
+    # active -- see oceanicu_providers.py's river_discharge.CMIP6.
+    # nutrient_climatology / scripts/rivers.py's set_river_data docstring.
+    # Inactive here (source: emorid above), kept for parity with the
+    # other NSe configs and so switching source needs no further edit.
+    nutrient_climatology: 5yr
     script: ${SCRIPT_FOLDER}/rivers.py:add_rivers
     data_script: ${SCRIPT_FOLDER}/rivers.py:set_river_data
 fabm:
-  source: ERSEM
+  source: none
   ERSEM:
     folder: ${FABM_ERSEM_FOLDER}
-    file: fabm_ersem.yaml
     data_script: ${SCRIPT_FOLDER}/fabm.py:configure_fabm
-    restart_file: ${FABM_RESTART_FOLDER}/restart_ersem.nc

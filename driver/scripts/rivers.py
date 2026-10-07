@@ -159,12 +159,35 @@ def set_river_data(sim, domain, config: dict) -> int:
     projection file (river_flows_future_{scenario}[_daily].nc) has ONLY
     Q/Q_mean/regulated_flag (confirmed directly), no nutrient data at all
     -- and per user, 2026-10-01, this is deliberate: nutrients are NEVER
-    projected into the future, only flow is. So nutrients are ALWAYS read
-    from this same real historical record regardless of
-    river_discharge.source, and simply never updated past that record's
-    own real coverage -- pygetm's TemporalInterpolation holds the last
-    value beyond it, the same "best we can do" precedent already used for
-    CMIP6 biogeochemical boundaries.
+    projected into the future, only flow is. For river_discharge.source
+    == "emorid", nutrients are read from the real historical record and
+    simply never updated past that record's own real coverage -- pygetm's
+    TemporalInterpolation holds the last value beyond it, the same "best
+    we can do" precedent already used for CMIP6 biogeochemical boundaries.
+
+    For river_discharge.source == "CMIP6" (2026-10-01), nutrients beyond
+    the real record are instead held at a MONTHLY CLIMATOLOGY built from
+    that same real record (${RIVER_FOLDER}/EMORID_nutrient_climatology_
+    monthly_{nutrient_climatology}.nc -- site x month=12, all 6 tracers,
+    one file per baseline period) rather than the flat last-value hold --
+    per user, since a scenario run commonly extends decades past 2024-12-31,
+    and the flat hold would otherwise freeze nutrients at whatever single
+    calendar day the real record happened to end on, losing the real
+    seasonal cycle entirely for the dominant fraction of most scenario runs'
+    own length. `river_discharge.CMIP6.nutrient_climatology` (oceanicu_
+    providers.py) selects which pre-generated baseline period to use --
+    '5yr' (2020-2024, the DEFAULT), '10yr' (2015-2024), or 'full'
+    (1993-2024); these differ materially at some stations (confirmed
+    directly: AURAJOKI's NO3 and Adour's Si both show real, baseline-
+    dependent shifts, not just sampling noise), so this is a real modeling
+    choice, not a cosmetic one. A day-of-year (366-bin) variant was also
+    generated and compared, but dropped entirely -- pygetm's own
+    climatology support only handles 12 monthly records, not 366 daily
+    ones (per user, 2026-10-01). The climatology file's own 1-12 `month`
+    axis is calendar-agnostic (no noleap sibling needed, unlike every
+    other file this function reads) -- each future day is assigned its
+    OWN calendar month's value (via that day's real cftime object, whether
+    on a standard or noleap axis), not a fixed day-length mapping.
 
     Flow splice (river_discharge.source == "CMIP6" only): real EMORID flow
     up to its own real LAST DAY, then the CMIP6-projected daily file
@@ -273,6 +296,39 @@ def set_river_data(sim, domain, config: dict) -> int:
         # this replaces a hardcoded HIST_CUTOFF_YEAR.
         hist_cutoff = hist_ds["time"].values[-1]
 
+        # Nutrient climatology (CMIP6 only -- see docstring for why
+        # "emorid" doesn't need this at all). No folder_template/calendar-
+        # suffix handling needed here unlike every other file this
+        # function reads: the climatology lives directly in ${RIVER_FOLDER}
+        # (same folder as the historical file, not RIVER_FOLDER_CMIP6 --
+        # it's derived FROM the historical file, not a CMIP6 product), and
+        # its own 1-12 `month` axis is calendar-agnostic (no noleap
+        # sibling -- see docstring).
+        clim_ds = None
+        clim_name_to_index: dict = {}
+        fut_time = None
+        fut_months = None
+        if use_cmip6:
+            clim_period = rcfg.get("nutrient_climatology", "5yr")
+            clim_path = hist_folder / f"EMORID_nutrient_climatology_monthly_{clim_period}.nc"
+            clim_ds = stack.enter_context(
+                xr.open_dataset(clim_path, engine="netcdf4")
+            )
+            clim_name_var = next((v for v in ("site_name", "name") if v in clim_ds), None)
+            clim_site_names = (
+                clim_ds[clim_name_var].values if clim_name_var else range(clim_ds.sizes["site"])
+            )
+            clim_name_to_index = {str(n): i for i, n in enumerate(clim_site_names)}
+            # Same future time axis the flow splice below uses (post-
+            # cutoff slice of the CMIP6 future file) -- guarantees the
+            # nutrient series lands on the exact same real dates/calendar
+            # (standard or noleap) flow already does, rather than a
+            # separately-constructed axis that could drift out of step.
+            fut_time = datasets[1]["time"].sel(
+                time=slice(hist_cutoff + datetime.timedelta(days=1), None)
+            )
+            fut_months = fut_time.dt.month.values
+
         # Same "site_name" vs "name" fallback as add_rivers above -- both
         # read the same file(s), so if one needs it the other might too.
         name_to_index_per_ds = []
@@ -319,10 +375,29 @@ def set_river_data(sim, domain, config: dict) -> int:
                 if idx is None:
                     continue
                 set_here = []
+                clim_idx = clim_name_to_index.get(name) if use_cmip6 else None
                 for tracer, file_var in _emorid_nutrient_vars.items():
                     if file_var not in hist_ds.data_vars:
                         continue
-                    river[tracer].set(hist_ds[file_var].isel(site=idx))
+                    hist_nutrient_da = hist_ds[file_var].isel(site=idx).sel(
+                        time=slice(None, hist_cutoff)
+                    )
+                    if clim_idx is not None and file_var in clim_ds.data_vars:
+                        # Future segment: each real future day's own
+                        # calendar month looked up in the site's 12-value
+                        # climatology -- see docstring for why this
+                        # replaces a flat last-value hold under CMIP6.
+                        clim_vals = clim_ds[file_var].isel(site=clim_idx).values
+                        fut_vals = clim_vals[fut_months - 1]
+                        fut_nutrient_da = xr.DataArray(
+                            fut_vals, coords={"time": fut_time}, dims="time"
+                        )
+                        nutrient_da = xr.concat(
+                            [hist_nutrient_da, fut_nutrient_da], dim="time"
+                        )
+                    else:
+                        nutrient_da = hist_nutrient_da
+                    river[tracer].set(nutrient_da)
                     set_here.append(tracer)
                     n_fabm_set += 1
                 if set_here:

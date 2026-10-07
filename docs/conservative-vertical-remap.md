@@ -173,6 +173,42 @@ Validated on the real restart file with a real `pygetm.parallel.Tiling`
 (2x2 decomposition): each rank's own slice runs cleanly, and the
 reassembled global array is bit-for-bit identical to a single-rank run.
 
+## Why this exists: perpetual spin-up rounds (2026-10-01)
+
+Benthic ERSEM state can take longer to reach equilibrium than any single
+domain has real forcing data for -- CMEMS/ERA5/EMORID coverage is ~15-35
+years; benthic spin-up can need far more. The fix is a *perpetual* run:
+repeat the same forcing period over and over, carrying only the slow
+biogeochemical state forward between rounds, not the physics.
+
+- **Round 1**: no `restart_ersem.nc` exists yet. `fabm.ERSEM.restart_file`
+  is unset, `set_hydrography_ic` falls through to the WOA/CMEMS monthly-
+  climatology pick for FABM tracers too (`boundaries.fabm.<source>.
+  ic_file` for CMEMS, `tracers[*].file` for WOA -- moved here from scripts/
+  fabm.py's own configure_fabm, 2026-10-01, for the same "only ever on a
+  genuine fresh start" reason the restart seed already lived here: that
+  function runs on every chunk unconditionally, which is wrong for a
+  one-time IC). Run with `--save-restart` to produce this round's own
+  `restart_ersem.nc`-shaped output.
+- **Round 2+**: set `fabm.ERSEM.restart_file` to that output (read LIVE
+  from the companion `generated_*_config.yaml` at runtime -- no
+  regeneration needed to flip it on). `set_hydrography_ic` takes the
+  restart-seed branch below instead.
+
+Physics (T/S) is deliberately **not** part of this choice -- it's always
+re-initialized from the WOA/CMEMS climatology, every round, round 1 and
+round 2+ alike (never carried over via `restart_file`, never via pyGETM's
+own `--load-restart`/`sim.load_restart()` either -- that's for continuing
+chunks *within* one simulation, a different thing). Round-to-round, only
+the biogeochemical state is meant to accumulate toward equilibrium; physics
+restarts the same forcing cycle fresh each time. This is exactly *why* the
+remap below is still needed even round-to-round on what is nominally "the
+same grid": layer thicknesses are a function of the current physical state
+(dynamic vertical coordinate), so a round that resets T/S to a fresh
+climatology IC will generally not share the previous round's own
+save-time layer layout, even with no change in domain/resolution/model
+version at all.
+
 ## Where this lives
 
 ```
@@ -181,6 +217,11 @@ driver/scripts/hydrography.py
         _seed_fabm_state_from_restart(sim, restart_path)      # nested -- see below
             _conservative_remap_column(source_vals, source_ifaces, target_ifaces)   # nested
 ```
+
+The same function's `else` branch (no `restart_file` configured) is where
+the WOA/CMEMS climatology FABM IC lives now -- see "Why this exists" above.
+No remap involved there; it's a plain `.isel(time=imonth)` pick, same
+mechanism as the T/S climatology IC just above it in the same function.
 
 Both helpers are nested *inside* `set_hydrography_ic`, not module-level
 siblings. `pygetm_config.codegen`'s `--dump-python` only inlines a

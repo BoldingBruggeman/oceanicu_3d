@@ -61,15 +61,18 @@ def configure_fabm(sim, domain, config: dict) -> None:
 
     ERSEM dependency setup (gelbstoff absorption from a satellite product,
     atmospheric CO2, EMEP N-deposition) is ported from cfg_fabm.py as-is,
-    reading its folder from fabm.ERSEM.folder. WOA-sourced FABM tracer
-    ICs/SPONGE boundaries are ALSO ported, but now gated on this driver's
-    own boundaries.fabm.source (config["boundaries"]["fabm"]["source"])
-    instead of cfg_fabm.py's real cfg.hydrography.source check -- FABM
-    boundary data gets its own role, independent of T/S hydrography (see
-    oceanicu_providers.py's boundaries.fabm comment for why), so a config
-    can enable ERSEM dependencies without necessarily also using WOA for
-    FABM boundaries, and vice versa -- these two blocks below are
-    deliberately independent, not an if/elif.
+    reading its folder from fabm.ERSEM.folder. The WOA/CMEMS-sourced FABM
+    tracer initial condition is NOT handled here (moved to scripts/
+    hydrography.py's set_hydrography_ic, 2026-10-01 -- see that function's
+    own comment for why: this function runs on every chunk unconditionally,
+    which is wrong for a one-time IC pick). FABM boundary TYPE/VALUES
+    (SPONGE etc.) aren't handled here either -- oceanicu_providers.
+    derive_data_assignments emits those as plain data_assignments entries,
+    gated on this driver's own boundaries.fabm.source
+    (config["boundaries"]["fabm"]["source"]), independent of T/S
+    hydrography's own source (see oceanicu_providers.py's boundaries.fabm
+    comment for why) -- a config can enable ERSEM dependencies without
+    necessarily also using WOA/CMEMS for FABM boundaries, and vice versa.
 
     NOT YET VERIFIED against real NSe input files (AMM7-EMEP-style
     N-deposition netCDFs, gelbstoff/CDOM product, WOA tracer
@@ -174,7 +177,36 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # support -- same splice mechanism boundaries.baroclinic/barotropic's
     # own CMIP6 branches already use (see oceanicu_providers.py).
     fabm_cfg_boundaries = config.get("boundaries", {}).get("fabm") or {}
-    co2_scenario = fabm_cfg_boundaries.get("scenario")
+    # fabm.ERSEM.ghg_scenario (2026-10-07, per user: "can't we make a
+    # historical -> projection transition, as we do for boundaries") is
+    # CMEMS/WOA's own equivalent of boundaries.fabm.CMIP6's own
+    # `scenario` -- only consulted when that isn't itself set, so a real
+    # CMIP6 run keeps reusing ITS OWN scenario for the atmosphere
+    # unchanged (deliberately coupled, see this dependency's own comment
+    # below), while a CMEMS/WOA run -- which has no scenario concept at
+    # all otherwise -- finally gets a way to splice past the historical
+    # file's 2014-12 end too.
+    co2_scenario = fabm_cfg_boundaries.get("scenario") or fabm_cfg.get("ghg_scenario")
+    # Fail loudly HERE (setup time, before any real computation) rather
+    # than let pygetm.input.TemporalInterpolation crash deep into a real
+    # run once the clock passes the historical file's last real time
+    # point (confirmed directly, pygetm/input/__init__.py's
+    # _move_to_next: "Cannot interpolate ... because end of time series
+    # was reached" -- it does NOT hold the last value). 2015-01-01 is the
+    # real, hardcoded historical/scenario split for every GHG/N-dep file
+    # this function reads (download_ghg_15deg.py's own HIST_END_YEAR =
+    # 2014) -- not derived from the files themselves, since a wrong/
+    # missing ghg_scenario should be caught before even opening them.
+    runtime_cfg = config.get("runtime") or {}
+    _ghg_stop = runtime_cfg.get("stop")
+    if not co2_scenario and _ghg_stop and datetime.datetime.fromisoformat(_ghg_stop) > datetime.datetime(2015, 1, 1):
+        raise ValueError(
+            f"configure_fabm: no GHG scenario available (boundaries.fabm.CMIP6.scenario unset "
+            f"and fabm.ERSEM.ghg_scenario unset) but this run's own stop date ({_ghg_stop}) is "
+            "past the historical CO2/N2O/N-deposition files' real 2014-12 end -- set "
+            "fabm.ERSEM.ghg_scenario (e.g. 'ssp245') or this will crash mid-run once the "
+            "historical-only series runs out of data."
+        )
     # Calendar match: bias-corrected meteo (bc_correct) runs a standard
     # calendar, but CMIP6-raw (runtime.calendar: noleap, e.g. GFDL-ESM4)
     # doesn't -- pygetm.input.from_nc splices files strictly by real date,
@@ -396,80 +428,17 @@ def configure_fabm(sim, domain, config: dict) -> None:
         )
         sim.logger.info(f"configure_fabm: providing fish/fishing_pressure from {fish_path}")
 
-    # --- WOA/CMEMS-sourced FABM tracer initial conditions ---
-    # Independent of the dependency setup above -- gated on this driver's
-    # own boundaries.fabm role, NOT cfg_fabm.py's real cfg.hydrography.source
-    # check (see this function's own docstring for why). SPONGE boundary
-    # type + values are NOT set here -- oceanicu_providers.derive_data_
-    # assignments emits them as plain data_assignments entries instead
-    # (open_boundary.N3_n / open_boundary.N3_n.values, etc.), mirroring
-    # boundaries.baroclinic's own WOA/CMEMS/CMIP6 branches there exactly,
-    # since they're a straightforward 1:1 file read with no computation
-    # needed (same meteo.py ERA5-vs-CMIP6 split reasoning: plain reads are
-    # data_assignments, only genuinely computed values stay in a script).
-    # Only the IC below stays here, because it needs a one-time
-    # `.isel(time=imonth)` pick that data_assignments' climatology=True flag
-    # can't express (that flag cycles all 12 months for the whole run, not
-    # "pick one month once") -- exactly the same reason hydrography.py's own
-    # T/S IC pick isn't a data_assignments entry either.
-    #
-    # CMIP6 is deliberately NOT accepted here -- mirrors hydrography.py's
-    # own set_hydrography_ic, which only ever takes WOA/CMEMS for the IC
-    # (`if source not in ("WOA", "CMEMS"): return`). CMIP6 delta-change
-    # boundary output has no equivalent "monthly_ic" snapshot file
-    # convention -- CMEMS's own IC below isn't its real time-series
-    # boundary file either, it's a separate, purpose-built monthly-
-    # climatology-shaped file (matches hydrography.py's own CMEMS IC
-    # branch: so_2025_monthly_ic.nc/thetao_2025_monthly_ic.nc, NOT the
-    # real time series boundaries.baroclinic.CMEMS reads for boundary
-    # VALUES) -- so boundaries.fabm.CMEMS.tracers[*].file is expected to
-    # point at that same kind of monthly-IC file, not the real time series
-    # oceanicu_providers.derive_data_assignments reads for the boundary.
-    boundaries_fabm_cfg = config.get("boundaries", {}).get("fabm") or {}
-    if boundaries_fabm_cfg.get("source") in ("WOA", "CMEMS"):
-        # Monthly-climatology index pick (.isel(time=imonth)) -- a ONE-TIME
-        # initial value, not pygetm-config's own climatology:True
-        # data_assignments flag (which cycles the whole 12-month pattern
-        # for the entire run). configure_fabm's fixed (sim, domain, config)
-        # signature has no imonth parameter, so it's derived from
-        # runtime.time here exactly like hydrography.py's own
-        # set_hydrography_ic does (that function's own CMEMS IC branch
-        # ALSO uses isel(time=imonth), on its own separate monthly-IC file
-        # -- same precedent this mirrors).
-        time = config.get("runtime", {}).get("time")
-        if time is None:
-            raise RuntimeError(
-                "configure_fabm's FABM tracer initial condition needs a real start "
-                "time, but runtime.time isn't set anywhere -- pass --start explicitly (either "
-                "when generating this script, or when running it)."
-            )
-        if isinstance(time, str):
-            time = datetime.datetime.fromisoformat(time)
-        imonth = time.month - 1
-
-        ic_folder = Path(resolve_data_path(boundaries_fabm_cfg["folder"]))
-
-        # Same tracer set as derive_data_assignments' boundary_type/values
-        # entries (boundaries.fabm.<source>.tracers) -- defined once, used
-        # for both, so the IC and boundary tracer lists can't drift apart.
-        # A FABM state variable NOT listed here is simply never touched by
-        # this loop -- it keeps whatever `initial_value` its own fabm.yaml
-        # declares (standard FABM behavior when the host model doesn't
-        # override it), and, on the boundary side, pygetm.tracer.Tracer.
-        # __init__ already gives EVERY tracer -- FABM ones included --
-        # ArrayOpenBoundaries(self, ZERO_GRADIENT) at construction time,
-        # unconditionally, before any config runs. So an unlisted tracer
-        # needs no explicit handling anywhere: it's ZERO_GRADIENT by
-        # pygetm's own default, not by anything this driver has to arrange.
-        for tracer, spec in (boundaries_fabm_cfg.get("tracers") or {}).items():
-            sim[tracer].set(
-                pygetm.input.from_nc(ic_folder / spec["file"], spec["variable"]).isel(time=imonth)
-            )
-
-    # The ERSEM state restart-style initial condition (fabm.ERSEM.
-    # restart_file) is NOT handled here -- moved to scripts/hydrography.py's
-    # set_hydrography_ic instead (2026-09-30, per user), specifically
-    # because THIS function runs on every chunk unconditionally (its
-    # dependency setup above is real, time-varying forcing every chunk
-    # needs, restart or not), whereas that hook is only ever called for a
-    # genuine fresh start -- see its own comment for the full reasoning.
+    # Neither the WOA/CMEMS climatology-based FABM tracer IC NOR the ERSEM
+    # restart-style IC (fabm.ERSEM.restart_file) is handled here -- BOTH
+    # live in scripts/hydrography.py's set_hydrography_ic instead (the
+    # climatology one moved there 2026-10-01, joining restart_file which
+    # was already there since 2026-09-30), for the same reason either way:
+    # THIS function runs on every chunk unconditionally (its dependency
+    # setup above is real, time-varying forcing every chunk needs, restart
+    # or not), whereas that hook is only ever called for a genuine fresh
+    # start -- a one-time IC pick left here would have silently re-applied
+    # on every restart-continuation chunk too, overwriting whatever real,
+    # evolved state a genuine continuation just loaded. See that function's
+    # own comment for the full reasoning (including why restart_file and
+    # the climatology IC are a real, intended either/or choice there, not
+    # just incidentally both relocated here).
