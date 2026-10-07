@@ -828,6 +828,28 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                     ),
                     importance=Importance.BASIC,
                 ),
+                ParameterSpec(
+                    name="ghg_scenario",
+                    type=TypeRef(kind="scalar", scalar_type="str", nullable=True),
+                    default=None,
+                    help=(
+                        "which SSP scenario's atmospheric CO2/N2O/N-deposition pathway "
+                        "scripts/fabm.py's configure_fabm splices in past the historical "
+                        "GHG file's own real 2014-12 end (e.g. 'ssp126', 'ssp245', "
+                        "'ssp370', 'ssp585' -- matching files already on disk under "
+                        "${GHG_CONCENTRATION_FOLDER}). ONLY consulted when boundaries.fabm "
+                        "isn't itself CMIP6-scenario-driven (a real CMIP6 run always reuses "
+                        "boundaries.fabm.CMIP6.scenario instead, deliberately, so atmosphere "
+                        "and ocean boundary tracers share the same scenario -- see "
+                        "configure_fabm's own comment) -- this is CMEMS/WOA's own "
+                        "equivalent, since those sources have no scenario concept at all. "
+                        "Leave unset only for a run that never extends past 2014-12-31: "
+                        "configure_fabm raises loudly at setup time otherwise, rather than "
+                        "letting pygetm's own TemporalInterpolation crash deep into the run "
+                        "once it runs out of historical data."
+                    ),
+                    importance=Importance.BASIC,
+                ),
             ),
         },
         default="ERSEM",

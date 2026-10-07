@@ -1,5 +1,15 @@
 # Atmospheric CO2/N2O forcing: historical file stops 2014, real runs now go past it
 
+**Update (2026-10-07): Option A below is now built.** Set
+`fabm.ERSEM.ghg_scenario` (e.g. `ssp245`) in any CMEMS/WOA config to
+splice in that SSP's own CO2/N2O/N-deposition projection past the
+historical file's 2014-12 end -- same mechanism CMIP6 runs already use,
+now available independent of `boundaries.fabm`'s own source. Leaving it
+unset now raises a loud, immediate error at FABM setup time if the run's
+own stop date is past 2015-01-01, instead of crashing deep into the run.
+Option B (real NOAA observations instead of a scenario projection for
+2015-2024) is still open if preferred -- not built yet.
+
 ## What's there today
 
 `bb-server1:/data/FABM/GHGConcentrations/co2_historical_15deg.nc` (and its

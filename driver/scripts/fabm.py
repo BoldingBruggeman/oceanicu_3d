@@ -177,7 +177,36 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # support -- same splice mechanism boundaries.baroclinic/barotropic's
     # own CMIP6 branches already use (see oceanicu_providers.py).
     fabm_cfg_boundaries = config.get("boundaries", {}).get("fabm") or {}
-    co2_scenario = fabm_cfg_boundaries.get("scenario")
+    # fabm.ERSEM.ghg_scenario (2026-10-07, per user: "can't we make a
+    # historical -> projection transition, as we do for boundaries") is
+    # CMEMS/WOA's own equivalent of boundaries.fabm.CMIP6's own
+    # `scenario` -- only consulted when that isn't itself set, so a real
+    # CMIP6 run keeps reusing ITS OWN scenario for the atmosphere
+    # unchanged (deliberately coupled, see this dependency's own comment
+    # below), while a CMEMS/WOA run -- which has no scenario concept at
+    # all otherwise -- finally gets a way to splice past the historical
+    # file's 2014-12 end too.
+    co2_scenario = fabm_cfg_boundaries.get("scenario") or fabm_cfg.get("ghg_scenario")
+    # Fail loudly HERE (setup time, before any real computation) rather
+    # than let pygetm.input.TemporalInterpolation crash deep into a real
+    # run once the clock passes the historical file's last real time
+    # point (confirmed directly, pygetm/input/__init__.py's
+    # _move_to_next: "Cannot interpolate ... because end of time series
+    # was reached" -- it does NOT hold the last value). 2015-01-01 is the
+    # real, hardcoded historical/scenario split for every GHG/N-dep file
+    # this function reads (download_ghg_15deg.py's own HIST_END_YEAR =
+    # 2014) -- not derived from the files themselves, since a wrong/
+    # missing ghg_scenario should be caught before even opening them.
+    runtime_cfg = config.get("runtime") or {}
+    _ghg_stop = runtime_cfg.get("stop")
+    if not co2_scenario and _ghg_stop and datetime.datetime.fromisoformat(_ghg_stop) > datetime.datetime(2015, 1, 1):
+        raise ValueError(
+            f"configure_fabm: no GHG scenario available (boundaries.fabm.CMIP6.scenario unset "
+            f"and fabm.ERSEM.ghg_scenario unset) but this run's own stop date ({_ghg_stop}) is "
+            "past the historical CO2/N2O/N-deposition files' real 2014-12 end -- set "
+            "fabm.ERSEM.ghg_scenario (e.g. 'ssp245') or this will crash mid-run once the "
+            "historical-only series runs out of data."
+        )
     # Calendar match: bias-corrected meteo (bc_correct) runs a standard
     # calendar, but CMIP6-raw (runtime.calendar: noleap, e.g. GFDL-ESM4)
     # doesn't -- pygetm.input.from_nc splices files strictly by real date,
