@@ -611,9 +611,9 @@ both equally.&lt;/p&gt;</description>
     </item>
     <item>
       <title>NSe - Experiment CMEMS/run02</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems/run02/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-run02/</link>
       <pubDate>Thu, 08 Oct 2026 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems/run02/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-run02/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NSe
@@ -792,13 +792,13 @@ Analysed: 2026-09-30  11:37:48
   --------------------------------------------
   All      1.1249   +0.2315   0.8416  0.9003
 &lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
-&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems/run02/analysed_sst_surface_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems/run02/analysed_sst_surface_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-run02/analysed_sst_surface_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-run02/analysed_sst_surface_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NSe - Experiment CMEMS/spinup</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems/spinup/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-spinup/</link>
       <pubDate>Thu, 08 Oct 2026 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems/spinup/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-spinup/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NSe
@@ -951,13 +951,13 @@ Analysed: 2026-10-07  13:59:52
     95th pct:     +1.7141
     Max:         +8.4514
 &lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
-&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems/spinup/temp_surface_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems/spinup/temp_surface_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-spinup/temp_surface_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-spinup/temp_surface_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NSe - Experiment CMEMS/v01P</title>
-      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems/v01p/</link>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p/</link>
       <pubDate>Thu, 08 Oct 2026 00:00:00 +0000</pubDate>
-      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems/v01p/</guid>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NSe
@@ -1209,7 +1209,7 @@ Analysed: 2026-10-08  20:37:04
     95th pct:     +0.1810
     Max:         +7.1086
 &lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
-&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems/v01p/salt_bottom_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems/v01p/salt_bottom_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v01p/salt_bottom_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v01p/salt_bottom_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NSe - WOA/tidal - Tidal Analysis</title>

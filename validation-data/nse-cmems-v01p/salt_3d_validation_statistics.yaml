@@ -1,0 +1,33 @@
+format: '1.1'
+variable: salt
+title: SALT Validation Statistics
+created: '2026-10-07 10:45:52'
+area: NSe
+experiment: CMEMS/v01P
+author: K.B. & R.T.
+project: OceanICU
+institute: BB
+periods:
+- period: 2010-2013
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-10-08 21:06:18'
+  datasets:
+    WOA:
+      rmse: null
+      bias: null
+      mae: null
+      correlation: null
+      n_points: 0
+      mean_model: null
+      mean_obs: null
+      std_model: null
+      std_obs: null
+      error_distribution:
+        min: null
+        p05: null
+        p25: null
+        median: null
+        p75: null
+        p95: null
+        max: null
