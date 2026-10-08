@@ -1,0 +1,155 @@
+# data_inventory_forcing.yaml — Data Sources page, group 1 (generic forcing).
+#
+# Forcing/boundary data usable by ANY model setup (area-independent) --
+# mirrors driver/oceanicu_providers.py's provider-slot roles one-to-one.
+# Read by ocean-post's _generate_data_sources_page() (see
+# plan_data_sources.txt). Validate with ocean-post's
+# cli/validate_data_inventory.py against this project's own data_roots.yaml
+# (NOT ocean-post's scylla_ocean-post_data_roots.yaml -- separate file by
+# design, see that file's own header comment):
+#
+#   validate-data-inventory \
+#     --inventory .../oceanicu_3d/driver/data_inventory_forcing.yaml \
+#     --data-roots-file .../experiments/NSe/data_roots.yaml
+#
+# Every `path` value below uses the SAME ${VAR} names as
+# driver/data_roots.yaml.example -- a `path: null` entry means "no local
+# folder for this choice" (e.g. a static-constants source), not a gap.
+
+roles:
+
+  meteo:
+    default: ERA5
+    sources:
+      ERA5:
+        path: "${ERA5_FOLDER}"
+      CMIP6:
+        description: bias-corrected CMIP6 meteo (ocean-prep's bias-correction pipeline)
+        path: "${CMIP6_FOLDER}"
+        models:
+          GFDL-ESM4:
+            scenarios: [ssp126, ssp245, ssp370, ssp585]
+            status: fetched
+          MPI-ESM1-2-HR:
+            scenarios: [ssp370]
+            status: availability-only
+          CNRM-ESM2-1:
+            scenarios: [ssp370]
+            status: availability-only
+      CMIP6-raw:
+        description: raw (not bias-corrected) CMIP6 archive, fetched via ocean-data's DataLoader
+        path: "${CMIP6_RAW_FOLDER}"
+        models:
+          GFDL-ESM4:
+            scenarios: [ssp126, ssp245, ssp370, ssp585]
+            status: fetched
+          MPI-ESM1-2-HR:
+            scenarios: [ssp370]
+            status: availability-only
+          CNRM-ESM2-1:
+            scenarios: [ssp370]
+            status: availability-only
+      Fluxes:
+        description: prescribed taux/tauy/sp/shf/swr/pe, static per-run constants
+        path: null
+
+  river_discharge:
+    default: emorid
+    sources:
+      emorid:
+        description: EMORID/JRC, 446 real gauged stations
+        path: "${RIVER_FOLDER}"
+      CMIP6:
+        description: delta-change-projected discharge, same 446 EMORID stations
+        path: "${RIVER_FOLDER_CMIP6}"
+        models:
+          GFDL-ESM4:
+            scenarios: [ssp126, ssp245, ssp370, ssp585]
+            status: fetched
+
+  hydrography:
+    description: initial conditions (temperature, salinity)
+    default: CMEMS
+    sources:
+      CMEMS:
+        path: "${HYDROGRAPHY_FOLDER_CMEMS}"
+      WOA:
+        path: "${HYDROGRAPHY_FOLDER_WOA}"
+      constant:
+        description: uniform temp/salt, no file
+        path: null
+
+  boundaries.barotropic:
+    default: TPXO
+    sources:
+      TPXO:
+        description: TPXO9-atlas tidal constituents
+        path: "${TPXO_FOLDER}"
+      CMEMS:
+        path: "${BOUNDARY_FOLDER_BAROTROPIC_CMEMS}"
+      CMIP6:
+        description: CMIP6 monthly mean SSH / barotropic transport
+        path: "${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}"
+        models:
+          GFDL-ESM4:
+            scenarios: [ssp126, ssp245, ssp370, ssp585]
+            status: fetched
+          MPI-ESM1-2-HR:
+            scenarios: [ssp370]
+            status: availability-only
+          CNRM-ESM2-1:
+            scenarios: [ssp370]
+            status: availability-only
+
+  boundaries.baroclinic:
+    default: CMEMS
+    sources:
+      CMEMS:
+        path: "${BOUNDARY_FOLDER_BAROCLINIC_CMEMS}"
+      WOA:
+        path: "${BOUNDARY_FOLDER_BAROCLINIC_WOA}"
+      CMIP6:
+        description: ocean-prep's delta-change boundary output (NOT the raw CMIP6 extraction)
+        path: "${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}"
+        models:
+          GFDL-ESM4:
+            scenarios: [ssp126, ssp245, ssp370, ssp585]
+            status: fetched
+          MPI-ESM1-2-HR:
+            scenarios: [ssp370]
+            status: availability-only
+          CNRM-ESM2-1:
+            scenarios: [ssp370]
+            status: availability-only
+
+  boundaries.fabm:
+    description: biogeochemical (FABM) boundary/IC tracers
+    default: WOA
+    sources:
+      WOA:
+        description: global climatology, cycled 12-month pattern
+        path: "${BOUNDARY_FOLDER_FABM_WOA}"
+      CMEMS:
+        description: >
+          real boundary-point biogeochemistry; dissic/talk pre-2015 bridged
+          via dic_ta_historical_method (cycled_climatology or pml_trend)
+        path: "${BOUNDARY_FOLDER_FABM_CMEMS}"
+      CMIP6:
+        path: "${BOUNDARY_FOLDER_FABM_CMIP6}"
+        models:
+          GFDL-ESM4:
+            scenarios: [ssp126, ssp245, ssp370, ssp585]
+            status: fetched
+
+  fabm:
+    description: biogeochemical model selection
+    default: ERSEM
+    sources:
+      none:
+        path: null
+      ERSEM:
+        path: "${FABM_ERSEM_FOLDER}"
+        ghg_concentration:
+          description: atmospheric CO2/N2O, input4MIPs pathway, one file per scenario
+          path: "${GHG_CONCENTRATION_FOLDER}"
+          scenarios: [ssp126, ssp245, ssp370, ssp585]
