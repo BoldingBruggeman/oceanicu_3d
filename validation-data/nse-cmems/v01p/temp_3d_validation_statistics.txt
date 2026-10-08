@@ -1,0 +1,57 @@
+################################################################################
+TEMP Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-10-07 10:45:05
+  Author:       K.B. & R.T.
+  Project:      OceanICU
+  Institute:    BB
+  Area:         NSe
+  Experiment:   CMEMS/v01P
+################################################################################
+
+================================================================================
+Period: 2010-2013  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-07  10:45:05
+
+--- WOA ---
+  RMSE:          nan
+  Bias:         +nan
+  MAE:           nan
+  Correlation:   nan
+  N points:      0
+  Model mean:   nan
+  Obs mean:     nan
+  Model std:    nan
+  Obs std:      nan
+
+  Error distribution:
+    Min:         +nan
+    5th pct:      +nan
+    25th pct:     +nan
+    Median:       +nan
+    75th pct:     +nan
+    95th pct:     +nan
+    Max:         +nan
+
+--- Copernicus-online ---
+  RMSE:          nan
+  Bias:         +nan
+  MAE:           nan
+  Correlation:   nan
+  N points:      0
+  Model mean:   nan
+  Obs mean:     nan
+  Model std:    nan
+  Obs std:      nan
+
+  Error distribution:
+    Min:         +nan
+    5th pct:      +nan
+    25th pct:     +nan
+    Median:       +nan
+    75th pct:     +nan
+    95th pct:     +nan
+    Max:         +nan
+

@@ -6,7 +6,7 @@
     <description>Recent content in Guides on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 07 Oct 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 08 Oct 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/guides/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Tidal Analysis</title>
@@ -247,6 +247,26 @@ Config and guides are at &lt;code&gt;ocean-prep/config/bc_correct_example.yaml&l
 &lt;code&gt;ocean-prep/guides/&lt;/code&gt;.&lt;/p&gt;</description>
     </item>
     <item>
+      <title>Push To Remote</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/push-to-remote/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/push-to-remote/</guid>
+      <description>&lt;h1 id=&#34;push-to-remote-guide&#34;&gt;push-to-remote Guide&lt;/h1&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;push-to-remote&lt;/code&gt; is the other half of the post-simulation handoff, alongside
+&lt;a href=&#34;update-from-remote.md&#34;&gt;update-from-remote&lt;/a&gt;. Run it &lt;strong&gt;on the simulation
+server&lt;/strong&gt; (e.g. an HPC login node) right after a batch of analyses finishes
+there, to send the results to the machine that actually generates and
+deploys the Hugo site (the &amp;ldquo;analysis server&amp;rdquo;, e.g. &lt;code&gt;bb-server1&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;It exists because the two machines are not symmetrically reachable: the
+simulation server typically has outgoing network access only, and the
+analysis server has no route back to it at all. Any transfer must be
+&lt;strong&gt;initiated from the simulation server&lt;/strong&gt;, pushing out — never initiated
+from the analysis server trying to pull in. &lt;code&gt;push-to-remote&lt;/code&gt; wraps
+&lt;code&gt;manage-analyses sync ... --put&lt;/code&gt;, which is exactly that: an &lt;code&gt;rsync&lt;/code&gt;, run
+from here, pushing local files out.&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>River Flow and Nutrient Load Projection</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/river-projection/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -459,7 +479,7 @@ both equally.&lt;/p&gt;</description>
     <item>
       <title>Regridding</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</link>
-      <pubDate>Wed, 07 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Thu, 08 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</guid>
       <description>&lt;h1 id=&#34;regridding-user-guide&#34;&gt;Regridding User Guide&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;ocean_data.regridding&lt;/code&gt; provides xESMF-based regridding with automatic
