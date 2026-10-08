@@ -390,7 +390,7 @@ output:
       interval_units: DAYS
       path: surf_bott_daily.nc
       start: '2010-01-01'
-      stop: '2020-01-01'
+      stop: '2024-01-01'
     variable_requests:
     - groups:
       - fabm_mizer_fishing
