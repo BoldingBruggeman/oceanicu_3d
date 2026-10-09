@@ -25,13 +25,14 @@ its own --help). --sync-back is for the specific case of wanting a local,
 low-latency `hugo server` preview on a machine other than the relay.
 """
 import argparse
-import shlex
 import socket
 import subprocess
 import sys
 from pathlib import Path
 
 import yaml
+
+from ocean_data import host_config as oc_host_config  # type: ignore[import-not-found]
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = SCRIPT_DIR / "regen_hosts.yaml"
@@ -52,28 +53,32 @@ def host_config(config: dict, hostname: str) -> dict:
     return host_cfg
 
 
-def relay(config: dict, relay_host: str, args: argparse.Namespace) -> None:
-    print(f"Not on {relay_host} -- running there over ssh instead...", file=sys.stderr)
-
-    # Forward this invocation's actual argv verbatim rather than manually
-    # re-listing each flag from the parsed Namespace -- the latter is a
-    # real bug class (forget to forward one new flag here and it's
-    # silently dropped on the relay hop, not an error; this exact pattern
-    # in deploy_ghpages.py's relay() caused a real, unintended production
-    # deploy during testing). --sync-back and --serve are both
-    # local-machine-only concerns (they run here, after the ssh call
-    # returns -- see below) so they're excluded, not forwarded. --serve
-    # in particular must never reach the relay: cli.reporting's own
-    # --serve runs `hugo server` on whatever machine it's given to, and
-    # bb-server1 is in Hetzner/Germany -- a live dev server there would
-    # have bad latency for anyone actually browsing it.
-    drop = {"--no-relay", "--sync-back", "--serve"}
-    remote_args = [a for a in sys.argv[1:] if a not in drop] + ["--no-relay"]
-    remote_cmd = (
-        "cd ~/source/repos/OceanICU/oceanicu_3d && "
-        "./regenerate_hugo.py " + shlex.join(remote_args)
+def relay(config: dict, oc_cfg: dict, relay_host: str, args: argparse.Namespace) -> None:
+    # --sync-back and --serve are both local-machine-only concerns (they
+    # run here, after the ssh call returns -- see below) so they're
+    # dropped, not forwarded to the relay. --serve in particular must
+    # never reach the relay: cli.reporting's own --serve runs `hugo
+    # server` on whatever machine it's given to, and bb-server1 is in
+    # Hetzner/Germany -- a live dev server there would have bad latency
+    # for anyone actually browsing it.
+    relayed = oc_host_config.relay_if_needed(
+        oc_cfg, sys.argv[1:],
+        repo_key='OceanICU/oceanicu_3d', entry_point='./regenerate_hugo.py',
+        drop_flags=frozenset({"--sync-back", "--serve"}),
     )
-    subprocess.run(["ssh", relay_host, remote_cmd], check=True)
+    if not relayed:
+        # main() already decided (via regen_hosts.yaml's relay_host) that
+        # relaying was needed before calling this -- if oc_host_config's
+        # own check (via ~/.config/oceanicu/hosts.yaml) disagrees, the two
+        # config sources have drifted out of sync. Fail loudly rather than
+        # silently falling through to "Done" below as if a relay happened.
+        sys.exit(
+            "ERROR: expected to relay to "
+            f"{oc_cfg.get('relay_host')!r} but relay_if_needed() declined -- "
+            "check ~/.config/oceanicu/hosts.yaml (relay_host must match "
+            f"regen_hosts.yaml's {relay_host!r}, and hosts.{relay_host} "
+            "must have conda_env + repos.'OceanICU/oceanicu_3d' set)."
+        )
 
     # --serve implies --sync-back (no point serving without local content)
     if args.sync_back or args.serve:
@@ -210,8 +215,18 @@ def main() -> None:
     relay_host = args.relay_host or config["relay_host"]
     hostname = socket.gethostname()
 
+    # ~/.config/oceanicu/hosts.yaml -- the generic relay config
+    # (ocean_data.host_config), separate from regen_hosts.yaml's own
+    # enabled_areas/hugo_out/analyses_dir/db (unrelated to relaying,
+    # stays exactly as-is). --relay-host applies to both, so a one-off
+    # override can't make the two sources disagree about which host is
+    # the relay.
+    oc_cfg = oc_host_config.load_host_config('oceanicu')
+    if args.relay_host:
+        oc_cfg = {**oc_cfg, 'relay_host': args.relay_host}
+
     if hostname != relay_host and not args.no_relay:
-        relay(config, relay_host, args)
+        relay(config, oc_cfg, relay_host, args)
     else:
         generate_locally(config, hostname, relay_host, args)
 
