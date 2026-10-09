@@ -67,12 +67,12 @@ menu:
     - name: Validations
       url: validations/
       weight: 2
+    - name: Rankings
+      url: rankings/
+      weight: 3
     - name: Scenarios
       url: scenarios/
       weight: 4
-    - name: Rankings
-      url: rankings/
-      weight: 5
     - name: Data Sources
       url: data-sources/
       weight: 6
