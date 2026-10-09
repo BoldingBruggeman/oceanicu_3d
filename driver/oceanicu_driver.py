@@ -37,6 +37,7 @@ import argparse
 import datetime
 import logging
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -73,6 +74,53 @@ from pygetm_config.yaml_parse import validate_config
 # config still carrying them, NSe/config/nse_from_oceanicu.yaml, failed
 # validate_config with "unknown field" until the leftover fields were
 # dropped from it too).
+
+
+def _copy_companion_file(out_dir: Path, filename: str, max_levels: int = 6) -> None:
+    """Copy *filename* into *out_dir* from the nearest ancestor that has
+    it, unless *out_dir* already has its own copy.
+
+    gotm.yaml and fabm.<source>.file are resolved as bare, cwd-relative
+    filenames at simulation runtime (see simulation.gotm's own comment
+    below) -- every experiment directory needs its OWN literal copy
+    sitting next to generated_*.py. Real gap hit directly, 2026-10-09:
+    two new NSe/CMEMS experiment dirs (tidal_avc, tidal_gvc) were
+    missing gotm.yaml entirely -- nothing in this pipeline ever copied
+    it in, only --dump-python writing generated_*.py/_utils.py/
+    _config.yaml, so a brand-new experiment dir silently had no
+    gotm.yaml until someone noticed (or the run crashed on the HPC
+    trying to open it). This copies the canonical per-area file
+    (experiments/<AREA>/gotm.yaml, experiments/<AREA>/fabm_{ersem,
+    mizer}.yaml) in automatically, found by walking upward from out_dir
+    -- the area's own nesting depth varies (NSe/CMEMS/<experiment>/ is
+    2 levels below NSe/gotm.yaml; AMM7/ENA4/ENA8/NS's own Baseline/
+    TPXO9/etc. run dirs are 1 level below their own area's file), so
+    this is a search, not a hardcoded relative path. Never overwrites
+    an existing copy -- an experiment dir that already has its own
+    (possibly deliberately customized) copy keeps it untouched. Stops
+    at a directory containing .git (the repo root) so this never
+    wanders above the experiments tree looking for an unrelated file
+    of the same name.
+    """
+    dest = out_dir / filename
+    if dest.exists():
+        return
+    ancestor = out_dir.resolve()
+    for _ in range(max_levels):
+        ancestor = ancestor.parent
+        candidate = ancestor / filename
+        if candidate.is_file():
+            shutil.copy2(candidate, dest)
+            print(f"copied {candidate} -> {dest}", file=sys.stderr)
+            return
+        if (ancestor / ".git").exists():
+            break
+    print(
+        f"WARNING: no {filename} found above {out_dir} -- not copied; "
+        f"the generated script will fail to open it at runtime unless "
+        f"you copy one in by hand.",
+        file=sys.stderr,
+    )
 
 
 def main(argv=None) -> int:
@@ -579,6 +627,13 @@ def main(argv=None) -> int:
         print(f"wrote {out_path}", file=sys.stderr)
         print(f"wrote {utils_module_path}", file=sys.stderr)
         print(f"wrote {config_yaml_path}", file=sys.stderr)
+
+        out_dir = Path(out_path).resolve().parent
+        _copy_companion_file(out_dir, "gotm.yaml")
+        if fabm_source and fabm_source != "none":
+            _fabm_filename = (fabm.get(fabm_source) or {}).get("file")
+            if _fabm_filename and "$" not in _fabm_filename and not Path(_fabm_filename).is_absolute():
+                _copy_companion_file(out_dir, _fabm_filename)
         return 0
 
     domain = loader.build_domain(config, schema)
