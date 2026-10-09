@@ -31,21 +31,3 @@ periods:
         p75: null
         p95: null
         max: null
-    Copernicus-online:
-      rmse: null
-      bias: null
-      mae: null
-      correlation: null
-      n_points: 0
-      mean_model: null
-      mean_obs: null
-      std_model: null
-      std_obs: null
-      error_distribution:
-        min: null
-        p05: null
-        p25: null
-        median: null
-        p75: null
-        p95: null
-        max: null
