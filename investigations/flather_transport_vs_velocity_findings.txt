@@ -1,0 +1,228 @@
+TIDAL BOUNDARY BUG: CMEMS-SOURCED RUNS FEED VELOCITY INTO A
+FLATHER_TRANSPORT BOUNDARY THAT EXPECTS TRANSPORT
+=============================================================
+2026-10-08
+
+SUMMARY
+-------
+nse_cmems.yaml and nse_cmems_tides.yaml set every open boundary's
+type_2d to FLATHER_TRANSPORT, but the CMEMS-sourced u/v field they
+actually supply is raw depth-averaged VELOCITY (m/s), not depth-
+integrated TRANSPORT (m2/s). pyGETM's FLATHER_TRANSPORT boundary uses
+a prescribed field directly as transport, with no internal conversion
+-- so every CMEMS-driven run has been using velocity values in a slot
+that needs them multiplied by local water depth first. This explains
+why CMEMS (and, you suspected, CMIP6) tidal validation looks wrong
+next to WOA/pure-TPXO9.
+
+Investigated CMIP6 as well: its pipeline turns out to be CORRECT
+already -- it genuinely computes transport, just via a non-obvious
+route (below). TPXO/WOA is correct by construction. CMEMS is the one
+real bug.
+
+THE FIX IS PURE CONFIGURATION, per your correction: pyGETM supports
+both a velocity-based and a transport-based Flather condition
+(FLATHER_ELEV vs FLATHER_TRANSPORT) and does the depth multiplication
+itself, using its own accurate model bathymetry, when told the input
+is velocity. No new code, no ocean-prep re-run, no boundary file
+regeneration -- change which type_2d each CMEMS config declares. See
+"RECOMMENDED FIX" below.
+
+
+EVIDENCE TRAIL
+--------------
+
+1. pyGETM has two Flather variants, and they are NOT interchangeable
+   labels for the same thing:
+
+     GETM/pygetm/python/pygetm/constants.py
+       FLATHER_ELEV      = 4
+       FLATHER_TRANSPORT = -4
+
+     GETM/pygetm/python/pygetm/open_boundaries.py:1092-1095
+       elif value == FLATHER_ELEV:
+           return Flather()                    # transport=False (default)
+       elif value == FLATHER_TRANSPORT:
+           return Flather(transport=True)
+
+     GETM/pygetm/python/pygetm/open_boundaries.py:517-523 (Flather.__init__)
+       def __init__(self, transport: bool = False):
+           """
+           Args:
+               transport: use prescribed transport at the boundary instead of
+                   prescribed velocity
+           """
+
+     GETM/pygetm/python/pygetm/open_boundaries.py:538-558
+       update_velocity(...):   # used when transport=False (FLATHER_ELEV)
+           setter(z_ext - inflow_sign * (tp - vel_ext * D) / sqrt(D*GRAVITY))
+           #                                    ^^^^^^^^^^ -- vel_ext IS
+           #              multiplied by D (pyGETM's own model water depth,
+           #              grid.Dclip) right here, converting velocity to
+           #              transport internally.
+       update_transport(...):  # used when transport=True (FLATHER_TRANSPORT)
+           setter(z_ext - inflow_sign * (tp - tp_ext) / sqrt(D*GRAVITY))
+           #                                    ^^^^^^ -- tp_ext used AS-IS,
+           #              no conversion. Caller must already supply transport.
+
+   So: FLATHER_ELEV's "elev" name is misleading -- what actually
+   distinguishes it from FLATHER_TRANSPORT is that its u/v input is
+   VELOCITY, converted to transport internally via pyGETM's own
+   bathymetry. FLATHER_TRANSPORT requires the caller to already supply
+   transport.
+
+2. What each source's u/v variable actually contains:
+
+   TPXO (nse_woa.yaml / nse_woa_tides.yaml, source: TPXO)
+     oceanicu_providers.py:1040-1046 -- kind: tpxo, tpxo_variable: u/v.
+     ocean-prep/lib/boundaries/tidal_boundary.py's own header comment:
+       "TPXO9 tidal U-transport" -- genuine transport by construction
+       (a tidal-atlas product IS already a transport/current product
+       at the constituent level in this pipeline).
+     --> CORRECT for FLATHER_TRANSPORT as currently configured.
+
+   CMIP6 (nse_cmip6.yaml, nse_cmip6_tides.yaml, nse_cmip6_raw.yaml,
+          source: CMIP6)
+     oceanicu_providers.py:1101-1102 -- reads variable "uo"/"vo" from
+     bdy_2d_{start}_{end}.nc (same file for all three configs --
+     confirmed matching folder_template/filename_template).
+     That file is written by ocean-prep/lib/boundaries/tidal_boundary.py:
+       Header comment (lines 12-14):
+         uo (m2/s) : TPXO tidal U-transport + (CMIP6 int(uo.dz) - hist-mean int(uo.dz))
+       _VAR_SPEC (line 65):
+         ('u', 'uo', 'uo', 'eastward barotropic sea water transport', 'm2 s-1')
+       line 1267:
+         depth_int = cmip6_var in ('uo', 'vo')   # depth-integrates CMIP6's
+                                                  # raw 3-D velocity before
+                                                  # combining with TPXO transport
+     --> Despite the generic-looking variable name "uo", this IS
+         genuine depth-integrated transport (TPXO transport + a
+         properly depth-integrated CMIP6 anomaly), correctly labelled
+         units='m2 s-1' in the file itself.
+     --> CORRECT for FLATHER_TRANSPORT as currently configured. No
+         change needed here.
+
+   CMEMS (nse_cmems.yaml, nse_cmems_tides.yaml, source: CMEMS)
+     oceanicu_providers.py:1061-1064 -- reads variable "uo"/"vo" from
+     hourly_{start}_to_{end}.nc.
+     That file's u/v come from the "barotropic_vel" dataset in
+     OceanICU/oceanicu_3d/NSe/config/nse_bdy_create.yaml (lines 195-214):
+       barotropic_vel:
+         category: physics
+         output_group: hourly
+         variables: [uo, vo]            # NOT renamed -- output stays "uo"/"vo"
+         target_frequency: hourly
+         scenarios:
+           - dataset_id: cmems_mod_nws_phy-uv_my_7km-2D_PT1H-i       (AMM7 MY)
+           - dataset_id: cmems_mod_nws_phy-cur_anfc_1.5km-2D_PT1H-i  (AMM15 ANFC)
+     Both dataset_ids are CMEMS's own "2D" (depth-AVERAGED) hourly
+     current products -- by Copernicus Marine's own product definition
+     these are velocity (m/s), not transport. ocean-prep's own
+     cmems_processor.py has a compute_transport flag that would
+     depth-integrate a profile into transport (m2/s) -- but it
+     requires a depth coordinate (line 1289-1291: "compute_transport=
+     true but no depth coordinate found" if absent) and barotropic_vel
+     does not set it (defaults False) -- consistent with its source
+     being an already depth-averaged 2-D product with no profile to
+     integrate.
+
+     The SAME config file (nse_bdy_create.yaml, lines 167-187) ALSO
+     defines a separate "transport" dataset that DOES correctly
+     depth-integrate (compute_transport: true, from the 3-D DAILY
+     product, output renamed to transport_x/transport_y) -- but
+     grepping all of OceanICU/oceanicu_3d's .py/.yaml for
+     "transport_x"/"transport_y" outside nse_bdy_create.yaml itself
+     returns NOTHING. It is defined, presumably correctly computed if
+     ever run, and never read by anything. oceanicu_providers.py's
+     CMEMS branch reads the literal name "uo"/"vo", which only
+     barotropic_vel provides -- transport_x/y is orphaned.
+
+     --> BUG: hourly_{start}_to_{end}.nc's uo/vo is raw depth-averaged
+         VELOCITY (m/s), fed into a FLATHER_TRANSPORT boundary that
+         uses it as-is, with no depth multiplication. Every CMEMS-
+         driven run's tidal boundary forcing has effectively been
+         wrong by a factor of local water depth at each boundary
+         point (shallow points relatively too strong, deep points
+         relatively too weak, compared to the true transport).
+
+     Note: simply switching oceanicu_providers.py to read
+     transport_x/transport_y instead would NOT be a complete fix on
+     its own -- that dataset comes from the 3-D DAILY CMEMS product,
+     and daily temporal resolution cannot resolve tidal-frequency
+     (M2 ~12.4h, etc.) variability any better than CMIP6's monthly
+     means can. It was presumably never wired up for exactly this
+     reason. The existing barotropic_vel dataset (hourly, matching
+     tidal frequencies) is the right DATA source; it's just the wrong
+     TYPE for how it's being read.
+
+
+RECOMMENDED FIX
+---------------
+Per your correction -- pyGETM already supports both velocity and
+transport inputs via type_2d, and FLATHER_ELEV does the depth
+multiplication internally using pyGETM's own (more accurate than
+anything ocean-prep could derive independently) model bathymetry. No
+new computation, no re-running ocean-prep, no boundary file
+regeneration. Just change type_2d for the CMEMS-sourced configs:
+
+  nse_cmems.yaml        -- all 9 open_boundaries entries:
+                            type_2d: FLATHER_TRANSPORT -> FLATHER_ELEV
+  nse_cmems_tides.yaml  -- same, all 9 entries
+
+Leave unchanged (already correct):
+  nse_cmip6.yaml, nse_cmip6_tides.yaml, nse_cmip6_raw.yaml
+  nse_woa.yaml, nse_woa_tides.yaml
+
+One thing to verify before/after making this change: FLATHER_ELEV's
+internal vel_ext * D uses pyGETM's grid.Dclip (model water depth at
+the boundary, from the NSe bathymetry) rather than whatever local
+depth (if any) the CMEMS source grid implies -- these should be very
+close but are not guaranteed bit-identical; worth a sanity check of
+resulting transport magnitudes against TPXO/CMIP6 after the switch,
+not just trusting the config change blindly.
+
+Also worth deciding (not done here, no code touched): whether to
+delete the dead "transport"/transport_x/transport_y dataset block
+from nse_bdy_create.yaml now that FLATHER_ELEV makes it unnecessary,
+or leave it as a documented-but-unused alternative.
+
+
+SCOPE NOT COVERED BY THIS INVESTIGATION
+----------------------------------------
+- Did not inspect the actual generated hourly_*.nc file's units
+  attribute directly (it lives on scylla, which this session
+  couldn't reach -- orca, the only HPC machine reachable, does not
+  mount /work at all). The conclusion rests on reading
+  nse_bdy_create.yaml + cmems_processor.py's code path, which is
+  unambiguous about what gets computed, but a direct `ncdump -h`
+  confirmation would be a good sanity check once you have scylla
+  access.
+- Did not re-verify nse_cmip6_raw.yaml's bdy_2d_*.nc file byte-for-
+  byte -- concluded it's the same file/pipeline as nse_cmip6.yaml
+  purely from matching folder_template/filename_template/model/
+  scenario in the config (very likely correct, not independently
+  confirmed against a real file).
+- Did not check whether any OTHER area/domain (outside NSe) has the
+  same source: CMEMS + FLATHER_TRANSPORT combination -- this
+  investigation was scoped to the NSe configs the user named.
+
+
+SEPARATE, UNRELATED ITEM FROM THIS SESSION
+--------------------------------------------
+.../CMIP6/tidal/plots/physics/pyGETM/ (and everything under it) is
+owned by user rt, group rt, mode 775 -- missing the setgid bit every
+sibling directory in analyses/ has (mode 2775, group bb), so new
+subdirectories rt creates inside it don't inherit the shared group.
+This blocked renaming its leftover 2011-2011/ period folder (same
+resolve_period bug as CMEMS/WOA's tidal output, already fixed in code
+-- see ocean-post commit 0245a92). Needs rt (or anyone who already has
+write access there) to run, no sudo required since they already own
+the group:
+
+  chmod g+s /data/OceanICU/oceanicu_3d/analyses/areas/NSe/validations/CMIP6
+  find /data/OceanICU/oceanicu_3d/analyses/areas/NSe/validations/CMIP6 \
+      -type d -exec chmod 2775 {} \;
+
+Then rt (or kb, once the group is fixed) can:
+  mv .../CMIP6/tidal/plots/physics/pyGETM/2011-2011 \
+     .../CMIP6/tidal/plots/physics/pyGETM/2011
