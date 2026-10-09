@@ -307,6 +307,22 @@ def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
         return 1
 
     queue_path = Path(queue_path)
+    # Deliberately NOT queue_path.parent.mkdir(...) -- a typo'd/wrong
+    # --queue directory (confirmed happening in production, 2026-10-09:
+    # .../experiments/hpc_commands/queue_kb_orcal.yaml instead of
+    # .../hpc_commands/queue_kb_orca.yaml) would otherwise silently
+    # succeed by creating a new directory nothing ever looks at, instead
+    # of failing loudly where the typo is actually visible. A new FILE
+    # in an EXISTING folder is still fine (see queue_path.write_text
+    # below) -- only a missing PARENT folder is refused.
+    if not queue_path.parent.is_dir():
+        print(
+            f"ERROR: {queue_path.parent} does not exist -- refusing to create it "
+            f"(check for a typo in --queue). Create the folder yourself first if "
+            f"this is genuinely a new location.",
+            file=sys.stderr,
+        )
+        return 1
     if queue_path.exists():
         data = yaml.safe_load(queue_path.read_text()) or {}
     else:
@@ -343,7 +359,6 @@ def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
         "note": None,
     })
 
-    queue_path.parent.mkdir(parents=True, exist_ok=True)
     queue_path.write_text(yaml.safe_dump(data, sort_keys=False))
     print(f"queued {cmd_id}: {args.cmd} {call_args.get('experiment_id', '')}".rstrip())
     print(f"-- commit and push/rsync {queue_path} for it to actually cross to the registry's "
