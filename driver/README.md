@@ -250,22 +250,36 @@ PYGETM_CONFIG_PROVIDERS="$(pwd)/oceanicu_providers.py:register_oceanicu_provider
 conda activate .venv-tui  # or: source <pygetm-config repo>/.venv-tui/bin/activate
 export SCRIPT_FOLDER="$(pwd)/scripts"
 export PYGETM_CONFIG_DATA_ASSIGNMENTS_DERIVERS="$(pwd)/oceanicu_providers.py:derive_data_assignments"
+export PYGETM_CONFIG_VALUE_DERIVERS="$(pwd)/oceanicu_providers.py:derive_config_value_overrides"
 pygetm-config edit --schema dist/schema.json ../NSe/config/nse_from_oceanicu.yaml
 ```
 
-Both exports matter for 'Generate script' inside the TUI specifically, not
+All three exports matter for 'Generate script' inside the TUI specifically, not
 just running the dumped schema against a real domain: `pygetm-config edit
 --schema ...` NEVER calls `register_oceanicu_providers()` (that's the whole
 point of the pre-built JSON snapshot -- no live pygetm/provider-registration
-code runs in this pygetm-free process at all), so neither env var gets set
-automatically the way `oceanicu_driver.py`'s own `main()` sets them for a
+code runs in this pygetm-free process at all), so none of these env vars get
+set automatically the way `oceanicu_driver.py`'s own `main()` sets them for a
 direct/--dump-python run. Without `SCRIPT_FOLDER`, 'Generate script' fails
 outright (`river_discharge.script`'s real function is loaded/embedded
 eagerly, at generation time, not deferred like a plain data file path).
 Without `PYGETM_CONFIG_DATA_ASSIGNMENTS_DERIVERS`, generation SUCCEEDS but
 silently omits boundaries.baroclinic's/meteo's own derived data_assignments
 (open_boundary.temp/salt.values, simulation.airsea.t2m/d2m/...) -- see
-`oceanicu_providers.derive_data_assignments`'s own docstring.
+`oceanicu_providers.derive_data_assignments`'s own docstring. **Without
+`PYGETM_CONFIG_VALUE_DERIVERS`, generation ALSO succeeds but silently breaks
+FABM** (real gap, caught 2026-10-09): the generated script's own `fabm = True`
+default branch (FABM enabled, no explicit `--fabm` path given) bakes in a bare
+`True` instead of `pathlib.Path(resolve_data_path('fabm_ersem.yaml'))`, which
+then falls through to pygetm's own generic `'fabm.yaml'` default instead of
+the real configured filename -- see `derive_config_value_overrides`'s own
+docstring. The SAME missing export also breaks `pygetm_config.codegen.
+copy_companion_files` (new 2026-10-09): with no deriver to resolve
+`simulation.fabm`'s real filename, only `gotm.yaml` gets copied into a new
+experiment directory on 'Generate script', never the FABM yaml -- this is
+exactly the symptom that surfaces if this export is missing, so if FABM's
+own yaml isn't showing up in a freshly generated experiment directory,
+check this env var first.
 
 `build_schema()` itself logs its own provenance at `INFO` (pygetm-config's
 own `schema.py`) — real question this answers: "how was this schema
