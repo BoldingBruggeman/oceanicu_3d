@@ -57,8 +57,7 @@
 &lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
-&lt;h3 id=&#34;ranking&#34;&gt;Ranking&lt;/h3&gt;
-&lt;p&gt;&lt;img alt=&#34;Salt experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-ranking-horizon_surface-salt_surface.png&#34;&gt;&lt;/p&gt;</description>
+&lt;p&gt;📊 &lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/amm7/#horizon-surface&#34;&gt;View Horizontal Surface Validation rankings for AMM7 →&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NS — Analysis Overview</title>
@@ -129,6 +128,7 @@
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NSe&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
 &lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
 &lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;p&gt;📊 &lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/#tides&#34;&gt;View Tidal Analysis rankings for NSe →&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/&#34;&gt;CMEMS/tidal&lt;/a&gt;&lt;/strong&gt; — 2011&lt;/p&gt;
@@ -168,44 +168,7 @@
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmip6-tidal/&#34;&gt;CMIP6/tidal&lt;/a&gt;&lt;/strong&gt; — 2011-2011&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;Constituent&lt;/th&gt;
-          &lt;th&gt;Amp err (m)&lt;/th&gt;
-          &lt;th&gt;Phase err (°)&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;M2&lt;/td&gt;
-          &lt;td&gt;0.143&lt;/td&gt;
-          &lt;td&gt;90.6&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;S2&lt;/td&gt;
-          &lt;td&gt;0.044&lt;/td&gt;
-          &lt;td&gt;19.6&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;K1&lt;/td&gt;
-          &lt;td&gt;0.005&lt;/td&gt;
-          &lt;td&gt;38.2&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;O1&lt;/td&gt;
-          &lt;td&gt;0.011&lt;/td&gt;
-          &lt;td&gt;109.8&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmip6-tidal/#year-2011-2011&#34;&gt;2011-2011&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/&#34;&gt;WOA/tidal&lt;/a&gt;&lt;/strong&gt; — 2010–2011&lt;/p&gt;</description>
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmip6-tidal/&#34;&gt;CMIP6/tidal&lt;/a&gt;&lt;/strong&gt; — 2011-2011&lt;/p&gt;</description>
     </item>
     <item>
       <title>Tidal Analysis</title>
@@ -960,6 +923,27 @@ both equally.&lt;/p&gt;</description>
 &lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;O₁ (principal lunar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-tpxo9/physics/pyGETM/2019-2022/tidal/O1_gesla_comparison.png&#34;&gt;
 &lt;em&gt;O₁ (principal lunar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>AMM7 Rankings</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/rankings/amm7/</link>
+      <pubDate>Fri, 09 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/amm7/</guid>
+      <description>&lt;h1 id=&#34;amm7-experiment-rankings&#34;&gt;AMM7 Experiment Rankings&lt;/h1&gt;
+&lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;AMM7&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-overview/&#34;&gt;AMM7 overview&lt;/a&gt; for the full per-experiment statistics these are built from.&lt;/p&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;tides&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Only one experiment validated so far for this category — ranking needs at least two.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;horizon-surface&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Salt experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-ranking-horizon_surface-salt_surface.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-ranking-horizon_surface-temp_surface.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;gridded-3d-validation&#34;&gt;Gridded 3D Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;gridded-3d&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Salt experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-ranking-gridded_3d-salt_3d.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-ranking-gridded_3d-temp_3d.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;argo-profile-validation&#34;&gt;Argo Profile Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;argo&#34;&gt;&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>MLE Comparison — AMM7</title>
@@ -1888,6 +1872,22 @@ Analysed: 2026-05-04  12:29:45
 &lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-ssrd-strd/psal_ices_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-ssrd-strd/psal_ices_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     <item>
+      <title>NS Rankings</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/rankings/ns/</link>
+      <pubDate>Fri, 09 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/ns/</guid>
+      <description>&lt;h1 id=&#34;ns-experiment-rankings&#34;&gt;NS Experiment Rankings&lt;/h1&gt;
+&lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;NS&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-overview/&#34;&gt;NS overview&lt;/a&gt; for the full per-experiment statistics these are built from.&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;horizon-surface&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Only one experiment validated so far for this category — ranking needs at least two.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;horizon-bottom&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Only one experiment validated so far for this category — ranking needs at least two.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;gridded-3d-validation&#34;&gt;Gridded 3D Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;gridded-3d&#34;&gt;&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>NSe</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</link>
       <pubDate>Fri, 09 Oct 2026 00:00:00 +0000</pubDate>
@@ -2379,6 +2379,26 @@ Analysed: 2026-10-08  20:37:04
 &lt;h2 id=&#34;delta-change-temperature--salinity&#34;&gt;Delta-change (temperature / salinity)&lt;/h2&gt;
 &lt;h3 id=&#34;temperature-thetao&#34;&gt;Temperature (thetao)&lt;/h3&gt;
 &lt;p&gt;&lt;em&gt;Source: AMM7/AMM15 delta-change: GFDL-ESM4/ssp126 [1985-01-01–2014-12-31 vs 2015-01-01–2100-12-31]&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NSe Rankings</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/</link>
+      <pubDate>Fri, 09 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/</guid>
+      <description>&lt;h1 id=&#34;nse-experiment-rankings&#34;&gt;NSe Experiment Rankings&lt;/h1&gt;
+&lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;NSe&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-overview/&#34;&gt;NSe overview&lt;/a&gt; for the full per-experiment statistics these are built from.&lt;/p&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;tides&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Tidal experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-ranking-tides.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;horizon-surface&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-ranking-horizon_surface-temp_surface.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;horizon-bottom&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Only one experiment validated so far for this category — ranking needs at least two.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;gridded-3d-validation&#34;&gt;Gridded 3D Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;gridded-3d&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Only one experiment validated so far for this category — ranking needs at least two.&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>Regridding</title>
