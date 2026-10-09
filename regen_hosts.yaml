@@ -31,6 +31,8 @@ relay_host: bb-server1
 # ready to bring them back.
 enabled_areas:
   - NSe
+  - NS
+  - AMM7
 
 hosts:
   bb-server1:
