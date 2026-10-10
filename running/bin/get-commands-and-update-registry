@@ -1,13 +1,22 @@
 #!/bin/bash
-# Wrapper so `get-commands-and-update-registry ...` works from anywhere
-# once running/bin is on PATH -- see EXPERIMENT_TRACKING.md and
-# relay.env.example. Just forwards to the real script, which lives one
-# directory up from this one; pure stdlib, no conda env needed for this
-# one. Mainly useful for the manual/urgent invocation on the HPC's login
-# node (see EXPERIMENT_TRACKING.md "Command queue" -- "Don't wait for the cron
-# interval if something's urgent") -- the crontab line itself still uses
-# a full path, since cron doesn't source ~/.bashrc and won't see PATH
-# additions made there (same caveat as the plain .sh scripts in this
-# same directory, e.g. restart_registry_watcher.sh).
-SELF="$(readlink -f "${BASH_SOURCE[0]}")"
-exec python3 "$(dirname "$SELF")/../get_commands_and_update_registry.py" "$@"
+# Forwards to ocean-run's installed `get-commands-and-update-registry`
+# console script instead of this repo's local
+# get_commands_and_update_registry.py -- see RUN_TRACKING_EXTRACTION.md.
+# This is the "swap the thin wrapper layer" step of the ocean-run
+# comparison: the local script is left in place, untouched, for now
+# (nothing is deleted until the comparison plan there says so). Mainly
+# used for the manual/urgent invocation on the HPC's login node -- the
+# crontab line itself still uses a full path (see EXPERIMENT_TRACKING.md
+# "Command queue"), so that cron entry is unaffected by this swap.
+#
+# Resolved by stripping this directory out of PATH before looking up
+# `get-commands-and-update-registry` again, so this doesn't just
+# re-invoke itself -- needs ocean-run `pip install -e .`'d into whichever
+# conda env this runs under (see ocean-run's own README).
+SELF_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+REAL_CMD="$(PATH="${PATH//$SELF_DIR:/}" command -v get-commands-and-update-registry)"
+if [ -z "$REAL_CMD" ] || [ "$REAL_CMD" = "$(readlink -f "${BASH_SOURCE[0]}")" ]; then
+    echo "get-commands-and-update-registry: ocean-run's console script not found outside $SELF_DIR -- is ocean-run pip-installed (pip install -e .) in this conda env?" >&2
+    exit 1
+fi
+exec "$REAL_CMD" "$@"

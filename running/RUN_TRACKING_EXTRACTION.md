@@ -17,12 +17,46 @@ system that happens to live inside this project's repo. Pulling it out
 into its own repo means it can be versioned, tested, and reused
 independently of OceanICU's own science/deployment concerns.
 
-## Current status (2026-10-10)
+## Current status (2026-10-10, updated)
 
-**Nothing in this branch is different from `claude` yet, except this
-file.** `running/` here is still byte-identical to what's actually
-driving live experiments. This is deliberate -- see the constraint
-below.
+**Step 1 and 2 of the plan below are now done.** `running/bin/{chunk-runner,
+oceanicu-experiments,get-commands-and-update-registry,reap-orphaned-chunks,
+run-chunks-local}` now forward to `ocean-run`'s installed console scripts
+instead of this repo's local `.py` files (PATH-stripping trick so the
+wrapper doesn't just call itself -- see any of those 5 files for the exact
+mechanism). **The local `.py` scripts themselves are completely untouched**
+(`git diff --stat running/` touches only the 5 `bin/*` wrapper files) --
+both paths still exist side by side, exactly per the plan. `run_chunk.slurm`
+and the remaining deployment-specific `bin/*` scripts
+(`push_registry_snapshot.sh`, `sync_*_from_bbserver1.sh`, etc.) are
+untouched, as planned.
+
+**Comparison (step 2) result: IDENTICAL on every check run.** All done
+against fully isolated scratch registries (never the live
+`submission_registry.sqlite`, never this repo's own tracked
+`test_experiment_tracking/` fixtures -- separate scratch trees entirely),
+comparing the OLD path (`python3 running/*.py` directly) against the NEW
+path (`ocean-run`'s installed console scripts, called both directly and
+through the actual swapped `bin/*` wrappers):
+
+- `oceanicu-experiments list` / `show` output: byte-identical (after
+  normalizing the expected per-tree absolute paths and registration
+  timestamps).
+- Running one real chunk (`chunk_runner.py` vs `chunk-runner`) on a
+  single-chunk experiment: same exit code (0), same resulting registry
+  row (`status=complete`, same column values).
+- The harder case -- `chunk_chain.py` vs `chunk-chain` self-chaining
+  end to end: starts a single-chunk experiment, completes it, **picks up
+  the next queued experiment automatically**, advances it through all 17
+  of its 5-year chunks to its own stop date, then stops cleanly (no more
+  queued). Identical log output and identical final registry state
+  (`status=complete` for both experiments) on both sides.
+- The actual swapped `bin/oceanicu-experiments` + `bin/chunk-runner`
+  wrappers, exercised exactly as production would (PATH-based resolution,
+  real `mpiexec -n 1` launch, not mocked): added an experiment, ran it to
+  `complete`, confirmed via `oceanicu-experiments list` -- went through
+  the real wrapper layer this branch now ships, not just a direct call to
+  ocean-run's binaries.
 
 `ocean-run` itself (the new repo) is further along:
 - Built, `pip install -e .`'d, all 10 console scripts verified working
@@ -50,28 +84,35 @@ deployment-specific and out of scope to touch), and open questions not
 yet decided (env var naming, where pyGETM-aware code should live
 long-term, final naming/family decision for the new repo).
 
-## The plan from here (not yet done)
+## The plan from here
 
-1. On this branch: add `ocean-run` as an installable dependency and
-   swap `running/`'s own thin wrapper layer (`bin/*`) to call its
-   console scripts instead of the local copies -- **without deleting
-   anything local yet**, so both paths exist side by side.
-2. Run the exact same real-experiment workflows through both paths and
-   confirm identical registry behaviour (same CLI output, same chunk
-   exit-code decisions, same registry writes) -- ideally against a
-   *copy* of the real registry state, never the live
-   `submission_registry.sqlite` itself.
-3. Only once that comparison is clean: swap the lowest-risk pieces
-   first (e.g. `reap-orphaned-chunks`, `run-chunks-local`), leave
-   `chunk-runner`/`oceanicu-experiments` (what live chunks and
-   `run_chunk.slurm` actually depend on) for last.
-4. `run_chunk.slurm`'s two invocation lines (`python chunk_runner.py
-   ...` and its self-resubmission `sbatch ... "$SELF"`) are the last
-   thing touched -- only after a full chunk-to-chunk cycle has run
-   clean through `ocean-run` on real infrastructure (scylla), not just
-   this environment's scratch-registry test.
-5. Local copies in this repo's `running/` are deleted only after step 4,
-   never before.
+1. ✅ **Done.** Add `ocean-run` as an installable dependency and swap
+   `running/`'s own thin wrapper layer (`bin/*`) to call its console
+   scripts instead of the local copies -- without deleting anything
+   local (both paths exist side by side).
+2. ✅ **Done.** Run the exact same real-experiment workflows through both
+   paths and confirm identical registry behaviour. Caveat: this was all
+   against isolated scratch registries, not a *copy of the real* registry
+   state -- this environment has no access to the live relay
+   (`submission_registry.sqlite` lives behind `ssh://oceanicu-relay`, see
+   `relay.env`), so the strongest comparison possible from here used the
+   same fixture mechanism both repos' own test harnesses already use.
+   Still pending: the same comparison against an actual *copy* of real
+   production registry state, by whoever has relay access.
+3. **Not yet done.** Only once that stronger (real-data) comparison is
+   also clean: swap the lowest-risk pieces first (e.g.
+   `reap-orphaned-chunks`, `run-chunks-local` -- already swapped above,
+   but not yet exercised against anything beyond scratch/synthetic data),
+   leave `chunk-runner`/`oceanicu-experiments` (what live chunks and
+   `run_chunk.slurm` actually depend on) running through the swap in
+   production last, watched closely.
+4. **Not yet done.** `run_chunk.slurm`'s two invocation lines (`python
+   chunk_runner.py ...` and its self-resubmission `sbatch ... "$SELF"`)
+   are the last thing touched -- only after a full chunk-to-chunk cycle
+   has run clean through `ocean-run` on real infrastructure (scylla), not
+   just this environment's scratch-registry test.
+5. **Not yet done.** Local copies in this repo's `running/` are deleted
+   only after step 4, never before.
 
 ## Hard constraint
 

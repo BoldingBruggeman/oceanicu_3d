@@ -1,9 +1,19 @@
 #!/bin/bash
-# Wrapper so `oceanicu-experiments ...` works from anywhere (e.g. from inside
-# an experiment's own chunk directory) once running/bin is on PATH -- see
-# EXPERIMENT_TRACKING.md and relay.env.example. Just forwards to the real script,
-# which lives one directory up from this one; pure stdlib, no conda env
-# needed for this one (only the actual pyGETM driver subprocess needs
-# that, handled separately via chunk_runner.py's own --conda-env).
-SELF="$(readlink -f "${BASH_SOURCE[0]}")"
-exec python3 "$(dirname "$SELF")/../oceanicu_experiments.py" "$@"
+# Forwards to ocean-run's installed `oceanicu-experiments` console script
+# instead of this repo's local oceanicu_experiments.py -- see
+# RUN_TRACKING_EXTRACTION.md. This is the "swap the thin wrapper layer" step
+# of the ocean-run comparison: the local oceanicu_experiments.py is left in
+# place, untouched, for now (nothing is deleted until the comparison plan
+# there says so).
+#
+# Resolved by stripping this directory out of PATH before looking up
+# `oceanicu-experiments` again, so this doesn't just re-invoke itself --
+# needs ocean-run `pip install -e .`'d into whichever conda env this runs
+# under (see ocean-run's own README).
+SELF_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+REAL_CMD="$(PATH="${PATH//$SELF_DIR:/}" command -v oceanicu-experiments)"
+if [ -z "$REAL_CMD" ] || [ "$REAL_CMD" = "$(readlink -f "${BASH_SOURCE[0]}")" ]; then
+    echo "oceanicu-experiments: ocean-run's console script not found outside $SELF_DIR -- is ocean-run pip-installed (pip install -e .) in this conda env?" >&2
+    exit 1
+fi
+exec "$REAL_CMD" "$@"
