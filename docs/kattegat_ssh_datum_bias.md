@@ -102,5 +102,43 @@ The hypothesis is confirmed on three independent lines of evidence
 (code inspection, real boundary data, published literature): segment
 7's SSH forcing has a genuine ~15-25 cm reference-level artifact
 coincident with the 2023 Baltic product switch, superimposed on a real
-~0.2-0.4 m physical Baltic-higher steric signal that must be kept. See
-the companion implementation plan for the proposed fix.
+~0.2-0.4 m physical Baltic-higher steric signal that must be kept.
+
+## The fix, applied and verified against the real boundary file (2026-10-12)
+
+Implemented as `cmems_processor._apply_ssh_datum_corrections` (see
+`ocean-prep`), enabled for segment 7 via `datum_correction:
+{reference_segment: 6, density_reference_depth_m: 15}` in
+`nse_bdy_create.yaml`. The boundary generation was re-run for
+`temperature`/`salinity`/`ssh`/`transport`/`barotropic_vel` on
+bb-server1, writing `zos_datum_corrected` alongside the untouched `zos`
+in `data/NSe/CMEMS/bdy/hourly_2010-01-01_to_2026-08-17.nc`.
+
+The TEOS-10-derived physical target, computed from this run's own real
+T/S boundary data (segment 7 vs. segment 6, upper 15 m): **+0.309 m**
+-- squarely inside the 0.2-0.4 m range this investigation estimated
+independently, and consistent with the Ekman & Mäkinen (1996) literature
+anchor.
+
+Checked directly against the regenerated file:
+
+| | pre-2023 offset | post-2023 offset | jump |
+|---|---|---|---|
+| raw `zos` | +0.485 m | +0.234 m | **-0.251 m** |
+| `zos_datum_corrected` | +0.309 m | +0.309 m | **0.000 m** |
+
+Scope check: `zos_datum_corrected` is bit-identical to `zos` at all 294
+non-segment-7 boundary points (out of 310 total) -- the correction
+touches only the Kattegat/Baltic segment, nothing else.
+
+![Segment7-minus-segment6 SSH offset, raw vs. datum-corrected](kattegat_ssh_datum_correction.png)
+
+Monthly-mean offset between segment 7 (Kattegat) and segment 6 (North
+Sea): the raw `zos` series (red) carries the ~25 cm step exactly at the
+Baltic product switch; `zos_datum_corrected` (blue) holds a steady
+~0.31 m offset across the whole 2010-2026 record -- the real physical
+signal, with the artifact removed.
+
+Nothing downstream consumes `zos_datum_corrected` yet -- switching
+pygetm's actual boundary-condition input from `zos` to this field is a
+deliberate follow-up, not done here.
