@@ -154,6 +154,10 @@ datasets:
     segment_overrides:
       - segments: [7]
         on_gap: skip   # NWS SSH does not cover the Kattegat; Baltic sources cover the full range
+        datum_correction:   # see docs/kattegat_ssh_datum_bias.md
+          reference_segment: 6          # nearest NWS-covered segment (Norway/Shetland side)
+          density_reference_depth_m: 15 # matches real Danish-strait sill depths
+          output_variable: zos_datum_corrected   # written alongside 'zos', never overwrites it
         scenarios:
           - dataset_id: "cmems_mod_bal_phy_my_P1D-m"        # Baltic MY SSH as 'sla' (1993–2022)
             end_date:   "2022-12-31"
