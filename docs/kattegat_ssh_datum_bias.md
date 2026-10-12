@@ -139,6 +139,10 @@ Baltic product switch; `zos_datum_corrected` (blue) holds a steady
 ~0.31 m offset across the whole 2010-2026 record -- the real physical
 signal, with the artifact removed.
 
-Nothing downstream consumes `zos_datum_corrected` yet -- switching
-pygetm's actual boundary-condition input from `zos` to this field is a
-deliberate follow-up, not done here.
+**Update (2026-10-12)**: the SSH boundary variable is now selectable in
+`oceanicu-providers`/`pygetm-config` (`boundaries.barotropic.CMEMS.
+variable`, choices `zos`/`zos_datum_corrected`), and the real production
+config `NSe/config/nse_cmems.yaml` has been switched to
+`zos_datum_corrected`. Verified end-to-end via `--print-config`/
+`--dump-python`: the generated driver script reads
+`zos_datum_corrected` from the boundary file.
