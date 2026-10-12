@@ -447,6 +447,13 @@ boundaries:
       filename_template: hourly_{start_date}_to_{end_date}.nc
       start_date: '2010-01-01'
       end_date: '2026-08-17'
+      # Datum-corrected (2026-10-12, per user) -- raw 'zos' carries a real
+      # ~0.25 m artificial step at the Kattegat/Baltic segment (segment 7)
+      # exactly at the 2023 Baltic product switch, see
+      # docs/kattegat_ssh_datum_bias.md. zos_datum_corrected removes that
+      # artifact while keeping the real steady-state offset; identical to
+      # zos at every other boundary point.
+      variable: zos_datum_corrected
   baroclinic:
     # Same "no CMIP6 config" removal as barotropic above. WOA kept (not a
     # CMIP6 concern -- a genuinely separate, real alternate choice for
