@@ -185,9 +185,28 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                 ),
             ),
             # CMEMS: cfg_boundaries.py::data_2d's generic (non-TPXO) branch --
-            # reads zos/uo/vo from a single resolved file via the shared
-            # folder/folder_template/filename_template base, no extra params.
-            "CMEMS": (),
+            # reads <variable>/uo/vo from a single resolved file via the
+            # shared folder/folder_template/filename_template base.
+            "CMEMS": (
+                ParameterSpec(
+                    name="variable",
+                    type=TypeRef(kind="scalar", scalar_type="str"),
+                    default="zos",
+                    choices=("zos", "zos_datum_corrected"),
+                    help=(
+                        "'zos' (default) | 'zos_datum_corrected' -- which SSH "
+                        "variable to read from the resolved CMEMS boundary "
+                        "file for open_boundaries.z. 'zos_datum_corrected' "
+                        "removes a ~15-25 cm reference-level artifact at the "
+                        "NSe Kattegat/Baltic segment (see "
+                        "docs/kattegat_ssh_datum_bias.md) while keeping zos "
+                        "unchanged everywhere else -- see "
+                        "nse_bdy_create.yaml's segment 7 datum_correction "
+                        "block for how it's produced."
+                    ),
+                    importance=Importance.BASIC,
+                ),
+            ),
             "CMIP6": _CMIP6_SHARED,
         },
         default="TPXO",
@@ -1059,7 +1078,7 @@ def derive_data_assignments(config: dict) -> list[dict]:
             start_date=barotropic.get("start_date", ""), end_date=barotropic.get("end_date", "")
         )
         entries += [
-            {"target": "open_boundaries.z", "kind": "file", "file": str(_file), "variable": "zos", "on_grid": True},
+            {"target": "open_boundaries.z", "kind": "file", "file": str(_file), "variable": barotropic.get("variable", "zos"), "on_grid": True},
             {"target": "open_boundaries.u", "kind": "file", "file": str(_file), "variable": "uo", "on_grid": True},
             {"target": "open_boundaries.v", "kind": "file", "file": str(_file), "variable": "vo", "on_grid": True},
         ]
