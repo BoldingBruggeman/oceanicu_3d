@@ -1,34 +1,13 @@
-# Per-host settings for regenerate_hugo.py.
-#
-# Generation always runs on `relay_host` (that's where the consolidated
-# registry and analyses/ output actually live) -- running the script from
-# any other machine listed here auto-relays over ssh. To let generation
-# run from a new machine (another workstation, the production/simulation
-# machine itself, ...), just add an entry under `hosts:` -- no code
-# changes needed. The key is the machine's `hostname` output.
+# Per-host settings for regenerate_hugo.py. Generation runs on
+# relay_host; running from any other host listed here auto-relays over
+# ssh. Host key = that machine's `hostname` output.
 
 relay_host: bb-server1
 
-# Which areas this site publishes -- a persistent allowlist, not a one-off
-# CLI override you have to remember to type every time. Applies to every
-# host below (which areas exist is a property of the SITE's content, not
-# of which machine happens to run generation). Omit this key entirely (or
-# leave the list empty) to publish every area found under analyses/areas/.
-#
-# IMPORTANT (2026-08-28): cli.reporting's --area treats any area NOT named
-# here as no longer wanted on a --recursive run (which regenerate_hugo.py
-# always does) -- it doesn't just skip generating it, it actively removes
-# that area's already-published content/static pages. That's the whole
-# point of this list (deliberately narrowing what the site publishes), but
-# it's why leaving an area off here is not the same as "not touched yet" --
-# it's actively pruned. Nothing is lost by doing so though: this content is
-# fully regenerated from analyses/ data, never hand-authored, so adding an
-# area back to this list and re-running restores it exactly.
-#
-# For now: NSe only (per user, 2026-08-28). AMM7/ENA4/ENA8/NS were already
-# removed from the live site as a side effect of an earlier one-off
-# `--area NSe` regen before this list existed -- re-add them here whenever
-# ready to bring them back.
+# Allowlist of areas this site publishes. IMPORTANT: on a --recursive run
+# (regenerate_hugo.py's default), any area NOT listed here is actively
+# pruned from the already-published site, not just skipped -- safe since
+# content is always regenerated from analyses/, never hand-authored.
 enabled_areas:
   - NSe
   - NS
@@ -45,4 +24,4 @@ hosts:
     analyses_dir: /data/kb/OceanICU/oceanicu_3d/analyses
     hugo_out: /data/kb/OceanICU/oceanicu_3d
     conda_env: pygetm
-    db: null   # falls back to cli.reporting's own <analyses-dir>/simulation_list.db discovery
+    db: null   # falls back to <analyses-dir>/simulation_list.db discovery
