@@ -10,19 +10,45 @@
 # wrapper from anywhere else would still work, just via two separate
 # relay hops instead of one direct run).
 #
-# Usage:
-#   ./regen_and_deploy.sh              # regenerate all enabled areas, then deploy
-#   ./regen_and_deploy.sh --area NSe   # regenerate one area only, then deploy
+# Usage (--apply is required to actually run anything; without it, this
+# help is shown and nothing happens -- same confirmation gate
+# regenerate_hugo.py/deploy_ghpages.py each already require individually,
+# which this wrapper must not silently bypass just because it hardcodes
+# the call):
+#   ./regen_and_deploy.sh --apply              # regenerate all enabled areas, then deploy
+#   ./regen_and_deploy.sh --apply --area NSe   # regenerate one area only, then deploy
 #
-# Any arguments given are forwarded as-is to regenerate_hugo.py (e.g.
-# --area NAME). deploy_ghpages.py always runs with just --apply, since it
-# builds+pushes the Hugo site as a whole -- there's no "deploy one area"
-# equivalent.
+# All arguments given (including --apply itself) are forwarded as-is to
+# regenerate_hugo.py (e.g. --area NAME). deploy_ghpages.py always runs
+# with just --apply, since it builds+pushes the Hugo site as a whole --
+# there's no "deploy one area" equivalent.
 #
 # Exits non-zero (without deploying) if regeneration fails, so a broken
 # regen never gets force-pushed to the live site.
 
 set -euo pipefail
+
+apply=false
+for arg in "$@"; do
+    if [ "$arg" = "--apply" ]; then
+        apply=true
+    fi
+done
+if ! $apply; then
+    cat <<'EOF'
+Usage:
+  ./regen_and_deploy.sh --apply              # regenerate all enabled areas, then deploy
+  ./regen_and_deploy.sh --apply --area NSe   # regenerate one area only, then deploy
+
+Regenerates Hugo content then deploys to gh-pages -- a real, public,
+hard-to-reverse push. --apply is required to actually run anything;
+without it (as now), this message is shown and nothing happens --
+the same confirmation gate regenerate_hugo.py/deploy_ghpages.py each
+already require individually, which this wrapper must not silently
+bypass just because it used to hardcode the call.
+EOF
+    exit 0
+fi
 
 # This script's own directory IS the oceanicu_3d checkout -- not a fixed
 # ~/source/repos/OceanICU/oceanicu_3d guess (that broke for real: the
@@ -56,7 +82,7 @@ fi
 
 echo "==> Regenerating Hugo content ($HUGO_REPO)"
 cd "$HUGO_REPO"
-python3 regenerate_hugo.py --apply "$@"
+python3 regenerate_hugo.py "$@"   # "$@" already contains --apply, checked above
 
 echo
 echo "==> Deploying to gh-pages ($DEPLOY_REPO)"
