@@ -2,15 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/tidal-analysis/</loc>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/gridded-2d-validation/</loc>
@@ -41,28 +32,16 @@
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/guides/hugo-deployment/</loc>
   </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/</loc>
+    <lastmod>2026-10-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</loc>
+    <lastmod>2026-10-11T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/</loc>
+    <lastmod>2026-10-11T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/rankings/all/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-baseline/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-cmems/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-cmems-prof/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-netsw-lw/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-obskd/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/</loc>
     <lastmod>2026-10-10T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/rankings/amm7/</loc>
@@ -98,16 +77,7 @@
     <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/gfdl-esm4/ssp370/</loc>
     <lastmod>2026-10-10T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-mle-comparison/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-mle-comparison/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/mle_comparison/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/</loc>
     <lastmod>2026-10-10T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/</loc>
@@ -120,36 +90,6 @@
     <lastmod>2026-10-10T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/ssp370/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-1/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-2/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-3/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-baseline/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-cmems/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-obskd/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-srt/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/</loc>
     <lastmod>2026-10-10T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/rankings/ns/</loc>
@@ -176,13 +116,7 @@
     <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/</loc>
     <lastmod>2026-10-10T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/</loc>
-    <lastmod>2026-10-10T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/</loc>
     <lastmod>2026-10-10T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/rankings/</loc>
