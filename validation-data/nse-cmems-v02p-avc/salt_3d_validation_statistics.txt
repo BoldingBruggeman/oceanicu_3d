@@ -1,0 +1,34 @@
+################################################################################
+SALT Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-10-13 17:26:05
+  Area:         NSe
+  Experiment:   CMEMS/v02P_avc
+################################################################################
+
+================================================================================
+Period: 2011-2024  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  17:26:05
+
+--- WOA ---
+  RMSE:          nan
+  Bias:         +nan
+  MAE:           nan
+  Correlation:   nan
+  N points:      0
+  Model mean:   nan
+  Obs mean:     nan
+  Model std:    nan
+  Obs std:      nan
+
+  Error distribution:
+    Min:         +nan
+    5th pct:      +nan
+    25th pct:     +nan
+    Median:       +nan
+    75th pct:     +nan
+    95th pct:     +nan
+    Max:         +nan
+
