@@ -46,19 +46,30 @@ done
 # location works for either layout automatically.
 HUGO_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# First choice: the caller already has a working ocean-stack env active
+# (any conda layout at all -- module-based HPC conda, ~/.conda/envs,
+# anaconda3, miniforge3, ...). Caught live: scylla's own env lives at
+# ~/.conda/envs/ocean-stack, neither of the two hardcoded guesses below --
+# a third hardcoded path would just be the same brittleness again for the
+# next machine. Checking "is python3 already right" instead of "where
+# might it be" handles every layout, including ones we've never seen.
+if command -v python3 >/dev/null 2>&1 && python3 -c "import ocean_data" 2>/dev/null; then
+    : # already active and correct -- nothing to do
 # Prefer the shared conda env location over ~/miniconda3 -- not every
 # account has its own miniconda3 install at all (the shared "oceanicu"
 # account doesn't; confirmed live: `source ~/miniconda3/...` failed
 # outright with "No such file or directory"). A plain PATH prepend works
 # for any account with read+execute on it, same mechanism
 # host_config.relay_if_needed()'s own python_bin already uses.
-if [ -x /opt/conda-envs/ocean-stack/bin/python3 ]; then
+elif [ -x /opt/conda-envs/ocean-stack/bin/python3 ]; then
     export PATH="/opt/conda-envs/ocean-stack/bin:$PATH"
 elif [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
     source "$HOME/miniconda3/etc/profile.d/conda.sh"
     conda activate ocean-stack
 else
-    echo "ERROR: no ocean-stack python3 found (checked /opt/conda-envs/ocean-stack and ~/miniconda3)" >&2
+    echo "ERROR: no ocean-stack python3 found on PATH, and neither" >&2
+    echo "/opt/conda-envs/ocean-stack nor ~/miniconda3 exists here --" >&2
+    echo "activate your own ocean-stack env before running this script." >&2
     exit 1
 fi
 
