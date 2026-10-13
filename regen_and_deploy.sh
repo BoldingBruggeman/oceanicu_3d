@@ -45,12 +45,6 @@ done
 # bb_server1_shared_account_setup.txt). Resolving via this script's own
 # location works for either layout automatically.
 HUGO_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# A single shared checkout (kb:bb, pulled only by kb -- see
-# ~/.config/oceanicu/hosts.yaml's own note on this), not per-account --
-# ocean-post is a pure library/script source this pipeline never pushes
-# to, so there's no reason for oceanicu to have (and keep in sync) its
-# own separate copy.
-DEPLOY_REPO="/opt/ocean-src/ocean-post"
 
 # Prefer the shared conda env location over ~/miniconda3 -- not every
 # account has its own miniconda3 install at all (the shared "oceanicu"
@@ -65,6 +59,36 @@ elif [ -f "$HOME/miniconda3/etc/profile.d/conda.sh" ]; then
     conda activate ocean-stack
 else
     echo "ERROR: no ocean-stack python3 found (checked /opt/conda-envs/ocean-stack and ~/miniconda3)" >&2
+    exit 1
+fi
+
+# Where ocean-post lives is NOT the same on every host -- the shared
+# /opt/ocean-src/ocean-post checkout only exists on bb-server1/oceanicu-
+# relay; orca still has its own ~/source/repos/ocean-post. Hardcoding
+# /opt/ocean-src/ocean-post here broke for real on orca ("cd: No such
+# file or directory"). Resolve it the same way resolve_hugo_dir()/
+# resolve_env_python() already do in the Python scripts: read this
+# host's own repos.ocean-post from ~/.config/oceanicu/hosts.yaml,
+# falling back to relay_host's entry only if THIS host has no entry at
+# all (not merely a missing key) -- same semantics, same reason (see
+# regenerate_hugo.py's resolve_env_python() docstring). Must run after
+# the PATH/conda setup above so python3 here is the right interpreter
+# with ocean_data importable.
+DEPLOY_REPO="$(python3 -c "
+import socket
+from pathlib import Path
+from ocean_data import host_config as oc
+cfg = oc.load_host_config('oceanicu')
+hostname = socket.gethostname()
+entry = cfg.get('hosts', {}).get(hostname)
+if entry is None:
+    entry = cfg.get('hosts', {}).get(cfg.get('relay_host'))
+repo = (entry or {}).get('repos', {}).get('ocean-post')
+if repo:
+    print(Path(repo).expanduser())
+")"
+if [ -z "$DEPLOY_REPO" ]; then
+    echo "ERROR: no repos.ocean-post entry for host $(hostname) (or relay_host) in ~/.config/oceanicu/hosts.yaml" >&2
     exit 1
 fi
 
