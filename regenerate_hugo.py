@@ -1,11 +1,12 @@
-#!/opt/conda-envs/ocean-stack/bin/python3
-# A plain "#!/usr/bin/env python3" shebang would resolve whatever's on
-# PATH at invocation time -- requiring `conda activate ocean-stack`
-# first (and oceanicu has no conda to activate at all, see
-# bb_server1_shared_account_setup.txt). Pointing the shebang straight at
-# the shared env (kb:bb, group-readable+executable, same mechanism as
-# hosts.yaml's python_bin) means `./regenerate_hugo.py --apply` just
-# works for either account, no activation step, no PATH setup, ever.
+#!/usr/bin/env python3
+# NOT a hardcoded "#!/opt/conda-envs/ocean-stack/bin/python3" -- tried
+# that (2026-10-13), reverted the same day: that path only exists on
+# bb-server1. This script also runs directly on orca (kb's own machine,
+# before it relays), where it doesn't exist at all -- confirmed live:
+# "cannot execute: required file not found". A shebang is one static
+# path, it can't fall back per-machine -- that logic belongs in a
+# wrapper (regen_and_deploy.sh) or in `conda activate` / an explicit
+# python3 path at the call site, not baked into the file itself.
 """Regenerate Hugo content from validation results and area metadata.
 
 Usage (--apply is required to actually do anything; without it, this help
