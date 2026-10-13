@@ -118,7 +118,46 @@ def sync_back(config: dict, relay_host: str, serve: bool = False) -> None:
         print("Then open http://localhost:1313/oceanicu_3d/ in a browser.")
 
 
-def generate_locally(config: dict, hostname: str, relay_host: str, args: argparse.Namespace) -> None:
+def resolve_env_python(oc_cfg: dict, hostname: str, conda_env: str) -> Path:
+    """Where this host's own conda_env's python3 actually lives.
+
+    Prefers ~/.config/oceanicu/hosts.yaml's python_bin (an absolute path,
+    works for any account with read+execute on it, same mechanism
+    host_config.relay_if_needed() already uses for the ssh hop -- see its
+    own docstring) over guessing ``~/miniconda3/envs/<conda_env>``: not
+    every account even has its own ~/miniconda3 install at all -- the
+    shared "oceanicu" account on bb-server1 doesn't, it uses the shared
+    /opt/conda-envs/ocean-stack instead, confirmed live (the hardcoded
+    guess resolved to a nonexistent /home/oceanicu/miniconda3/... path).
+
+    Looked up under this account's own real hostname -- falling back to
+    cfg['relay_host'] only when hostname has *no* entry in hosts.yaml at
+    all (covers bb-server1/oceanicu, whose hosts.yaml key is the ssh
+    alias "oceanicu-relay" rather than its real socket.gethostname(), so
+    a lookup by real hostname finds nothing there to even check).
+    Deliberately NOT "no python_bin under this key -> try relay_host's
+    instead" -- caught live: orca's own entry exists but has no
+    python_bin (correctly -- it doesn't need the override, it has its
+    own ~/miniconda3), and falling through to oceanicu-relay's
+    python_bin there would silently run orca's generation under the
+    wrong conda env entirely (ocean-stack instead of orca's actual
+    pygetm). Falls back to the original
+    ~/miniconda3/envs/<conda_env>/bin/python3 guess when the resolved
+    entry (if any) has no python_bin set.
+    """
+    hosts = oc_cfg.get('hosts', {})
+    entry = hosts.get(hostname)
+    if entry is None:
+        entry = hosts.get(oc_cfg.get('relay_host'))
+    python_bin = (entry or {}).get('python_bin')
+    if python_bin:
+        return Path(python_bin).expanduser()
+    return Path.home() / "miniconda3" / "envs" / conda_env / "bin" / "python3"
+
+
+def generate_locally(
+    config: dict, oc_cfg: dict, hostname: str, relay_host: str, args: argparse.Namespace,
+) -> None:
     if args.serve and hostname == relay_host:
         sys.exit(
             f"ERROR: refusing --serve on {relay_host} -- it's in Hetzner/Germany, "
@@ -132,7 +171,7 @@ def generate_locally(config: dict, hostname: str, relay_host: str, args: argpars
     # Invoke the conda env's python3 directly rather than "conda run":
     # conda's shell function isn't set up in a plain non-interactive ssh
     # command, so "conda" itself often isn't even on PATH there.
-    env_python = Path.home() / "miniconda3" / "envs" / host_cfg["conda_env"] / "bin" / "python3"
+    env_python = resolve_env_python(oc_cfg, hostname, host_cfg["conda_env"])
     if not env_python.exists():
         sys.exit(f"ERROR: no python3 found for conda env {host_cfg['conda_env']!r} at {env_python}")
 
@@ -228,7 +267,7 @@ def main() -> None:
     if hostname != relay_host and not args.no_relay:
         relay(config, oc_cfg, relay_host, args)
     else:
-        generate_locally(config, hostname, relay_host, args)
+        generate_locally(config, oc_cfg, hostname, relay_host, args)
 
 
 if __name__ == "__main__":
