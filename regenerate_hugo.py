@@ -1,4 +1,11 @@
-#!/usr/bin/env python3
+#!/opt/conda-envs/ocean-stack/bin/python3
+# A plain "#!/usr/bin/env python3" shebang would resolve whatever's on
+# PATH at invocation time -- requiring `conda activate ocean-stack`
+# first (and oceanicu has no conda to activate at all, see
+# bb_server1_shared_account_setup.txt). Pointing the shebang straight at
+# the shared env (kb:bb, group-readable+executable, same mechanism as
+# hosts.yaml's python_bin) means `./regenerate_hugo.py --apply` just
+# works for either account, no activation step, no PATH setup, ever.
 """Regenerate Hugo content from validation results and area metadata.
 
 Usage (--apply is required to actually do anything; without it, this help
