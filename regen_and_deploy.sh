@@ -31,7 +31,12 @@ set -euo pipefail
 # bb_server1_shared_account_setup.txt). Resolving via this script's own
 # location works for either layout automatically.
 HUGO_REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DEPLOY_REPO="$HOME/source/repos/ocean-post"   # same relative position for every account
+# A single shared checkout (kb:bb, pulled only by kb -- see
+# ~/.config/oceanicu/hosts.yaml's own note on this), not per-account --
+# ocean-post is a pure library/script source this pipeline never pushes
+# to, so there's no reason for oceanicu to have (and keep in sync) its
+# own separate copy.
+DEPLOY_REPO="/opt/ocean-src/ocean-post"
 
 # Prefer the shared conda env location over ~/miniconda3 -- not every
 # account has its own miniconda3 install at all (the shared "oceanicu"
