@@ -11,9 +11,10 @@
 
 Usage (--apply is required to actually do anything; without it, this help
 is shown and nothing runs):
-  ./regenerate_hugo.py --apply                # all areas
-  ./regenerate_hugo.py --apply --area NS      # single area
-  ./regenerate_hugo.py --apply --serve        # regenerate then start dev server
+  ./regenerate_hugo.py --apply                    # regen_hosts.yaml's enabled_areas list
+  ./regenerate_hugo.py --apply --area NSe         # one area only, overriding enabled_areas
+  ./regenerate_hugo.py --apply --area NSe AMM7    # several areas, same override
+  ./regenerate_hugo.py --apply --serve            # regenerate then start dev server
   ./regenerate_hugo.py --apply --sync-back    # also sync content/static to this
                                        # machine's own local paths, for a
                                        # low-latency `hugo server` preview
@@ -191,15 +192,14 @@ def generate_locally(
     ]
     if host_cfg.get("db"):
         cmd += ["--db", host_cfg["db"]]
-    # --area (this invocation's own one-off override) always wins over the
-    # persistent enabled_areas allowlist below -- e.g. `--area AMM7` to
-    # regenerate just that one area's own pages without touching the
-    # allowlist or any other area's already-published pages.
-    if args.area:
-        cmd += ["--area", args.area]
-    else:
-        for area in config.get("enabled_areas") or []:
-            cmd += ["--area", area]
+    # --area (this invocation's own one-off override, one or more names)
+    # always wins over the persistent enabled_areas allowlist below --
+    # e.g. `--area NSe AMM7` to regenerate just those areas' own pages
+    # without touching the allowlist or any other area's already-
+    # published pages. Not restricted to names in the allowlist -- a
+    # one-off `--area ENA4` works even if ENA4 isn't in enabled_areas.
+    for area in (args.area if args.area else config.get("enabled_areas") or []):
+        cmd += ["--area", area]
     # --serve is handled separately below (a plain local hugo server on
     # this machine), never forwarded to cli.reporting -- see the refusal
     # check above for why.
@@ -225,7 +225,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument("--area", help="Regenerate a single area only")
+    parser.add_argument(
+        "--area", "--areas", nargs="+", metavar="NAME",
+        help="Regenerate only these area(s) (e.g. --area NSe AMM7), "
+             "overriding regen_hosts.yaml's enabled_areas list for this "
+             "run only -- the allowlist itself is untouched.",
+    )
     parser.add_argument(
         "--serve", action="store_true",
         help="Run a local `hugo server` preview after generating -- never "
