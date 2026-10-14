@@ -725,12 +725,13 @@ def list_experiments(
 @_rpc_or_local
 def set_priority(conn: sqlite3.Connection, experiment_id: str, priority: int, user: Optional[str] = None) -> None:
     old = get_experiment(conn, experiment_id)
+    if old is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
     conn.execute(
         "UPDATE experiments SET priority = ?, updated_at = ? WHERE experiment_id = ?",
         (priority, _now(), experiment_id),
     )
-    if old is not None:
-        _log_history(conn, experiment_id, "priority_changed", f"{old['priority']} -> {priority}", user=user)
+    _log_history(conn, experiment_id, "priority_changed", f"{old['priority']} -> {priority}", user=user)
     conn.commit()
 
 
@@ -747,15 +748,16 @@ def set_data_roots_file(
     same way as script/config, if it's a bare filename), same
     next-hand-off-only semantics as set_priority/set_chunk_delay."""
     old = get_experiment(conn, experiment_id)
+    if old is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
     conn.execute(
         "UPDATE experiments SET data_roots_file = ?, updated_at = ? WHERE experiment_id = ?",
         (data_roots_file, _now(), experiment_id),
     )
-    if old is not None:
-        _log_history(
-            conn, experiment_id, "data_roots_file_changed",
-            f"{old['data_roots_file']!r} -> {data_roots_file!r}", user=user,
-        )
+    _log_history(
+        conn, experiment_id, "data_roots_file_changed",
+        f"{old['data_roots_file']!r} -> {data_roots_file!r}", user=user,
+    )
     conn.commit()
 
 
@@ -767,12 +769,13 @@ def set_np(conn: sqlite3.Connection, experiment_id: str, np: int, user: Optional
     set_priority/set_chunk_delay -- never affects a chunk already
     running."""
     old = get_experiment(conn, experiment_id)
+    if old is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
     conn.execute(
         "UPDATE experiments SET np = ?, updated_at = ? WHERE experiment_id = ?",
         (np, _now(), experiment_id),
     )
-    if old is not None:
-        _log_history(conn, experiment_id, "np_changed", f"{old['np']} -> {np}", user=user)
+    _log_history(conn, experiment_id, "np_changed", f"{old['np']} -> {np}", user=user)
     conn.commit()
 
 
@@ -785,12 +788,13 @@ def set_launcher(conn: sqlite3.Connection, experiment_id: str, launcher: str, us
     if launcher not in ("srun", "mpiexec"):
         raise ValueError(f"launcher must be 'srun' or 'mpiexec', got {launcher!r}")
     old = get_experiment(conn, experiment_id)
+    if old is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
     conn.execute(
         "UPDATE experiments SET launcher = ?, updated_at = ? WHERE experiment_id = ?",
         (launcher, _now(), experiment_id),
     )
-    if old is not None:
-        _log_history(conn, experiment_id, "launcher_changed", f"{old['launcher']} -> {launcher}", user=user)
+    _log_history(conn, experiment_id, "launcher_changed", f"{old['launcher']} -> {launcher}", user=user)
     conn.commit()
 
 
@@ -802,12 +806,13 @@ def set_notes(conn: sqlite3.Connection, experiment_id: str, notes: Optional[str]
     consistency, though notes itself has no runtime effect on chunk
     execution -- it's purely a human-facing record."""
     old = get_experiment(conn, experiment_id)
+    if old is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
     conn.execute(
         "UPDATE experiments SET notes = ?, updated_at = ? WHERE experiment_id = ?",
         (notes, _now(), experiment_id),
     )
-    if old is not None:
-        _log_history(conn, experiment_id, "notes_changed", f"{old['notes']!r} -> {notes!r}", user=user)
+    _log_history(conn, experiment_id, "notes_changed", f"{old['notes']!r} -> {notes!r}", user=user)
     conn.commit()
 
 
@@ -910,15 +915,16 @@ def set_chunk_delay(
     Takes effect on the very next hand-off, never retroactively, same as
     set_priority/set_stop_date/set_chunk_settings."""
     old = get_experiment(conn, experiment_id)
+    if old is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
     conn.execute(
         "UPDATE experiments SET chunk_delay_seconds = ?, updated_at = ? WHERE experiment_id = ?",
         (chunk_delay_seconds, _now(), experiment_id),
     )
-    if old is not None:
-        _log_history(
-            conn, experiment_id, "chunk_delay_changed",
-            f"{old['chunk_delay_seconds']} -> {chunk_delay_seconds}", user=user,
-        )
+    _log_history(
+        conn, experiment_id, "chunk_delay_changed",
+        f"{old['chunk_delay_seconds']} -> {chunk_delay_seconds}", user=user,
+    )
     conn.commit()
 
 
@@ -933,12 +939,13 @@ def set_stop_date(conn: sqlite3.Connection, experiment_id: str, stop_date: str, 
     (revised) goal -- it does not undo or delete any chunk already run
     past the new date."""
     old = get_experiment(conn, experiment_id)
+    if old is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
     conn.execute(
         "UPDATE experiments SET stop_date = ?, updated_at = ? WHERE experiment_id = ?",
         (stop_date, _now(), experiment_id),
     )
-    if old is not None:
-        _log_history(conn, experiment_id, "stop_date_changed", f"{old['stop_date']} -> {stop_date}", user=user)
+    _log_history(conn, experiment_id, "stop_date_changed", f"{old['stop_date']} -> {stop_date}", user=user)
     conn.commit()
     recompute_experiment_status(conn, experiment_id)
 
@@ -955,12 +962,13 @@ def set_start_date(conn: sqlite3.Connection, experiment_id: str, initial_date: s
     first. No recompute_experiment_status call needed -- unlike stop_date,
     initial_date plays no part in status derivation."""
     old = get_experiment(conn, experiment_id)
+    if old is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
     conn.execute(
         "UPDATE experiments SET initial_date = ?, updated_at = ? WHERE experiment_id = ?",
         (initial_date, _now(), experiment_id),
     )
-    if old is not None:
-        _log_history(conn, experiment_id, "initial_date_changed", f"{old['initial_date']} -> {initial_date}", user=user)
+    _log_history(conn, experiment_id, "initial_date_changed", f"{old['initial_date']} -> {initial_date}", user=user)
     conn.commit()
 
 
@@ -1133,6 +1141,8 @@ def set_chunk_settings(
     Already-completed chunks and their date-based restart filenames are
     untouched -- the next chunk simply picks up the new size."""
     old = get_experiment(conn, experiment_id)
+    if old is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
     fields, params = [], []
     if chunk_kind is not None:
         fields.append("chunk_kind = ?"); params.append(chunk_kind)
@@ -1143,14 +1153,13 @@ def set_chunk_settings(
     fields.append("updated_at = ?"); params.append(_now())
     params.append(experiment_id)
     conn.execute(f"UPDATE experiments SET {', '.join(fields)} WHERE experiment_id = ?", params)
-    if old is not None:
-        changes = []
-        if chunk_kind is not None and chunk_kind != old["chunk_kind"]:
-            changes.append(f"chunk_kind: {old['chunk_kind']} -> {chunk_kind}")
-        if chunk_multiplier is not None and chunk_multiplier != old["chunk_multiplier"]:
-            changes.append(f"chunk_multiplier: {old['chunk_multiplier']} -> {chunk_multiplier}")
-        if changes:
-            _log_history(conn, experiment_id, "chunk_settings_changed", "; ".join(changes), user=user)
+    changes = []
+    if chunk_kind is not None and chunk_kind != old["chunk_kind"]:
+        changes.append(f"chunk_kind: {old['chunk_kind']} -> {chunk_kind}")
+    if chunk_multiplier is not None and chunk_multiplier != old["chunk_multiplier"]:
+        changes.append(f"chunk_multiplier: {old['chunk_multiplier']} -> {chunk_multiplier}")
+    if changes:
+        _log_history(conn, experiment_id, "chunk_settings_changed", "; ".join(changes), user=user)
     conn.commit()
 
 
@@ -1158,6 +1167,8 @@ def set_chunk_settings(
 def set_control(conn: sqlite3.Connection, experiment_id: str, control: str, user: Optional[str] = None) -> None:
     if control not in EXPERIMENT_CONTROLS:
         raise ValueError(f"control must be one of {EXPERIMENT_CONTROLS}, got {control!r}")
+    if get_experiment(conn, experiment_id) is None:
+        raise KeyError(f"no such experiment_id: {experiment_id!r}")
     conn.execute(
         "UPDATE experiments SET control = ?, updated_at = ? WHERE experiment_id = ?",
         (control, _now(), experiment_id),

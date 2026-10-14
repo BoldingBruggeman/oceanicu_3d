@@ -891,42 +891,66 @@ def cmd_show(args: argparse.Namespace) -> int:
 
 def cmd_set_priority(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rt.set_priority(conn, args.experiment_id, args.priority, user=rt._current_user())
+        try:
+            rt.set_priority(conn, args.experiment_id, args.priority, user=rt._current_user())
+        except KeyError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     print(f"{args.experiment_id}: priority set to {args.priority}")
     return 0
 
 
 def cmd_set_data_roots_file(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rt.set_data_roots_file(conn, args.experiment_id, args.path, user=rt._current_user())
+        try:
+            rt.set_data_roots_file(conn, args.experiment_id, args.path, user=rt._current_user())
+        except KeyError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     print(f"{args.experiment_id}: data_roots_file set to {args.path!r}")
     return 0
 
 
 def cmd_set_np(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rt.set_np(conn, args.experiment_id, args.np, user=rt._current_user())
+        try:
+            rt.set_np(conn, args.experiment_id, args.np, user=rt._current_user())
+        except KeyError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     print(f"{args.experiment_id}: np set to {args.np}")
     return 0
 
 
 def cmd_set_launcher(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rt.set_launcher(conn, args.experiment_id, args.launcher, user=rt._current_user())
+        try:
+            rt.set_launcher(conn, args.experiment_id, args.launcher, user=rt._current_user())
+        except KeyError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     print(f"{args.experiment_id}: launcher set to {args.launcher!r}")
     return 0
 
 
 def cmd_set_notes(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rt.set_notes(conn, args.experiment_id, args.notes, user=rt._current_user())
+        try:
+            rt.set_notes(conn, args.experiment_id, args.notes, user=rt._current_user())
+        except KeyError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     print(f"{args.experiment_id}: notes set to {args.notes!r}")
     return 0
 
 
 def cmd_set_chunk_delay(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rt.set_chunk_delay(conn, args.experiment_id, args.seconds, user=rt._current_user())
+        try:
+            rt.set_chunk_delay(conn, args.experiment_id, args.seconds, user=rt._current_user())
+        except KeyError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     print(f"{args.experiment_id}: chunk_delay_seconds set to {args.seconds} "
           f"(takes effect on the next chunk/resubmission)")
     return 0
@@ -934,14 +958,22 @@ def cmd_set_chunk_delay(args: argparse.Namespace) -> int:
 
 def cmd_set_stop_date(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rt.set_stop_date(conn, args.experiment_id, args.stop_date, user=rt._current_user())
+        try:
+            rt.set_stop_date(conn, args.experiment_id, args.stop_date, user=rt._current_user())
+        except KeyError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     print(f"{args.experiment_id}: stop_date set to {args.stop_date} (takes effect on the next chunk)")
     return 0
 
 
 def cmd_set_start_date(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rt.set_start_date(conn, args.experiment_id, args.start_date, user=rt._current_user())
+        try:
+            rt.set_start_date(conn, args.experiment_id, args.start_date, user=rt._current_user())
+        except KeyError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     print(f"{args.experiment_id}: initial_date set to {args.start_date} -- only takes effect if chunk 0 "
           f"hasn't run yet (next_chunk_start falls back to initial_date only when no chunk is 'done'); "
           f"otherwise this has no practical effect until a rerun/reset drops all chunks first")
@@ -950,10 +982,14 @@ def cmd_set_start_date(args: argparse.Namespace) -> int:
 
 def cmd_chunk_size(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
-        rt.set_chunk_settings(
-            conn, args.experiment_id, chunk_kind=args.chunk_kind, chunk_multiplier=args.chunk_multiplier,
-            user=rt._current_user(),
-        )
+        try:
+            rt.set_chunk_settings(
+                conn, args.experiment_id, chunk_kind=args.chunk_kind, chunk_multiplier=args.chunk_multiplier,
+                user=rt._current_user(),
+            )
+        except KeyError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     print(f"{args.experiment_id}: chunk size updated for the remaining (not-yet-run) part of the experiment")
     return 0
 
@@ -966,7 +1002,11 @@ def cmd_pause(args: argparse.Namespace) -> int:
                 rt.set_control(conn, r["experiment_id"], "pause_requested", user=user)
             print("pause requested for all experiments")
         else:
-            rt.set_control(conn, args.experiment_id, "pause_requested", user=user)
+            try:
+                rt.set_control(conn, args.experiment_id, "pause_requested", user=user)
+            except KeyError as exc:
+                print(f"ERROR: {exc}", file=sys.stderr)
+                return 1
             print(f"pause requested for {args.experiment_id!r} (takes effect after the current chunk finishes)")
     return 0
 
@@ -979,7 +1019,11 @@ def cmd_resume(args: argparse.Namespace) -> int:
                 rt.set_control(conn, r["experiment_id"], "run", user=user)
             print("resumed all experiments")
         else:
-            rt.set_control(conn, args.experiment_id, "run", user=user)
+            try:
+                rt.set_control(conn, args.experiment_id, "run", user=user)
+            except KeyError as exc:
+                print(f"ERROR: {exc}", file=sys.stderr)
+                return 1
             print(f"resumed {args.experiment_id!r}")
     return 0
 
