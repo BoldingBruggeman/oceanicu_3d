@@ -1,0 +1,986 @@
+################################################################################
+TEMP_SURFACE Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-10-13 23:40:52
+  Area:         NSe
+  Experiment:   CMEMS/v02P_gvc
+################################################################################
+
+================================================================================
+Period: 2011-2024  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:52
+
+--- OSTIA ---
+  RMSE:          0.7953
+  Bias:         +0.2082
+  MAE:           0.5791
+  Correlation:   0.9280
+  N points:      139,002,448
+  Model mean:   11.4033
+  Obs mean:     11.1951
+  Model std:    4.1022
+  Obs std:      3.8572
+
+  Error distribution:
+    Min:         -9.7444
+    5th pct:      -0.8461
+    25th pct:     -0.1967
+    Median:       +0.1963
+    75th pct:     +0.5975
+    95th pct:     +1.3050
+    Max:         +11.0574
+
+  Monthly breakdown:
+  Month      RMSE      Bias      MAE    Corr
+  --------------------------------------------
+  Jan      0.6479   -0.0226   0.4717  0.9454
+  Feb      0.6237   -0.0592   0.4477  0.9523
+  Mar      0.5427   -0.0531   0.3909  0.9579
+  Apr      0.5136   -0.0126   0.3734  0.9516
+  May      0.7612   +0.2663   0.5609  0.9260
+  Jun      1.2033   +0.7051   0.9512  0.8965
+  Jul      1.2287   +0.7756   1.0016  0.9030
+  Aug      0.9665   +0.5187   0.7713  0.9231
+  Sep      0.7184   +0.1877   0.5448  0.9497
+  Oct      0.6128   +0.0602   0.4638  0.9509
+  Nov      0.6174   +0.0591   0.4636  0.9379
+  Dec      0.6780   +0.0526   0.4966  0.9269
+  --------------------------------------------
+  All      0.7953   +0.2082   0.5791  0.9280
+
+--- CCI-SST ---
+  RMSE:          0.8084
+  Bias:         +0.3179
+  MAE:           0.5942
+  Correlation:   0.9331
+  N points:      139,822,299
+  Model mean:   11.4009
+  Obs mean:     11.0833
+  Model std:    4.1102
+  Obs std:      3.8596
+
+  Error distribution:
+    Min:         -9.0288
+    5th pct:      -0.7017
+    25th pct:     -0.0790
+    Median:       +0.3075
+    75th pct:     +0.7020
+    95th pct:     +1.3775
+    Max:         +10.0612
+
+  Monthly breakdown:
+  Month      RMSE      Bias      MAE    Corr
+  --------------------------------------------
+  Jan      0.6299   +0.0975   0.4606  0.9495
+  Feb      0.6074   +0.0495   0.4355  0.9545
+  Mar      0.5247   +0.0448   0.3765  0.9599
+  Apr      0.4920   +0.0673   0.3606  0.9563
+  May      0.7711   +0.3644   0.5828  0.9333
+  Jun      1.2145   +0.7938   0.9890  0.9090
+  Jul      1.2683   +0.8850   1.0623  0.9127
+  Aug      1.0213   +0.6360   0.8318  0.9266
+  Sep      0.7400   +0.2907   0.5632  0.9514
+  Oct      0.6345   +0.1777   0.4763  0.9509
+  Nov      0.6275   +0.1897   0.4714  0.9414
+  Dec      0.6849   +0.1969   0.5069  0.9309
+  --------------------------------------------
+  All      0.8084   +0.3179   0.5942  0.9331
+
+--- OISST ---
+  RMSE:          0.8789
+  Bias:         +0.2654
+  MAE:           0.6531
+  Correlation:   0.9208
+  N points:      127,270,140
+  Model mean:   11.3992
+  Obs mean:     11.1337
+  Model std:    4.0378
+  Obs std:      3.6843
+
+  Error distribution:
+    Min:         -8.9717
+    5th pct:      -0.8464
+    25th pct:     -0.1564
+    Median:       +0.2671
+    75th pct:     +0.6904
+    95th pct:     +1.3635
+    Max:         +9.7751
+
+  Monthly breakdown:
+  Month      RMSE      Bias      MAE    Corr
+  --------------------------------------------
+  Jan      0.6994   -0.0564   0.5170  0.9327
+  Feb      0.6787   -0.1326   0.5002  0.9412
+  Mar      0.5768   -0.2090   0.4415  0.9549
+  Apr      0.5311   -0.0862   0.4075  0.9470
+  May      0.8346   +0.3630   0.6382  0.9131
+  Jun      1.3866   +0.9605   1.1457  0.8826
+  Jul      1.4094   +1.0172   1.1915  0.8897
+  Aug      1.0790   +0.6775   0.8853  0.9130
+  Sep      0.7914   +0.3121   0.6096  0.9438
+  Oct      0.6288   +0.1472   0.4795  0.9502
+  Nov      0.6199   +0.1240   0.4750  0.9386
+  Dec      0.7116   +0.0405   0.5336  0.9141
+  --------------------------------------------
+  All      0.8789   +0.2654   0.6531  0.9208
+
+
+================================================================================
+Period: 2011  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:52
+
+--- OSTIA ---
+  RMSE:          0.7572
+  Bias:         +0.2104
+  MAE:           0.5543
+  Correlation:   0.9286
+  N points:      10,685,740
+  Model mean:   11.0353
+  Obs mean:     10.8250
+  Model std:    4.1002
+  Obs std:      3.8866
+
+  Error distribution:
+    Min:         -6.7213
+    5th pct:      -0.8119
+    25th pct:     -0.1808
+    Median:       +0.1876
+    75th pct:     +0.5600
+    95th pct:     +1.2572
+    Max:         +7.1719
+
+--- CCI-SST ---
+  RMSE:          0.7925
+  Bias:         +0.3252
+  MAE:           0.5872
+  Correlation:   0.9317
+  N points:      10,747,789
+  Model mean:   11.0323
+  Obs mean:     10.7085
+  Model std:    4.1112
+  Obs std:      3.8794
+
+  Error distribution:
+    Min:         -7.3563
+    5th pct:      -0.6849
+    25th pct:     -0.0602
+    Median:       +0.3032
+    75th pct:     +0.6780
+    95th pct:     +1.3633
+    Max:         +6.8151
+
+--- OISST ---
+  RMSE:          0.8792
+  Bias:         +0.3217
+  MAE:           0.6712
+  Correlation:   0.9150
+  N points:      9,783,825
+  Model mean:   11.0322
+  Obs mean:     10.7105
+  Model std:    4.0171
+  Obs std:      3.6444
+
+  Error distribution:
+    Min:         -6.0187
+    5th pct:      -0.8090
+    25th pct:     -0.1024
+    Median:       +0.3107
+    75th pct:     +0.7299
+    95th pct:     +1.4138
+    Max:         +6.1209
+
+
+================================================================================
+Period: 2012  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:52
+
+--- OSTIA ---
+  RMSE:          0.7606
+  Bias:         +0.1522
+  MAE:           0.5607
+  Correlation:   0.9266
+  N points:      10,715,016
+  Model mean:   10.9018
+  Obs mean:     10.7496
+  Model std:    3.8479
+  Obs std:      3.6240
+
+  Error distribution:
+    Min:         -6.1804
+    5th pct:      -0.9273
+    25th pct:     -0.2645
+    Median:       +0.1254
+    75th pct:     +0.5285
+    95th pct:     +1.2458
+    Max:         +8.3733
+
+--- CCI-SST ---
+  RMSE:          0.7693
+  Bias:         +0.2588
+  MAE:           0.5689
+  Correlation:   0.9329
+  N points:      10,778,210
+  Model mean:   10.8988
+  Obs mean:     10.6407
+  Model std:    3.8561
+  Obs std:      3.6238
+
+  Error distribution:
+    Min:         -6.2239
+    5th pct:      -0.7672
+    25th pct:     -0.1409
+    Median:       +0.2416
+    75th pct:     +0.6325
+    95th pct:     +1.3110
+    Max:         +7.4180
+
+--- OISST ---
+  RMSE:          0.8178
+  Bias:         +0.2793
+  MAE:           0.6120
+  Correlation:   0.9235
+  N points:      9,810,630
+  Model mean:   10.9015
+  Obs mean:     10.6222
+  Model std:    3.7807
+  Obs std:      3.5272
+
+  Error distribution:
+    Min:         -6.6397
+    5th pct:      -0.8135
+    25th pct:     -0.1445
+    Median:       +0.2611
+    75th pct:     +0.6684
+    95th pct:     +1.3455
+    Max:         +6.7576
+
+
+================================================================================
+Period: 2013  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:52
+
+--- OSTIA ---
+  RMSE:          0.9004
+  Bias:         +0.1776
+  MAE:           0.6617
+  Correlation:   0.9149
+  N points:      10,685,740
+  Model mean:   10.7266
+  Obs mean:     10.5491
+  Model std:    4.4965
+  Obs std:      4.1973
+
+  Error distribution:
+    Min:         -8.0227
+    5th pct:      -1.0562
+    25th pct:     -0.2791
+    Median:       +0.1547
+    75th pct:     +0.6004
+    95th pct:     +1.3633
+    Max:         +7.8791
+
+--- CCI-SST ---
+  RMSE:          0.8509
+  Bias:         +0.2897
+  MAE:           0.6250
+  Correlation:   0.9301
+  N points:      10,748,854
+  Model mean:   10.7236
+  Obs mean:     10.4344
+  Model std:    4.5052
+  Obs std:      4.2285
+
+  Error distribution:
+    Min:         -7.6040
+    5th pct:      -0.8026
+    25th pct:     -0.1363
+    Median:       +0.2620
+    75th pct:     +0.6840
+    95th pct:     +1.3767
+    Max:         +7.7383
+
+--- OISST ---
+  RMSE:          0.9725
+  Bias:         +0.3436
+  MAE:           0.7228
+  Correlation:   0.9169
+  N points:      9,783,825
+  Model mean:   10.7302
+  Obs mean:     10.3866
+  Model std:    4.4358
+  Obs std:      4.0213
+
+  Error distribution:
+    Min:         -7.9030
+    5th pct:      -0.8539
+    25th pct:     -0.1241
+    Median:       +0.3284
+    75th pct:     +0.7816
+    95th pct:     +1.4969
+    Max:         +7.4986
+
+
+================================================================================
+Period: 2014  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:52
+
+--- OSTIA ---
+  RMSE:          0.8372
+  Bias:         +0.1601
+  MAE:           0.6083
+  Correlation:   0.9205
+  N points:      10,685,740
+  Model mean:   11.8900
+  Obs mean:     11.7298
+  Model std:    4.1599
+  Obs std:      3.8753
+
+  Error distribution:
+    Min:         -6.9098
+    5th pct:      -0.9624
+    25th pct:     -0.2795
+    Median:       +0.1318
+    75th pct:     +0.5641
+    95th pct:     +1.3188
+    Max:         +8.6575
+
+--- CCI-SST ---
+  RMSE:          0.7864
+  Bias:         +0.2498
+  MAE:           0.5764
+  Correlation:   0.9356
+  N points:      10,748,885
+  Model mean:   11.8878
+  Obs mean:     11.6381
+  Model std:    4.1676
+  Obs std:      3.9007
+
+  Error distribution:
+    Min:         -7.2566
+    5th pct:      -0.7850
+    25th pct:     -0.1636
+    Median:       +0.2248
+    75th pct:     +0.6256
+    95th pct:     +1.2857
+    Max:         +7.5764
+
+--- OISST ---
+  RMSE:          0.9753
+  Bias:         +0.4477
+  MAE:           0.7222
+  Correlation:   0.9202
+  N points:      9,783,825
+  Model mean:   11.8861
+  Obs mean:     11.4384
+  Model std:    4.1041
+  Obs std:      3.7502
+
+  Error distribution:
+    Min:         -6.7181
+    5th pct:      -0.7123
+    25th pct:     -0.0169
+    Median:       +0.4289
+    75th pct:     +0.8826
+    95th pct:     +1.5870
+    Max:         +6.8080
+
+
+================================================================================
+Period: 2015  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:52
+
+--- OSTIA ---
+  RMSE:          0.7257
+  Bias:         +0.1237
+  MAE:           0.5406
+  Correlation:   0.9281
+  N points:      10,685,740
+  Model mean:   11.0611
+  Obs mean:     10.9374
+  Model std:    3.7109
+  Obs std:      3.4308
+
+  Error distribution:
+    Min:         -8.4287
+    5th pct:      -0.8470
+    25th pct:     -0.2652
+    Median:       +0.1090
+    75th pct:     +0.4952
+    95th pct:     +1.1459
+    Max:         +8.1445
+
+--- CCI-SST ---
+  RMSE:          0.7095
+  Bias:         +0.2273
+  MAE:           0.5291
+  Correlation:   0.9398
+  N points:      10,748,885
+  Model mean:   11.0595
+  Obs mean:     10.8322
+  Model std:    3.7167
+  Obs std:      3.4211
+
+  Error distribution:
+    Min:         -8.3098
+    5th pct:      -0.6694
+    25th pct:     -0.1466
+    Median:       +0.2081
+    75th pct:     +0.5789
+    95th pct:     +1.1418
+    Max:         +8.7325
+
+--- OISST ---
+  RMSE:          0.7885
+  Bias:         +0.3005
+  MAE:           0.5957
+  Correlation:   0.9276
+  N points:      9,783,825
+  Model mean:   11.0544
+  Obs mean:     10.7539
+  Model std:    3.6488
+  Obs std:      3.3333
+
+  Error distribution:
+    Min:         -5.5711
+    5th pct:      -0.7003
+    25th pct:     -0.1040
+    Median:       +0.2878
+    75th pct:     +0.6879
+    95th pct:     +1.2813
+    Max:         +6.9322
+
+
+================================================================================
+Period: 2016  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:53
+
+--- OSTIA ---
+  RMSE:          0.8407
+  Bias:         +0.1969
+  MAE:           0.6129
+  Correlation:   0.9241
+  N points:      10,715,016
+  Model mean:   11.5246
+  Obs mean:     11.3277
+  Model std:    4.0577
+  Obs std:      3.7883
+
+  Error distribution:
+    Min:         -7.8923
+    5th pct:      -0.9254
+    25th pct:     -0.2487
+    Median:       +0.1669
+    75th pct:     +0.5970
+    95th pct:     +1.3372
+    Max:         +8.5108
+
+--- CCI-SST ---
+  RMSE:          0.8305
+  Bias:         +0.3095
+  MAE:           0.6063
+  Correlation:   0.9355
+  N points:      10,778,334
+  Model mean:   11.5214
+  Obs mean:     11.2122
+  Model std:    4.0662
+  Obs std:      3.7879
+
+  Error distribution:
+    Min:         -7.2433
+    5th pct:      -0.7167
+    25th pct:     -0.1075
+    Median:       +0.2796
+    75th pct:     +0.6873
+    95th pct:     +1.3692
+    Max:         +8.2330
+
+--- OISST ---
+  RMSE:          0.9417
+  Bias:         +0.2830
+  MAE:           0.6953
+  Correlation:   0.9177
+  N points:      9,810,630
+  Model mean:   11.5236
+  Obs mean:     11.2406
+  Model std:    3.9925
+  Obs std:      3.6052
+
+  Error distribution:
+    Min:         -7.8588
+    5th pct:      -0.8891
+    25th pct:     -0.1798
+    Median:       +0.2664
+    75th pct:     +0.7156
+    95th pct:     +1.4050
+    Max:         +8.5282
+
+
+================================================================================
+Period: 2017  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:53
+
+--- OSTIA ---
+  RMSE:          0.7598
+  Bias:         +0.2334
+  MAE:           0.5640
+  Correlation:   0.9322
+  N points:      10,685,740
+  Model mean:   11.4849
+  Obs mean:     11.2515
+  Model std:    3.9009
+  Obs std:      3.6631
+
+  Error distribution:
+    Min:         -8.0241
+    5th pct:      -0.7666
+    25th pct:     -0.1770
+    Median:       +0.2031
+    75th pct:     +0.6024
+    95th pct:     +1.2815
+    Max:         +9.4802
+
+--- CCI-SST ---
+  RMSE:          0.7693
+  Bias:         +0.3339
+  MAE:           0.5769
+  Correlation:   0.9378
+  N points:      10,748,813
+  Model mean:   11.4818
+  Obs mean:     11.1486
+  Model std:    3.9081
+  Obs std:      3.6647
+
+  Error distribution:
+    Min:         -7.4836
+    5th pct:      -0.6225
+    25th pct:     -0.0662
+    Median:       +0.3079
+    75th pct:     +0.6986
+    95th pct:     +1.3378
+    Max:         +7.2212
+
+--- OISST ---
+  RMSE:          0.7744
+  Bias:         +0.2130
+  MAE:           0.5889
+  Correlation:   0.9268
+  N points:      9,783,825
+  Model mean:   11.4813
+  Obs mean:     11.2683
+  Model std:    3.8331
+  Obs std:      3.5171
+
+  Error distribution:
+    Min:         -6.9695
+    5th pct:      -0.8358
+    25th pct:     -0.1947
+    Median:       +0.1973
+    75th pct:     +0.6170
+    95th pct:     +1.2762
+    Max:         +6.8634
+
+
+================================================================================
+Period: 2018  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:53
+
+--- OSTIA ---
+  RMSE:          0.8895
+  Bias:         +0.2552
+  MAE:           0.6419
+  Correlation:   0.9285
+  N points:      10,685,740
+  Model mean:   11.3604
+  Obs mean:     11.1053
+  Model std:    4.5883
+  Obs std:      4.3660
+
+  Error distribution:
+    Min:         -9.7444
+    5th pct:      -0.9412
+    25th pct:     -0.2039
+    Median:       +0.2279
+    75th pct:     +0.6783
+    95th pct:     +1.5003
+    Max:         +11.0574
+
+--- CCI-SST ---
+  RMSE:          0.9152
+  Bias:         +0.3946
+  MAE:           0.6728
+  Correlation:   0.9340
+  N points:      10,748,879
+  Model mean:   11.3587
+  Obs mean:     10.9642
+  Model std:    4.5979
+  Obs std:      4.3683
+
+  Error distribution:
+    Min:         -9.0288
+    5th pct:      -0.7420
+    25th pct:     -0.0555
+    Median:       +0.3763
+    75th pct:     +0.8257
+    95th pct:     +1.6147
+    Max:         +10.0612
+
+--- OISST ---
+  RMSE:          0.9745
+  Bias:         +0.2797
+  MAE:           0.7191
+  Correlation:   0.9232
+  N points:      9,783,825
+  Model mean:   11.3625
+  Obs mean:     11.0828
+  Model std:    4.5208
+  Obs std:      4.0970
+
+  Error distribution:
+    Min:         -8.6678
+    5th pct:      -0.9792
+    25th pct:     -0.2113
+    Median:       +0.2353
+    75th pct:     +0.7089
+    95th pct:     +1.4936
+    Max:         +9.7751
+
+
+================================================================================
+Period: 2019  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:53
+
+--- OSTIA ---
+  RMSE:          0.7523
+  Bias:         +0.2488
+  MAE:           0.5568
+  Correlation:   0.9392
+  N points:      10,685,740
+  Model mean:   11.5317
+  Obs mean:     11.2829
+  Model std:    3.9388
+  Obs std:      3.6824
+
+  Error distribution:
+    Min:         -8.9677
+    5th pct:      -0.7188
+    25th pct:     -0.1533
+    Median:       +0.2267
+    75th pct:     +0.6062
+    95th pct:     +1.2501
+    Max:         +8.0652
+
+--- CCI-SST ---
+  RMSE:          0.8284
+  Bias:         +0.4016
+  MAE:           0.6179
+  Correlation:   0.9368
+  N points:      10,748,885
+  Model mean:   11.5297
+  Obs mean:     11.1283
+  Model std:    3.9456
+  Obs std:      3.6574
+
+  Error distribution:
+    Min:         -8.8707
+    5th pct:      -0.5867
+    25th pct:     -0.0129
+    Median:       +0.3804
+    75th pct:     +0.7788
+    95th pct:     +1.4282
+    Max:         +7.1837
+
+--- OISST ---
+  RMSE:          0.8091
+  Bias:         +0.2196
+  MAE:           0.6100
+  Correlation:   0.9252
+  N points:      9,783,825
+  Model mean:   11.5206
+  Obs mean:     11.3010
+  Model std:    3.8751
+  Obs std:      3.5562
+
+  Error distribution:
+    Min:         -5.7824
+    5th pct:      -0.8710
+    25th pct:     -0.2243
+    Median:       +0.1945
+    75th pct:     +0.6192
+    95th pct:     +1.2665
+    Max:         +7.3022
+
+
+================================================================================
+Period: 2020  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:53
+
+--- OSTIA ---
+  RMSE:          0.7406
+  Bias:         +0.2129
+  MAE:           0.5377
+  Correlation:   0.9328
+  N points:      10,715,016
+  Model mean:   11.5745
+  Obs mean:     11.3617
+  Model std:    3.7788
+  Obs std:      3.5175
+
+  Error distribution:
+    Min:         -7.7839
+    5th pct:      -0.7304
+    25th pct:     -0.1791
+    Median:       +0.1881
+    75th pct:     +0.5656
+    95th pct:     +1.2444
+    Max:         +8.7156
+
+--- CCI-SST ---
+  RMSE:          0.7789
+  Bias:         +0.3431
+  MAE:           0.5719
+  Correlation:   0.9330
+  N points:      10,778,334
+  Model mean:   11.5744
+  Obs mean:     11.2309
+  Model std:    3.7851
+  Obs std:      3.5099
+
+  Error distribution:
+    Min:         -6.9633
+    5th pct:      -0.6108
+    25th pct:     -0.0504
+    Median:       +0.3176
+    75th pct:     +0.6970
+    95th pct:     +1.3499
+    Max:         +7.7057
+
+--- OISST ---
+  RMSE:          0.7453
+  Bias:         +0.1314
+  MAE:           0.5562
+  Correlation:   0.9196
+  N points:      9,810,630
+  Model mean:   11.5588
+  Obs mean:     11.4274
+  Model std:    3.7214
+  Obs std:      3.4780
+
+  Error distribution:
+    Min:         -8.5002
+    5th pct:      -0.9648
+    25th pct:     -0.2929
+    Median:       +0.1053
+    75th pct:     +0.5040
+    95th pct:     +1.1425
+    Max:         +6.6861
+
+
+================================================================================
+Period: 2021  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:53
+
+--- OSTIA ---
+  RMSE:          0.8383
+  Bias:         +0.2619
+  MAE:           0.6012
+  Correlation:   0.9210
+  N points:      10,685,740
+  Model mean:   11.4168
+  Obs mean:     11.1549
+  Model std:    4.2820
+  Obs std:      4.0483
+
+  Error distribution:
+    Min:         -8.0133
+    5th pct:      -0.8130
+    25th pct:     -0.1482
+    Median:       +0.2435
+    75th pct:     +0.6472
+    95th pct:     +1.3945
+    Max:         +8.7187
+
+--- CCI-SST ---
+  RMSE:          0.8759
+  Bias:         +0.3527
+  MAE:           0.6365
+  Correlation:   0.9186
+  N points:      10,748,743
+  Model mean:   11.4141
+  Obs mean:     11.0618
+  Model std:    4.2903
+  Obs std:      4.0384
+
+  Error distribution:
+    Min:         -7.9403
+    5th pct:      -0.7498
+    25th pct:     -0.0599
+    Median:       +0.3455
+    75th pct:     +0.7490
+    95th pct:     +1.4866
+    Max:         +8.4444
+
+--- OISST ---
+  RMSE:          0.9102
+  Bias:         +0.1862
+  MAE:           0.6585
+  Correlation:   0.9063
+  N points:      9,783,825
+  Model mean:   11.4198
+  Obs mean:     11.2336
+  Model std:    4.2217
+  Obs std:      3.8753
+
+  Error distribution:
+    Min:         -8.9717
+    5th pct:      -1.0150
+    25th pct:     -0.2520
+    Median:       +0.1834
+    75th pct:     +0.5851
+    95th pct:     +1.2488
+    Max:         +7.9550
+
+
+================================================================================
+Period: 2022  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:53
+
+--- OSTIA ---
+  RMSE:          0.6694
+  Bias:         +0.1448
+  MAE:           0.4820
+  Correlation:   0.9452
+  N points:      10,685,740
+  Model mean:   11.8084
+  Obs mean:     11.6636
+  Model std:    4.0272
+  Obs std:      3.8927
+
+  Error distribution:
+    Min:         -7.2545
+    5th pct:      -0.7987
+    25th pct:     -0.1958
+    Median:       +0.1345
+    75th pct:     +0.4730
+    95th pct:     +1.0968
+    Max:         +7.3677
+
+--- CCI-SST ---
+  RMSE:          0.7013
+  Bias:         +0.2332
+  MAE:           0.5118
+  Correlation:   0.9435
+  N points:      10,748,885
+  Model mean:   11.8060
+  Obs mean:     11.5731
+  Model std:    4.0349
+  Obs std:      3.8929
+
+  Error distribution:
+    Min:         -6.3205
+    5th pct:      -0.7257
+    25th pct:     -0.1109
+    Median:       +0.2269
+    75th pct:     +0.5760
+    95th pct:     +1.2041
+    Max:         +7.0138
+
+--- OISST ---
+  RMSE:          0.8202
+  Bias:         +0.1122
+  MAE:           0.6219
+  Correlation:   0.9415
+  N points:      9,783,825
+  Model mean:   11.7984
+  Obs mean:     11.6862
+  Model std:    3.9604
+  Obs std:      3.5331
+
+  Error distribution:
+    Min:         -7.9771
+    5th pct:      -0.9089
+    25th pct:     -0.2787
+    Median:       +0.0956
+    75th pct:     +0.4577
+    95th pct:     +1.0167
+    Max:         +5.5819
+
+
+================================================================================
+Period: 2023  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-13  23:40:53
+
+--- OSTIA ---
+  RMSE:          0.8318
+  Bias:         +0.3287
+  MAE:           0.6060
+  Correlation:   0.9317
+  N points:      10,685,740
+  Model mean:   11.9273
+  Obs mean:     11.5986
+  Model std:    4.1329
+  Obs std:      3.8628
+
+  Error distribution:
+    Min:         -8.8755
+    5th pct:      -0.7128
+    25th pct:     -0.0819
+    Median:       +0.3070
+    75th pct:     +0.7007
+    95th pct:     +1.3933
+    Max:         +10.5799
+
+--- CCI-SST ---
+  RMSE:          0.8708
+  Bias:         +0.4137
+  MAE:           0.6445
+  Correlation:   0.9295
+  N points:      10,748,803
+  Model mean:   11.9238
+  Obs mean:     11.5106
+  Model std:    4.1403
+  Obs std:      3.8799
+
+  Error distribution:
+    Min:         -8.5269
+    5th pct:      -0.6496
+    25th pct:     +0.0022
+    Median:       +0.3984
+    75th pct:     +0.7959
+    95th pct:     +1.4970
+    Max:         +9.4190
+
+--- OISST ---
+  RMSE:          0.9673
+  Bias:         +0.3333
+  MAE:           0.7169
+  Correlation:   0.9219
+  N points:      9,783,825
+  Model mean:   11.9205
+  Obs mean:     11.5872
+  Model std:    4.0710
+  Obs std:      3.6199
+
+  Error distribution:
+    Min:         -8.6587
+    5th pct:      -0.8008
+    25th pct:     -0.1232
+    Median:       +0.3181
+    75th pct:     +0.7470
+    95th pct:     +1.3902
+    Max:         +7.2764
+
