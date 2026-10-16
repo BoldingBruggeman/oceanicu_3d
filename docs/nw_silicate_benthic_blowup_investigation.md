@@ -135,12 +135,19 @@ end if
 ```
 
 This is a local, uncommitted edit in this machine's `FABM/ERSEM` clone
-(`master`, clean otherwise) -- not yet built, tested, or pushed
-anywhere. `relax_min=1.0 d` is a starting guess, not a tuned value; it
-should be checked against how fast `K3`/`K4`/`K5` are expected to
-genuinely equilibrate in a healthy run, so the clamp doesn't mask a
-real signal elsewhere. Flagging as a concrete starting point for
-discussion rather than a finished fix.
+(`master`, clean otherwise) -- not yet built or tested. `relax_min=1.0
+d` is a starting guess, not a tuned value; it should be checked against
+how fast `K3`/`K4`/`K5` are expected to genuinely equilibrate in a
+healthy run, so the clamp doesn't mask a real signal elsewhere.
+Flagging as a concrete starting point for discussion rather than a
+finished fix.
+
+**The patched file has been copied to `bb-server1:/tmp/
+benthic_column_dissolved_matter.F90`** so it can be dropped into the
+ERSEM source tree and tried on scylla directly against `v01E_gvc`/
+`v01E_avc` (or a short instrumented rerun from a restart near the
+2016 onset) -- no FABM rebuild context needed on our end to make that
+available.
 
 ## What we can't confirm from here
 
