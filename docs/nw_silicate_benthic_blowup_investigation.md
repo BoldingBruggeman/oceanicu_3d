@@ -142,6 +142,23 @@ healthy run, so the clamp doesn't mask a real signal elsewhere.
 Flagging as a concrete starting point for discussion rather than a
 finished fix.
 
+**Mass conservation**: the pelagic/benthic exchange itself stays exactly
+conserved. `P_res_int` is a single local scalar, clamped before use, fed
+unchanged into both `_SET_BOTTOM_EXCHANGE_(info%id_pel,sms+P_res_int)`
+(pelagic gain) and `_SET_BOTTOM_ODE_(info%id_int,-P_res_int-sms)`
+(benthic loss) -- exact negatives of each other regardless of the clamp,
+so pelagic+benthic total is unaffected, and the `TA` coupling (which
+scales off the same clamped value) stays consistent too. At true
+equilibrium (`c_int==c_int_eq`) `P_res_int` is already zero whether
+clamped or not, so the fix changes only the *speed* of transient
+relaxation, never the eventual target. The one real side effect: if
+something keeps driving a persistent `c_int`/`c_int_eq` mismatch (e.g.
+an abnormal production term feeding `sms`), that mass now accumulates
+in the benthic integrated-mass state instead of being exported to
+pelagic via an amplified flux -- which is useful diagnostically (it
+surfaces *where* mass piles up) but means the clamp alone won't fix an
+underlying runaway production term if one turns out to exist.
+
 **The patched file has been copied to `bb-server1:/tmp/
 benthic_column_dissolved_matter.F90`** so it can be dropped into the
 ERSEM source tree and tried on scylla directly against `v01E_gvc`/
