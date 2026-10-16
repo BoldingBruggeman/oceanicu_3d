@@ -101,6 +101,47 @@ clean the whole time.
   shallow/anomalous bathymetry at the boundary-corner cell is *not* the
   mechanism, ruling out our first guess.
 
+## Proposed fix (draft patch against `ERSEM/src/benthic_column_dissolved_matter.F90`)
+
+The structural asymmetry that makes this branch special: the sibling
+`last_layer/=nlayers` case (used for constituents where the pore-water
+concentration tapers to zero partway down the column) divides its
+equilibration term by an explicit, configurable relaxation *time*
+(`self%relax`, days) -- bounding how fast the system can adjust. The
+`last_layer==nlayers` case -- the default, and what `K3`/`K4`/`K5` all
+use -- has no such divisor. `P_res_int = (c_int-c_int_eq)/norm_res_int
+*Dm(nlayers)` is an "instantaneous equilibrium" flux, and
+`norm_res_int` is a purely geometric/diffusivity-dependent
+normalisation that shrinks as `diff(1:3)` grows (bioturbation/
+bioirrigation enhancement is individually bounded, but doesn't need to
+be unbounded -- it only needs to make `norm_res_int` small relative to
+a persistent `(c_int-c_int_eq)` mismatch for the resulting flux to run
+away).
+
+Draft fix: add a `relax_min` parameter (days, default `1.0`) and clamp
+`P_res_int` so it can never imply adjusting faster than that, mirroring
+the existing `relax` pattern used by the other branch -- while guarding
+the division itself (not just the result) so a degenerate
+`norm_res_int≈0` can't produce a `NaN` a post-hoc clamp would miss:
+
+```fortran
+norm_res_int = poro*sum(self%ads*residual_per_layer)
+if (abs(norm_res_int) > epsilon(norm_res_int)) then
+   P_res_int = (c_int-c_int_eq)/norm_res_int*Dm(nlayers)
+   P_res_int = sign(min(abs(P_res_int), abs(c_int-c_int_eq)/self%relax_min), P_res_int)
+else
+   P_res_int = 0.0_rk
+end if
+```
+
+This is a local, uncommitted edit in this machine's `FABM/ERSEM` clone
+(`master`, clean otherwise) -- not yet built, tested, or pushed
+anywhere. `relax_min=1.0 d` is a starting guess, not a tuned value; it
+should be checked against how fast `K3`/`K4`/`K5` are expected to
+genuinely equilibrate in a healthy run, so the clamp doesn't mask a
+real signal elsewhere. Flagging as a concrete starting point for
+discussion rather than a finished fix.
+
 ## What we can't confirm from here
 
 We don't have direct access to the running experiment's diagnostic
