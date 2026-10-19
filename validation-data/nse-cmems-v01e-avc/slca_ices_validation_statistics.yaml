@@ -1,0 +1,62 @@
+format: '1.1'
+variable: SLCA
+title: SLCA Profile Validation Statistics
+created: '2026-10-18 11:51:41'
+area: NSe
+experiment: CMEMS/v01E_avc
+periods:
+- period: 2011-2024
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-10-18 11:51:41'
+  datasets:
+    ICES point observations:
+      rmse: 15.654262
+      bias: 8.371356
+      mae: 9.491458
+      correlation: 0.394404
+      n_points: 19789
+      mean_model: 14.904077
+      mean_obs: 6.532721
+      std_model: 13.745035
+      std_obs: 9.35143
+      n_profiles: 10663
+      error_distribution:
+        min: -213.393677
+        p05: -2.08447
+        p25: 0.754027
+        median: 4.436932
+        p75: 14.901877
+        p95: 28.308749
+        max: 240.842663
+      by_depth:
+        0-10m:
+          n: 11844
+          bias: 9.159635
+          rmse: 17.987937
+          correlation: 0.316313
+        10-25m:
+          n: 3855
+          bias: 12.299411
+          rmse: 15.167074
+          correlation: 0.635166
+        25-50m:
+          n: 2366
+          bias: 3.871821
+          rmse: 7.222031
+          correlation: 0.794305
+        50-100m:
+          n: 1199
+          bias: 0.580726
+          rmse: 2.144463
+          correlation: 0.367826
+        100-200m:
+          n: 431
+          bias: -0.107083
+          rmse: 1.676792
+          correlation: 0.283139
+        200-500m:
+          n: 94
+          bias: -0.542931
+          rmse: 1.312753
+          correlation: 0.352379

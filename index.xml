@@ -6,12 +6,123 @@
     <description>Recent content on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 14 Oct 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 19 Oct 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AMM7 — Analysis Overview</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</guid>
+      <description>&lt;h1 id=&#34;amm7-analysis-overview&#34;&gt;AMM7 Analysis Overview&lt;/h1&gt;
+&lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;AMM7&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
+&lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/&#34;&gt;TPXO9&lt;/a&gt;&lt;/strong&gt; — 2019-2022&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Constituent&lt;/th&gt;
+          &lt;th&gt;Amp err (m)&lt;/th&gt;
+          &lt;th&gt;Phase err (°)&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;M2&lt;/td&gt;
+          &lt;td&gt;0.121&lt;/td&gt;
+          &lt;td&gt;14.5&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;S2&lt;/td&gt;
+          &lt;td&gt;0.038&lt;/td&gt;
+          &lt;td&gt;14.3&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;K1&lt;/td&gt;
+          &lt;td&gt;0.023&lt;/td&gt;
+          &lt;td&gt;27.1&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;O1&lt;/td&gt;
+          &lt;td&gt;0.013&lt;/td&gt;
+          &lt;td&gt;18.0&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/#year-2019-2022&#34;&gt;2019-2022&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;p&gt;📊 &lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/amm7/#horizon-surface&#34;&gt;View Horizontal Surface Validation rankings for AMM7 →&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS — Analysis Overview</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</guid>
+      <description>&lt;h1 id=&#34;ns-analysis-overview&#34;&gt;NS Analysis Overview&lt;/h1&gt;
+&lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NS&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
+&lt;!-- BEGIN GENERATED OVERVIEW — do not edit this section --&gt;
+&lt;div style=&#34;opacity: 0.35; pointer-events: none&#34;&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;No tidal analysis has been performed for this area yet.&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-cmems/&#34;&gt;CMEMS&lt;/a&gt;&lt;/strong&gt; — 2016-2023&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Variable&lt;/th&gt;
+          &lt;th&gt;Dataset&lt;/th&gt;
+          &lt;th&gt;RMSE&lt;/th&gt;
+          &lt;th&gt;Bias&lt;/th&gt;
+          &lt;th&gt;Corr&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;SALT&lt;/td&gt;
+          &lt;td&gt;CCI-SSS&lt;/td&gt;
+          &lt;td&gt;2.233&lt;/td&gt;
+          &lt;td&gt;-0.101&lt;/td&gt;
+          &lt;td&gt;0.92&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TEMP&lt;/td&gt;
+          &lt;td&gt;CCI-SST&lt;/td&gt;
+          &lt;td&gt;0.854&lt;/td&gt;
+          &lt;td&gt;+0.402&lt;/td&gt;
+          &lt;td&gt;0.92&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;TEMP&lt;/td&gt;
+          &lt;td&gt;OSTIA&lt;/td&gt;
+          &lt;td&gt;0.860&lt;/td&gt;
+          &lt;td&gt;+0.197&lt;/td&gt;
+          &lt;td&gt;0.90&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-cmems/#year-2016-2023&#34;&gt;2016-2023&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-cmems/&#34;&gt;CMEMS&lt;/a&gt;&lt;/strong&gt; — 2016-2023&lt;/p&gt;</description>
+    </item>
     <item>
       <title>NSe — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</guid>
       <description>&lt;h1 id=&#34;nse-analysis-overview&#34;&gt;NSe Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NSe&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -530,7 +641,7 @@ both equally.&lt;/p&gt;</description>
     <item>
       <title>All Areas Rankings</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/rankings/all/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/all/</guid>
       <description>&lt;h1 id=&#34;all-areas--experiment-rankings&#34;&gt;All Areas — Experiment Rankings&lt;/h1&gt;
 &lt;p&gt;Composite-score ranking pooling experiments from every area together, one chart per validation category, labelled &amp;ldquo;Area: Experiment&amp;rdquo;. Only categories with experiments from two or more areas or runs end up here with a real comparison; see each area’s own rankings page for within-area comparisons.&lt;/p&gt;
@@ -539,28 +650,1273 @@ both equally.&lt;/p&gt;</description>
 &lt;p&gt;&lt;img alt=&#34;Tidal experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/all-ranking-tides.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;p&gt;&lt;a id=&#34;horizon-surface&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Chla experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/all-ranking-horizon_surface-chla_surface.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;Salt experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/all-ranking-horizon_surface-salt_surface.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/all-ranking-horizon_surface-temp_surface.png&#34;&gt;&lt;/p&gt;
-&lt;h2 id=&#34;ices-point-observation-profiles&#34;&gt;ICES Point Observation Profiles&lt;/h2&gt;
-&lt;p&gt;&lt;a id=&#34;ices-profiles&#34;&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img alt=&#34;Psal_Ices experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/all-ranking-ices_profiles-psal_ices.png&#34;&gt;&lt;/p&gt;</description>
+&lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;horizon-bottom&#34;&gt;&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>AMM7</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</guid>
+      <description>AMM7 modeling area — validation results and experiment overview.</description>
+    </item>
+    <item>
+      <title>AMM7 - Experiment Baseline</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-baseline/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-baseline/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: AMM7
+&lt;strong&gt;Experiment&lt;/strong&gt;: Baseline
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_SURFACE, TEMP_SURFACE&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;1.0030&lt;/td&gt;
+          &lt;td&gt;0.9160&lt;/td&gt;
+          &lt;td&gt;0.9018&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;0.2756&lt;/td&gt;
+          &lt;td&gt;0.3920&lt;/td&gt;
+          &lt;td&gt;0.3841&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.6019&lt;/td&gt;
+          &lt;td&gt;0.9651&lt;/td&gt;
+          &lt;td&gt;0.9649&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;195,106,513&lt;/td&gt;
+          &lt;td&gt;151,821,276&lt;/td&gt;
+          &lt;td&gt;197,655,640&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-baseline/physics/pyGETM/2016-2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>AMM7 - Experiment CMEMS</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-cmems/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-cmems/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: AMM7
+&lt;strong&gt;Experiment&lt;/strong&gt;: CMEMS
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_SURFACE, TEMP_SURFACE&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;1.0607&lt;/td&gt;
+          &lt;td&gt;1.1413&lt;/td&gt;
+          &lt;td&gt;1.0988&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;-0.0323&lt;/td&gt;
+          &lt;td&gt;0.6880&lt;/td&gt;
+          &lt;td&gt;0.6777&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.8367&lt;/td&gt;
+          &lt;td&gt;0.9610&lt;/td&gt;
+          &lt;td&gt;0.9630&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;195,106,513&lt;/td&gt;
+          &lt;td&gt;151,821,276&lt;/td&gt;
+          &lt;td&gt;197,655,640&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-cmems/physics/pyGETM/2016-2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>AMM7 - Experiment CMEMS_prof</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-cmems-prof/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-cmems-prof/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: AMM7
+&lt;strong&gt;Experiment&lt;/strong&gt;: CMEMS_prof
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_SURFACE, TEMP_SURFACE&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;0.8866&lt;/td&gt;
+          &lt;td&gt;1.0272&lt;/td&gt;
+          &lt;td&gt;1.0031&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;0.0802&lt;/td&gt;
+          &lt;td&gt;0.4192&lt;/td&gt;
+          &lt;td&gt;0.4755&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.8318&lt;/td&gt;
+          &lt;td&gt;0.9479&lt;/td&gt;
+          &lt;td&gt;0.9550&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;170,735,828&lt;/td&gt;
+          &lt;td&gt;132,856,606&lt;/td&gt;
+          &lt;td&gt;172,965,608&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-cmems-prof/physics/pyGETM/2016-2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>AMM7 - Experiment NetSW_LW</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-netsw-lw/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-netsw-lw/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: AMM7
+&lt;strong&gt;Experiment&lt;/strong&gt;: NetSW_LW
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_SURFACE, TEMP_SURFACE&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;1.0077&lt;/td&gt;
+          &lt;td&gt;0.9415&lt;/td&gt;
+          &lt;td&gt;0.9283&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;0.2858&lt;/td&gt;
+          &lt;td&gt;0.4208&lt;/td&gt;
+          &lt;td&gt;0.4006&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.6003&lt;/td&gt;
+          &lt;td&gt;0.9627&lt;/td&gt;
+          &lt;td&gt;0.9621&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;195,106,513&lt;/td&gt;
+          &lt;td&gt;151,821,276&lt;/td&gt;
+          &lt;td&gt;197,655,640&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-netsw-lw/physics/pyGETM/2016-2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>AMM7 - Experiment ObsKd</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-obskd/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-obskd/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: AMM7
+&lt;strong&gt;Experiment&lt;/strong&gt;: ObsKd
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_SURFACE, TEMP_SURFACE&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;1.0175&lt;/td&gt;
+          &lt;td&gt;0.9880&lt;/td&gt;
+          &lt;td&gt;0.9801&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;0.3028&lt;/td&gt;
+          &lt;td&gt;0.5735&lt;/td&gt;
+          &lt;td&gt;0.5491&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.5923&lt;/td&gt;
+          &lt;td&gt;0.9654&lt;/td&gt;
+          &lt;td&gt;0.9639&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;195,106,513&lt;/td&gt;
+          &lt;td&gt;151,821,276&lt;/td&gt;
+          &lt;td&gt;197,655,640&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-obskd/physics/pyGETM/2016-2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>AMM7 - TPXO9 - Tidal Analysis</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/</guid>
+      <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
+&lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-19
+&lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
+&lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
+&lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;GESLA tide gauge station locations&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-tpxo9/physics/pyGETM/2019-2022/tidal/gesla_station_map.png&#34;&gt;
+&lt;em&gt;GESLA tide gauge station locations&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-tpxo9/physics/pyGETM/2019-2022/tidal/K1_gesla_comparison.png&#34;&gt;
+&lt;em&gt;K₁ (lunar-solar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;O₁ (principal lunar diurnal) — amplitude/phase comparison with GESLA tide gauges&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/amm7-tpxo9/physics/pyGETM/2019-2022/tidal/O1_gesla_comparison.png&#34;&gt;
+&lt;em&gt;O₁ (principal lunar diurnal) — amplitude/phase comparison with GESLA tide gauges&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>AMM7 Rankings</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/rankings/amm7/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/amm7/</guid>
+      <description>&lt;h1 id=&#34;amm7-experiment-rankings&#34;&gt;AMM7 Experiment Rankings&lt;/h1&gt;
+&lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;AMM7&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-overview/&#34;&gt;AMM7 overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
+&lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;tides&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Only one experiment validated so far for this category — ranking needs at least two.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;horizon-surface&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Salt experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-ranking-horizon_surface-salt_surface.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-ranking-horizon_surface-temp_surface.png&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;gridded-3d-validation&#34;&gt;Gridded 3D Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;gridded-3d&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Salt experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-ranking-gridded_3d-salt_3d.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-ranking-gridded_3d-temp_3d.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>MLE Comparison — AMM7</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-mle-comparison/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-mle-comparison/</guid>
+      <description>&lt;h1 id=&#34;mle-cross-experiment-comparison--amm7&#34;&gt;MLE Cross-Experiment Comparison — AMM7&lt;/h1&gt;
+&lt;p&gt;SVD-reduced maximum-likelihood ranking of model experiments against a common observation footprint.&lt;/p&gt;
+&lt;h2 id=&#34;ranking&#34;&gt;Ranking&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;experiment&lt;/th&gt;
+          &lt;th&gt;log_likelihood&lt;/th&gt;
+          &lt;th&gt;rank&lt;/th&gt;
+          &lt;th&gt;delta_log_L&lt;/th&gt;
+          &lt;th&gt;aic&lt;/th&gt;
+          &lt;th&gt;explained_variance_captured&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Baseline&lt;/td&gt;
+          &lt;td&gt;-0.49748439587068466&lt;/td&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;0.0&lt;/td&gt;
+          &lt;td&gt;2.9949687917413694&lt;/td&gt;
+          &lt;td&gt;0.9972383853443495&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;NetSW_LW&lt;/td&gt;
+          &lt;td&gt;-0.5007573186360548&lt;/td&gt;
+          &lt;td&gt;2&lt;/td&gt;
+          &lt;td&gt;-0.003272922765370112&lt;/td&gt;
+          &lt;td&gt;3.0015146372721095&lt;/td&gt;
+          &lt;td&gt;0.9972383853443495&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;ObsKd&lt;/td&gt;
+          &lt;td&gt;-0.5017582854932605&lt;/td&gt;
+          &lt;td&gt;3&lt;/td&gt;
+          &lt;td&gt;-0.004273889622575855&lt;/td&gt;
+          &lt;td&gt;3.003516570986521&lt;/td&gt;
+          &lt;td&gt;0.9972383853443495&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;diagnostic-plots&#34;&gt;Diagnostic Plots&lt;/h2&gt;
+&lt;p&gt;&lt;img alt=&#34;1_scree_plot&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-mle-comparison/1_scree_plot.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;2_mode_loadings_mode0&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-mle-comparison/2_mode_loadings_mode0.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;3_per_mode_contributions&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-mle-comparison/3_per_mode_contributions.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;4_contributions_by_obs_type&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-mle-comparison/4_contributions_by_obs_type.png&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;4_contributions_by_variable&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-mle-comparison/4_contributions_by_variable.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>MLE Comparison — NS</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-mle-comparison/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-mle-comparison/</guid>
+      <description>&lt;h1 id=&#34;mle-cross-experiment-comparison--ns&#34;&gt;MLE Cross-Experiment Comparison — NS&lt;/h1&gt;
+&lt;p&gt;SVD-reduced maximum-likelihood ranking of model experiments against a common observation footprint.&lt;/p&gt;
+&lt;h2 id=&#34;ranking&#34;&gt;Ranking&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;experiment&lt;/th&gt;
+          &lt;th&gt;log_likelihood&lt;/th&gt;
+          &lt;th&gt;rank&lt;/th&gt;
+          &lt;th&gt;delta_log_L&lt;/th&gt;
+          &lt;th&gt;aic&lt;/th&gt;
+          &lt;th&gt;explained_variance_captured&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;ObsKd&lt;/td&gt;
+          &lt;td&gt;-0.8997876421014234&lt;/td&gt;
+          &lt;td&gt;1&lt;/td&gt;
+          &lt;td&gt;0.0&lt;/td&gt;
+          &lt;td&gt;3.799575284202847&lt;/td&gt;
+          &lt;td&gt;0.9923041270768755&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Adaptive_1&lt;/td&gt;
+          &lt;td&gt;-1.0049792344553714&lt;/td&gt;
+          &lt;td&gt;2&lt;/td&gt;
+          &lt;td&gt;-0.10519159235394804&lt;/td&gt;
+          &lt;td&gt;4.009958468910742&lt;/td&gt;
+          &lt;td&gt;0.9923041270768755&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Adaptive_3&lt;/td&gt;
+          &lt;td&gt;-1.0061267306983028&lt;/td&gt;
+          &lt;td&gt;3&lt;/td&gt;
+          &lt;td&gt;-0.10633908859687946&lt;/td&gt;
+          &lt;td&gt;4.012253461396606&lt;/td&gt;
+          &lt;td&gt;0.9923041270768755&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Adaptive_2&lt;/td&gt;
+          &lt;td&gt;-1.0103562758376738&lt;/td&gt;
+          &lt;td&gt;4&lt;/td&gt;
+          &lt;td&gt;-0.11056863373625048&lt;/td&gt;
+          &lt;td&gt;4.020712551675348&lt;/td&gt;
+          &lt;td&gt;0.9923041270768755&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;SSRD_STRD&lt;/td&gt;
+          &lt;td&gt;-1.0108718935484369&lt;/td&gt;
+          &lt;td&gt;5&lt;/td&gt;
+          &lt;td&gt;-0.1110842514470135&lt;/td&gt;
+          &lt;td&gt;4.021743787096874&lt;/td&gt;
+          &lt;td&gt;0.9923041270768755&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Baseline&lt;/td&gt;
+          &lt;td&gt;-1.011708243472961&lt;/td&gt;
+          &lt;td&gt;6&lt;/td&gt;
+          &lt;td&gt;-0.11192060137153759&lt;/td&gt;
+          &lt;td&gt;4.023416486945922&lt;/td&gt;
+          &lt;td&gt;0.9923041270768755&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;SSR_STR&lt;/td&gt;
+          &lt;td&gt;-1.0188474815428445&lt;/td&gt;
+          &lt;td&gt;7&lt;/td&gt;
+          &lt;td&gt;-0.11905983944142118&lt;/td&gt;
+          &lt;td&gt;4.0376949630856895&lt;/td&gt;
+          &lt;td&gt;0.9923041270768755&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;CMEMS&lt;/td&gt;
+          &lt;td&gt;-1.0373224983429865&lt;/td&gt;
+          &lt;td&gt;8&lt;/td&gt;
+          &lt;td&gt;-0.13753485624156314&lt;/td&gt;
+          &lt;td&gt;4.074644996685973&lt;/td&gt;
+          &lt;td&gt;0.9923041270768755&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;diagnostic-plots&#34;&gt;Diagnostic Plots&lt;/h2&gt;
+&lt;p&gt;&lt;img alt=&#34;1_scree_plot&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-mle-comparison/1_scree_plot.png&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</guid>
+      <description>NS modeling area — validation results and experiment overview.</description>
+    </item>
+    <item>
+      <title>NS - Experiment Adaptive_1</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-1/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-1/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
+&lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_1
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;:&lt;/p&gt;
+&lt;h2 id=&#34;ices-point-profiles&#34;&gt;ICES Point Profiles&lt;/h2&gt;
+&lt;h3 id=&#34;statistics&#34;&gt;Statistics&lt;/h3&gt;
+&lt;h3 id=&#34;psal&#34;&gt;PSAL&lt;/h3&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;ICES point observations&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;2.5983&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;+0.5417&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MAE&lt;/td&gt;
+          &lt;td&gt;1.2525&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.9533&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Model mean&lt;/td&gt;
+          &lt;td&gt;32.7137&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Obs mean&lt;/td&gt;
+          &lt;td&gt;32.1720&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;details&gt;
+&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
+PSAL Profile Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-05-04 11:32:32
+  Area:         NS
+  Experiment:   Adaptive_1
+################################################################################
+
+================================================================================
+Period: 2016-2023  |  Model: pyGETM
+================================================================================
+Analysed: 2026-05-04  12:32:44
+
+--- ICES point observations ---
+  RMSE:          2.5983
+  Bias:         +0.5417
+  MAE:           1.2525
+  Correlation:   0.9533
+  N points:      2,236,819
+  N profiles:    27,980
+  Model mean:   32.7137
+  Obs mean:     32.1720
+  Model std:    4.4837
+  Obs std:      6.4251
+
+  Error distribution:
+    Min:         -17.2622
+    5th pct:      -1.1804
+    25th pct:     -0.5350
+    Median:       -0.1916
+    75th pct:     +0.1352
+    95th pct:     +7.2982
+    Max:         +33.6566
+
+  Statistics by depth:
+  Depth               N        Bias        RMSE      Corr
+  ------------------------------------------------------
+  0-10m         391,114     +3.2667      5.2914    0.9252
+  10-25m        411,753     +0.7607      2.7948    0.9533
+  25-50m        407,320     -0.2130      1.3397    0.9564
+  50-100m       463,310     -0.3512      0.5545    0.5926
+  100-200m      324,064     -0.2796      0.3866    0.5915
+  200-500m      224,455     -0.1640      0.2229    0.6268
+  500-1000m      14,803     -0.1505      0.1743    0.6283
+&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-adaptive-1/psal_ices_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-adaptive-1/psal_ices_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS - Experiment Adaptive_2</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-2/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-2/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
+&lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_2
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;:&lt;/p&gt;
+&lt;h2 id=&#34;ices-point-profiles&#34;&gt;ICES Point Profiles&lt;/h2&gt;
+&lt;h3 id=&#34;statistics&#34;&gt;Statistics&lt;/h3&gt;
+&lt;h3 id=&#34;psal&#34;&gt;PSAL&lt;/h3&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;ICES point observations&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;2.6006&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;+0.5477&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MAE&lt;/td&gt;
+          &lt;td&gt;1.2463&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.9533&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Model mean&lt;/td&gt;
+          &lt;td&gt;32.7196&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Obs mean&lt;/td&gt;
+          &lt;td&gt;32.1719&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;details&gt;
+&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
+PSAL Profile Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-05-04 11:35:41
+  Area:         NS
+  Experiment:   Adaptive_2
+################################################################################
+
+================================================================================
+Period: 2016-2023  |  Model: pyGETM
+================================================================================
+Analysed: 2026-05-04  12:35:46
+
+--- ICES point observations ---
+  RMSE:          2.6006
+  Bias:         +0.5477
+  MAE:           1.2463
+  Correlation:   0.9533
+  N points:      2,236,727
+  N profiles:    27,980
+  Model mean:   32.7196
+  Obs mean:     32.1719
+  Model std:    4.4828
+  Obs std:      6.4252
+
+  Error distribution:
+    Min:         -17.2593
+    5th pct:      -1.2089
+    25th pct:     -0.5187
+    Median:       -0.1690
+    75th pct:     +0.1343
+    95th pct:     +7.3084
+    Max:         +33.6466
+
+  Statistics by depth:
+  Depth               N        Bias        RMSE      Corr
+  ------------------------------------------------------
+  0-10m         391,112     +3.2676      5.2989    0.9250
+  10-25m        411,753     +0.7546      2.7957    0.9535
+  25-50m        407,304     -0.2225      1.3425    0.9563
+  50-100m       463,301     -0.3469      0.5548    0.5939
+  100-200m      324,019     -0.2533      0.3624    0.5883
+  200-500m      224,437     -0.1277      0.1848    0.6149
+  500-1000m      14,801     -0.1068      0.1311    0.5827
+&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-adaptive-2/psal_ices_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-adaptive-2/psal_ices_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS - Experiment Adaptive_3</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-3/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-3/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
+&lt;strong&gt;Experiment&lt;/strong&gt;: Adaptive_3
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;:&lt;/p&gt;
+&lt;h2 id=&#34;ices-point-profiles&#34;&gt;ICES Point Profiles&lt;/h2&gt;
+&lt;h3 id=&#34;statistics&#34;&gt;Statistics&lt;/h3&gt;
+&lt;h3 id=&#34;psal&#34;&gt;PSAL&lt;/h3&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;ICES point observations&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;2.6013&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;+0.5436&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MAE&lt;/td&gt;
+          &lt;td&gt;1.2563&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.9532&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Model mean&lt;/td&gt;
+          &lt;td&gt;32.7156&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Obs mean&lt;/td&gt;
+          &lt;td&gt;32.1720&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;details&gt;
+&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
+PSAL Profile Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-05-04 11:38:51
+  Area:         NS
+  Experiment:   Adaptive_3
+################################################################################
+
+================================================================================
+Period: 2016-2023  |  Model: pyGETM
+================================================================================
+Analysed: 2026-05-04  12:38:44
+
+--- ICES point observations ---
+  RMSE:          2.6013
+  Bias:         +0.5436
+  MAE:           1.2563
+  Correlation:   0.9532
+  N points:      2,236,795
+  N profiles:    27,980
+  Model mean:   32.7156
+  Obs mean:     32.1720
+  Model std:    4.4810
+  Obs std:      6.4250
+
+  Error distribution:
+    Min:         -17.2535
+    5th pct:      -1.1663
+    25th pct:     -0.5393
+    Median:       -0.1987
+    75th pct:     +0.1378
+    95th pct:     +7.3066
+    Max:         +33.6562
+
+  Statistics by depth:
+  Depth               N        Bias        RMSE      Corr
+  ------------------------------------------------------
+  0-10m         391,106     +3.2766      5.2981    0.9250
+  10-25m        411,736     +0.7713      2.7977    0.9532
+  25-50m        407,350     -0.2055      1.3373    0.9566
+  50-100m       463,309     -0.3517      0.5543    0.5911
+  100-200m      324,029     -0.2897      0.3961    0.5930
+  200-500m      224,457     -0.1794      0.2395    0.6292
+  500-1000m      14,808     -0.1664      0.1901    0.6165
+&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-adaptive-3/psal_ices_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-adaptive-3/psal_ices_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS - Experiment Baseline</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-baseline/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-baseline/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
+&lt;strong&gt;Experiment&lt;/strong&gt;: Baseline
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;:&lt;/p&gt;
+&lt;h2 id=&#34;ices-point-profiles&#34;&gt;ICES Point Profiles&lt;/h2&gt;
+&lt;h3 id=&#34;statistics&#34;&gt;Statistics&lt;/h3&gt;
+&lt;h3 id=&#34;psal&#34;&gt;PSAL&lt;/h3&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;ICES point observations&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;2.6065&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;+0.5403&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MAE&lt;/td&gt;
+          &lt;td&gt;1.2611&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.9532&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Model mean&lt;/td&gt;
+          &lt;td&gt;32.7075&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Obs mean&lt;/td&gt;
+          &lt;td&gt;32.1672&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;details&gt;
+&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
+PSAL Profile Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-05-04 11:23:14
+  Area:         NS
+  Experiment:   Baseline
+################################################################################
+
+================================================================================
+Period: 2016-2023  |  Model: pyGETM
+================================================================================
+Analysed: 2026-05-04  12:23:48
+
+--- ICES point observations ---
+  RMSE:          2.6065
+  Bias:         +0.5403
+  MAE:           1.2611
+  Correlation:   0.9532
+  N points:      2,239,481
+  N profiles:    27,982
+  Model mean:   32.7075
+  Obs mean:     32.1672
+  Model std:    4.4762
+  Obs std:      6.4284
+
+  Error distribution:
+    Min:         -17.2384
+    5th pct:      -1.2003
+    25th pct:     -0.5472
+    Median:       -0.1946
+    75th pct:     +0.1334
+    95th pct:     +7.3167
+    Max:         +33.6631
+
+  Statistics by depth:
+  Depth               N        Bias        RMSE      Corr
+  ------------------------------------------------------
+  0-10m         391,140     +3.2820      5.3064    0.9254
+  10-25m        412,998     +0.7575      2.8053    0.9533
+  25-50m        407,979     -0.2234      1.3511    0.9556
+  50-100m       463,619     -0.3534      0.5594    0.5896
+  100-200m      324,278     -0.2827      0.3908    0.5918
+  200-500m      224,657     -0.1674      0.2268    0.6291
+  500-1000m      14,810     -0.1502      0.1737    0.6219
+&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-baseline/psal_ices_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-baseline/psal_ices_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS - Experiment CMEMS</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-cmems/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-cmems/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
+&lt;strong&gt;Experiment&lt;/strong&gt;: CMEMS
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_BOTTOM, TEMP_BOTTOM, SALT_SURFACE, TEMP_SURFACE&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_BOTTOM / NWS-salinity&lt;/th&gt;
+          &lt;th&gt;TEMP_BOTTOM / NWS-bottomT&lt;/th&gt;
+          &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
+          &lt;th&gt;TEMP_SURFACE / CCI-SST&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;0.4879&lt;/td&gt;
+          &lt;td&gt;1.4122&lt;/td&gt;
+          &lt;td&gt;2.2332&lt;/td&gt;
+          &lt;td&gt;0.8598&lt;/td&gt;
+          &lt;td&gt;0.8541&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;0.0749&lt;/td&gt;
+          &lt;td&gt;-0.6136&lt;/td&gt;
+          &lt;td&gt;-0.1010&lt;/td&gt;
+          &lt;td&gt;0.1970&lt;/td&gt;
+          &lt;td&gt;0.4024&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.8398&lt;/td&gt;
+          &lt;td&gt;0.9208&lt;/td&gt;
+          &lt;td&gt;0.9219&lt;/td&gt;
+          &lt;td&gt;0.9010&lt;/td&gt;
+          &lt;td&gt;0.9213&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;58,068&lt;/td&gt;
+          &lt;td&gt;58,068&lt;/td&gt;
+          &lt;td&gt;16,531,480&lt;/td&gt;
+          &lt;td&gt;2,003,850&lt;/td&gt;
+          &lt;td&gt;17,213,415&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-cmems/physics/pyGETM/2016-2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS - Experiment ObsKd</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-obskd/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-obskd/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
+&lt;strong&gt;Experiment&lt;/strong&gt;: ObsKd
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;:&lt;/p&gt;
+&lt;h2 id=&#34;ices-point-profiles&#34;&gt;ICES Point Profiles&lt;/h2&gt;
+&lt;h3 id=&#34;statistics&#34;&gt;Statistics&lt;/h3&gt;
+&lt;h3 id=&#34;psal&#34;&gt;PSAL&lt;/h3&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;ICES point observations&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;2.6434&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;+0.5740&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MAE&lt;/td&gt;
+          &lt;td&gt;1.2680&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.9531&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Model mean&lt;/td&gt;
+          &lt;td&gt;32.7412&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Obs mean&lt;/td&gt;
+          &lt;td&gt;32.1672&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;details&gt;
+&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
+PSAL Profile Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-05-04 11:51:39
+  Area:         NS
+  Experiment:   ObsKd
+################################################################################
+
+================================================================================
+Period: 2016-2023  |  Model: pyGETM
+================================================================================
+Analysed: 2026-05-04  12:41:44
+
+--- ICES point observations ---
+  RMSE:          2.6434
+  Bias:         +0.5740
+  MAE:           1.2680
+  Correlation:   0.9531
+  N points:      2,239,479
+  N profiles:    27,982
+  Model mean:   32.7412
+  Obs mean:     32.1672
+  Model std:    4.4321
+  Obs std:      6.4284
+
+  Error distribution:
+    Min:         -17.1605
+    5th pct:      -1.1617
+    25th pct:     -0.5281
+    Median:       -0.1850
+    75th pct:     +0.1386
+    95th pct:     +7.4418
+    Max:         +33.6755
+
+  Statistics by depth:
+  Depth               N        Bias        RMSE      Corr
+  ------------------------------------------------------
+  0-10m         391,138     +3.3694      5.3929    0.9248
+  10-25m        412,998     +0.8098      2.8412    0.9538
+  25-50m        407,979     -0.2014      1.3491    0.9566
+  50-100m       463,619     -0.3414      0.5469    0.5932
+  100-200m      324,278     -0.2727      0.3814    0.5929
+  200-500m      224,657     -0.1603      0.2193    0.6298
+  500-1000m      14,810     -0.1424      0.1656    0.6084
+&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-obskd/psal_ices_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-obskd/psal_ices_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS - Experiment SSR_SRT</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-srt/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-srt/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
+&lt;strong&gt;Experiment&lt;/strong&gt;: SSR_SRT
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;:&lt;/p&gt;
+&lt;h2 id=&#34;argo-float-profiles&#34;&gt;Argo Float Profiles&lt;/h2&gt;
+&lt;h3 id=&#34;plots&#34;&gt;Plots&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Argo float profile overview (NE Atlantic)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-ssr-srt/physics/pyGETM/2016-2023/argo/na_argo_argo_overview.png&#34;&gt;
+&lt;em&gt;Argo float profile overview (NE Atlantic)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;NA_ARGO — Hovmöller diagram&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-ssr-srt/physics/pyGETM/2016-2023/argo/na_argo_hovmoller.png&#34;&gt;
+&lt;em&gt;NA_ARGO — Hovmöller diagram&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;observations&#34;&gt;Observations&lt;/h2&gt;
+&lt;h3 id=&#34;argo-observations--2016-2023&#34;&gt;ARGO Observations — 2016-2023&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;ARGO Station Map&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/areas/ns/obs/argo/2016-2023/argo_station_map.png&#34;&gt;
+&lt;em&gt;ARGO Station Map&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;ARGO Observation Density&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/areas/ns/obs/argo/2016-2023/argo_observation_density.png&#34;&gt;
+&lt;em&gt;ARGO Observation Density&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;ARGO Hovmoller&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/areas/ns/obs/argo/2016-2023/argo_hovmoller.png&#34;&gt;
+&lt;em&gt;ARGO Hovmoller&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id=&#34;ices-observations--2016-2023&#34;&gt;ICES Observations — 2016-2023&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;ICES Station Map&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/areas/ns/obs/ices/2016-2023/ices_station_map.png&#34;&gt;
+&lt;em&gt;ICES Station Map&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS - Experiment SSR_STR</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
+&lt;strong&gt;Experiment&lt;/strong&gt;: SSR_STR
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;:&lt;/p&gt;
+&lt;h2 id=&#34;ices-point-profiles&#34;&gt;ICES Point Profiles&lt;/h2&gt;
+&lt;h3 id=&#34;statistics&#34;&gt;Statistics&lt;/h3&gt;
+&lt;h3 id=&#34;psal&#34;&gt;PSAL&lt;/h3&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;ICES point observations&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;2.6128&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;+0.5482&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MAE&lt;/td&gt;
+          &lt;td&gt;1.2606&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.9532&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Model mean&lt;/td&gt;
+          &lt;td&gt;32.7154&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Obs mean&lt;/td&gt;
+          &lt;td&gt;32.1672&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;details&gt;
+&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
+PSAL Profile Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-05-04 11:26:18
+  Area:         NS
+  Experiment:   SSR_STR
+################################################################################
+
+================================================================================
+Period: 2016-2023  |  Model: pyGETM
+================================================================================
+Analysed: 2026-05-04  12:26:47
+
+--- ICES point observations ---
+  RMSE:          2.6128
+  Bias:         +0.5482
+  MAE:           1.2606
+  Correlation:   0.9532
+  N points:      2,239,481
+  N profiles:    27,982
+  Model mean:   32.7154
+  Obs mean:     32.1672
+  Model std:    4.4704
+  Obs std:      6.4284
+
+  Error distribution:
+    Min:         -17.2323
+    5th pct:      -1.1848
+    25th pct:     -0.5399
+    Median:       -0.1937
+    75th pct:     +0.1353
+    95th pct:     +7.3387
+    Max:         +33.6850
+
+  Statistics by depth:
+  Depth               N        Bias        RMSE      Corr
+  ------------------------------------------------------
+  0-10m         391,140     +3.3001      5.3217    0.9252
+  10-25m        412,998     +0.7706      2.8114    0.9533
+  25-50m        407,979     -0.2155      1.3495    0.9559
+  50-100m       463,619     -0.3501      0.5543    0.5921
+  100-200m      324,278     -0.2816      0.3887    0.5903
+  200-500m      224,657     -0.1674      0.2266    0.6256
+  500-1000m      14,810     -0.1529      0.1765    0.6274
+&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-ssr-str/psal_ices_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-ssr-str/psal_ices_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS - Experiment SSRD_STRD</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NS
+&lt;strong&gt;Experiment&lt;/strong&gt;: SSRD_STRD
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;:&lt;/p&gt;
+&lt;h2 id=&#34;ices-point-profiles&#34;&gt;ICES Point Profiles&lt;/h2&gt;
+&lt;h3 id=&#34;statistics&#34;&gt;Statistics&lt;/h3&gt;
+&lt;h3 id=&#34;psal&#34;&gt;PSAL&lt;/h3&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;ICES point observations&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;2.6506&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;+0.5833&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MAE&lt;/td&gt;
+          &lt;td&gt;1.2688&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.9531&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Model mean&lt;/td&gt;
+          &lt;td&gt;32.7505&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Obs mean&lt;/td&gt;
+          &lt;td&gt;32.1671&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;details&gt;
+&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
+PSAL Profile Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-05-04 11:29:24
+  Area:         NS
+  Experiment:   SSRD_STRD
+################################################################################
+
+================================================================================
+Period: 2016-2023  |  Model: pyGETM
+================================================================================
+Analysed: 2026-05-04  12:29:45
+
+--- ICES point observations ---
+  RMSE:          2.6506
+  Bias:         +0.5833
+  MAE:           1.2688
+  Correlation:   0.9531
+  N points:      2,239,484
+  N profiles:    27,982
+  Model mean:   32.7505
+  Obs mean:     32.1671
+  Model std:    4.4246
+  Obs std:      6.4285
+
+  Error distribution:
+    Min:         -17.0901
+    5th pct:      -1.1438
+    25th pct:     -0.5232
+    Median:       -0.1833
+    75th pct:     +0.1464
+    95th pct:     +7.4716
+    Max:         +33.7238
+
+  Statistics by depth:
+  Depth               N        Bias        RMSE      Corr
+  ------------------------------------------------------
+  0-10m         391,143     +3.3926      5.4090    0.9247
+  10-25m        412,998     +0.8309      2.8483    0.9538
+  25-50m        407,979     -0.1900      1.3492    0.9567
+  50-100m       463,619     -0.3383      0.5432    0.5937
+  100-200m      324,278     -0.2774      0.3844    0.5926
+  200-500m      224,657     -0.1663      0.2250    0.6311
+  500-1000m      14,810     -0.1490      0.1720    0.6332
+&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-ssrd-strd/psal_ices_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/ns-ssrd-strd/psal_ices_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NS Rankings</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/rankings/ns/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/ns/</guid>
+      <description>&lt;h1 id=&#34;ns-experiment-rankings&#34;&gt;NS Experiment Rankings&lt;/h1&gt;
+&lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;NS&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-overview/&#34;&gt;NS overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;horizon-surface&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Only one experiment validated so far for this category — ranking needs at least two.&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
+&lt;p&gt;&lt;a id=&#34;horizon-bottom&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Only one experiment validated so far for this category — ranking needs at least two.&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NSe</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</guid>
       <description>NSe modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>NSe - CMEMS/tidal - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-14
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-19
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
@@ -575,12 +1931,12 @@ both equally.&lt;/p&gt;</description>
     <item>
       <title>NSe - CMEMS/tidal_avc - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal-avc/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal-avc/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-14
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-19
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
@@ -595,12 +1951,12 @@ both equally.&lt;/p&gt;</description>
     <item>
       <title>NSe - CMEMS/tidal_gvc - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal-gvc/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal-gvc/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-14
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-19
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
@@ -615,12 +1971,12 @@ both equally.&lt;/p&gt;</description>
     <item>
       <title>NSe - CMIP6/tidal - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmip6-tidal/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmip6-tidal/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-14
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-19
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
@@ -634,7 +1990,7 @@ both equally.&lt;/p&gt;</description>
     <item>
       <title>NSe - Experiment CMEMS/spinup</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-spinup/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-spinup/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -793,7 +2149,7 @@ Analysed: 2026-10-07  13:59:52
     <item>
       <title>NSe - Experiment CMEMS/v01E</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -840,9 +2196,557 @@ Analysed: 2026-10-07  13:59:52
 &lt;em&gt;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
+      <title>NSe - Experiment CMEMS/v01E_avc</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e-avc/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e-avc/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NSe
+&lt;strong&gt;Experiment&lt;/strong&gt;: CMEMS/v01E_avc
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: CHLA_SURFACE
+&lt;strong&gt;Period&lt;/strong&gt;: 2011&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;CHLA_SURFACE / CCI-CHL&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;1.6689&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;-0.7226&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.3077&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;572,124&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;CHLA (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v01e-avc/bio/pyGETM/2011-2015/surface/chla_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;CHLA (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id=&#34;horizontal-validation&#34;&gt;Horizontal Validation&lt;/h2&gt;
+&lt;h3 id=&#34;statistics&#34;&gt;Statistics&lt;/h3&gt;
+&lt;h3 id=&#34;chla_surface&#34;&gt;CHLA_SURFACE&lt;/h3&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;CCI-CHL&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;1.7325&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;-0.7762&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MAE&lt;/td&gt;
+          &lt;td&gt;1.1478&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.3248&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Model mean&lt;/td&gt;
+          &lt;td&gt;0.7626&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Obs mean&lt;/td&gt;
+          &lt;td&gt;1.6478&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;details&gt;
+&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
+CHLA_SURFACE Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-10-18 17:53:37
+  Author:       R.T.
+  Project:      OceanICU
+  Institute:    BB
+  Area:         NSe
+  Experiment:   CMEMS/v01E_avc
+################################################################################
+
+================================================================================
+Period: 2011  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-19  08:47:50
+
+--- CCI-CHL ---
+  RMSE:          1.7325
+  Bias:         -0.7762
+  MAE:           1.1478
+  Correlation:   0.3248
+  N points:      292,489
+  Model mean:   0.7626
+  Obs mean:     1.6478
+  Model std:    0.9542
+  Obs std:      1.5530
+
+  Error distribution:
+    Min:         -38.2116
+    5th pct:      -3.3225
+    25th pct:     -1.2590
+    Median:       -0.5611
+    75th pct:     -0.0961
+    95th pct:     +1.3365
+    Max:         +5.3274
+
+================================================================================
+Period: 2011-2012  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-18  17:56:43
+
+--- CCI-CHL ---
+  RMSE:          1.6689
+  Bias:         -0.7226
+  MAE:           1.1015
+  Correlation:   0.3077
+  N points:      572,124
+  Model mean:   0.7445
+  Obs mean:     1.5696
+  Model std:    0.9465
+  Obs std:      1.4794
+
+  Error distribution:
+    Min:         -40.0241
+    5th pct:      -3.2308
+    25th pct:     -1.1739
+    Median:       -0.5150
+    75th pct:     -0.0778
+    95th pct:     +1.3179
+    Max:         +5.8632
+
+  Monthly breakdown:
+  Month      RMSE      Bias      MAE    Corr
+  --------------------------------------------
+  Jan      2.8303   -2.2643   2.2654  0.2629
+  Feb      2.2234   -1.6347   1.6451  0.4640
+  Mar      1.8010   -1.0733   1.2918  0.5645
+  Apr      1.9498   -0.2023   1.4313  0.3271
+  May      1.6209   +0.2344   1.1424  0.1457
+  Jun      1.0963   -0.2002   0.6592  0.4264
+  Jul      1.1507   -0.4767   0.6449  0.5470
+  Aug      1.1671   -0.6034   0.7314  0.5451
+  Sep      1.2587   -0.6283   0.7673  0.4706
+  Oct      1.4174   -0.8410   0.8981  0.4736
+  Nov      1.9908   -1.4479   1.4519  0.4611
+  Dec      2.2104   -1.4438   1.4448  0.5377
+  --------------------------------------------
+  All      1.6689   -0.7226   1.1015  0.3077
+
+
+================================================================================
+Period: 2012  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-19  08:47:50
+
+--- CCI-CHL ---
+  RMSE:          1.5997
+  Bias:         -0.6666
+  MAE:           1.0531
+  Correlation:   0.2863
+  N points:      279,635
+  Model mean:   0.7265
+  Obs mean:     1.4879
+  Model std:    0.9385
+  Obs std:      1.3936
+
+  Error distribution:
+    Min:         -40.0241
+    5th pct:      -3.1345
+    25th pct:     -1.0897
+    Median:       -0.4765
+    75th pct:     -0.0555
+    95th pct:     +1.3009
+    Max:         +5.8632
+
+================================================================================
+Period: 2011-2015  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-19  08:47:50
+
+--- CCI-CHL ---
+  RMSE:          1.6195
+  Bias:         -0.7453
+  MAE:           1.0652
+  Correlation:   0.3118
+  N points:      1,412,316
+  Model mean:   0.7009
+  Obs mean:     1.5286
+  Model std:    0.8894
+  Obs std:      1.4278
+
+  Error distribution:
+    Min:         -67.0223
+    5th pct:      -3.1106
+    25th pct:     -1.1670
+    Median:       -0.5297
+    75th pct:     -0.1375
+    95th pct:     +1.1090
+    Max:         +6.2204
+
+  Monthly breakdown:
+  Month      RMSE      Bias      MAE    Corr
+  --------------------------------------------
+  Jan      2.8166   -2.2346   2.2352  0.2547
+  Feb      2.0894   -1.5510   1.5601  0.3977
+  Mar      1.7005   -1.1051   1.2515  0.5689
+  Apr      1.8673   -0.3739   1.3549  0.3416
+  May      1.7362   +0.0529   1.1408  0.1260
+  Jun      1.3190   -0.2887   0.7316  0.3649
+  Jul      1.0298   -0.4647   0.6045  0.5563
+  Aug      1.0726   -0.5693   0.6790  0.5491
+  Sep      1.1718   -0.6198   0.7499  0.4895
+  Oct      1.3372   -0.8249   0.8754  0.4614
+  Nov      1.9053   -1.3607   1.3657  0.4704
+  Dec      2.0348   -1.3497   1.3501  0.4993
+  --------------------------------------------
+  All      1.6195   -0.7453   1.0652  0.3118
+
+
+================================================================================
+Period: 2013  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-19  08:47:50
+
+--- CCI-CHL ---
+  RMSE:          1.6465
+  Bias:         -0.7820
+  MAE:           1.0589
+  Correlation:   0.3228
+  N points:      280,853
+  Model mean:   0.6601
+  Obs mean:     1.5086
+  Model std:    0.8499
+  Obs std:      1.4720
+
+  Error distribution:
+    Min:         -67.0223
+    5th pct:      -3.1251
+    25th pct:     -1.1739
+    Median:       -0.5308
+    75th pct:     -0.1991
+    95th pct:     +0.9735
+    Max:         +6.2204
+
+
+================================================================================
+Period: 2014  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-19  08:47:50
+
+--- CCI-CHL ---
+  RMSE:          1.5320
+  Bias:         -0.8009
+  MAE:           1.0220
+  Correlation:   0.3516
+  N points:      279,096
+  Model mean:   0.6288
+  Obs mean:     1.4961
+  Model std:    0.7961
+  Obs std:      1.3451
+
+  Error distribution:
+    Min:         -47.1717
+    5th pct:      -2.9681
+    25th pct:     -1.1941
+    Median:       -0.5680
+    75th pct:     -0.2364
+    95th pct:     +0.8285
+    Max:         +3.7760
+
+
+================================================================================
+Period: 2015  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-19  08:47:50
+
+--- CCI-CHL ---
+  RMSE:          1.5738
+  Bias:         -0.6993
+  MAE:           1.0404
+  Correlation:   0.2679
+  N points:      280,243
+  Model mean:   0.7207
+  Obs mean:     1.4971
+  Model std:    0.8819
+  Obs std:      1.3513
+
+  Error distribution:
+    Min:         -59.2618
+    5th pct:      -3.0015
+    25th pct:     -1.1138
+    Median:       -0.5182
+    75th pct:     -0.1076
+    95th pct:     +1.1853
+    Max:         +5.7687
+&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v01e-avc/chla_surface_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v01e-avc/chla_surface_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>NSe - Experiment CMEMS/v01E_gvc</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e-gvc/</link>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e-gvc/</guid>
+      <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
+&lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NSe
+&lt;strong&gt;Experiment&lt;/strong&gt;: CMEMS/v01E_gvc
+&lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
+&lt;strong&gt;Variables&lt;/strong&gt;: CHLA_SURFACE&lt;/p&gt;
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;CHLA_SURFACE / CCI-CHL&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;1.6837&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;-0.5218&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.2384&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;1,132,073&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;horizontal-validation&#34;&gt;Horizontal Validation&lt;/h2&gt;
+&lt;h3 id=&#34;statistics&#34;&gt;Statistics&lt;/h3&gt;
+&lt;h3 id=&#34;chla_surface&#34;&gt;CHLA_SURFACE&lt;/h3&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;CCI-CHL&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;1.6837&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;-0.5218&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MAE&lt;/td&gt;
+          &lt;td&gt;1.0788&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.2384&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Model mean&lt;/td&gt;
+          &lt;td&gt;0.9012&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Obs mean&lt;/td&gt;
+          &lt;td&gt;1.5364&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;details&gt;
+&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
+CHLA_SURFACE Validation Statistics
+################################################################################
+  Format:     1.1
+  Created:    2026-10-18 18:27:05
+  Author:       R.T.
+  Project:      OceanICU
+  Institute:    BB
+  Area:         NSe
+  Experiment:   CMEMS/v01E_gvc
+################################################################################
+
+================================================================================
+Period: 2011-2015  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-18  18:27:05
+
+--- CCI-CHL ---
+  RMSE:          1.6837
+  Bias:         -0.5218
+  MAE:           1.0788
+  Correlation:   0.2384
+  N points:      1,132,073
+  Model mean:   0.9012
+  Obs mean:     1.5364
+  Model std:    1.0694
+  Obs std:      1.4460
+
+  Error distribution:
+    Min:         -66.9665
+    5th pct:      -2.9951
+    25th pct:     -1.0133
+    Median:       -0.3896
+    75th pct:     +0.1063
+    95th pct:     +1.5347
+    Max:         +14.2402
+
+  Monthly breakdown:
+  Month      RMSE      Bias      MAE    Corr
+  --------------------------------------------
+  Jan      2.7945   -2.2019   2.2049  0.2054
+  Feb      2.0704   -1.5074   1.5195  0.3677
+  Mar      1.6675   -1.1047   1.2030  0.5979
+  Apr      1.9353   -0.0312   1.4057  0.3152
+  May      2.1411   +0.7151   1.4665  0.0102
+  Jun      1.6003   +0.0266   0.8226  0.2610
+  Jul      1.0649   -0.2802   0.6013  0.4850
+  Aug      1.0412   -0.3897   0.6339  0.5176
+  Sep      1.1235   -0.3433   0.6892  0.3908
+  Oct      1.2846   -0.6357   0.7711  0.3980
+  Nov      1.8851   -1.3082   1.3390  0.4164
+  Dec      2.0377   -1.3166   1.3171  0.4790
+  --------------------------------------------
+  All      1.6837   -0.5218   1.0788  0.2384
+
+
+================================================================================
+Period: 2011  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-18  18:27:05
+
+--- CCI-CHL ---
+  RMSE:          1.7466
+  Bias:         -0.5665
+  MAE:           1.1320
+  Correlation:   0.2583
+  N points:      292,489
+  Model mean:   0.9455
+  Obs mean:     1.6478
+  Model std:    1.0580
+  Obs std:      1.5530
+
+  Error distribution:
+    Min:         -37.8631
+    5th pct:      -3.2232
+    25th pct:     -1.1049
+    Median:       -0.4049
+    75th pct:     +0.1422
+    95th pct:     +1.7501
+    Max:         +8.3151
+
+
+================================================================================
+Period: 2012  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-18  18:27:05
+
+--- CCI-CHL ---
+  RMSE:          1.6680
+  Bias:         -0.4495
+  MAE:           1.0767
+  Correlation:   0.2004
+  N points:      279,635
+  Model mean:   0.9136
+  Obs mean:     1.4879
+  Model std:    1.0826
+  Obs std:      1.3936
+
+  Error distribution:
+    Min:         -40.0749
+    5th pct:      -3.0594
+    25th pct:     -0.9557
+    Median:       -0.3475
+    75th pct:     +0.2274
+    95th pct:     +1.7942
+    Max:         +13.9633
+
+
+================================================================================
+Period: 2013  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-18  18:27:05
+
+--- CCI-CHL ---
+  RMSE:          1.7266
+  Bias:         -0.5038
+  MAE:           1.0780
+  Correlation:   0.2282
+  N points:      280,853
+  Model mean:   0.9040
+  Obs mean:     1.5086
+  Model std:    1.1107
+  Obs std:      1.4720
+
+  Error distribution:
+    Min:         -66.9665
+    5th pct:      -3.0233
+    25th pct:     -0.9976
+    Median:       -0.3869
+    75th pct:     +0.1078
+    95th pct:     +1.7036
+    Max:         +13.2146
+
+
+================================================================================
+Period: 2014  |  Model: pyGETM
+================================================================================
+Analysed: 2026-10-18  18:27:05
+
+--- CCI-CHL ---
+  RMSE:          1.5854
+  Bias:         -0.5655
+  MAE:           1.0259
+  Correlation:   0.2538
+  N points:      279,096
+  Model mean:   0.8335
+  Obs mean:     1.4961
+  Model std:    1.0087
+  Obs std:      1.3451
+
+  Error distribution:
+    Min:         -47.1752
+    5th pct:      -2.8858
+    25th pct:     -1.0405
+    Median:       -0.4259
+    75th pct:     +0.0101
+    95th pct:     +1.4314
+    Max:         +14.2402
+&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
+&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v01e-gvc/chla_surface_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v01e-gvc/chla_surface_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
       <title>NSe - Experiment CMEMS/v01P</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -910,7 +2814,7 @@ Analysed: 2026-10-07  13:59:52
     <item>
       <title>NSe - Experiment CMEMS/v01P_avc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p-avc/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p-avc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -1008,7 +2912,7 @@ Analysed: 2026-10-13  16:48:29
     <item>
       <title>NSe - Experiment CMEMS/v01P_gvc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p-gvc/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p-gvc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -1106,7 +3010,7 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>NSe - Experiment CMEMS/v02P_avc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v02p-avc/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v02p-avc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -1163,7 +3067,7 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>NSe - Experiment CMEMS/v02P_gvc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v02p-gvc/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v02p-gvc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -1220,12 +3124,12 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>NSe - WOA/tidal - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-14
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-19
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;year-2010&#34;&gt;Year 2010&lt;/h3&gt;
@@ -1239,7 +3143,7 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>NSe — Future Boundary Conditions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</guid>
       <description>&lt;p&gt;Cross-model, cross-scenario summary of NSe&amp;rsquo;s future open-boundary conditions: delta-change temperature/salinity (CMIP6, bias-corrected against the CMEMS Northwest Shelf reanalysis), tidal elevation/currents (TPXO9 plus the CMIP6 ensemble-mean sea-level trend), and (as of 2026-09-22) delta-change biogeochemistry &amp;ndash; nitrate, phosphate, silicate, oxygen, dissolved inorganic carbon, and alkalinity &amp;ndash; across all three CMIP6 models and both scenarios (see the bug-fix campaign section below for how that came together).&lt;/p&gt;
 &lt;h2 id=&#34;delta-change-temperature--salinity&#34;&gt;Delta-change (temperature / salinity)&lt;/h2&gt;
@@ -1249,7 +3153,7 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>NSe Rankings</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/</guid>
       <description>&lt;h1 id=&#34;nse-experiment-rankings&#34;&gt;NSe Experiment Rankings&lt;/h1&gt;
 &lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;NSe&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-overview/&#34;&gt;NSe overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
@@ -1258,6 +3162,7 @@ Analysed: 2026-10-13  16:38:24
 &lt;p&gt;&lt;img alt=&#34;Tidal experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-ranking-tides.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;p&gt;&lt;a id=&#34;horizon-surface&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Chla experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-ranking-horizon_surface-chla_surface.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;Salt experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-ranking-horizon_surface-salt_surface.png&#34;&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;Temp experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-ranking-horizon_surface-temp_surface.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;horizontal-bottom-layer-validation&#34;&gt;Horizontal Bottom Layer Validation&lt;/h2&gt;
@@ -1267,7 +3172,7 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>Regridding</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 19 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</guid>
       <description>&lt;h1 id=&#34;regridding-user-guide&#34;&gt;Regridding User Guide&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;ocean_data.regridding&lt;/code&gt; provides xESMF-based regridding with automatic

@@ -1,0 +1,62 @@
+format: '1.1'
+variable: PH
+title: PH Profile Validation Statistics
+created: '2026-10-19 08:55:20'
+area: NSe
+experiment: CMEMS/v01E_gvc
+periods:
+- period: 2011-2024
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-10-19 08:55:20'
+  datasets:
+    ICES point observations:
+      rmse: 0.393205
+      bias: -0.300903
+      mae: 0.332422
+      correlation: -0.351461
+      n_points: 31567
+      mean_model: 7.95858
+      mean_obs: 8.259482
+      std_model: 0.064156
+      std_obs: 0.223343
+      n_profiles: 3774
+      error_distribution:
+        min: -1.374527
+        p05: -0.726227
+        p25: -0.458473
+        median: -0.290138
+        p75: -0.165516
+        p95: 0.098608
+        max: 1.449687
+      by_depth:
+        0-10m:
+          n: 21204
+          bias: -0.313882
+          rmse: 0.407815
+          correlation: -0.431263
+        10-25m:
+          n: 9425
+          bias: -0.301986
+          rmse: 0.377506
+          correlation: -0.246651
+        25-50m:
+          n: 664
+          bias: 0.017109
+          rmse: 0.125382
+          correlation: -0.073749
+        50-100m:
+          n: 82
+          bias: -0.021676
+          rmse: 0.038644
+          correlation: 0.024881
+        100-200m:
+          n: 111
+          bias: -0.023414
+          rmse: 0.035311
+          correlation: -0.010816
+        200-500m:
+          n: 81
+          bias: -0.047112
+          rmse: 0.053606
+          correlation: 0.103146
