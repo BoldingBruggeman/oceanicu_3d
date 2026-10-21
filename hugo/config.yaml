@@ -24,6 +24,13 @@ params:
   # Prevent PaperMod from auto-listing pages from any section on the home page
   mainSections: []
 
+  # Favicon / touch-icon theme color, matched to the icon's own background
+  # (hugo/static/{favicon*,apple-touch-icon.png,safari-pinned-tab.svg}) --
+  # otherwise PaperMod's own default (#2e2e33) wouldn't match.
+  assets:
+    theme_color: "#0e344a"
+    msapplication_TileColor: "#0e344a"
+
   # Theme appearance
   defaultTheme: auto  # auto, light, dark
   disableThemeToggle: false
