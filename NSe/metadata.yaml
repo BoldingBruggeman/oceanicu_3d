@@ -82,9 +82,12 @@ input_generation:
 # ---------------------------------------------------------------------------
 scenario_matrix:
   description: >
-    Future ocean boundary conditions use CMIP6 model output as the
-    climate-change signal on top of the historical CMEMS reference
-    (AMM7/AMM15, same for all scenarios).
+    Future conditions use CMIP6 model output: as the climate-change
+    signal on top of the historical CMEMS reference (AMM7/AMM15, same
+    for all scenarios) for ocean boundaries; bias-corrected directly
+    against ERA5 for atmospheric forcing. Four input types per model/
+    scenario: 2-D tidal mean state, 3-D boundary delta-change, 3-D
+    biogeochemical boundary tracers, and atmospheric forcing.
 
   _ssp_labels:
     ssp126: "SSP1-2.6"
@@ -95,21 +98,103 @@ scenario_matrix:
   _type_labels:
     tidal_mean_state: "Tidal mean state (2-D)"
     delta_3d: "3-D delta-change"
+    meteo: "Atmospheric forcing (bias-corrected)"
+    fabm: "Biogeochemical boundary (3-D)"
 
+  # All three model/scenario tables below re-verified against the real
+  # files on bb-server1, 2026-10-21 (previously only partially filled
+  # in, and in one place wrong -- see tidal_mean_state's and delta_3d's
+  # own notes). Two real, open findings surfaced doing this that are
+  # NOT resolved here, just flagged, since they're data-quality
+  # questions, not documentation staleness:
+  #  1. tidal_mean_state's uo/vo: the variable IS present in every real
+  #     bdy_2d_*.nc file (all 3 models), but with an implausible range
+  #     (~-130..190, vs zos's realistic -4..4 m) -- consistently across
+  #     all three models, so probably a known placeholder/extrapolation
+  #     artifact rather than real transport, not something to just
+  #     mark "available" without checking with whoever generated these.
+  #  2. meteo's ssp245/ssp585 (MPI-ESM1-2-HR only): real files exist
+  #     but for a visibly incomplete variable subset (7-8 of the normal
+  #     13), not a full bias-corrected set -- flagged per-cell below
+  #     rather than guessing why.
   models:
     GFDL-ESM4:
       tidal_mean_state:
         ssp126:
-          variables: [zos]
-          note: "uo/vo absent from ESGF — tidal only"
+          variables: [zos, uo, vo]
+          note: "uo/vo present but implausible magnitude -- see scenario_matrix's own header note"
         ssp370:
           variables: [zos, uo, vo]
+          note: "uo/vo present but implausible magnitude -- see scenario_matrix's own header note"
       delta_3d:
         ssp126:
           variables: [thetao, so]
-          note: "uo/vo absent from ESGF"
+          note: "no uo/vo boundary files exist at all for any model/scenario"
+        ssp370:
+          variables: [thetao, so]
+      fabm:
+        ssp126:
+          variables: [dissic, no3, o2, po4, si, talk]
+        ssp370:
+          variables: [dissic, no3, o2, po4, si, talk]
+      meteo:
+        ssp126:
+          variables: [evspsbl, huss, net_lw, net_sw, pr, psl, rlds, rlus, rsds, rsus, tas, uas, vas]
+        ssp370:
+          variables: [evspsbl, huss, net_lw, net_sw, pr, psl, rlds, rlus, rsds, rsus, tas, uas, vas]
 
     MPI-ESM1-2-HR:
-      delta_3d:
+      tidal_mean_state:
+        ssp126:
+          variables: [zos, uo, vo]
+          note: "uo/vo present but implausible magnitude -- see scenario_matrix's own header note"
         ssp370:
-          variables: [thetao, so, uo, vo]
+          variables: [zos, uo, vo]
+          note: "uo/vo present but implausible magnitude -- see scenario_matrix's own header note"
+      delta_3d:
+        ssp126:
+          variables: [thetao, so]
+        ssp370:
+          variables: [thetao, so]
+      fabm:
+        ssp126:
+          variables: [dissic, no3, o2, po4, si, talk]
+        ssp370:
+          variables: [dissic, no3, o2, po4, si, talk]
+      meteo:
+        ssp126:
+          variables: [evspsbl, huss, net_lw, net_sw, pr, psl, rlds, rlus, rsds, rsus, tas, uas, vas]
+        ssp245:
+          variables: [evspsbl, huss, net_lw, net_sw, pr, rsds, tas]
+          note: "incomplete set (7 of 13) -- not a full bias-corrected run"
+        ssp370:
+          variables: [evspsbl, huss, net_lw, net_sw, pr, psl, rlds, rlus, rsds, rsus, tas, uas, vas]
+        ssp585:
+          variables: [evspsbl, huss, pr, rlds, rsds, tas, uas, vas]
+          note: "incomplete set (8 of 13) -- not a full bias-corrected run"
+
+    CNRM-ESM2-1:
+      tidal_mean_state:
+        ssp126:
+          variables: [zos, uo, vo]
+          note: "uo/vo present but implausible magnitude -- see scenario_matrix's own header note"
+        ssp370:
+          variables: [zos, uo, vo]
+          note: "uo/vo present but implausible magnitude -- see scenario_matrix's own header note"
+      delta_3d:
+        ssp126:
+          variables: [thetao, so]
+        ssp370:
+          variables: [thetao, so]
+      fabm:
+        ssp126:
+          variables: [dissic, no3, o2, po4, si, talk]
+        ssp370:
+          variables: [dissic, no3, o2, po4, si, talk]
+      meteo:
+        ssp126:
+          variables: [evspsbl, huss, pr, psl, rlus, rsds, tas, uas, vas]
+          note: "incomplete set (9 of 13) -- missing net_lw/net_sw/rlds/rsus"
+        ssp370:
+          variables: [evspsbl, huss, net_lw, pr, psl, rlds, rlus, rsds, tas, uas, vas]
+          note: "incomplete set (11 of 13) -- missing net_sw/rsus"
