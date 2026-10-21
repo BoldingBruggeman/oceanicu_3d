@@ -189,6 +189,13 @@ def generate_locally(
         "--analyses-dir", host_cfg["analyses_dir"],
         "--recursive",
         "--hugo", host_cfg["hugo_out"],
+        # This script's own checkout -- always the right OceanICU/
+        # oceanicu_3d location, unlike ocean-post's sibling-directory
+        # guess (false on bb-server1's real relay account, where
+        # ocean_post is imported from the unrelated /opt/ocean-src
+        # checkout; confirmed live, 2026-10-21, as the cause of the
+        # Data Sources page's "data_inventory_forcing.yaml not found").
+        "--forcing-inventory", str(SCRIPT_DIR / "driver" / "data_inventory_forcing.yaml"),
     ]
     if host_cfg.get("db"):
         cmd += ["--db", host_cfg["db"]]
