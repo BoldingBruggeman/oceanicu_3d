@@ -216,6 +216,10 @@ def generate_locally(
     else:
         data_roots_file = SCRIPT_DIR / "driver" / "data_roots.yaml.example"
     cmd += ["--data-roots-file", str(data_roots_file)]
+    # This script's own committed about.md -- config.yaml's nav links to
+    # /about/ unconditionally, but there was no generator for it at all
+    # (confirmed live, 2026-10-21: a 404, not a stale page).
+    cmd += ["--about-file", str(SCRIPT_DIR / "about.md")]
     if host_cfg.get("db"):
         cmd += ["--db", host_cfg["db"]]
     # --area (this invocation's own one-off override, one or more names)
