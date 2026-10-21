@@ -254,6 +254,10 @@ output:
     - P2_c
     - P3_c
     - P4_c
+    - P1_Chl
+    - P2_Chl
+    - P3_Chl
+    - P4_Chl
     - O2_o
     - N3_n
     - N4_n
