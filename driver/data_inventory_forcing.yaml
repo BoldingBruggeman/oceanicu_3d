@@ -72,10 +72,26 @@ roles:
         path: "${RIVER_FOLDER}"
       CMIP6:
         description: delta-change-projected discharge, same 446 EMORID stations
-        path: "${RIVER_FOLDER_CMIP6}"
+        # Same shared bias-corrected root + /CMIP6 subfolder as
+        # meteo.CMIP6 (confirmed live, 2026-10-21: river_flows_future_*/
+        # nutrient_loads_future_* sit in ${RIVER_FOLDER_CMIP6}/CMIP6/
+        # <model>/<scenario>/rivers/, not directly under
+        # ${RIVER_FOLDER_CMIP6}). No real rivers/ dir exists for
+        # historical (any model) or ssp245/ssp585 (MPI-ESM1-2-HR) at
+        # all -- river discharge projections were only ever run for
+        # ssp126/ssp370, unlike meteo's own broader scenario set for the
+        # same models. MPI-ESM1-2-HR/CNRM-ESM2-1 weren't listed as
+        # models at all before -- both really have ssp126/ssp370 data.
+        path: "${RIVER_FOLDER_CMIP6}/CMIP6"
         models:
           GFDL-ESM4:
-            scenarios: [ssp126, ssp245, ssp370, ssp585]
+            scenarios: [ssp126, ssp370]
+            status: fetched
+          MPI-ESM1-2-HR:
+            scenarios: [ssp126, ssp370]
+            status: fetched
+          CNRM-ESM2-1:
+            scenarios: [ssp126, ssp370]
             status: fetched
 
   hydrography:
