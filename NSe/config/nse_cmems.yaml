@@ -157,8 +157,8 @@ runtime:
   report_totals:
     days: 7
   debug_output: false
-  save_restart_interval: null
-  save_restart_interval_units: null
+  save_restart_interval: 1
+  save_restart_interval_units: YEARS
 data_assignments:
 - target: simulation.radiation.A
   kind: constant
