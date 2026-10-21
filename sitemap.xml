@@ -74,13 +74,13 @@
     <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/cnrm-esm2-1/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/cnrm-esm2-1/historical/</loc>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/cnrm-esm2-1-historical/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/cnrm-esm2-1/ssp126/</loc>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/cnrm-esm2-1-ssp1-2.6-low-emissions/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/cnrm-esm2-1/ssp370/</loc>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/cnrm-esm2-1-ssp3-7.0-high-emissions/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/data-sources/</loc>
@@ -89,13 +89,13 @@
     <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/gfdl-esm4/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/gfdl-esm4/historical/</loc>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/gfdl-esm4-historical/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/gfdl-esm4/ssp126/</loc>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/gfdl-esm4-ssp1-2.6-low-emissions/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/gfdl-esm4/ssp370/</loc>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/gfdl-esm4-ssp3-7.0-high-emissions/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-mle-comparison/</loc>
@@ -113,13 +113,13 @@
     <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/historical/</loc>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/mpi-esm1-2-hr-historical/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/ssp126/</loc>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/mpi-esm1-2-hr-ssp1-2.6-low-emissions/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/ssp370/</loc>
+    <loc>https://bolding-bruggeman.com/oceanicu_3d/scenarios/mpi-esm1-2-hr-ssp3-7.0-high-emissions/</loc>
     <lastmod>2026-10-21T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</loc>
