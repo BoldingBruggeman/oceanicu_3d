@@ -196,6 +196,13 @@ def generate_locally(
         # checkout; confirmed live, 2026-10-21, as the cause of the
         # Data Sources page's "data_inventory_forcing.yaml not found").
         "--forcing-inventory", str(SCRIPT_DIR / "driver" / "data_inventory_forcing.yaml"),
+        # Real per-host data-path env vars (ERA5_FOLDER, CMIP6_FOLDER, ...)
+        # -- data_roots.yaml.example's committed values ARE bb-server1's
+        # real, verified ones (see driver/README.md), not a template to
+        # fill in; this lets the Data Sources page check real files
+        # instead of trusting the inventory's own hand-maintained
+        # scenarios:/status: fields (confirmed stale, 2026-10-21).
+        "--data-roots-file", str(SCRIPT_DIR / "driver" / "data_roots.yaml.example"),
     ]
     if host_cfg.get("db"):
         cmd += ["--db", host_cfg["db"]]
