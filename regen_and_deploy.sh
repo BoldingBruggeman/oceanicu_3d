@@ -103,6 +103,50 @@ if [ -z "$DEPLOY_REPO" ]; then
     exit 1
 fi
 
+# Serialize concurrent runs -- this wrapper is the real production
+# trigger point (no bb-server1 cron by design; HPC fires this directly
+# when a new analysis is ready), and two experiments finishing close
+# together can trigger two runs around the same time. Both the Hugo
+# content tree (regenerate_hugo.py writes there) and the gh-pages push
+# (deploy_ghpages.py) are shared mutable state -- two interleaved runs
+# could race writing content/ or pushing the same branch.
+#
+# Lock file lives in the Hugo OUTPUT dir (hugo_out), not $HUGO_REPO --
+# $HUGO_REPO is a per-account checkout on bb-server1 (kb and the shared
+# oceanicu account each clone this repo separately), so a lock there
+# would never actually serialize the two accounts against each other.
+# hugo_out, by contrast, is the one resource regen_hosts.yaml already
+# has both accounts sharing for real (/data/OceanICU/oceanicu_3d, group
+# `bb`, confirmed write-accessible by both, 2026-10-21) -- resolved the
+# same way DEPLOY_REPO is above, from this host's own regen_hosts.yaml.
+HUGO_OUT="$(python3 -c "
+import socket, yaml
+from pathlib import Path
+cfg = yaml.safe_load(Path('$HUGO_REPO/regen_hosts.yaml').read_text())
+hostname = socket.gethostname()
+entry = cfg.get('hosts', {}).get(hostname)
+if entry is None:
+    entry = cfg.get('hosts', {}).get(cfg.get('relay_host'))
+out = (entry or {}).get('hugo_out')
+if out:
+    print(Path(out).expanduser())
+")"
+if [ -z "$HUGO_OUT" ]; then
+    echo "ERROR: no hosts.$(hostname).hugo_out entry (or relay_host's) in $HUGO_REPO/regen_hosts.yaml" >&2
+    exit 1
+fi
+
+LOCKFILE="$HUGO_OUT/.regen_deploy.lock"
+[ -f "$LOCKFILE" ] || { mkdir -p "$HUGO_OUT" && touch "$LOCKFILE"; } 2>/dev/null || true
+exec 200<"$LOCKFILE"
+if ! flock -n 200; then
+    echo "==> Another regen_and_deploy.sh run is already in progress on $(hostname) -- waiting for it to finish before starting this one..." >&2
+    flock 200
+    echo "==> Previous run finished -- proceeding."
+fi
+# fd 200 stays open (and the lock held) for the rest of this script's
+# life, released automatically on exit -- no explicit unlock needed.
+
 if ! $apply; then
     echo "==> --apply not given -- dry run: showing both inner scripts' own usage, nothing will run"
     echo
