@@ -100,17 +100,26 @@ roles:
         path: "${BOUNDARY_FOLDER_BAROTROPIC_CMEMS}"
       CMIP6:
         description: CMIP6 monthly mean SSH / barotropic transport
+        # Same real <model>/<scenario>/bdy/ tree as boundaries.baroclinic/
+        # fabm's own CMIP6 entries below (bdy_2d_* files here vs their
+        # bdy_3d_*) -- scenarios/status no longer trusted, same reason
+        # (confirmed stale live, 2026-10-21: MPI-ESM1-2-HR/CNRM-ESM2-1
+        # both already have real historical+ssp126+ssp370 data, not just
+        # the one 'availability-only' scenario each listed here). The
+        # Data Sources page computes real per-model scenario/file counts
+        # dynamically instead -- see _REAL_FILE_SCANNERS. Kept only as
+        # the fallback shown when no data-roots file is given at all.
         path: "${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}"
         models:
           GFDL-ESM4:
-            scenarios: [ssp126, ssp245, ssp370, ssp585]
+            scenarios: [historical, ssp126, ssp370]
             status: fetched
           MPI-ESM1-2-HR:
-            scenarios: [ssp370]
-            status: availability-only
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
           CNRM-ESM2-1:
-            scenarios: [ssp370]
-            status: availability-only
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
 
   boundaries.baroclinic:
     default: CMEMS
@@ -121,17 +130,21 @@ roles:
         path: "${BOUNDARY_FOLDER_BAROCLINIC_WOA}"
       CMIP6:
         description: ocean-prep's delta-change boundary output (NOT the raw CMIP6 extraction)
+        # Same tree/caveat as boundaries.barotropic.CMIP6 above (this
+        # entry's own bdy_3d_{so,thetao}_* files, physics only -- the
+        # bio tracers in the same bdy_3d_* files belong to
+        # boundaries.fabm.CMIP6 below, not here).
         path: "${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}"
         models:
           GFDL-ESM4:
-            scenarios: [ssp126, ssp245, ssp370, ssp585]
+            scenarios: [historical, ssp126, ssp370]
             status: fetched
           MPI-ESM1-2-HR:
-            scenarios: [ssp370]
-            status: availability-only
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
           CNRM-ESM2-1:
-            scenarios: [ssp370]
-            status: availability-only
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
 
   boundaries.fabm:
     description: biogeochemical (FABM) boundary/IC tracers
@@ -146,10 +159,23 @@ roles:
           via dic_ta_historical_method (cycled_climatology or pml_trend)
         path: "${BOUNDARY_FOLDER_FABM_CMEMS}"
       CMIP6:
+        # Same tree/caveat as boundaries.baroclinic.CMIP6 above (this
+        # entry's own bdy_3d_{dissic,no3,o2,po4,si,talk}_* files, bio
+        # only). Confirmed live, 2026-10-21: MPI-ESM1-2-HR/CNRM-ESM2-1
+        # both have real bio-tracer files for ssp126/ssp370 (not listed
+        # here at all before) -- historical is GFDL-ESM4-only for real
+        # (confirmed: MPI/CNRM's historical/bdy/ has so/thetao only, no
+        # bio tracers), so NOT listed as a scenario for them below.
         path: "${BOUNDARY_FOLDER_FABM_CMIP6}"
         models:
           GFDL-ESM4:
-            scenarios: [ssp126, ssp245, ssp370, ssp585]
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
+          MPI-ESM1-2-HR:
+            scenarios: [ssp126, ssp370]
+            status: fetched
+          CNRM-ESM2-1:
+            scenarios: [ssp126, ssp370]
             status: fetched
 
   fabm:
