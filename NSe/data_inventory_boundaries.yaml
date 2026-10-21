@@ -1,0 +1,86 @@
+# NSe/data_inventory_boundaries.yaml — Data Sources page, NSe's own
+# area-specific section.
+#
+# Companion to ../driver/data_inventory_forcing.yaml (the generic,
+# any-model-setup section) -- holds exactly the sources that file's
+# hydrography/boundaries.* roles used to also list, but that are
+# genuinely NSe-specific, not reusable by another area: CMEMS and
+# CMIP6 boundary/initial-condition extractions are generated AT NSe's
+# own open-boundary locations and grid, so they can't be shared with a
+# different domain the way WOA (a full global 3-D climatology) or TPXO
+# (a global tidal atlas) can -- those two stay in the generic file.
+# Confirmed live, 2026-10-21: every path below resolves under
+# .../data/NSe/..., while every path left in data_inventory_forcing.yaml
+# does not.
+#
+# Same roles:/sources:/models: shape as data_inventory_forcing.yaml,
+# rendered by the same code (_generate_data_sources_page), just under
+# this area's own section of the Data Sources page instead of the
+# generic one.
+
+roles:
+
+  hydrography:
+    default: CMEMS
+    sources:
+      CMEMS:
+        path: "${HYDROGRAPHY_FOLDER_CMEMS}"
+
+  boundaries.barotropic:
+    default: CMEMS
+    sources:
+      CMEMS:
+        path: "${BOUNDARY_FOLDER_BAROTROPIC_CMEMS}"
+      CMIP6:
+        description: CMIP6 monthly mean SSH / barotropic transport
+        path: "${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}"
+        models:
+          GFDL-ESM4:
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
+          MPI-ESM1-2-HR:
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
+          CNRM-ESM2-1:
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
+
+  boundaries.baroclinic:
+    default: CMEMS
+    sources:
+      CMEMS:
+        path: "${BOUNDARY_FOLDER_BAROCLINIC_CMEMS}"
+      CMIP6:
+        description: ocean-prep's delta-change boundary output (NOT the raw CMIP6 extraction)
+        path: "${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}"
+        models:
+          GFDL-ESM4:
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
+          MPI-ESM1-2-HR:
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
+          CNRM-ESM2-1:
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
+
+  boundaries.fabm:
+    default: CMEMS
+    sources:
+      CMEMS:
+        description: >
+          real boundary-point biogeochemistry; dissic/talk pre-2015 bridged
+          via dic_ta_historical_method (cycled_climatology or pml_trend)
+        path: "${BOUNDARY_FOLDER_FABM_CMEMS}"
+      CMIP6:
+        path: "${BOUNDARY_FOLDER_FABM_CMIP6}"
+        models:
+          GFDL-ESM4:
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
+          MPI-ESM1-2-HR:
+            scenarios: [ssp126, ssp370]
+            status: fetched
+          CNRM-ESM2-1:
+            scenarios: [ssp126, ssp370]
+            status: fetched
