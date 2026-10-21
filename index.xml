@@ -131,7 +131,7 @@
 &lt;p&gt;📊 &lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/#tides&#34;&gt;View Tidal Analysis rankings for NSe →&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/&#34;&gt;CMEMS/tidal&lt;/a&gt;&lt;/strong&gt; — 2011–2011-2011&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/&#34;&gt;CMEMS/tidal&lt;/a&gt;&lt;/strong&gt; — 2011-2011–2011&lt;/p&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -164,7 +164,7 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011&#34;&gt;2011&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011-2011&#34;&gt;2011-2011&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011-2011&#34;&gt;2011-2011&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011&#34;&gt;2011&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
@@ -971,7 +971,7 @@ and (where applicable) future-scenario boundary/forcing data.&lt;/p&gt;</descrip
       <pubDate>Wed, 21 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/amm7/</guid>
       <description>&lt;h1 id=&#34;amm7-experiment-rankings&#34;&gt;AMM7 Experiment Rankings&lt;/h1&gt;
-&lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;AMM7&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-overview/&#34;&gt;AMM7 overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
+&lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;AMM7&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/&#34;&gt;AMM7 overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
 &lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
 &lt;p&gt;&lt;a id=&#34;tides&#34;&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Not enough experiments with usable results in this category yet — ranking needs at least two.&lt;/em&gt;&lt;/p&gt;
@@ -2446,7 +2446,7 @@ Analysed: 2026-05-04  12:29:45
       <pubDate>Wed, 21 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/ns/</guid>
       <description>&lt;h1 id=&#34;ns-experiment-rankings&#34;&gt;NS Experiment Rankings&lt;/h1&gt;
-&lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;NS&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns-overview/&#34;&gt;NS overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
+&lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;NS&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/&#34;&gt;NS overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
 &lt;h2 id=&#34;horizontal-surface-validation&#34;&gt;Horizontal Surface Validation&lt;/h2&gt;
 &lt;p&gt;&lt;a id=&#34;horizon-surface&#34;&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Not enough experiments with usable results in this category yet — ranking needs at least two.&lt;/em&gt;&lt;/p&gt;
@@ -4189,7 +4189,7 @@ Analysed: 2026-10-13  16:38:24
       <pubDate>Wed, 21 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/</guid>
       <description>&lt;h1 id=&#34;nse-experiment-rankings&#34;&gt;NSe Experiment Rankings&lt;/h1&gt;
-&lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;NSe&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-overview/&#34;&gt;NSe overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
+&lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;NSe&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/&#34;&gt;NSe overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
 &lt;h2 id=&#34;tidal-analysis&#34;&gt;Tidal Analysis&lt;/h2&gt;
 &lt;p&gt;&lt;a id=&#34;tides&#34;&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;Tidal experiment ranking&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-ranking-tides.png&#34;&gt;&lt;/p&gt;
