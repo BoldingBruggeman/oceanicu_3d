@@ -131,7 +131,7 @@
 &lt;p&gt;📊 &lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/#tides&#34;&gt;View Tidal Analysis rankings for NSe →&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/&#34;&gt;CMEMS/tidal&lt;/a&gt;&lt;/strong&gt; — 2011-2011–2011&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/&#34;&gt;CMEMS/tidal&lt;/a&gt;&lt;/strong&gt; — 2011–2011-2011&lt;/p&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -164,7 +164,7 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011-2011&#34;&gt;2011-2011&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011&#34;&gt;2011&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011&#34;&gt;2011&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011-2011&#34;&gt;2011-2011&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
@@ -637,6 +637,29 @@ side.&lt;/li&gt;
 one case, &lt;code&gt;python3 -m cli.reporting&lt;/code&gt; in the other) and this repo&amp;rsquo;s own
 &lt;code&gt;deploy_ghpages.py&lt;/code&gt; directly. A bug or fix in &lt;code&gt;lib/reporting.py&lt;/code&gt; affects
 both equally.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>About</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/about/</link>
+      <pubDate>Wed, 21 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/about/</guid>
+      <description>&lt;p&gt;This site presents validation results and future-scenario projections
+for &lt;a href=&#34;https://github.com/BoldingBruggeman/getm-rewrite&#34;&gt;pyGETM&lt;/a&gt; ocean
+model setups developed within the &lt;a href=&#34;https://ocean-icu.eu/&#34;&gt;OceanICU&lt;/a&gt;
+project.&lt;/p&gt;
+&lt;h2 id=&#34;modeling-areas&#34;&gt;Modeling areas&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;NSe&lt;/strong&gt; — an extended North Sea domain, covering the North Sea and
+its approaches down to the Baltic entrance.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;NS&lt;/strong&gt; — a GETM setup similar to the
+&lt;a href=&#34;https://sourceforge.net/p/getm/getm-setups/ci/master/tree/NorthSea/&#34;&gt;legacy GETM North Sea setup&lt;/a&gt;,
+updated with GEBCO 2025 bathymetry and current forcing.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;AMM7&lt;/strong&gt; — a well-tested shelf-seas configuration, also run with
+&lt;a href=&#34;https://www.nemo-ocean.eu/&#34;&gt;NEMO&lt;/a&gt; as the model, from
+&lt;a href=&#34;https://pml.ac.uk/&#34;&gt;PML&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Each area&amp;rsquo;s own page lists its real experiments, validation results,
+and (where applicable) future-scenario boundary/forcing data.&lt;/p&gt;</description>
     </item>
     <item>
       <title>All Areas Rankings</title>
