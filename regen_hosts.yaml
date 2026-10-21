@@ -19,6 +19,15 @@ hosts:
     hugo_out: /data/OceanICU/oceanicu_3d
     conda_env: ocean-stack
     db: /data/OceanICU/oceanicu_3d/experiments/experiment_registry.sqlite
+    # Private repo (github.com/BoldingBruggeman/oceanicu_3d_experiments) --
+    # holds the REAL per-host data_roots.yaml (canonical home per that
+    # file's own header, NOT driver/data_roots.yaml.example in this code
+    # repo, which is stale/a template). Kept at this shared path (not
+    # kb's own ~/source/repos/OceanICU/) because the oceanicu account
+    # itself has no SSH access to this private repo -- only kb pulls it;
+    # oceanicu reads it here via the shared `bb` group, same pattern
+    # /opt/ocean-src/ocean-post already uses.
+    experiments_repo: /data/OceanICU/oceanicu_3d_experiments
 
   orca:
     analyses_dir: /data/kb/OceanICU/oceanicu_3d/analyses

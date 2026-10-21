@@ -25,17 +25,28 @@ roles:
         path: "${ERA5_FOLDER}"
       CMIP6:
         description: bias-corrected CMIP6 meteo (ocean-prep's bias-correction pipeline)
-        path: "${CMIP6_FOLDER}"
+        # NOT just ${CMIP6_FOLDER} -- the real bias-correction output sits
+        # one level deeper, under its own CMIP6/ subfolder (confirmed
+        # live, 2026-10-21, trying to actually resolve real per-variable
+        # file counts for this entry: ${CMIP6_FOLDER}/GFDL-ESM4/... does
+        # not exist; ${CMIP6_FOLDER}/CMIP6/GFDL-ESM4/... does). The
+        # scenarios/status fields below are no longer trusted for
+        # anything -- the Data Sources page computes real per-model
+        # scenario/file counts dynamically instead (see
+        # _generate_data_sources_page's data_roots_file handling) --
+        # kept only as the fallback shown when no data-roots file is
+        # given at all.
+        path: "${CMIP6_FOLDER}/CMIP6"
         models:
           GFDL-ESM4:
-            scenarios: [ssp126, ssp245, ssp370, ssp585]
+            scenarios: [historical, ssp126, ssp370]
             status: fetched
           MPI-ESM1-2-HR:
-            scenarios: [ssp370]
-            status: availability-only
+            scenarios: [historical, ssp126, ssp245, ssp370, ssp585]
+            status: fetched
           CNRM-ESM2-1:
-            scenarios: [ssp370]
-            status: availability-only
+            scenarios: [historical, ssp126, ssp370]
+            status: fetched
       CMIP6-raw:
         description: raw (not bias-corrected) CMIP6 archive, fetched via ocean-data's DataLoader
         path: "${CMIP6_RAW_FOLDER}"

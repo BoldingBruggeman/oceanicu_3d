@@ -196,14 +196,26 @@ def generate_locally(
         # checkout; confirmed live, 2026-10-21, as the cause of the
         # Data Sources page's "data_inventory_forcing.yaml not found").
         "--forcing-inventory", str(SCRIPT_DIR / "driver" / "data_inventory_forcing.yaml"),
-        # Real per-host data-path env vars (ERA5_FOLDER, CMIP6_FOLDER, ...)
-        # -- data_roots.yaml.example's committed values ARE bb-server1's
-        # real, verified ones (see driver/README.md), not a template to
-        # fill in; this lets the Data Sources page check real files
-        # instead of trusting the inventory's own hand-maintained
-        # scenarios:/status: fields (confirmed stale, 2026-10-21).
-        "--data-roots-file", str(SCRIPT_DIR / "driver" / "data_roots.yaml.example"),
     ]
+    # Real per-host data-path env vars (ERA5_FOLDER, CMIP6_FOLDER, ...), so
+    # the Data Sources page can check real files instead of trusting the
+    # inventory's own hand-maintained scenarios:/status: fields (confirmed
+    # stale, 2026-10-21). The REAL file's canonical home is the private
+    # oceanicu_3d_experiments repo's experiments/NSe/<hostname>_data_roots
+    # .yaml (its own header says so) -- driver/data_roots.yaml.example in
+    # THIS repo is a stale template, not that file (confirmed different
+    # values for ERA5_FOLDER/HYDROGRAPHY_FOLDER_CMEMS, 2026-10-21).
+    # host_cfg["experiments_repo"] (bb-server1 only, so far -- see
+    # regen_hosts.yaml) is where kb's own clone of that private repo lives,
+    # shared with the oceanicu account via the `bb` group (oceanicu itself
+    # has no SSH access to it). Falls back to the stale example file,
+    # unchanged from before, on a host with no experiments_repo entry.
+    experiments_repo = host_cfg.get("experiments_repo")
+    if experiments_repo:
+        data_roots_file = Path(experiments_repo) / "experiments" / "NSe" / f"{hostname}_data_roots.yaml"
+    else:
+        data_roots_file = SCRIPT_DIR / "driver" / "data_roots.yaml.example"
+    cmd += ["--data-roots-file", str(data_roots_file)]
     if host_cfg.get("db"):
         cmd += ["--db", host_cfg["db"]]
     # --area (this invocation's own one-off override, one or more names)
