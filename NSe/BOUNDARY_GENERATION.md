@@ -51,37 +51,85 @@ every reference, then `ls -la` each one — only
 `NSe/Bathymetry/nse_bdy_lonlat.txt` should be a real, live file;
 everything else with that basename should be a `.bak*` or archived copy.
 
-### Verifying it against the bathymetry
+### Generating/verifying it -- `pygetm-config boundaries-generate`/`boundaries-check-points`
 
-Every boundary point must land on a wet cell in the current
-`NSe/Bathymetry/bathymetry_nse.nc`. Check with:
+**As of this update, `nse_bdy_lonlat.txt` is a generated artifact --
+never hand-edit it directly again.** The single source of truth is now
+`NSe/config/nse_bdy_segments.yaml`, a short list of the same 9 segments
+already baked into `nse_cmems.yaml`'s `open_boundaries:` block (index
+form: `side`/`l`/`mstart`/`mstop`, or guide-point form:
+`lonlat_a`/`lonlat_b` for an easier-to-pick-by-eye new segment). Both
+the point file and the `open_boundaries:` YAML block are derived from
+that one file, so they can't silently diverge again (see the pygetm-config
+repo's `boundary_tool.py` for why, and the 2026-08-03 "123 points
+silently on land" / "mislanded edit" incidents above for why this
+mattered).
 
-```python
-import netCDF4, numpy as np
+**This same physical domain is shared by ~10 run configs**
+(`nse_cmems.yaml`, `nse_cmems_tides.yaml`, `nse_cmip6.yaml`,
+`nse_cmip6_tides.yaml`, `nse_cmip6_raw.yaml`,
+`nse_cmip6_fabm_dryrun{,_mizer}.yaml`, `nse_woa.yaml`,
+`nse_woa_tides.yaml` -- `nse_from_oceanicu.yaml` deliberately excluded
+for now, see below) -- their `open_boundaries:` *positions* must stay
+identical, but **not** their `type_2d`/`type_3d`: the CMEMS configs use
+`FLATHER_ELEV`, the CMIP6/WOA configs use `FLATHER_TRANSPORT` (a real,
+intentional difference, confirmed 2026-10-22, not something a bulk
+update should ever silently flip). Regenerate and push the new
+positions out to every one of them in one go with (conda env with
+`pygetm` installed):
 
-with netCDF4.Dataset("NSe/Bathymetry/bathymetry_nse.nc") as nc:
-    lon = np.array(nc["lon"][:]); lat = np.array(nc["lat"][:])
-    mask = np.array(nc["ocean_mask"][:]).astype(bool)
-
-pts = []
-with open("NSe/Bathymetry/nse_bdy_lonlat.txt") as f:
-    for line in f.readlines()[2:]:
-        line = line.strip()
-        if not line: continue
-        lo, la = map(float, line.split(","))
-        pts.append((lo, la))
-
-n_land = 0
-for lo, la in pts:
-    i = int(np.argmin(np.abs(lon - lo)))
-    j = int(np.argmin(np.abs(lat - la)))
-    if not mask[j, i]:
-        n_land += 1
-        print("ON LAND:", lo, la)
-print(f"{len(pts)} points, {n_land} on land")
+```bash
+conda activate pygetm
+pygetm-config boundaries-generate \
+  --domain NSe/config/nse_cmems.yaml \
+  --segments NSe/config/nse_bdy_segments.yaml \
+  --bdy-lonlat-out NSe/Bathymetry/nse_bdy_lonlat.txt \
+  --plot /tmp/nse_boundaries.png --report /tmp/nse_boundaries.md \
+  --apply-to NSe/config/nse_cmems.yaml --apply-to NSe/config/nse_cmems_tides.yaml \
+  --apply-to NSe/config/nse_cmip6.yaml --apply-to NSe/config/nse_cmip6_tides.yaml \
+  --apply-to NSe/config/nse_cmip6_raw.yaml \
+  --apply-to NSe/config/nse_cmip6_fabm_dryrun.yaml \
+  --apply-to NSe/config/nse_cmip6_fabm_dryrun_mizer.yaml \
+  --apply-to NSe/config/nse_woa.yaml --apply-to NSe/config/nse_woa_tides.yaml
 ```
 
-**Run this after every bathymetry regeneration.** `generate_nse_bathymetry.py`
+This calls pygetm's own real `add_by_index`/`adjust_mask` under the
+hood, so a segment that's on land, overlaps another, or crosses another
+fails loudly here, with the offending segment named -- instead of
+silently writing a bad point file. `--apply-to` patches each target's
+`open_boundaries:` list in place by position (`side`/`l`/`mstart`/
+`mstop`/`name` only), via `ruamel.yaml` round-trip mode, so every
+comment and everything else in the file is left untouched, and each
+file's own `type_2d`/`type_3d` are preserved exactly as they already
+are unless `--update-types` is also given. A target whose existing
+segment count doesn't match (a segment being added/removed) is refused
+unless `--allow-length-change` is passed too -- there's no existing
+`type_2d`/`type_3d` to preserve for a genuinely new segment, so that's
+a deliberate, opt-in step, not a silent guess. Without `--apply-to`, add
+`--open-boundaries-out <path>` instead to just inspect the generated
+block before deciding where it should go.
+
+`nse_from_oceanicu.yaml` has a real, as-yet-unexplained one-point drift
+(`mstart: 136` vs `137` on segment 1) and uses the older `WEST`/`NORTH`/
+`EAST`/`SOUTH` side-naming convention instead of `LEFT`/`TOP`/`RIGHT`/
+`BOTTOM` -- left out of `--apply-to` above deliberately (as of
+2026-10-22) until someone confirms whether it's a legacy file that can
+be retired or should be brought back in sync.
+
+**Run this after every bathymetry regeneration -- it's now the direct,
+automated replacement for the old manual numpy land-check snippet**:
+
+```bash
+pygetm-config boundaries-check-points \
+  --domain NSe/config/nse_cmems.yaml --lonlat NSe/Bathymetry/nse_bdy_lonlat.txt
+```
+
+Exits non-zero and prints every `ON LAND: lon lat` point if the current
+bathymetry has moved any boundary point onto land -- the exact failure
+mode of the 2026-08-03 incident below, now caught immediately instead
+of silently.
+
+`generate_nse_bathymetry.py`
 (mask_regions, rx0 smoothing, thalweg fixes) can change which cells are wet —
 a point that was fine yesterday can end up on land today with no error or
 warning anywhere else. This actually happened on 2026-08-03: a fix to
@@ -105,13 +153,19 @@ re-run the check above before trusting either "0 on land" or an old
 point-count from this doc** — bathymetry regenerations happen independently
 of this file and can silently invalidate either state.
 
-### If a point needs to move or be dropped
+### If a segment needs to move, shrink, or be dropped
 
 1. **Back up first** — always: `.bak` copies with a timestamp suffix if a
    second round of fixes is likely (see `NSe/Bathymetry/nse_bdy_lonlat.txt.bak*`
-   for the pattern used so far).
-2. Edit `NSe/Bathymetry/nse_bdy_lonlat.txt` directly (plain `lon,lat` per
-   line, header `T-grid` / `lon,lat`).
+   for the pattern used before this file became generated).
+2. Edit `NSe/config/nse_bdy_segments.yaml` -- change the relevant
+   segment's index tuple (or guide points), then re-run
+   `pygetm-config boundaries-generate` (above) to regenerate both
+   `nse_bdy_lonlat.txt` and the `open_boundaries:` block together.
+   **Never edit `nse_bdy_lonlat.txt` by hand anymore** -- it's a build
+   artifact now, and a hand edit will just be silently overwritten (or
+   worse, drift from `nse_cmems.yaml`'s own segments again) the next
+   time someone regenerates it.
 3. **If boundary_data NC files already exist** (see §2 below) for the *old*
    point list, they must be re-cut to match — the point count/order in the
    NC files' `nbdyp` dimension must stay in lockstep with the text file, or
