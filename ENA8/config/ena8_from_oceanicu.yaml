@@ -40,23 +40,26 @@ domain:
 # here). type_3d intentionally omitted, same reasoning as NSe/AMM7
 # (SPONGE forced unconditionally via data_assignments below).
 open_boundaries:
-  - side: WEST
-    l: 0
-    mstart: 0
-    mstop: 189
-    type_2d: FLATHER_TRANSPORT
-  - side: WEST
-    l: 0
-    mstart: 209
-    mstop: 241
-    type_2d: FLATHER_TRANSPORT
-  - side: NORTH
-    l: 240
-    mstart: 1
-    mstop: 154
-    type_2d: FLATHER_TRANSPORT
+- side: LEFT
+  l: 0
+  mstart: 0
+  mstop: 189
+  type_2d: FLATHER_TRANSPORT
+  name: 'segment 0: W boundary (north part)'
+- side: LEFT
+  l: 0
+  mstart: 209
+  mstop: 241
+  type_2d: FLATHER_TRANSPORT
+  name: 'segment 1: W boundary (south part)'
+- side: TOP
+  l: 240
+  mstart: 1
+  mstop: 154
+  type_2d: FLATHER_TRANSPORT
 
 # ----------------------------------------------------------------------
+  name: 'segment 2: N boundary'
 simulation:
   runtype: BAROCLINIC
   gotm: gotm.yaml
@@ -126,6 +129,9 @@ simulation:
       swr: 0.0
       pe: 0.0
     FluxesFromMeteo:
+      # Differs from NSe's own ROSATI_MIYAKODA/CLARK: NET_FLUX/DOWNWARD_FLUX
+      # here -- not the same method by another name, ROSATI_MIYAKODA
+      # (shortwave) and CLARK (longwave) are unrelated bulk formulas.
       shortwave_method: NET_FLUX
       longwave_method: DOWNWARD_FLUX
       humidity_measure: DEW_POINT_TEMPERATURE
@@ -160,71 +166,71 @@ runtime:
 
 # ----------------------------------------------------------------------
 data_assignments:
-  - target: simulation.radiation.A
-    kind: constant
-    constant_value: 0.7
-  - target: simulation.radiation.kc1
-    kind: constant
-    constant_value: 0.54
+- target: simulation.radiation.A
+  kind: constant
+  constant_value: 0.7
+- target: simulation.radiation.kc1
+  kind: constant
+  constant_value: 0.54
   # ObsKd: True (same as AMM7) -- space-varying KD490 climatology for kc2
   # instead of a fixed constant.
-  - target: simulation.radiation.kc2
-    kind: file
-    file: ${KD490_FOLDER}/KD490_clim.nc
-    variable: KD490_filled
-    climatology: true
+- target: simulation.radiation.kc2
+  kind: file
+  file: ${KD490_FOLDER}/KD490_clim.nc
+  variable: KD490_filled
+  climatology: true
 
-  - target: simulation.airsea.t2m
-    kind: file
-    file: ${ERA5_FOLDER}/era5_t2m_????.nc
-    variable: t2m
-    pre_transform_offset: -273.15
-  - target: simulation.airsea.d2m
-    kind: file
-    file: ${ERA5_FOLDER}/era5_d2m_????.nc
-    variable: d2m
-    pre_transform_offset: -273.15
-  - target: simulation.airsea.u10
-    kind: file
-    file: ${ERA5_FOLDER}/era5_u10_????.nc
-    variable: u10
-  - target: simulation.airsea.v10
-    kind: file
-    file: ${ERA5_FOLDER}/era5_v10_????.nc
-    variable: v10
-  - target: simulation.airsea.sp
-    kind: file
-    file: ${ERA5_FOLDER}/era5_sp_????.nc
-    variable: sp
-  - target: simulation.airsea.tp
-    kind: file
-    file: ${ERA5_FOLDER}/era5_tp_????.nc
-    variable: tp
-    pre_transform_scale: 0.0002777777777777778
-  - target: simulation.airsea.tcc
-    kind: file
-    file: ${ERA5_FOLDER}/era5_tcc_????.nc
-    variable: tcc
-  - target: simulation.airsea.swr
-    kind: file
-    file: ${ERA5_FOLDER}/era5_ssr_????.nc
-    variable: ssr
-    pre_transform_scale: 0.0002777777777777778
-  - target: simulation.airsea.swr_downwards
-    kind: file
-    file: ${ERA5_FOLDER}/era5_ssrd_????.nc
-    variable: ssrd
-    pre_transform_scale: 0.0002777777777777778
-  - target: simulation.airsea.ql
-    kind: file
-    file: ${ERA5_FOLDER}/era5_str_????.nc
-    variable: str
-    pre_transform_scale: 0.0002777777777777778
-  - target: simulation.airsea.ql_downwards
-    kind: file
-    file: ${ERA5_FOLDER}/era5_strd_????.nc
-    variable: strd
-    pre_transform_scale: 0.0002777777777777778
+- target: simulation.airsea.t2m
+  kind: file
+  file: ${ERA5_FOLDER}/era5_t2m_????.nc
+  variable: t2m
+  pre_transform_offset: -273.15
+- target: simulation.airsea.d2m
+  kind: file
+  file: ${ERA5_FOLDER}/era5_d2m_????.nc
+  variable: d2m
+  pre_transform_offset: -273.15
+- target: simulation.airsea.u10
+  kind: file
+  file: ${ERA5_FOLDER}/era5_u10_????.nc
+  variable: u10
+- target: simulation.airsea.v10
+  kind: file
+  file: ${ERA5_FOLDER}/era5_v10_????.nc
+  variable: v10
+- target: simulation.airsea.sp
+  kind: file
+  file: ${ERA5_FOLDER}/era5_sp_????.nc
+  variable: sp
+- target: simulation.airsea.tp
+  kind: file
+  file: ${ERA5_FOLDER}/era5_tp_????.nc
+  variable: tp
+  pre_transform_scale: 0.0002777777777777778
+- target: simulation.airsea.tcc
+  kind: file
+  file: ${ERA5_FOLDER}/era5_tcc_????.nc
+  variable: tcc
+- target: simulation.airsea.swr
+  kind: file
+  file: ${ERA5_FOLDER}/era5_ssr_????.nc
+  variable: ssr
+  pre_transform_scale: 0.0002777777777777778
+- target: simulation.airsea.swr_downwards
+  kind: file
+  file: ${ERA5_FOLDER}/era5_ssrd_????.nc
+  variable: ssrd
+  pre_transform_scale: 0.0002777777777777778
+- target: simulation.airsea.ql
+  kind: file
+  file: ${ERA5_FOLDER}/era5_str_????.nc
+  variable: str
+  pre_transform_scale: 0.0002777777777777778
+- target: simulation.airsea.ql_downwards
+  kind: file
+  file: ${ERA5_FOLDER}/era5_strd_????.nc
+  variable: strd
+  pre_transform_scale: 0.0002777777777777778
 
   # open_boundaries.z/u/v (2D barotropic boundary values) are no longer
   # static entries here -- derive_data_assignments (driver/
@@ -232,12 +238,12 @@ data_assignments:
   # boundaries.barotropic.source above (TPXO/CMEMS/CMIP6), same as
   # open_boundary.temp/salt.values already is from boundaries.baroclinic.
 
-  - target: open_boundary.temp
-    kind: boundary_type
-    boundary_condition_type: SPONGE
-  - target: open_boundary.salt
-    kind: boundary_type
-    boundary_condition_type: SPONGE
+- target: open_boundary.temp
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.salt
+  kind: boundary_type
+  boundary_condition_type: SPONGE
 
 # ----------------------------------------------------------------------
 # Output shape: meteo=True (unlike AMM7's False), tides=False, barotropic
@@ -256,48 +262,48 @@ output:
     barotropic_3d: [uk, vk, ww, SS, num]
     baroclinic_3d: [temp, salt, rho, nuh]
   files:
-    - type: netcdf
-      path: ena8_meteo.nc
-      interval: 1
-      interval_units: HOURS
-      sync_interval: null
-      default_dtype: float32
-      variable_requests:
-        - groups: [airsea_standard, airsea_fluxes]
+  - type: netcdf
+    path: ena8_meteo.nc
+    interval: 1
+    interval_units: HOURS
+    sync_interval: null
+    default_dtype: float32
+    variable_requests:
+    - groups: [airsea_standard, airsea_fluxes]
 
-    - type: netcdf
-      path: ena8_surface_daily.nc
-      interval: 1
-      interval_units: HOURS
-      sync_interval: null
-      default_dtype: float32
-      variable_requests:
-        - fields: [temp]
-          z_index: -1
-        - fields: [salt]
-          z_index: -1
+  - type: netcdf
+    path: ena8_surface_daily.nc
+    interval: 1
+    interval_units: HOURS
+    sync_interval: null
+    default_dtype: float32
+    variable_requests:
+    - fields: [temp]
+      z_index: -1
+    - fields: [salt]
+      z_index: -1
 
-    - type: netcdf
-      path: ena8_bottom_daily.nc
-      interval: 1
-      interval_units: DAYS
-      sync_interval: null
-      default_dtype: float32
-      variable_requests:
-        - fields: [temp]
-          z_index: 0
-        - fields: [salt]
-          z_index: 0
+  - type: netcdf
+    path: ena8_bottom_daily.nc
+    interval: 1
+    interval_units: DAYS
+    sync_interval: null
+    default_dtype: float32
+    variable_requests:
+    - fields: [temp]
+      z_index: 0
+    - fields: [salt]
+      z_index: 0
 
-    - type: netcdf
-      path: ena8_monthly.nc
-      interval: 1
-      interval_units: MONTHS
-      sync_interval: null
-      default_dtype: float32
-      variable_requests:
-        - groups: [barotropic_3d, baroclinic_3d]
-          time_average: true
+  - type: netcdf
+    path: ena8_monthly.nc
+    interval: 1
+    interval_units: MONTHS
+    sync_interval: null
+    default_dtype: float32
+    variable_requests:
+    - groups: [barotropic_3d, baroclinic_3d]
+      time_average: true
 
 # ----------------------------------------------------------------------
 hydrography:
@@ -354,8 +360,6 @@ meteo:
     # more folder_template/model indirection).
     folder: ${ERA5_FOLDER}
     evaporation: true
-    shortwave_method: -1
-    longwave_method: -2
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
   CMIP6:
     # The old config's own active choice, kept as an inactive alternative
@@ -365,8 +369,6 @@ meteo:
     model: "MPI-ESM1-2-HR"
     scenario: "ssp585"
     evaporation: true
-    shortwave_method: -1
-    longwave_method: -2
 river_discharge:
   source: emorid
   emorid:

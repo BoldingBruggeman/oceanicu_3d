@@ -20,7 +20,7 @@ input_generation:
       lon, lat, mask, H.
     configs:
       - label: "NS bathymetry config"
-        github_url: "https://github.com/bolding/ocean-prep/blob/main/config/northsea_1d20deg_bathy_create.yaml"
+        github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/northsea_1d20deg_bathy_create.yaml"
         cli: "bathymetry-regrid --config config/northsea_1d20deg_bathy_create.yaml"
 
   boundaries:
@@ -31,8 +31,8 @@ input_generation:
         ocean-prep run_cmems_boundaries.
       configs:
         - label: "NS CMEMS boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ns_bdy_create.yaml"
-          cli: "python cli/run_cmems_boundaries.py --config config/ns_bdy_create.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ns_bdy_create.yaml"
+          cli: "run-cmems-boundaries --config config/ns_bdy_create.yaml"
           note: "Config not yet committed."
 
     - label: "Tidal boundaries (TPXO9 + CMIP6 mean SSH / barotropic transport)"
@@ -43,7 +43,7 @@ input_generation:
         Scenario Summary table below.
       configs:
         - label: "NS tidal boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ns_tidal_bdy.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ns_tidal_bdy.yaml"
           cli: "run-tidal-boundaries --config config/ns_tidal_bdy.yaml"
           note: "Config not yet committed."
 
@@ -56,7 +56,7 @@ input_generation:
         Scenario-specific; see Scenario Summary table below.
       configs:
         - label: "NS delta-change boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ns_delta_bdy.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ns_delta_bdy.yaml"
           cli: "run-delta-boundaries --config config/ns_delta_bdy.yaml --scenario ssp370"
           note: "Config not yet committed."
 
@@ -68,8 +68,8 @@ input_generation:
         NaN cells on the model grid.
       configs:
         - label: "NS initial conditions config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ns_init_create.yaml"
-          cli: "python cli/download_init_conditions.py --config config/ns_init_create.yaml --source AMM7 --year 2015"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ns_init_create.yaml"
+          cli: "download-init-conditions --config config/ns_init_create.yaml --source AMM7 --year 2015"
           note: "Config not yet committed."
 
 # ---------------------------------------------------------------------------

@@ -87,14 +87,31 @@ def main(argv=None) -> int:
         const=True,
         default=False,
         metavar="PREFIX",
-        help="build the domain and Simulation, plot the domain (mesh+subdomains+tiling, and "
-        "mask), save the two PNGs, then exit -- before any hydrography/data-assignment/river-"
-        "data loading. Mirrors run_model.py's own --plot_domain exactly (both figures, same "
-        "show_mesh/show_subdomains/tiling and show_mask calls to domain.plot(), same early-"
-        "exit-before-data placement), richer than pygetm-config run's plain --plot-domain "
-        "(which only calls domain.plot() with no args and doesn't need a built Simulation). "
+        help="build the domain (open boundaries + rivers added, no Simulation), plot it "
+        "(mesh, and mask -- both include river/open-boundary markers via domain.plot()'s "
+        "own show_rivers/show_open_boundaries defaults), save the two PNGs, then exit -- "
+        "before build_simulation()/any hydrography/data-assignment loading. Deliberately "
+        "does NOT build a Simulation (unlike run_model.py's own --plot_domain): these plots "
+        "only need `domain`, and requiring a full Simulation would make this flag fail "
+        "whenever the final land/sea mask has an unrelated problem (e.g. a stale open-"
+        "boundary point now on land) that has nothing to do with wanting a domain overview. "
         "Saves {PREFIX}_mesh.png and {PREFIX}_mask.png; PREFIX defaults to "
         "domain_<config file's stem>, or pass one to override.",
+    )
+    parser.add_argument(
+        "--export-domain-summary",
+        nargs="?",
+        const=True,
+        default=False,
+        metavar="PREFIX",
+        help="build the domain (same point as --plot-domain -- open boundaries + rivers "
+        "added, no Simulation) and write the real T-grid bathymetry/mask/lon/lat, "
+        "open-boundary point positions, and river name/lon/lat to {PREFIX}_summary.npz, "
+        "then exit. For rendering with ocean-plot (real coastlines, controlled figure "
+        "size/DPI, decluttered output) instead of pygetm's own Domain.plot() -- see "
+        "ocean-post's generate_domain_overview_plot. Mutually exclusive with "
+        "--plot-domain (both would need to pick which one wins on PREFIX defaulting; "
+        "just run the command twice if you want both outputs).",
     )
     parser.add_argument(
         "--skip-unavailable-output",
@@ -599,7 +616,11 @@ def main(argv=None) -> int:
     # Order matters and matches run_model.py's own create_domain() exactly:
     # open boundaries -> domain.cfl_check() -> rivers.
     loader.add_open_boundaries(domain, config, schema)
-    loader.check_domain_cfl(domain)
+    # pygetm_config.loader has no check_domain_cfl() wrapper (confirmed --
+    # grepped the real devel-branch source, nothing matches) despite this
+    # comment claiming one; call the real pygetm API directly instead,
+    # exactly as run_model.py's own create_domain() does on `main`.
+    domain.cfl_check()
 
     # Goes through the SAME generic mechanism --dump-python's generated
     # scripts use (river_discharge.script, see pygetm_config.loader.
@@ -612,19 +633,125 @@ def main(argv=None) -> int:
     n_rivers = loader.run_river_discharge_script(domain, config)
     print(f"{n_rivers} river(s) added from {config['river_discharge']['file']}", file=sys.stderr)
 
-    sim = loader.build_simulation(domain, config, schema)
-
+    # --plot-domain deliberately plots BEFORE build_simulation(): the two
+    # figures only need `domain` (bathymetry/mask/mesh/open boundaries/
+    # rivers are all on it already by this point) -- building a full
+    # Simulation needs a valid final land/sea mask with every open-boundary
+    # point on water, which this domain-overview feature has no reason to
+    # require (confirmed hitting exactly that unrelated, real open-boundary/
+    # mask mismatch for real while first exercising this flag; a domain
+    # overview plot shouldn't be blocked by it). show_subdomains/tiling
+    # dropped accordingly -- no Simulation exists yet to supply a tiling,
+    # and MPI subdomain decomposition isn't part of what this flag is for.
     if args.plot_domain:
+        # domain.plot() itself still calls get_final_mask(), which still
+        # validates every open-boundary point is on water and raises if not
+        # (confirmed: moving the call above build_simulation() wasn't
+        # enough by itself -- this is pygetm's own domain.plot() doing the
+        # same check independently, not something build_simulation() alone
+        # does). allow_on_land is pygetm's own real, intended escape hatch
+        # for exactly this (open_boundaries.py: downgrades the check from a
+        # raised Exception to a logged WARNING) -- used ONLY here, for this
+        # visualization, never for build_simulation() below, so an actual
+        # simulation run still fails loudly on a real land-point problem.
+        # The warning itself still prints either way -- this doesn't hide
+        # the underlying issue, just stops it from blocking a plot.
+        domain.open_boundaries.allow_on_land = True
         prefix = args.plot_domain if isinstance(args.plot_domain, str) else f"domain_{Path(args.config).stem}"
-        fig = domain.plot(show_mesh=True, show_subdomains=True, tiling=sim.tiling)
+        # Real, not derived/assumed: domain.lon/lat are pygetm's own public
+        # T-grid coordinate arrays, already built above -- extent is a
+        # straight min/max; "resolution" is reported as the real native
+        # grid point counts (nx/ny) rather than a computed average degree
+        # spacing, since a curvilinear/rotated-pole grid's spacing isn't
+        # actually uniform across the domain -- stating the exact grid
+        # shape avoids implying a precision the grid doesn't have.
+        extent = (
+            f"{domain.ny} × {domain.nx} grid points"
+            f"  ·  lon [{float(domain.lon.min()):.2f}, {float(domain.lon.max()):.2f}]°E"
+            f"  ·  lat [{float(domain.lat.min()):.2f}, {float(domain.lat.max()):.2f}]°N"
+        )
+        fig = domain.plot(show_mesh=True)
         if fig is not None:
+            fig.suptitle(f"{Path(args.config).stem}\n{extent}")
             fig.savefig(f"{prefix}_mesh.png")
             print(f"wrote {prefix}_mesh.png", file=sys.stderr)
         fig = domain.plot(show_mesh=False, show_mask=True)
         if fig is not None:
+            fig.suptitle(f"{Path(args.config).stem}\n{extent}")
             fig.savefig(f"{prefix}_mask.png")
             print(f"wrote {prefix}_mask.png", file=sys.stderr)
         return 0
+
+    if args.export_domain_summary:
+        # Same early-exit point as --plot-domain, same allow_on_land reasoning
+        # (get_final_mask() below still validates open boundaries) -- see that
+        # flag's own comments just above. This one doesn't render anything
+        # itself; it hands the real numbers to a separate ocean-plot-based
+        # renderer instead (pygetm's own Domain.plot() isn't built for a
+        # polished web graphic -- no real coastline, fixed dev-tool figure
+        # sizing, no river-label decluttering at 250+ rivers; see ocean-post's
+        # generate_domain_overview_plot for the actual rendering).
+        import numpy as np
+        from pygetm import core
+        from pygetm.open_boundaries import Side
+
+        domain.open_boundaries.allow_on_land = True
+        prefix = (
+            args.export_domain_summary
+            if isinstance(args.export_domain_summary, str)
+            else f"domain_{Path(args.config).stem}"
+        )
+
+        final_mask = domain.get_final_mask()
+        t_mask = final_mask[1::2, 1::2]
+        t_lon = domain.lon[1::2, 1::2]
+        t_lat = domain.lat[1::2, 1::2]
+        t_H = domain.H[1::2, 1::2]
+
+        # Open-boundary point positions. l/mstart/mstop are 0-based T-grid
+        # indices (confirmed via pygetm's own add_by_index() docstring:
+        # "l, mstart, mstop are 0-based indices of a T point in the global
+        # domain") -- so they index directly into t_lon/t_lat (already
+        # T-grid-sliced above), NOT into domain.lon/domain.lat themselves,
+        # which are full supergrid arrays (2*ny+1 x 2*nx+1). Indexing
+        # domain.lon[j, i] with a raw T-grid j/i (as an earlier version of
+        # this code did) silently picked a real but wrong point near the
+        # domain's (0,0) corner instead of the actual boundary location --
+        # this is what put every boundary marker in the wrong place on the
+        # rendered overview maps. Rivers already do this conversion
+        # correctly below (i_sup = 1 + 2*i); this mirrors that.
+        bdy_lon, bdy_lat = [], []
+        for b in domain.open_boundaries._boundaries:
+            for m in range(b.mstart, b.mstop, b.mstep or 1):
+                j, i = (m, b.l) if b.side in (Side.LEFT, Side.RIGHT) else (b.l, m)
+                bdy_lon.append(float(t_lon[j, i]))
+                bdy_lat.append(float(t_lat[j, i]))
+
+        # River positions -- mirrors Domain.plot()'s own show_rivers block
+        # exactly (map_to_grid immediately before reading .items(), same
+        # i_sup/j_sup = 1+2*i/j supergrid conversion) so this stays correct
+        # if that convention ever changes upstream.
+        domain.rivers.map_to_grid(core.Locator(**domain._tcoords(mask=final_mask)))
+        river_lon, river_lat, river_name = [], [], []
+        for name, river in domain.rivers.items():
+            i_sup, j_sup = 1 + river.i * 2, 1 + river.j * 2
+            river_lon.append(float(domain.lon[j_sup, i_sup]))
+            river_lat.append(float(domain.lat[j_sup, i_sup]))
+            river_name.append(name)
+
+        out_path = f"{prefix}_summary.npz"
+        np.savez(
+            out_path,
+            area=Path(args.config).stem,
+            lon=t_lon, lat=t_lat, H=t_H, mask=t_mask,
+            boundary_lon=np.array(bdy_lon), boundary_lat=np.array(bdy_lat),
+            river_lon=np.array(river_lon), river_lat=np.array(river_lat),
+            river_name=np.array(river_name),
+        )
+        print(f"wrote {out_path}", file=sys.stderr)
+        return 0
+
+    sim = loader.build_simulation(domain, config, schema)
 
     # Before apply_data_assignments, matching cfg_ic.py's own placement
     # (before cfg_boundaries.data_2d/data_3d) in run_model.py's create_

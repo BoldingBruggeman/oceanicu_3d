@@ -1,5 +1,12 @@
 # AMM7 area metadata — read by ocean-post reporting.py
 #
+# domain_dir override: AMM7's own analyses/areas/AMM7/ directory is owned
+# by a different account (rt), not group-writable for creating a new
+# domain/ subdirectory there -- real domain_mesh.png/domain_mask.png
+# (driver/oceanicu_driver.py --plot-domain) are written to this sibling
+# location instead, so as not to touch another account's directory.
+domain_dir: /data/OceanICU/oceanicu_3d/analyses/areas/AMM7_domain_overview/domain
+#
 # ---------------------------------------------------------------------------
 # input_generation — how each set of input files is produced.
 #
@@ -19,7 +26,7 @@ input_generation:
       (rx0 ≤ 0.2).  Output: amm7_topo_getm.nc with variables lon, lat, mask, H.
     configs:
       - label: "AMM7 bathymetry config"
-        github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_bathy_create.yaml"
+        github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/amm7_bathy_create.yaml"
         cli: "bathymetry-regrid --config config/amm7_bathy_create.yaml"
         note: "Config not yet committed."
 
@@ -31,8 +38,8 @@ input_generation:
         ocean-prep run_cmems_boundaries.
       configs:
         - label: "AMM7 CMEMS boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_bdy_create.yaml"
-          cli: "python cli/run_cmems_boundaries.py --config config/amm7_bdy_create.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/amm7_bdy_create.yaml"
+          cli: "run-cmems-boundaries --config config/amm7_bdy_create.yaml"
           note: "Config not yet committed."
 
     - label: "Tidal boundaries (TPXO9 + CMIP6 mean SSH / barotropic transport)"
@@ -43,7 +50,7 @@ input_generation:
         Scenario Summary table below.
       configs:
         - label: "AMM7 tidal boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_tidal_bdy.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/amm7_tidal_bdy.yaml"
           cli: "run-tidal-boundaries --config config/amm7_tidal_bdy.yaml"
           note: "Config not yet committed."
 
@@ -56,7 +63,7 @@ input_generation:
         Scenario-specific; see Scenario Summary table below.
       configs:
         - label: "AMM7 delta-change boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_delta_bdy.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/amm7_delta_bdy.yaml"
           cli: "run-delta-boundaries --config config/amm7_delta_bdy.yaml --scenario ssp585"
           note: "Config not yet committed."
 
@@ -68,8 +75,8 @@ input_generation:
         NaN cells on the model grid.
       configs:
         - label: "AMM7 initial conditions config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_init_create.yaml"
-          cli: "python cli/download_init_conditions.py --config config/amm7_init_create.yaml --source AMM7 --year 2015"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/amm7_init_create.yaml"
+          cli: "download-init-conditions --config config/amm7_init_create.yaml --source AMM7 --year 2015"
           note: "Config not yet committed."
 
 # ---------------------------------------------------------------------------

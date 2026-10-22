@@ -1,0 +1,40 @@
+# ENA8 open-boundary segment specification -- the single source of truth
+# for this domain's open boundaries. Edit THIS file, then regenerate both
+# ena8_from_oceanicu.yaml's `open_boundaries:` block and
+# ENA8/Bathymetry/ena8_bdy_lonlat.txt with:
+#
+#   pygetm-config boundaries-generate \
+#     --domain ENA8/config/ena8_from_oceanicu.yaml \
+#     --segments ENA8/config/ena8_bdy_segments.yaml \
+#     --bdy-lonlat-out ENA8/Bathymetry/ena8_bdy_lonlat.txt \
+#     --apply-to ENA8/config/ena8_from_oceanicu.yaml \
+#     --plot /tmp/ena8_boundaries.png --report /tmp/ena8_boundaries.md
+#
+# Same layout/workflow as NSe (see NSe/BOUNDARY_GENERATION.md section 0).
+# Never hand-edit ena8_bdy_lonlat.txt directly -- it's a generated artifact.
+#
+# This starting version is transcribed directly from
+# ena8_from_oceanicu.yaml's existing, known-good open_boundaries: block
+# (index form, side/l/mstart/mstop) -- a restatement of what's already
+# running, not a reinterpretation. Side names converted WEST->LEFT,
+# NORTH->TOP, SOUTH->BOTTOM, EAST->RIGHT (pygetm.open_boundaries.Side's
+# own real aliases, confirmed in source -- not a guess).
+segments:
+- side: LEFT
+  name: "segment 0: W boundary (north part)"
+  l: 0
+  mstart: 0
+  mstop: 189
+  type_2d: FLATHER_TRANSPORT
+- side: LEFT
+  name: "segment 1: W boundary (south part)"
+  l: 0
+  mstart: 209
+  mstop: 241
+  type_2d: FLATHER_TRANSPORT
+- side: TOP
+  name: "segment 2: N boundary"
+  l: 240
+  mstart: 1
+  mstop: 154
+  type_2d: FLATHER_TRANSPORT

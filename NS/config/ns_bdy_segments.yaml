@@ -1,0 +1,46 @@
+# NS open-boundary segment specification -- the single source of truth
+# for this domain's open boundaries. Edit THIS file, then regenerate both
+# ns_from_oceanicu.yaml's `open_boundaries:` block and
+# NS/Bathymetry/ns_bdy_lonlat.txt with:
+#
+#   pygetm-config boundaries-generate \
+#     --domain NS/config/ns_from_oceanicu.yaml \
+#     --segments NS/config/ns_bdy_segments.yaml \
+#     --bdy-lonlat-out NS/Bathymetry/ns_bdy_lonlat.txt \
+#     --apply-to NS/config/ns_from_oceanicu.yaml \
+#     --plot /tmp/ns_boundaries.png --report /tmp/ns_boundaries.md
+#
+# Same layout/workflow as NSe (see NSe/BOUNDARY_GENERATION.md section 0).
+# Never hand-edit ns_bdy_lonlat.txt directly -- it's a generated artifact.
+#
+# This starting version is transcribed directly from
+# ns_from_oceanicu.yaml's existing, known-good open_boundaries: block
+# (index form, side/l/mstart/mstop) -- a restatement of what's already
+# running, not a reinterpretation. Side names converted WEST->LEFT,
+# NORTH->TOP, SOUTH->BOTTOM, EAST->RIGHT (pygetm.open_boundaries.Side's
+# own real aliases, confirmed in source -- not a guess).
+segments:
+- side: LEFT
+  name: "segment 0: W boundary (north part)"
+  l: 0
+  mstart: 1
+  mstop: 16
+  type_2d: FLATHER_TRANSPORT
+- side: LEFT
+  name: "segment 1: W boundary (south part)"
+  l: 0
+  mstart: 103
+  mstop: 116
+  type_2d: FLATHER_TRANSPORT
+- side: TOP
+  name: "segment 2: N boundary"
+  l: 124
+  mstart: 27
+  mstop: 60
+  type_2d: FLATHER_TRANSPORT
+- side: RIGHT
+  name: "segment 3: E boundary"
+  l: 111
+  mstart: 62
+  mstop: 70
+  type_2d: FLATHER_TRANSPORT

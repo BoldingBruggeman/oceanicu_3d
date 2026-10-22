@@ -274,7 +274,7 @@ output:
     - Z4_c
     - Z5_c
     - Z6_c
-    - B1_c   
+    - B1_c
     fabm_ersem_2D:
     - O3_fair
     - Q7_c
@@ -408,7 +408,7 @@ output:
     - groups:
       - fabm_mizer_fishing
       requires_fabm_dependency: fish/fishing_pressure
-    - groups: 
+    - groups:
       - fabm_ersem_2D
       requires_fabm: true
     - groups:

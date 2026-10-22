@@ -13,7 +13,7 @@ input_generation:
       smoothing (rx0 ≤ 0.2).  Output: bathymetry_ena8.nc.
     configs:
       - label: "ENA8 bathymetry config"
-        github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ena8_bathy_create.yaml"
+        github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ena8_bathy_create.yaml"
         cli: "bathymetry-regrid --config config/ena8_bathy_create.yaml"
         note: "Config not yet committed."
 
@@ -24,8 +24,8 @@ input_generation:
         boundary conditions for the historical period.
       configs:
         - label: "ENA8 CMEMS boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ena8_bdy_create.yaml"
-          cli: "python cli/run_cmems_boundaries.py --config config/ena8_bdy_create.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ena8_bdy_create.yaml"
+          cli: "run-cmems-boundaries --config config/ena8_bdy_create.yaml"
           note: "Config not yet committed."
 
     - label: "Tidal boundaries (TPXO9 + CMIP6 mean SSH / barotropic transport)"
@@ -34,7 +34,7 @@ input_generation:
         sea-surface height and depth-integrated barotropic transport.
       configs:
         - label: "ENA8 tidal boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ena8_tidal_bdy.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ena8_tidal_bdy.yaml"
           cli: "run-tidal-boundaries --config config/ena8_tidal_bdy.yaml"
           note: "Config not yet committed."
 
@@ -44,7 +44,7 @@ input_generation:
         AMM7 historical CMEMS reference with CMIP6 monthly change signal.
       configs:
         - label: "ENA8 delta-change boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ena8_delta_bdy.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ena8_delta_bdy.yaml"
           cli: "run-delta-boundaries --config config/ena8_delta_bdy.yaml"
           note: "Config not yet committed."
 
@@ -55,8 +55,8 @@ input_generation:
         for NaN cells on the model grid.
       configs:
         - label: "ENA8 initial conditions config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ena8_init_create.yaml"
-          cli: "python cli/download_init_conditions.py --config config/ena8_init_create.yaml --source AMM7 --year 2015"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ena8_init_create.yaml"
+          cli: "download-init-conditions --config config/ena8_init_create.yaml --source AMM7 --year 2015"
           note: "Config not yet committed."
 
 # ---------------------------------------------------------------------------

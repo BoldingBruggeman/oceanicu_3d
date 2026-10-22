@@ -25,14 +25,15 @@
 # still available via cmip6.transient: false + cmip6.future_period, but
 # produces one static shift applied identically to 2015 and 2100 alike.
 #
-# Usage
+# Usage (run from the oceanicu_3d repo root; this file lives under
+# NSe/config/, not ocean-prep's own config/)
 # -----
-#   run-delta-boundaries --config config/nse_delta_bdy.yaml
-#   run-delta-boundaries --config config/nse_delta_bdy.yaml --variable thetao so
-#   run-delta-boundaries --config config/nse_delta_bdy.yaml --dryrun
-#   run-delta-boundaries --config config/nse_delta_bdy.yaml \
+#   run-delta-boundaries --config NSe/config/nse_delta_bdy.yaml
+#   run-delta-boundaries --config NSe/config/nse_delta_bdy.yaml --variable thetao so
+#   run-delta-boundaries --config NSe/config/nse_delta_bdy.yaml --dryrun
+#   run-delta-boundaries --config NSe/config/nse_delta_bdy.yaml \
 #       --scenario ssp126 ssp245 ssp370 ssp585
-#   run-delta-boundaries --config config/nse_delta_bdy.yaml \
+#   run-delta-boundaries --config NSe/config/nse_delta_bdy.yaml \
 #       --future-start 2070-01-01 --future-end 2099-12-31
 # =============================================================================
 

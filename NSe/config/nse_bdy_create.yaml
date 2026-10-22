@@ -47,11 +47,13 @@
 #   7  eastern  lon=12.980  lat 54.45–55.35 N  ( 19 pts)  ← Baltic override
 #   8  southern lon=-7.42 – -4.78°E  lat 48.50 N  ( 34 pts)
 #
-# Usage
+# Usage (run-cmems-boundaries is ocean-prep's installed console
+# script; run from the oceanicu_3d repo root, this file lives under
+# NSe/config/, not ocean-prep's own config/)
 # -----
-#   python cli/run_cmems_boundaries.py --config nse_bdy_create.yaml
-#   python cli/run_cmems_boundaries.py --config nse_bdy_create.yaml --dataset temperature salinity
-#   python cli/run_cmems_boundaries.py --config nse_bdy_create.yaml --dryrun
+#   run-cmems-boundaries --config NSe/config/nse_bdy_create.yaml
+#   run-cmems-boundaries --config NSe/config/nse_bdy_create.yaml --dataset temperature salinity
+#   run-cmems-boundaries --config NSe/config/nse_bdy_create.yaml --dryrun
 # =============================================================================
 
 setup:
