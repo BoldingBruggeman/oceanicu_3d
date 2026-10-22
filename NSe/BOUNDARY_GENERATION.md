@@ -84,7 +84,7 @@ pygetm-config boundaries-generate \
   --domain NSe/config/nse_cmems.yaml \
   --segments NSe/config/nse_bdy_segments.yaml \
   --bdy-lonlat-out NSe/Bathymetry/nse_bdy_lonlat.txt \
-  --plot /tmp/nse_boundaries.png --report /tmp/nse_boundaries.md \
+  --plot NSe/Bathymetry/nse_boundaries.png --report NSe/Bathymetry/nse_boundaries.md \
   --apply-to NSe/config/nse_cmems.yaml --apply-to NSe/config/nse_cmems_tides.yaml \
   --apply-to NSe/config/nse_cmip6.yaml --apply-to NSe/config/nse_cmip6_tides.yaml \
   --apply-to NSe/config/nse_cmip6_raw.yaml \
