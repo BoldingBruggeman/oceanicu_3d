@@ -8,24 +8,48 @@ order, from where*.
 ## 0. The boundary point file — read this first
 
 **Canonical copy:** `NSe/Bathymetry/nse_bdy_lonlat.txt` (currently 311
-points). Moved here from `NSe/nse_bdy_lonlat.txt` on 2026-08-17 — this
-file's entire validity is defined by wet/land status against
-`NSe/Bathymetry/bathymetry_nse.nc`, needs re-verification after every
-bathymetry regeneration (see below), and lives alongside the other
-grid/mask artifacts there, not the YAML domain configs in `NSe/config/`.
+points, moved here from `NSe/nse_bdy_lonlat.txt` on 2026-08-17). Its
+entire validity is defined by wet/land status against
+`NSe/Bathymetry/bathymetry_nse.nc` — re-verify after every bathymetry
+regeneration (see below) — and it lives alongside the other grid/mask
+artifacts there, not the YAML domain configs in `NSe/config/`.
 
 This is the file the running model actually uses — confirmed empirically by
 comparing it against `lon_bdy`/`lat_bdy` in a `getm-dump.nc` crash dump
-written by a live run: **exact match, 0 points different**. Treat any other
-copy as untrustworthy until proven otherwise (see "Known copies" below).
+written by a live run: **exact match, 0 points different**.
 
-**Policy: this file belongs to the setup.** It must live under
-`NSe/Bathymetry/`, not in `ocean-prep/bdy_coords/` or
-`boundaries.old/bdy_coords/` or the `oceanicu_3d/` repo root, and not as a
-symlink from those locations either — every consuming config references
-this one real path directly (fixed 2026-08-17; see §3). Verify with
-`ls -la` / `grep -rln nse_bdy_lonlat` before trusting any copy if this ever
-looks inconsistent again.
+**Policy: this file belongs to the setup, not to any shared/generic
+location.** It must live under `NSe/Bathymetry/` — never in
+`ocean-prep/bdy_coords/`, `boundaries.old/bdy_coords/`, or the
+`oceanicu_3d` repo root — and never as a symlink from those locations
+either: the point list changes per domain setup, not just NSe, so a
+shared symlink target wouldn't generalize.
+
+As of 2026-08-17 (resolving an earlier 2026-08-03 state with four
+divergent copies spread across three repos — `NSe/`, the `oceanicu_3d`
+repo root, `boundaries` (now `boundaries.old`), and `ocean-prep` — most
+configs pointing at the wrong one), every config references this one
+real, live copy directly:
+
+- `NSe/config/nse_bdy_create.yaml`, `nse_init_create.yaml`, and
+  `nse_tidal_bdy.yaml`. The first two use a real absolute path and were
+  moved out of `ocean-prep/config/` into `NSe/config/` on 2026-08-24
+  (NSe-specific configs belong with the NSe setup, not the generic
+  `ocean-prep` tool repo); `nse_tidal_bdy.yaml` uses a relative path
+  instead, resolved against `cwd=NSe/` (see Stage 2b below).
+- `boundaries.old/config/{nse_bdy_create,nse_init_create}.yaml` (the
+  pre-move copies, kept only as `.old` history).
+
+The old `oceanicu_3d/nse_bdy_lonlat.txt` (repo-root, a 309-point
+mis-landed edit — see "Update, 2026-08-17" below) is archived at
+`NSe/Bathymetry/nse_bdy_lonlat.txt.mislanded_edit_20260803`, not left at
+the repo root where it could be mistaken for a live copy again.
+
+**If this ever looks inconsistent again:** `grep -rln nse_bdy_lonlat`
+across `OceanICU/oceanicu_3d`, `ocean-prep`, and `boundaries.old` to find
+every reference, then `ls -la` each one — only
+`NSe/Bathymetry/nse_bdy_lonlat.txt` should be a real, live file;
+everything else with that basename should be a `.bak*` or archived copy.
 
 ### Verifying it against the bathymetry
 
@@ -96,8 +120,8 @@ of this file and can silently invalidate either state.
    match by coincidence. Use `NSe/trim_bdy.py <src.nc> <dst.nc> <idx0> ...`
    to drop specific 0-based `nbdyp` indices from hourly/daily reference
    files; verify the index against `boundary_lon`/`boundary_lat` in the NC
-   file first, not just the text file (they can drift independently — see
-   "Known copies").
+   file first, not just the text file — they can drift independently of
+   each other.
 4. If more than a couple of points changed, it may be simpler to fully
    regenerate the reference data from source (§2) than to patch the NC
    files by hand.
@@ -187,35 +211,3 @@ with `cwd = NSe/`.
   the tool prints per mask; this NSe setup's `masku`/`maskv` use 3 and 4
   for boundary orientation, not the GETM-textbook single code 2, which only
   the T-mask `maskt` uses here.)
-
-## 3. Known copies of `nse_bdy_lonlat.txt` — resolved 2026-08-17
-
-As of 2026-08-03 there were four divergent copies of this file across three
-repos (`NSe/`, the `oceanicu_3d` repo root, `boundaries` (now
-`boundaries.old`), and `ocean-prep`), with most configs pointing at the
-wrong one — this section used to document that mess in detail. It's now
-resolved:
-
-- **Canonical, single copy:** `NSe/Bathymetry/nse_bdy_lonlat.txt` (moved
-  from `NSe/nse_bdy_lonlat.txt`; still verified against `getm-dump.nc`, 0
-  points different).
-- **Every config** (`NSe/config/{nse_bdy_create,nse_init_create,nse_tidal_bdy}.yaml`,
-  and `boundaries.old/config/{nse_bdy_create,nse_init_create}.yaml`)
-  references this one copy directly — a real absolute path in every case
-  except `NSe/config/nse_tidal_bdy.yaml`, which uses a relative path
-  resolved against `cwd=NSe/` (see stage 2b). `nse_bdy_create.yaml` and
-  `nse_init_create.yaml` moved here from `ocean-prep/config/` on
-  2026-08-24 (NSe-specific configs belong with the NSe setup, not inside
-  the generic `ocean-prep` tool repo).
-  **No symlinks anywhere** — deliberate: this file changes per domain
-  setup, not just NSe, so a shared symlink target wouldn't generalize.
-- The old `oceanicu_3d/nse_bdy_lonlat.txt` (repo-root, 309-point mis-landed
-  edit — see §0's "Update, 2026-08-17" note) is archived at
-  `NSe/Bathymetry/nse_bdy_lonlat.txt.mislanded_edit_20260803`, not left at
-  the repo root where it could be mistaken for a live copy again.
-
-If this ever drifts again: `grep -rln nse_bdy_lonlat` across
-`OceanICU/oceanicu_3d`, `ocean-prep`, and `boundaries.old` to find every
-reference, then verify each with `ls -la` (should show a real file at
-`NSe/Bathymetry/nse_bdy_lonlat.txt` and nothing else with that basename
-outside `.bak*`/archived copies) before trusting any of them.
