@@ -32,7 +32,7 @@ input_generation:
       configs:
         - label: "AMM7 CMEMS boundary config"
           github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_bdy_create.yaml"
-          cli: "python cli/run_cmems_boundaries.py --config config/amm7_bdy_create.yaml"
+          cli: "run-cmems-boundaries --config config/amm7_bdy_create.yaml"
           note: "Config not yet committed."
 
     - label: "Tidal boundaries (TPXO9 + CMIP6 mean SSH / barotropic transport)"
@@ -69,7 +69,7 @@ input_generation:
       configs:
         - label: "AMM7 initial conditions config"
           github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_init_create.yaml"
-          cli: "python cli/download_init_conditions.py --config config/amm7_init_create.yaml --source AMM7 --year 2015"
+          cli: "download-init-conditions --config config/amm7_init_create.yaml --source AMM7 --year 2015"
           note: "Config not yet committed."
 
 # ---------------------------------------------------------------------------
