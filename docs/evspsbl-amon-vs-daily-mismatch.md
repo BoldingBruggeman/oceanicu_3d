@@ -106,21 +106,37 @@ error. Anyone consuming `evspsbl_bc_*_disagg_*.nc` as a complete year of
 hourly evspsbl forcing is actually getting real data for 12 scattered
 days and nothing (or a reindex artefact) for the other ~353.
 
+## Checked PANGEO directly: daily evspsbl doesn't exist, anywhere (2026-10-22)
+
+Queried the PANGEO CMIP6 intake-esm catalog directly on bb-server1
+(`pangeo-cmip6.json`, 514,818 entries) -- not just for GFDL-ESM4/
+CNRM-ESM2-1/MPI-ESM1-2-HR, but across every model in the whole catalog:
+
+```python
+sorted(df[df.variable_id == 'evspsbl'].table_id.unique())
+# ['Aclim', 'Amon']
+```
+
+`evspsbl` has **no `day`-table entries at all, for any model**. This is a
+CMOR/CMIP6-protocol fact, not a per-model data gap: daily evaporation flux
+was simply never requested in the CMIP6 experiment design, so there is no
+daily source to switch to. This rules out "pull the day table instead" as
+an option -- see the fix list below, updated accordingly.
+
 ## Not yet fixed -- options
 
-1. Override `evspsbl` to pull CMIP6's `day` table instead of `Amon`, if
-   daily evspsbl actually exists for the model/member on PANGEO.
-   `ocean-prep/lib/bias_correction/utils.py:671` (`_override_frequency`)
-   already exists for exactly this kind of per-variable frequency
-   override, so this may be a config-only fix if daily data exists upstream.
-2. If only `Amon` exists for a given model, aggregate the ERA5 reference to
-   monthly too (apples-to-apples) and drop `n_quantiles` for that variable
-   specifically (e.g. ~20, or `delta`). `_apply_scale_offset_resample`
-   (`utils.py:449`) currently only supports `resample: daily|auto|none` --
-   a `monthly` option would need to be added.
-3. Regardless of (1)/(2), disable diurnal disaggregation for a
-   monthly-sourced variable rather than silently emitting a 288-hour file
-   labelled as a full year -- or add a frequency check that errors instead
-   of silently repeating monthly means as single days.
+1. ~~Override `evspsbl` to pull CMIP6's `day` table instead of `Amon`~~ --
+   **ruled out**: confirmed via direct PANGEO catalog query that daily
+   `evspsbl` does not exist for any CMIP6 model, so there is nothing to
+   override to.
+2. Aggregate the ERA5 reference to monthly too (apples-to-apples) and drop
+   `n_quantiles` for this variable specifically (e.g. ~20, or `delta`).
+   `_apply_scale_offset_resample` (`utils.py:449`) currently only supports
+   `resample: daily|auto|none` -- a `monthly` option would need to be added.
+3. Disable diurnal disaggregation for `evspsbl` rather than silently
+   emitting a 288-hour file labelled as a full year -- or add a frequency
+   check that errors instead of silently repeating monthly means as single
+   days.
 
+Given (1) is off the table, (2) and (3) are the only real paths forward.
 No code or config has been changed; this is a documented finding only.
