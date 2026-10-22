@@ -87,12 +87,14 @@ def main(argv=None) -> int:
         const=True,
         default=False,
         metavar="PREFIX",
-        help="build the domain and Simulation, plot the domain (mesh+subdomains+tiling, and "
-        "mask), save the two PNGs, then exit -- before any hydrography/data-assignment/river-"
-        "data loading. Mirrors run_model.py's own --plot_domain exactly (both figures, same "
-        "show_mesh/show_subdomains/tiling and show_mask calls to domain.plot(), same early-"
-        "exit-before-data placement), richer than pygetm-config run's plain --plot-domain "
-        "(which only calls domain.plot() with no args and doesn't need a built Simulation). "
+        help="build the domain (open boundaries + rivers added, no Simulation), plot it "
+        "(mesh, and mask -- both include river/open-boundary markers via domain.plot()'s "
+        "own show_rivers/show_open_boundaries defaults), save the two PNGs, then exit -- "
+        "before build_simulation()/any hydrography/data-assignment loading. Deliberately "
+        "does NOT build a Simulation (unlike run_model.py's own --plot_domain): these plots "
+        "only need `domain`, and requiring a full Simulation would make this flag fail "
+        "whenever the final land/sea mask has an unrelated problem (e.g. a stale open-"
+        "boundary point now on land) that has nothing to do with wanting a domain overview. "
         "Saves {PREFIX}_mesh.png and {PREFIX}_mask.png; PREFIX defaults to "
         "domain_<config file's stem>, or pass one to override.",
     )
@@ -616,11 +618,19 @@ def main(argv=None) -> int:
     n_rivers = loader.run_river_discharge_script(domain, config)
     print(f"{n_rivers} river(s) added from {config['river_discharge']['file']}", file=sys.stderr)
 
-    sim = loader.build_simulation(domain, config, schema)
-
+    # --plot-domain deliberately plots BEFORE build_simulation(): the two
+    # figures only need `domain` (bathymetry/mask/mesh/open boundaries/
+    # rivers are all on it already by this point) -- building a full
+    # Simulation needs a valid final land/sea mask with every open-boundary
+    # point on water, which this domain-overview feature has no reason to
+    # require (confirmed hitting exactly that unrelated, real open-boundary/
+    # mask mismatch for real while first exercising this flag; a domain
+    # overview plot shouldn't be blocked by it). show_subdomains/tiling
+    # dropped accordingly -- no Simulation exists yet to supply a tiling,
+    # and MPI subdomain decomposition isn't part of what this flag is for.
     if args.plot_domain:
         prefix = args.plot_domain if isinstance(args.plot_domain, str) else f"domain_{Path(args.config).stem}"
-        fig = domain.plot(show_mesh=True, show_subdomains=True, tiling=sim.tiling)
+        fig = domain.plot(show_mesh=True)
         if fig is not None:
             fig.savefig(f"{prefix}_mesh.png")
             print(f"wrote {prefix}_mesh.png", file=sys.stderr)
@@ -629,6 +639,8 @@ def main(argv=None) -> int:
             fig.savefig(f"{prefix}_mask.png")
             print(f"wrote {prefix}_mask.png", file=sys.stderr)
         return 0
+
+    sim = loader.build_simulation(domain, config, schema)
 
     # Before apply_data_assignments, matching cfg_ic.py's own placement
     # (before cfg_boundaries.data_2d/data_3d) in run_model.py's create_
