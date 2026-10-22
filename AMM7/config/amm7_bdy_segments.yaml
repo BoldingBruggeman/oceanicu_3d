@@ -1,0 +1,52 @@
+# AMM7 open-boundary segment specification -- the single source of truth
+# for this domain's open boundaries. Edit THIS file, then regenerate both
+# amm7_from_oceanicu.yaml's `open_boundaries:` block and
+# AMM7/Bathymetry/amm7_bdy_lonlat.txt with:
+#
+#   pygetm-config boundaries-generate \
+#     --domain AMM7/config/amm7_from_oceanicu.yaml \
+#     --segments AMM7/config/amm7_bdy_segments.yaml \
+#     --bdy-lonlat-out AMM7/Bathymetry/amm7_bdy_lonlat.txt \
+#     --apply-to AMM7/config/amm7_from_oceanicu.yaml \
+#     --plot /tmp/amm7_boundaries.png --report /tmp/amm7_boundaries.md
+#
+# Same layout/workflow as NSe (see NSe/BOUNDARY_GENERATION.md section 0).
+# Never hand-edit amm7_bdy_lonlat.txt directly -- it's a generated artifact.
+#
+# This starting version is transcribed directly from
+# amm7_from_oceanicu.yaml's existing, known-good open_boundaries: block
+# (index form, side/l/mstart/mstop) -- a restatement of what's already
+# running, not a reinterpretation. Side names converted WEST->LEFT,
+# NORTH->TOP, SOUTH->BOTTOM, EAST->RIGHT (pygetm.open_boundaries.Side's
+# own real aliases, confirmed in source -- not a guess).
+segments:
+- side: LEFT
+  name: "segment 0: W boundary"
+  l: 1
+  mstart: 1
+  mstop: 353
+  type_2d: FLATHER_TRANSPORT
+- side: TOP
+  name: "segment 1: N boundary"
+  l: 373
+  mstart: 55
+  mstop: 284
+  type_2d: FLATHER_TRANSPORT
+- side: BOTTOM
+  name: "segment 2: S boundary (west)"
+  l: 1
+  mstart: 2
+  mstop: 100
+  type_2d: FLATHER_TRANSPORT
+- side: BOTTOM
+  name: "segment 3: S boundary (east, part 1)"
+  l: 247
+  mstart: 273
+  mstop: 276
+  type_2d: FLATHER_TRANSPORT
+- side: BOTTOM
+  name: "segment 4: S boundary (east, part 2)"
+  l: 247
+  mstart: 277
+  mstop: 296
+  type_2d: FLATHER_TRANSPORT

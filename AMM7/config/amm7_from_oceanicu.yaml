@@ -40,33 +40,38 @@ domain:
 # data_assignments below (cfg_boundaries.py::data_3d, domain-independent),
 # so a per-segment default here would never actually apply.
 open_boundaries:
-  - side: WEST
-    l: 1
-    mstart: 1
-    mstop: 353
-    type_2d: FLATHER_TRANSPORT
-  - side: NORTH
-    l: 373
-    mstart: 55
-    mstop: 284
-    type_2d: FLATHER_TRANSPORT
-  - side: SOUTH
-    l: 1
-    mstart: 2
-    mstop: 100
-    type_2d: FLATHER_TRANSPORT
-  - side: SOUTH
-    l: 247
-    mstart: 273
-    mstop: 276
-    type_2d: FLATHER_TRANSPORT
-  - side: SOUTH
-    l: 247
-    mstart: 277
-    mstop: 296
-    type_2d: FLATHER_TRANSPORT
+- side: LEFT
+  l: 1
+  mstart: 1
+  mstop: 353
+  type_2d: FLATHER_TRANSPORT
+  name: 'segment 0: W boundary'
+- side: TOP
+  l: 373
+  mstart: 55
+  mstop: 284
+  type_2d: FLATHER_TRANSPORT
+  name: 'segment 1: N boundary'
+- side: BOTTOM
+  l: 1
+  mstart: 2
+  mstop: 100
+  type_2d: FLATHER_TRANSPORT
+  name: 'segment 2: S boundary (west)'
+- side: BOTTOM
+  l: 247
+  mstart: 273
+  mstop: 276
+  type_2d: FLATHER_TRANSPORT
+  name: 'segment 3: S boundary (east, part 1)'
+- side: BOTTOM
+  l: 247
+  mstart: 277
+  mstop: 296
+  type_2d: FLATHER_TRANSPORT
 
 # ----------------------------------------------------------------------
+  name: 'segment 4: S boundary (east, part 2)'
 simulation:
   runtype: BAROCLINIC
   gotm: gotm.yaml
@@ -172,72 +177,72 @@ runtime:
 
 # ----------------------------------------------------------------------
 data_assignments:
-  - target: simulation.radiation.A
-    kind: constant
-    constant_value: 0.7
-  - target: simulation.radiation.kc1
-    kind: constant
-    constant_value: 0.54
+- target: simulation.radiation.A
+  kind: constant
+  constant_value: 0.7
+- target: simulation.radiation.kc1
+  kind: constant
+  constant_value: 0.54
   # AMM7's ObsKd: True (unlike NSe's False) -- a space-varying KD490
   # climatology for kc2 instead of a fixed constant, matching run_model.py's
   # own ObsKd branch.
-  - target: simulation.radiation.kc2
-    kind: file
-    file: ${KD490_FOLDER}/KD490_clim.nc
-    variable: KD490_filled
-    climatology: true
+- target: simulation.radiation.kc2
+  kind: file
+  file: ${KD490_FOLDER}/KD490_clim.nc
+  variable: KD490_filled
+  climatology: true
 
-  - target: simulation.airsea.t2m
-    kind: file
-    file: ${ERA5_FOLDER}/era5_t2m_????.nc
-    variable: t2m
-    pre_transform_offset: -273.15
-  - target: simulation.airsea.d2m
-    kind: file
-    file: ${ERA5_FOLDER}/era5_d2m_????.nc
-    variable: d2m
-    pre_transform_offset: -273.15
-  - target: simulation.airsea.u10
-    kind: file
-    file: ${ERA5_FOLDER}/era5_u10_????.nc
-    variable: u10
-  - target: simulation.airsea.v10
-    kind: file
-    file: ${ERA5_FOLDER}/era5_v10_????.nc
-    variable: v10
-  - target: simulation.airsea.sp
-    kind: file
-    file: ${ERA5_FOLDER}/era5_sp_????.nc
-    variable: sp
-  - target: simulation.airsea.tp
-    kind: file
-    file: ${ERA5_FOLDER}/era5_tp_????.nc
-    variable: tp
-    pre_transform_scale: 0.0002777777777777778
-  - target: simulation.airsea.tcc
-    kind: file
-    file: ${ERA5_FOLDER}/era5_tcc_????.nc
-    variable: tcc
-  - target: simulation.airsea.swr
-    kind: file
-    file: ${ERA5_FOLDER}/era5_ssr_????.nc
-    variable: ssr
-    pre_transform_scale: 0.0002777777777777778
-  - target: simulation.airsea.swr_downwards
-    kind: file
-    file: ${ERA5_FOLDER}/era5_ssrd_????.nc
-    variable: ssrd
-    pre_transform_scale: 0.0002777777777777778
-  - target: simulation.airsea.ql
-    kind: file
-    file: ${ERA5_FOLDER}/era5_str_????.nc
-    variable: str
-    pre_transform_scale: 0.0002777777777777778
-  - target: simulation.airsea.ql_downwards
-    kind: file
-    file: ${ERA5_FOLDER}/era5_strd_????.nc
-    variable: strd
-    pre_transform_scale: 0.0002777777777777778
+- target: simulation.airsea.t2m
+  kind: file
+  file: ${ERA5_FOLDER}/era5_t2m_????.nc
+  variable: t2m
+  pre_transform_offset: -273.15
+- target: simulation.airsea.d2m
+  kind: file
+  file: ${ERA5_FOLDER}/era5_d2m_????.nc
+  variable: d2m
+  pre_transform_offset: -273.15
+- target: simulation.airsea.u10
+  kind: file
+  file: ${ERA5_FOLDER}/era5_u10_????.nc
+  variable: u10
+- target: simulation.airsea.v10
+  kind: file
+  file: ${ERA5_FOLDER}/era5_v10_????.nc
+  variable: v10
+- target: simulation.airsea.sp
+  kind: file
+  file: ${ERA5_FOLDER}/era5_sp_????.nc
+  variable: sp
+- target: simulation.airsea.tp
+  kind: file
+  file: ${ERA5_FOLDER}/era5_tp_????.nc
+  variable: tp
+  pre_transform_scale: 0.0002777777777777778
+- target: simulation.airsea.tcc
+  kind: file
+  file: ${ERA5_FOLDER}/era5_tcc_????.nc
+  variable: tcc
+- target: simulation.airsea.swr
+  kind: file
+  file: ${ERA5_FOLDER}/era5_ssr_????.nc
+  variable: ssr
+  pre_transform_scale: 0.0002777777777777778
+- target: simulation.airsea.swr_downwards
+  kind: file
+  file: ${ERA5_FOLDER}/era5_ssrd_????.nc
+  variable: ssrd
+  pre_transform_scale: 0.0002777777777777778
+- target: simulation.airsea.ql
+  kind: file
+  file: ${ERA5_FOLDER}/era5_str_????.nc
+  variable: str
+  pre_transform_scale: 0.0002777777777777778
+- target: simulation.airsea.ql_downwards
+  kind: file
+  file: ${ERA5_FOLDER}/era5_strd_????.nc
+  variable: strd
+  pre_transform_scale: 0.0002777777777777778
 
   # Open-boundary 2D (barotropic tidal elevation/transport) -- TPXO is the
   # active source here (boundaries.barotropic.source above), but the
@@ -251,12 +256,12 @@ data_assignments:
   # (cfg_boundaries.py::data_3d, domain-independent). The actual VALUES
   # (real CMEMS thetao/so) are computed dynamically by oceanicu_driver.py,
   # not set here.
-  - target: open_boundary.temp
-    kind: boundary_type
-    boundary_condition_type: SPONGE
-  - target: open_boundary.salt
-    kind: boundary_type
-    boundary_condition_type: SPONGE
+- target: open_boundary.temp
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.salt
+  kind: boundary_type
+  boundary_condition_type: SPONGE
 
 # ----------------------------------------------------------------------
 # Output. AMM7's output shape is baroclinic-focused (no meteo/tides/
@@ -279,39 +284,39 @@ output:
     barotropic_3d: [uk, vk, ww, SS, num]
     baroclinic_3d: [temp, salt, rho, nuh]
   files:
-    - type: netcdf
-      path: amm7_surface_daily.nc
-      interval: 1
-      interval_units: HOURS
-      sync_interval: null
-      default_dtype: float32
-      variable_requests:
-        - fields: [temp]
-          z_index: -1
-        - fields: [salt]
-          z_index: -1
+  - type: netcdf
+    path: amm7_surface_daily.nc
+    interval: 1
+    interval_units: HOURS
+    sync_interval: null
+    default_dtype: float32
+    variable_requests:
+    - fields: [temp]
+      z_index: -1
+    - fields: [salt]
+      z_index: -1
 
-    - type: netcdf
-      path: amm7_bottom_daily.nc
-      interval: 1
-      interval_units: DAYS
-      sync_interval: null
-      default_dtype: float32
-      variable_requests:
-        - fields: [temp]
-          z_index: 0
-        - fields: [salt]
-          z_index: 0
+  - type: netcdf
+    path: amm7_bottom_daily.nc
+    interval: 1
+    interval_units: DAYS
+    sync_interval: null
+    default_dtype: float32
+    variable_requests:
+    - fields: [temp]
+      z_index: 0
+    - fields: [salt]
+      z_index: 0
 
-    - type: netcdf
-      path: amm7_monthly.nc
-      interval: 1
-      interval_units: MONTHS
-      sync_interval: null
-      default_dtype: float32
-      variable_requests:
-        - groups: [barotropic_3d, baroclinic_3d]
-          time_average: true
+  - type: netcdf
+    path: amm7_monthly.nc
+    interval: 1
+    interval_units: MONTHS
+    sync_interval: null
+    default_dtype: float32
+    variable_requests:
+    - groups: [barotropic_3d, baroclinic_3d]
+      time_average: true
 
 # ----------------------------------------------------------------------
 # Data provenance -- every real alternative per role stays present, not
