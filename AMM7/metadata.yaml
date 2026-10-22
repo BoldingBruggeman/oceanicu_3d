@@ -1,5 +1,12 @@
 # AMM7 area metadata — read by ocean-post reporting.py
 #
+# domain_dir override: AMM7's own analyses/areas/AMM7/ directory is owned
+# by a different account (rt), not group-writable for creating a new
+# domain/ subdirectory there -- real domain_mesh.png/domain_mask.png
+# (driver/oceanicu_driver.py --plot-domain) are written to this sibling
+# location instead, so as not to touch another account's directory.
+domain_dir: /data/OceanICU/oceanicu_3d/analyses/areas/AMM7_domain_overview/domain
+#
 # ---------------------------------------------------------------------------
 # input_generation — how each set of input files is produced.
 #

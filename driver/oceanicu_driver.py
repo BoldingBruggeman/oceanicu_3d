@@ -629,13 +629,40 @@ def main(argv=None) -> int:
     # dropped accordingly -- no Simulation exists yet to supply a tiling,
     # and MPI subdomain decomposition isn't part of what this flag is for.
     if args.plot_domain:
+        # domain.plot() itself still calls get_final_mask(), which still
+        # validates every open-boundary point is on water and raises if not
+        # (confirmed: moving the call above build_simulation() wasn't
+        # enough by itself -- this is pygetm's own domain.plot() doing the
+        # same check independently, not something build_simulation() alone
+        # does). allow_on_land is pygetm's own real, intended escape hatch
+        # for exactly this (open_boundaries.py: downgrades the check from a
+        # raised Exception to a logged WARNING) -- used ONLY here, for this
+        # visualization, never for build_simulation() below, so an actual
+        # simulation run still fails loudly on a real land-point problem.
+        # The warning itself still prints either way -- this doesn't hide
+        # the underlying issue, just stops it from blocking a plot.
+        domain.open_boundaries.allow_on_land = True
         prefix = args.plot_domain if isinstance(args.plot_domain, str) else f"domain_{Path(args.config).stem}"
+        # Real, not derived/assumed: domain.lon/lat are pygetm's own public
+        # T-grid coordinate arrays, already built above -- extent is a
+        # straight min/max; "resolution" is reported as the real native
+        # grid point counts (nx/ny) rather than a computed average degree
+        # spacing, since a curvilinear/rotated-pole grid's spacing isn't
+        # actually uniform across the domain -- stating the exact grid
+        # shape avoids implying a precision the grid doesn't have.
+        extent = (
+            f"{domain.ny} × {domain.nx} grid points"
+            f"  ·  lon [{float(domain.lon.min()):.2f}, {float(domain.lon.max()):.2f}]°E"
+            f"  ·  lat [{float(domain.lat.min()):.2f}, {float(domain.lat.max()):.2f}]°N"
+        )
         fig = domain.plot(show_mesh=True)
         if fig is not None:
+            fig.suptitle(f"{Path(args.config).stem}\n{extent}")
             fig.savefig(f"{prefix}_mesh.png")
             print(f"wrote {prefix}_mesh.png", file=sys.stderr)
         fig = domain.plot(show_mesh=False, show_mask=True)
         if fig is not None:
+            fig.suptitle(f"{Path(args.config).stem}\n{extent}")
             fig.savefig(f"{prefix}_mask.png")
             print(f"wrote {prefix}_mask.png", file=sys.stderr)
         return 0

@@ -129,6 +129,9 @@ simulation:
       swr: 0.0
       pe: 0.0
     FluxesFromMeteo:
+      # Differs from ENA4/ENA8/AMM7's own NET_FLUX/DOWNWARD_FLUX: NS uses
+      # ROSATI_MIYAKODA/CLARK -- unrelated bulk formulas, shortwave-only vs
+      # longwave-only, not the same method by another name.
       shortwave_method: ROSATI_MIYAKODA
       longwave_method: CLARK
       humidity_measure: DEW_POINT_TEMPERATURE
@@ -364,11 +367,6 @@ meteo:
     # more folder_template/model indirection).
     folder: ${ERA5_FOLDER}
     evaporation: true
-    # Differs from ENA4/ENA8 (NET_FLUX/DOWNWARD_FLUX, -1/-2): NS uses
-    # ROSATI_MIYAKODA/CLARK (1/1) -- unrelated bulk formulas, shortwave-only
-    # vs longwave-only, not the same method despite the matching "1".
-    shortwave_method: 1
-    longwave_method: 1
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
   CMIP6:
     # The old config's own active choice, kept as an inactive alternative
@@ -378,8 +376,6 @@ meteo:
     model: "MPI-ESM1-2-HR"
     scenario: "ssp585"
     evaporation: true
-    shortwave_method: 1
-    longwave_method: 1
 river_discharge:
   source: emorid
   emorid:
