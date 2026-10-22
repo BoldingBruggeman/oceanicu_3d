@@ -64,7 +64,8 @@ raw_smooth = rolling(raw_v)
 bc_smooth = rolling(bc_v)
 
 DARK = "#1B2A33"
-AMBER = "#C97A3E"
+AMBER = "#E69F00"  # Okabe-Ito orange (colorblind-safe)
+RAW = "#0072B2"    # Okabe-Ito blue (colorblind-safe)
 MUTED = "#8C9BA1"
 LIGHTBG = "#F6F3EC"
 
@@ -80,9 +81,9 @@ for ax in (ax1, ax2):
         ax.spines[spine].set_color(MUTED)
     ax.grid(axis="y", color=MUTED, alpha=0.25, linewidth=0.8)
 
-ax1.plot(years, raw_v, "o", color=MUTED, alpha=0.3, markersize=3)
-ax1.plot(years, bc_v, "o", color=AMBER, alpha=0.25, markersize=3)
-ax1.plot(years, raw_smooth, "--", color=MUTED, linewidth=2.8, label="CMIP6 raw (SSP1-2.6), 5-yr mean")
+ax1.plot(years, raw_v, "D", color=RAW, alpha=0.35, markersize=4)
+ax1.plot(years, bc_v, "o", color=AMBER, alpha=0.3, markersize=4)
+ax1.plot(years, raw_smooth, "--", color=RAW, linewidth=2.8, label="CMIP6 raw (SSP1-2.6), 5-yr mean")
 ax1.plot(years, bc_smooth, "-", color=AMBER, linewidth=2.8, label="CMIP6, bias-corrected (QDM), 5-yr mean")
 ax1.axhline(era5_mean, color=DARK, linewidth=2, linestyle=":")
 ax1.annotate("ERA5 1990–2014 mean", xy=(years[0] + 1, era5_mean), xytext=(0, 8),

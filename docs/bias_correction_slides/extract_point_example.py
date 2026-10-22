@@ -50,7 +50,8 @@ print(f"mean bias before: {bias_before:+.2f} C, after: {bias_after:+.2f} C")
 
 # ---- figure, styled to match the slide deck palette ----
 DARK = "#1B2A33"
-AMBER = "#C97A3E"
+AMBER = "#E69F00"  # Okabe-Ito orange (colorblind-safe)
+RAW = "#0072B2"    # Okabe-Ito blue (colorblind-safe)
 MUTED = "#8C9BA1"
 LIGHTBG = "#F6F3EC"
 
@@ -59,7 +60,7 @@ ax.set_facecolor(LIGHTBG)
 
 month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-ax.plot(months, raw_v, "--", color=MUTED, linewidth=2.5, marker="o", markersize=5,
+ax.plot(months, raw_v, "--", color=RAW, linewidth=2.5, marker="D", markersize=6,
         label="CMIP6 raw (GFDL-ESM4, historical)")
 ax.plot(months, bc_v, "-", color=AMBER, linewidth=3, marker="o", markersize=6,
         label="CMIP6, bias-corrected (QDM)")

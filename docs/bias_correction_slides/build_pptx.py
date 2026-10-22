@@ -114,7 +114,7 @@ text(s1, M, y, Inches(9.8), Inches(1.1),
      [[R("Quantile Delta Mapping of climate-model forcing against ERA5 — so the "
          "ocean model runs on a real climate signal, not model drift.", 18, SOFT_LIGHT)]],
      line_spacing=1.3)
-footer(s1, "ocean-prep · bias_correction_guide.md", "1 / 5")
+footer(s1, "ocean-prep · bias_correction_guide.md", "1 / 6")
 
 # ---------------------------------------------------------------- Slide 2
 s2 = add_slide(LIGHT)
@@ -169,7 +169,7 @@ cy += Inches(0.3)
 text(s2, M + Inches(0.3), cy, CW - Inches(0.6), Inches(0.3),
      [[R("future_bc = future × [ v_ref(q) / v_hist(q) ]   — multiplicative (precipitation)", 13, SOFT_LIGHT)]])
 
-footer(s2, "Cannon, Sobie & Murdock (2015), J. Climate 28(17)", "2 / 5", muted=SOFT_DARK)
+footer(s2, "Cannon, Sobie & Murdock (2015), J. Climate 28(17)", "2 / 6", muted=SOFT_DARK)
 
 # ---------------------------------------------------------------- Slide 3 (real example)
 s2b = add_slide(LIGHT)
@@ -187,7 +187,7 @@ img_h = Emu(int(img_w * 892 / 1610))
 img_left = (prs.slide_width - img_w) / 2
 s2b.shapes.add_picture(img_path, img_left, y, width=img_w, height=img_h)
 
-footer(s2b, "GFDL-ESM4, historical, 2009–2014 — real production output, not a mock-up", "3 / 5",
+footer(s2b, "GFDL-ESM4, historical, 2009–2014 — real production output, not a mock-up", "3 / 6",
        muted=SOFT_DARK)
 
 # ---------------------------------------------------------------- Slide 4 (future example)
@@ -205,10 +205,28 @@ img2_h = Emu(int(img2_w * 1054 / 1715))
 img2_left = (prs.slide_width - img2_w) / 2
 s2c.shapes.add_picture(img2_path, img2_left, y, width=img2_w, height=img2_h)
 
-footer(s2c, "GFDL-ESM4, SSP1-2.6, 2015–2099 — real production output", "4 / 5",
+footer(s2c, "GFDL-ESM4, SSP1-2.6, 2015–2099 — real production output", "4 / 6",
        muted=SOFT_DARK)
 
-# ---------------------------------------------------------------- Slide 5
+# ---------------------------------------------------------------- Slide 5 (pr example)
+s2d = add_slide(LIGHT)
+y = M
+text(s2d, M, y, CW, Inches(0.35), [[R("REAL EXAMPLE, A HARDER VARIABLE", 13, AMBER, bold=True, spacing=1.5)]])
+y += Inches(0.42)
+text(s2d, M, y, CW, Inches(0.7),
+     [[R("Precipitation is not temperature — and this shows it, honestly", 24, TEXT_DARK, bold=True, font=SERIF)]])
+y += Inches(0.78)
+
+img3_path = os.path.join(img_dir, "pr_domain_example.png")
+img3_w = Inches(7.7)
+img3_h = Emu(int(img3_w * 898 / 1755))
+img3_left = (prs.slide_width - img3_w) / 2
+s2d.shapes.add_picture(img3_path, img3_left, y, width=img3_w, height=img3_h)
+
+footer(s2d, "GFDL-ESM4, historical, 2009–2014, domain mean — real production output", "5 / 6",
+       muted=SOFT_DARK)
+
+# ---------------------------------------------------------------- Slide 6
 s3 = add_slide(DARK)
 y = M
 text(s3, M, y, CW, Inches(0.35), [[R("WORKFLOW", 13, AMBER, bold=True, spacing=1.5)]])
@@ -279,7 +297,7 @@ for big, sub in stats:
          [[R(sub, 12, SOFT_LIGHT)]], line_spacing=1.15)
     x += stat_w + stat_gap
 
-footer(s3, "QA: bc diagnostics — calibration maps · seasonal cycle · trend · monthly breakdown", "5 / 5")
+footer(s3, "QA: bc diagnostics — calibration maps · seasonal cycle · trend · monthly breakdown", "6 / 6")
 
 out_path = os.path.join(img_dir, "CMIP6_bias_correction_slides.pptx")
 prs.save(out_path)
