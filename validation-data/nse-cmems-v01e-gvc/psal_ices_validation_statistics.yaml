@@ -8,60 +8,60 @@ periods:
 - period: 2011-2024
   is_all_period: true
   model: pyGETM
-  analysed: '2026-10-19 08:54:19'
+  analysed: '2026-10-22 12:15:43'
   datasets:
     ICES point observations:
-      rmse: 2.812355
-      bias: -0.834097
-      mae: 1.111746
-      correlation: 0.937562
-      n_points: 3506005
-      mean_model: 32.285601
-      mean_obs: 33.119698
-      std_model: 6.778219
-      std_obs: 5.068373
-      n_profiles: 44836
+      rmse: 3.054188
+      bias: -0.901111
+      mae: 1.118278
+      correlation: 0.931573
+      n_points: 3506112
+      mean_model: 32.217046
+      mean_obs: 33.118157
+      std_model: 6.98622
+      std_obs: 5.07112
+      n_profiles: 44815
       error_distribution:
-        min: -34.91383
-        p05: -6.879261
-        p25: -0.310899
-        median: 0.003939
-        p75: 0.122415
-        p95: 0.566127
-        max: 33.953052
+        min: -34.787546
+        p05: -6.97264
+        p25: -0.280975
+        median: -0.014946
+        p75: 0.09115
+        p95: 0.438247
+        max: 33.626999
       by_depth:
         0-10m:
-          n: 527332
-          bias: -2.174696
-          rmse: 4.336034
-          correlation: 0.940959
+          n: 527439
+          bias: -2.431867
+          rmse: 4.610682
+          correlation: 0.940204
         10-25m:
           n: 658591
-          bias: -2.022305
-          rmse: 4.454045
-          correlation: 0.917297
+          bias: -2.16595
+          rmse: 4.834363
+          correlation: 0.908322
         25-50m:
           n: 705163
-          bias: -0.655077
-          rmse: 2.553568
-          correlation: 0.850715
+          bias: -0.669255
+          rmse: 2.91059
+          correlation: 0.805608
         50-100m:
           n: 772564
-          bias: -0.042846
-          rmse: 0.411375
-          correlation: 0.707974
+          bias: -0.017632
+          rmse: 0.377707
+          correlation: 0.74861
         100-200m:
           n: 487824
-          bias: 0.057335
-          rmse: 0.190473
-          correlation: 0.569482
+          bias: 0.047573
+          rmse: 0.167471
+          correlation: 0.64298
         200-500m:
           n: 331996
-          bias: 0.060379
-          rmse: 0.102884
-          correlation: 0.421645
+          bias: 0.03409
+          rmse: 0.094039
+          correlation: 0.42835
         500-1000m:
           n: 22535
-          bias: 0.05919
-          rmse: 0.076443
-          correlation: 0.204013
+          bias: 0.034169
+          rmse: 0.074617
+          correlation: 0.335842
