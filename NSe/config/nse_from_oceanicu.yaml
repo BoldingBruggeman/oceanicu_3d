@@ -15,7 +15,18 @@ open_boundaries:
   type_2d: FLATHER_TRANSPORT
 - side: WEST
   l: 0
-  mstart: 136
+  # mstart was 136 -- that exact point (T-grid j=136,i=0, lon -7.54, lat
+  # 51.875) is on land against the current bathymetry_nse.nc, confirmed by
+  # actually building this Simulation's open boundaries for the first time
+  # (domain.open_boundaries.adjust_mask's own land check: "1 of 33 points
+  # ... are on land") -- bumped to drop just that one point, keeping the
+  # other 32. Re-check against bathymetry_nse.nc after any future
+  # bathymetry regeneration, same as NSe/Bathymetry/nse_bdy_lonlat.txt
+  # (see NSe/BOUNDARY_GENERATION.md section 0) -- this is a SEPARATE point
+  # list from that one (drives the live Domain/Simulation's open-boundary
+  # structure, not the CMEMS/tidal boundary_data forcing files), so fixing
+  # one does not fix the other.
+  mstart: 137
   mstop: 169
   type_2d: FLATHER_TRANSPORT
 - side: WEST
