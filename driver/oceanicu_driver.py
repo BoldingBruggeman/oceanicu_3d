@@ -99,6 +99,21 @@ def main(argv=None) -> int:
         "domain_<config file's stem>, or pass one to override.",
     )
     parser.add_argument(
+        "--export-domain-summary",
+        nargs="?",
+        const=True,
+        default=False,
+        metavar="PREFIX",
+        help="build the domain (same point as --plot-domain -- open boundaries + rivers "
+        "added, no Simulation) and write the real T-grid bathymetry/mask/lon/lat, "
+        "open-boundary point positions, and river name/lon/lat to {PREFIX}_summary.npz, "
+        "then exit. For rendering with ocean-plot (real coastlines, controlled figure "
+        "size/DPI, decluttered output) instead of pygetm's own Domain.plot() -- see "
+        "ocean-post's generate_domain_overview_plot. Mutually exclusive with "
+        "--plot-domain (both would need to pick which one wins on PREFIX defaulting; "
+        "just run the command twice if you want both outputs).",
+    )
+    parser.add_argument(
         "--skip-unavailable-output",
         action="store_true",
         help="drop individual requested output fields that don't exist for the chosen "
@@ -665,6 +680,67 @@ def main(argv=None) -> int:
             fig.suptitle(f"{Path(args.config).stem}\n{extent}")
             fig.savefig(f"{prefix}_mask.png")
             print(f"wrote {prefix}_mask.png", file=sys.stderr)
+        return 0
+
+    if args.export_domain_summary:
+        # Same early-exit point as --plot-domain, same allow_on_land reasoning
+        # (get_final_mask() below still validates open boundaries) -- see that
+        # flag's own comments just above. This one doesn't render anything
+        # itself; it hands the real numbers to a separate ocean-plot-based
+        # renderer instead (pygetm's own Domain.plot() isn't built for a
+        # polished web graphic -- no real coastline, fixed dev-tool figure
+        # sizing, no river-label decluttering at 250+ rivers; see ocean-post's
+        # generate_domain_overview_plot for the actual rendering).
+        import numpy as np
+        from pygetm import core
+        from pygetm.open_boundaries import Side
+
+        domain.open_boundaries.allow_on_land = True
+        prefix = (
+            args.export_domain_summary
+            if isinstance(args.export_domain_summary, str)
+            else f"domain_{Path(args.config).stem}"
+        )
+
+        final_mask = domain.get_final_mask()
+        t_mask = final_mask[1::2, 1::2]
+        t_lon = domain.lon[1::2, 1::2]
+        t_lat = domain.lat[1::2, 1::2]
+        t_H = domain.H[1::2, 1::2]
+
+        # Open-boundary point positions -- same supergrid-index convention
+        # used to find/fix the one on-land point earlier (mstart/mstop/l ->
+        # T-grid index -> domain.lon/lat), just collected across every
+        # boundary instead of checked one at a time.
+        bdy_lon, bdy_lat = [], []
+        for b in domain.open_boundaries._boundaries:
+            for m in range(b.mstart, b.mstop, b.mstep or 1):
+                j, i = (m, b.l) if b.side in (Side.LEFT, Side.RIGHT) else (b.l, m)
+                bdy_lon.append(float(domain.lon[j, i]))
+                bdy_lat.append(float(domain.lat[j, i]))
+
+        # River positions -- mirrors Domain.plot()'s own show_rivers block
+        # exactly (map_to_grid immediately before reading .items(), same
+        # i_sup/j_sup = 1+2*i/j supergrid conversion) so this stays correct
+        # if that convention ever changes upstream.
+        domain.rivers.map_to_grid(core.Locator(**domain._tcoords(mask=final_mask)))
+        river_lon, river_lat, river_name = [], [], []
+        for name, river in domain.rivers.items():
+            i_sup, j_sup = 1 + river.i * 2, 1 + river.j * 2
+            river_lon.append(float(domain.lon[j_sup, i_sup]))
+            river_lat.append(float(domain.lat[j_sup, i_sup]))
+            river_name.append(name)
+
+        out_path = f"{prefix}_summary.npz"
+        np.savez(
+            out_path,
+            area=Path(args.config).stem,
+            lon=t_lon, lat=t_lat, H=t_H, mask=t_mask,
+            boundary_lon=np.array(bdy_lon), boundary_lat=np.array(bdy_lat),
+            river_lon=np.array(river_lon), river_lat=np.array(river_lat),
+            river_name=np.array(river_name),
+        )
+        print(f"wrote {out_path}", file=sys.stderr)
         return 0
 
     sim = loader.build_simulation(domain, config, schema)
