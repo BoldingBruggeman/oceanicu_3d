@@ -708,16 +708,24 @@ def main(argv=None) -> int:
         t_lat = domain.lat[1::2, 1::2]
         t_H = domain.H[1::2, 1::2]
 
-        # Open-boundary point positions -- same supergrid-index convention
-        # used to find/fix the one on-land point earlier (mstart/mstop/l ->
-        # T-grid index -> domain.lon/lat), just collected across every
-        # boundary instead of checked one at a time.
+        # Open-boundary point positions. l/mstart/mstop are 0-based T-grid
+        # indices (confirmed via pygetm's own add_by_index() docstring:
+        # "l, mstart, mstop are 0-based indices of a T point in the global
+        # domain") -- so they index directly into t_lon/t_lat (already
+        # T-grid-sliced above), NOT into domain.lon/domain.lat themselves,
+        # which are full supergrid arrays (2*ny+1 x 2*nx+1). Indexing
+        # domain.lon[j, i] with a raw T-grid j/i (as an earlier version of
+        # this code did) silently picked a real but wrong point near the
+        # domain's (0,0) corner instead of the actual boundary location --
+        # this is what put every boundary marker in the wrong place on the
+        # rendered overview maps. Rivers already do this conversion
+        # correctly below (i_sup = 1 + 2*i); this mirrors that.
         bdy_lon, bdy_lat = [], []
         for b in domain.open_boundaries._boundaries:
             for m in range(b.mstart, b.mstop, b.mstep or 1):
                 j, i = (m, b.l) if b.side in (Side.LEFT, Side.RIGHT) else (b.l, m)
-                bdy_lon.append(float(domain.lon[j, i]))
-                bdy_lat.append(float(domain.lat[j, i]))
+                bdy_lon.append(float(t_lon[j, i]))
+                bdy_lat.append(float(t_lat[j, i]))
 
         # River positions -- mirrors Domain.plot()'s own show_rivers block
         # exactly (map_to_grid immediately before reading .items(), same
