@@ -18,11 +18,12 @@
 # removed before adding to TPXO, making the CMIP6 term a real anomaly
 # around 0.
 #
-# Usage
+# Usage (run from the oceanicu_3d repo root; this file lives under
+# NSe/config/, not ocean-prep's own config/)
 # -----
-#   run-tidal-boundaries --config config/nse_tidal_bdy.yaml
-#   run-tidal-boundaries --config config/nse_tidal_bdy.yaml --dryrun
-#   run-tidal-boundaries --config config/nse_tidal_bdy.yaml \
+#   run-tidal-boundaries --config NSe/config/nse_tidal_bdy.yaml
+#   run-tidal-boundaries --config NSe/config/nse_tidal_bdy.yaml --dryrun
+#   run-tidal-boundaries --config NSe/config/nse_tidal_bdy.yaml \
 #       --start 2060-01-01 --end 2060-12-31
 # =============================================================================
 

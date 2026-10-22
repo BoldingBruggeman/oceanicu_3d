@@ -12,13 +12,15 @@
 # In both cases the NWS product is primary (defines the output grid) and
 # the Baltic product fills the southern Kattegat/Belt Sea masked halo.
 #
-# Usage
+# Usage (download-init-conditions is ocean-prep's installed console
+# script; run from the oceanicu_3d repo root, this file lives under
+# NSe/config/, not ocean-prep's own config/)
 # -----
-#   python cli/download_init_conditions.py --config config/nse_init_create.yaml --source AMM7
-#   python cli/download_init_conditions.py --config config/nse_init_create.yaml --source AMM15
-#   python cli/download_init_conditions.py --config config/nse_init_create.yaml --source AMM7  --year 2015
-#   python cli/download_init_conditions.py --config config/nse_init_create.yaml --source AMM15 --year 2026
-#   python cli/download_init_conditions.py --config config/nse_init_create.yaml --source AMM7  --dryrun
+#   download-init-conditions --config NSe/config/nse_init_create.yaml --source AMM7
+#   download-init-conditions --config NSe/config/nse_init_create.yaml --source AMM15
+#   download-init-conditions --config NSe/config/nse_init_create.yaml --source AMM7  --year 2015
+#   download-init-conditions --config NSe/config/nse_init_create.yaml --source AMM15 --year 2026
+#   download-init-conditions --config NSe/config/nse_init_create.yaml --source AMM7  --dryrun
 # =============================================================================
 
 setup:

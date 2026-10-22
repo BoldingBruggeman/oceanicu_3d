@@ -19,7 +19,7 @@ input_generation:
       (rx0 ≤ 0.2).  Output: amm7_topo_getm.nc with variables lon, lat, mask, H.
     configs:
       - label: "AMM7 bathymetry config"
-        github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_bathy_create.yaml"
+        github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/amm7_bathy_create.yaml"
         cli: "bathymetry-regrid --config config/amm7_bathy_create.yaml"
         note: "Config not yet committed."
 
@@ -31,7 +31,7 @@ input_generation:
         ocean-prep run_cmems_boundaries.
       configs:
         - label: "AMM7 CMEMS boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_bdy_create.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/amm7_bdy_create.yaml"
           cli: "run-cmems-boundaries --config config/amm7_bdy_create.yaml"
           note: "Config not yet committed."
 
@@ -43,7 +43,7 @@ input_generation:
         Scenario Summary table below.
       configs:
         - label: "AMM7 tidal boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_tidal_bdy.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/amm7_tidal_bdy.yaml"
           cli: "run-tidal-boundaries --config config/amm7_tidal_bdy.yaml"
           note: "Config not yet committed."
 
@@ -56,7 +56,7 @@ input_generation:
         Scenario-specific; see Scenario Summary table below.
       configs:
         - label: "AMM7 delta-change boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_delta_bdy.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/amm7_delta_bdy.yaml"
           cli: "run-delta-boundaries --config config/amm7_delta_bdy.yaml --scenario ssp585"
           note: "Config not yet committed."
 
@@ -68,7 +68,7 @@ input_generation:
         NaN cells on the model grid.
       configs:
         - label: "AMM7 initial conditions config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/amm7_init_create.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/amm7_init_create.yaml"
           cli: "download-init-conditions --config config/amm7_init_create.yaml --source AMM7 --year 2015"
           note: "Config not yet committed."
 

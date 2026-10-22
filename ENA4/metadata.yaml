@@ -13,7 +13,7 @@ input_generation:
       smoothing (rx0 ≤ 0.2).  Output: bathymetry_ena4.nc.
     configs:
       - label: "ENA4 bathymetry config"
-        github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ena4_bathy_create.yaml"
+        github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ena4_bathy_create.yaml"
         cli: "bathymetry-regrid --config config/ena4_bathy_create.yaml"
         note: "Config not yet committed."
 
@@ -24,7 +24,7 @@ input_generation:
         boundary conditions for the historical period.
       configs:
         - label: "ENA4 CMEMS boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ena4_bdy_create.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ena4_bdy_create.yaml"
           cli: "run-cmems-boundaries --config config/ena4_bdy_create.yaml"
           note: "Config not yet committed."
 
@@ -34,7 +34,7 @@ input_generation:
         sea-surface height and depth-integrated barotropic transport.
       configs:
         - label: "ENA4 tidal boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ena4_tidal_bdy.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ena4_tidal_bdy.yaml"
           cli: "run-tidal-boundaries --config config/ena4_tidal_bdy.yaml"
           note: "Config not yet committed."
 
@@ -44,7 +44,7 @@ input_generation:
         AMM7 historical CMEMS reference with CMIP6 monthly change signal.
       configs:
         - label: "ENA4 delta-change boundary config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ena4_delta_bdy.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ena4_delta_bdy.yaml"
           cli: "run-delta-boundaries --config config/ena4_delta_bdy.yaml"
           note: "Config not yet committed."
 
@@ -55,7 +55,7 @@ input_generation:
         for NaN cells on the model grid.
       configs:
         - label: "ENA4 initial conditions config"
-          github_url: "https://github.com/bolding/ocean-prep/blob/main/config/ena4_init_create.yaml"
+          github_url: "https://github.com/bolding/ocean-prep/blob/claude/config/ena4_init_create.yaml"
           cli: "download-init-conditions --config config/ena4_init_create.yaml --source AMM7 --year 2015"
           note: "Config not yet committed."
 
