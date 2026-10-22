@@ -599,7 +599,11 @@ def main(argv=None) -> int:
     # Order matters and matches run_model.py's own create_domain() exactly:
     # open boundaries -> domain.cfl_check() -> rivers.
     loader.add_open_boundaries(domain, config, schema)
-    loader.check_domain_cfl(domain)
+    # pygetm_config.loader has no check_domain_cfl() wrapper (confirmed --
+    # grepped the real devel-branch source, nothing matches) despite this
+    # comment claiming one; call the real pygetm API directly instead,
+    # exactly as run_model.py's own create_domain() does on `main`.
+    domain.cfl_check()
 
     # Goes through the SAME generic mechanism --dump-python's generated
     # scripts use (river_discharge.script, see pygetm_config.loader.
