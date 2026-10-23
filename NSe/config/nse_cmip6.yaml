@@ -454,10 +454,10 @@ boundaries:
       folder: ${BOUNDARY_FOLDER_BAROTROPIC_CMIP6}
       folder_template: '{model}/{scenario}/bdy'
       filename_template: bdy_2d_{start_date}_{end_date}.nc
-      scenario: ssp126
+      scenario: <SET BY add_experiments.py --scenario>
       start_date: '20150101'
       end_date: '21001231'
-      model: GFDL-ESM4
+      model: <SET BY add_experiments.py --model>
   baroclinic:
     source: CMIP6
     WOA:
@@ -472,10 +472,10 @@ boundaries:
       folder: ${BOUNDARY_FOLDER_BAROCLINIC_CMIP6}
       folder_template: '{model}/{scenario}/bdy'
       filename_template: bdy_3d_{variable}_{start_date}_{end_date}.nc
-      scenario: ssp126
+      scenario: <SET BY add_experiments.py --scenario>
       start_date: '20150101'
       end_date: '21001231'
-      model: GFDL-ESM4
+      model: <SET BY add_experiments.py --model>
   fabm:
     source: CMIP6
     CMEMS:
@@ -534,8 +534,8 @@ boundaries:
     CMIP6:
       folder: ${BOUNDARY_FOLDER_FABM_CMIP6}
       folder_template: '{model}/{scenario}/bdy'
-      model: GFDL-ESM4
-      scenario: ssp126
+      model: <SET BY add_experiments.py --model>
+      scenario: <SET BY add_experiments.py --scenario>
       tracers:
         N3_n:
           file: bdy_3d_no3_deltachange_20150101_21001231.nc
@@ -570,19 +570,19 @@ meteo:
   CMIP6-raw:
     folder: ${CMIP6_RAW_FOLDER}
     folder_template: '{model}/{scenario}'
-    scenario: ssp126
+    scenario: <SET BY add_experiments.py --scenario>
     evaporation: true
     radiation_source: components
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
-    model: GFDL-ESM4
+    model: <SET BY add_experiments.py --model>
   CMIP6:
     folder: ${CMIP6_FOLDER}
     folder_template: CMIP6/{model}/{scenario}/meteo
-    scenario: ssp126
+    scenario: <SET BY add_experiments.py --scenario>
     evaporation: true
     radiation_source: net
     data_script: ${SCRIPT_FOLDER}/meteo.py:set_meteo_data
-    model: GFDL-ESM4
+    model: <SET BY add_experiments.py --model>
   # folder deliberately left unset (an empty mapping, NOT omitted -- see
   # ChoiceSpec's own nested-vs-flat handling in yaml_parse._validate_choice:
   # a bare `Fluxes:` with nothing under it parses as YAML null, not an
@@ -610,8 +610,8 @@ river_discharge:
   CMIP6:
     folder: ${RIVER_FOLDER_CMIP6}
     folder_template: CMIP6/{model}/{scenario}/rivers
-    model: GFDL-ESM4
-    scenario: ssp126
+    model: <SET BY add_experiments.py --model>
+    scenario: <SET BY add_experiments.py --scenario>
     file: river_flows_future_{scenario}.nc
     # daily: river_flows_future_{scenario}.nc is monthly-mean, first record
     # 2015-01-31 -- closes a real ~30-day start-of-scenario coverage gap
