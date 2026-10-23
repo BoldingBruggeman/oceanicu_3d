@@ -139,4 +139,69 @@ an option -- see the fix list below, updated accordingly.
    days.
 
 Given (1) is off the table, (2) and (3) are the only real paths forward.
-No code or config has been changed; this is a documented finding only.
+
+## Tested the n_quantiles half of option 2 (2026-10-22)
+
+Option 2 has two independent parts: resampling the ERA5 reference to
+monthly (needs a code change -- not done), and dropping `n_quantiles` for
+`evspsbl` specifically (needs no code change -- already exposed via
+`bc-correct --n-quantiles N`, and `--variable evspsbl` already restricts a
+run to one variable). Only the second part was tested, in isolation, to
+see whether `n_quantiles` alone makes a measurable difference even with
+the reference still daily (i.e. without fixing the representativity
+mismatch -- this isolates the "100 quantiles from 25 samples is mostly
+redundant interpolation" effect from the "daily ref vs monthly hist"
+effect).
+
+```bash
+cd /data/BiasCorrected
+/home/kb/miniconda3/envs/ocean-stack/bin/bc-correct \
+  --config bc_correct_core7_fixed.yaml --model GFDL-ESM4 --historical \
+  --variable evspsbl --n-quantiles 20 \
+  --output-dir /tmp/evspsbl_n20_test --steps correct
+```
+
+GFDL-ESM4, historical, 2010-2014, `evspsbl` only, written to
+`/tmp/evspsbl_n20_test` (not the production path) -- ran clean, exit 0,
+~25 min per model (dominated by the daily-ERA5 reference load/regrid per
+month, not by the quantile count itself). Repeated for CNRM-ESM2-1
+(`/tmp/evspsbl_n20_test_cnrm`, member `r1i1p1f2` picked up automatically
+from the config's `member_defaults`) and MPI-ESM1-2-HR
+(`/tmp/evspsbl_n20_test_mpi`), run sequentially to avoid contending for
+ERA5 disk I/O on the shared machine. All three ran clean, exit 0.
+
+Compared against each model's real production output (`n_quantiles=100`)
+at the same North Sea point used in the slide-deck figures (4°E, 55°N),
+both converted to mm/day:
+
+| Model | mean, prod (n=100) | mean, test (n=20) | max abs diff (mm/day) |
+|---|---|---|---|
+| GFDL-ESM4    | 7.50 | 7.65 | 2.17 |
+| CNRM-ESM2-1  | 7.35 | 7.57 | 3.26 |
+| MPI-ESM1-2-HR| 8.34 | 8.45 | 2.88 |
+
+All three: the mean shifts up by a small, consistent amount (1-3%)
+dropping `n_quantiles` 100->20, plus occasional single-month-year outliers
+of 2-3 mm/day. So `n_quantiles` alone measurably changes the correction at
+this sample size, confirming the "100 quantiles from only ~25 samples is
+mostly redundant re-interpolation of the same staircase" mechanism
+described above is not just theoretical -- it holds for all 3 models.
+
+**Correction to an earlier draft of this note**: GFDL-ESM4's outliers
+happened to land on October in all 5 years (+1.33 to +2.17 mm/day), which
+an earlier version of this note described as "October stands out" -- that
+was checked against CNRM and MPI and does **not** generalise. CNRM's
+biggest outliers are Aug 2010 (+3.26), Jul 2013 (+2.67), Sep 2013 (+2.69);
+MPI's are Sep 2013 (+2.88), Oct 2013 (+2.40), Jan 2012 (+1.94) -- different
+months, different years, no shared calendar-month pattern across models.
+The real mechanism is simpler and more general: whichever calendar
+month's ~25-year sample happens to contain an unusually extreme single
+year, for that particular model, is the one where `n_quantiles=100` vs
+`20` diverges most -- not a property of any specific month.
+
+This test only covers the `n_quantiles` half of option 2 -- the ERA5
+resample-to-monthly half, and option 3 (the disaggregation fix), are
+still untouched. `/tmp/evspsbl_n20_test{,_cnrm,_mpi}` are left on
+bb-server1 for now. No production config or output was changed by this
+test -- only `evspsbl`, only `historical`, only these three test output
+directories.
