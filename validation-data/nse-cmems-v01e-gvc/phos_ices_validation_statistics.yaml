@@ -1,0 +1,62 @@
+format: '1.1'
+variable: PHOS
+title: PHOS Profile Validation Statistics
+created: '2026-10-19 08:54:59'
+area: NSe
+experiment: CMEMS/v01E_gvc
+periods:
+- period: 2011-2024
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-10-22 12:27:22'
+  datasets:
+    ICES point observations:
+      rmse: 0.842462
+      bias: -0.089867
+      mae: 0.215722
+      correlation: 0.165637
+      n_points: 20419
+      mean_model: 0.380363
+      mean_obs: 0.47023
+      std_model: 0.213919
+      std_obs: 0.846109
+      n_profiles: 10796
+      error_distribution:
+        min: -104.824112
+        p05: -0.463952
+        p25: -0.209407
+        median: -0.066716
+        p75: 0.078731
+        p95: 0.323329
+        max: 2.174558
+      by_depth:
+        0-10m:
+          n: 12143
+          bias: -0.097338
+          rmse: 1.068078
+          correlation: 0.133612
+        10-25m:
+          n: 3991
+          bias: -0.003676
+          rmse: 0.258389
+          correlation: 0.544544
+        25-50m:
+          n: 2501
+          bias: -0.117605
+          rmse: 0.281118
+          correlation: 0.443166
+        50-100m:
+          n: 1238
+          bias: -0.154773
+          rmse: 0.308981
+          correlation: 0.258488
+        100-200m:
+          n: 446
+          bias: -0.258317
+          rmse: 0.308515
+          correlation: 0.264733
+        200-500m:
+          n: 100
+          bias: -0.374042
+          rmse: 0.385621
+          correlation: 0.332188

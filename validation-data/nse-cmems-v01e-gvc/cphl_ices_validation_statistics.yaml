@@ -1,0 +1,62 @@
+format: '1.1'
+variable: CPHL
+title: CPHL Profile Validation Statistics
+created: '2026-10-19 08:55:13'
+area: NSe
+experiment: CMEMS/v01E_gvc
+periods:
+- period: 2011-2024
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-10-22 12:36:15'
+  datasets:
+    ICES point observations:
+      rmse: 3.031642
+      bias: -0.638024
+      mae: 1.290943
+      correlation: 0.304124
+      n_points: 23845
+      mean_model: 1.144959
+      mean_obs: 1.782983
+      std_model: 0.950751
+      std_obs: 3.111171
+      n_profiles: 9028
+      error_distribution:
+        min: -128.342725
+        p05: -4.141068
+        p25: -0.869398
+        median: -0.181164
+        p75: 0.481908
+        p95: 1.624494
+        max: 5.84835
+      by_depth:
+        0-10m:
+          n: 11640
+          bias: -1.108237
+          rmse: 4.003954
+          correlation: 0.289956
+        10-25m:
+          n: 6772
+          bias: -0.360795
+          rmse: 2.003342
+          correlation: 0.200217
+        25-50m:
+          n: 2968
+          bias: 0.118792
+          rmse: 1.256751
+          correlation: 0.071757
+        50-100m:
+          n: 1418
+          bias: 0.017515
+          rmse: 0.654197
+          correlation: 0.149853
+        100-200m:
+          n: 572
+          bias: -0.209194
+          rmse: 0.252151
+          correlation: -0.065245
+        200-500m:
+          n: 475
+          bias: -0.269992
+          rmse: 0.28238
+          correlation: 0.253525

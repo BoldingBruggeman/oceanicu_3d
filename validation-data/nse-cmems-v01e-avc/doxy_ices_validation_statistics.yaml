@@ -1,0 +1,67 @@
+format: '1.1'
+variable: DOXY
+title: DOXY Profile Validation Statistics
+created: '2026-10-18 11:36:58'
+area: NSe
+experiment: CMEMS/v01E_avc
+periods:
+- period: 2011-2024
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-10-18 11:36:58'
+  datasets:
+    ICES point observations:
+      rmse: 51.63985
+      bias: 23.09249
+      mae: 31.454216
+      correlation: 0.570683
+      n_points: 746762
+      mean_model: 299.156225
+      mean_obs: 276.063735
+      std_model: 42.752055
+      std_obs: 54.413406
+      n_profiles: 16789
+      error_distribution:
+        min: -4767.15543
+        p05: -26.800629
+        p25: 0.413881
+        median: 15.201647
+        p75: 35.028327
+        p95: 104.806649
+        max: 391.634257
+      by_depth:
+        0-10m:
+          n: 243114
+          bias: 11.975708
+          rmse: 43.609951
+          correlation: 0.681958
+        10-25m:
+          n: 225029
+          bias: 34.250631
+          rmse: 63.795579
+          correlation: 0.522877
+        25-50m:
+          n: 131741
+          bias: 30.883084
+          rmse: 61.180278
+          correlation: 0.215099
+        50-100m:
+          n: 94442
+          bias: 16.00245
+          rmse: 29.669524
+          correlation: 0.48636
+        100-200m:
+          n: 36387
+          bias: 17.386759
+          rmse: 25.079126
+          correlation: 0.375564
+        200-500m:
+          n: 15803
+          bias: 25.286648
+          rmse: 28.933861
+          correlation: 0.472883
+        500-1000m:
+          n: 246
+          bias: 55.358527
+          rmse: 57.329328
+          correlation: 0.262843

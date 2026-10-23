@@ -1,0 +1,67 @@
+format: '1.1'
+variable: TEMP
+title: TEMP Profile Validation Statistics
+created: '2026-10-19 08:52:31'
+area: NSe
+experiment: CMEMS/v01E_gvc
+periods:
+- period: 2011-2024
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-10-22 12:10:24'
+  datasets:
+    ICES point observations:
+      rmse: 1.229915
+      bias: 0.090135
+      mae: 0.786866
+      correlation: 0.934248
+      n_points: 3513681
+      mean_model: 9.351423
+      mean_obs: 9.261289
+      std_model: 3.413455
+      std_obs: 3.339689
+      n_profiles: 40588
+      error_distribution:
+        min: -9.10884
+        p05: -1.609841
+        p25: -0.428679
+        median: 0.008935
+        p75: 0.55789
+        p95: 2.008099
+        max: 14.89675
+      by_depth:
+        0-10m:
+          n: 525623
+          bias: 0.290902
+          rmse: 1.355276
+          correlation: 0.965499
+        10-25m:
+          n: 660910
+          bias: 0.146952
+          rmse: 1.640474
+          correlation: 0.924097
+        25-50m:
+          n: 707547
+          bias: -0.132324
+          rmse: 1.476513
+          correlation: 0.858017
+        50-100m:
+          n: 774683
+          bias: 0.050647
+          rmse: 0.913153
+          correlation: 0.849888
+        100-200m:
+          n: 489564
+          bias: 0.12831
+          rmse: 0.734891
+          correlation: 0.716412
+        200-500m:
+          n: 332819
+          bias: 0.16112
+          rmse: 0.57814
+          correlation: 0.708381
+        500-1000m:
+          n: 22535
+          bias: 0.205344
+          rmse: 0.554521
+          correlation: 0.514492

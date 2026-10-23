@@ -6,7 +6,7 @@
     <description>Recent content in Guides on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 14 Oct 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 23 Oct 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/guides/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Tidal Analysis</title>
@@ -95,12 +95,14 @@ gridded observation product.  Three layer modes are supported:&lt;/p&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;Multiple layers can be run in a single invocation.&lt;/p&gt;
-&lt;p&gt;There are four shipped configs:
+&lt;p&gt;There are five shipped configs:
 &lt;a href=&#34;https://github.com/bolding/ocean-post/blob/main/config/gridded_2d_validation.yaml&#34;&gt;&lt;code&gt;gridded_2d_validation.yaml&lt;/code&gt;&lt;/a&gt;
 is the generic one, with any combination of layers via &lt;code&gt;--layers&lt;/code&gt;.
 &lt;a href=&#34;https://github.com/bolding/ocean-post/blob/main/config/gridded_2d_validation_surface.yaml&#34;&gt;&lt;code&gt;gridded_2d_validation_surface.yaml&lt;/code&gt;&lt;/a&gt;,
 &lt;code&gt;_bottom.yaml&lt;/code&gt; and &lt;code&gt;_depths.yaml&lt;/code&gt; are the dedicated single-purpose variants
-used for NSe.&lt;/p&gt;</description>
+used for NSe. &lt;code&gt;_amm7_nemo.yaml&lt;/code&gt; targets a NEMO AMM7 (GFDL-ESM4-forced) run
+instead of pyGETM — only &lt;code&gt;model.variable_map&lt;/code&gt;/&lt;code&gt;model.base_path&lt;/code&gt; differ; see
+that file&amp;rsquo;s own header for its current (sample-data-only) status.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Gridded 3D Validation</title>
@@ -321,12 +323,12 @@ All subcommands default to a &lt;strong&gt;dry run&lt;/strong&gt; — add &lt;co
   &lt;/thead&gt;
   &lt;tbody&gt;
       &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;clean&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;Remove files at the wrong directory depth (non-canonical layout)&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
           &lt;td&gt;&lt;code&gt;wipe&lt;/code&gt;&lt;/td&gt;
           &lt;td&gt;Remove all regeneratable outputs so scripts can be re-run from scratch&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;purge&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Completely remove ONE area/experiment — plots, tables, and its &lt;code&gt;statistics.db&lt;/code&gt; rows&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;&lt;code&gt;sync&lt;/code&gt;&lt;/td&gt;
@@ -336,13 +338,17 @@ All subcommands default to a &lt;strong&gt;dry run&lt;/strong&gt; — add &lt;co
           &lt;td&gt;&lt;code&gt;import-stats&lt;/code&gt;&lt;/td&gt;
           &lt;td&gt;Import existing CSV statistics files into &lt;code&gt;statistics.db&lt;/code&gt;&lt;/td&gt;
       &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;migrate&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Apply pending layout-version migrations (e.g. v1→v2 scenario-dir reshuffle)&lt;/td&gt;
+      &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h2 id=&#34;clean&#34;&gt;clean&lt;/h2&gt;
-&lt;p&gt;Removes files that do not conform to the canonical layout — for example, plots
-written directly under &lt;code&gt;validations/&amp;lt;experiment&amp;gt;/plots/&lt;/code&gt; instead of the correct
-&lt;code&gt;plots/&amp;lt;domain&amp;gt;/&amp;lt;model&amp;gt;/&amp;lt;period&amp;gt;/&amp;lt;type&amp;gt;/&lt;/code&gt; path.  Canonical files are left
-untouched.&lt;/p&gt;</description>
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;clean&lt;/code&gt; was removed&lt;/strong&gt; — superseded by the separate
+&lt;a href=&#34;#audit-layout-separate-tool&#34;&gt;&lt;code&gt;audit-layout&lt;/code&gt;&lt;/a&gt; command below, which detects
+the same non-conforming files using the canonical &lt;code&gt;AnalysesLayout&lt;/code&gt;
+iterators from &lt;code&gt;lib/layout.py&lt;/code&gt; and adds &lt;code&gt;--obs-type&lt;/code&gt; filtering &lt;code&gt;clean&lt;/code&gt;
+never had.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Simulation List</title>
@@ -479,7 +485,7 @@ both equally.&lt;/p&gt;</description>
     <item>
       <title>Regridding</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</link>
-      <pubDate>Wed, 14 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</guid>
       <description>&lt;h1 id=&#34;regridding-user-guide&#34;&gt;Regridding User Guide&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;ocean_data.regridding&lt;/code&gt; provides xESMF-based regridding with automatic

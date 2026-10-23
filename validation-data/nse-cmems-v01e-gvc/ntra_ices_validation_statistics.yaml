@@ -1,0 +1,62 @@
+format: '1.1'
+variable: NTRA
+title: NTRA Profile Validation Statistics
+created: '2026-10-19 08:54:51'
+area: NSe
+experiment: CMEMS/v01E_gvc
+periods:
+- period: 2011-2024
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-10-22 12:24:29'
+  datasets:
+    ICES point observations:
+      rmse: 14.461257
+      bias: 6.186563
+      mae: 7.290415
+      correlation: 0.585731
+      n_points: 14752
+      mean_model: 12.805941
+      mean_obs: 6.619378
+      std_model: 16.0494
+      std_obs: 8.114363
+      n_profiles: 7888
+      error_distribution:
+        min: -104.610572
+        p05: -2.699804
+        p25: 0.133676
+        median: 2.811023
+        p75: 6.399467
+        p95: 32.517693
+        max: 235.646497
+      by_depth:
+        0-10m:
+          n: 8557
+          bias: 8.774249
+          rmse: 18.541972
+          correlation: 0.57899
+        10-25m:
+          n: 2414
+          bias: 3.365081
+          rmse: 5.435719
+          correlation: 0.747159
+        25-50m:
+          n: 2032
+          bias: 2.971834
+          rmse: 4.963348
+          correlation: 0.433622
+        50-100m:
+          n: 1224
+          bias: 1.897474
+          rmse: 3.837895
+          correlation: 0.113689
+        100-200m:
+          n: 431
+          bias: -0.162745
+          rmse: 2.620929
+          correlation: 0.064342
+        200-500m:
+          n: 94
+          bias: -2.462898
+          rmse: 2.814573
+          correlation: 0.360432

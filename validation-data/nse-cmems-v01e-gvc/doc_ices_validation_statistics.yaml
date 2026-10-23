@@ -1,0 +1,57 @@
+format: '1.1'
+variable: DOC
+title: DOC Profile Validation Statistics
+created: '2026-10-19 08:56:06'
+area: NSe
+experiment: CMEMS/v01E_gvc
+periods:
+- period: 2011-2024
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-10-22 13:00:02'
+  datasets:
+    ICES point observations:
+      rmse: 1429.800053
+      bias: 1253.839496
+      mae: 1253.839496
+      correlation: 0.787311
+      n_points: 825
+      mean_model: 1391.993481
+      mean_obs: 138.153985
+      std_model: 746.090791
+      std_obs: 76.346228
+      n_profiles: 537
+      error_distribution:
+        min: 141.11818
+        p05: 292.497043
+        p25: 787.771756
+        median: 1146.197736
+        p75: 1640.084018
+        p95: 2636.51586
+        max: 3163.536745
+      by_depth:
+        0-10m:
+          n: 524
+          bias: 1283.868889
+          rmse: 1441.356397
+          correlation: 0.796926
+        10-25m:
+          n: 184
+          bias: 1641.687201
+          rmse: 1741.820772
+          correlation: 0.627307
+        25-50m:
+          n: 42
+          bias: 796.603691
+          rmse: 839.319273
+          correlation: 0.122028
+        50-100m:
+          n: 50
+          bias: 356.669631
+          rmse: 379.413614
+          correlation: 0.177304
+        100-200m:
+          n: 25
+          bias: 332.360189
+          rmse: 342.147254
+          correlation: -0.162347
