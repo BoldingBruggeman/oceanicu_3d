@@ -182,8 +182,8 @@ y += Inches(0.85)
 
 img_dir = os.path.dirname(os.path.abspath(__file__))
 img_path = os.path.join(img_dir, "tas_point_example.png")
-img_w = Inches(8.6)
-img_h = Emu(int(img_w * 892 / 1610))
+img_w = Inches(7.0)
+img_h = Emu(int(img_w * 1106 / 1683))
 img_left = (prs.slide_width - img_w) / 2
 s2b.shapes.add_picture(img_path, img_left, y, width=img_w, height=img_h)
 
