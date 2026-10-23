@@ -1163,6 +1163,12 @@ Analysed: 2026-09-09 22:05:44
           &lt;td&gt;evspsbl:85, huss:85, net_lw:85, net_sw:85, pr:85, psl:85, rlds:85, rlus:85, rsds:85, rsus:85, tas:85, uas:85, vas:85&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
+          &lt;td&gt;ssp245&lt;/td&gt;
+          &lt;td&gt;not found&lt;/td&gt;
+          &lt;td&gt;0&lt;/td&gt;
+          &lt;td&gt;&amp;ndash;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
           &lt;td&gt;ssp370&lt;/td&gt;
           &lt;td&gt;fetched&lt;/td&gt;
           &lt;td&gt;1105&lt;/td&gt;
@@ -3241,230 +3247,45 @@ Analysed: 2026-10-13  16:38:24
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NSe
 &lt;strong&gt;Experiment&lt;/strong&gt;: CMEMS/v03P_avc
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: TEMP_SURFACE&lt;/p&gt;
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_SURFACE, TEMP_SURFACE
+&lt;strong&gt;Period&lt;/strong&gt;: 2021&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
           &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
       &lt;/tr&gt;
   &lt;/thead&gt;
   &lt;tbody&gt;
       &lt;tr&gt;
           &lt;td&gt;RMSE&lt;/td&gt;
-          &lt;td&gt;0.7494&lt;/td&gt;
+          &lt;td&gt;2.0858&lt;/td&gt;
+          &lt;td&gt;0.7308&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;Bias&lt;/td&gt;
-          &lt;td&gt;0.1213&lt;/td&gt;
+          &lt;td&gt;-0.1211&lt;/td&gt;
+          &lt;td&gt;0.1561&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;Corr&lt;/td&gt;
-          &lt;td&gt;0.9380&lt;/td&gt;
+          &lt;td&gt;0.8975&lt;/td&gt;
+          &lt;td&gt;0.9409&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;N points&lt;/td&gt;
-          &lt;td&gt;42,772,236&lt;/td&gt;
+          &lt;td&gt;20,474,427&lt;/td&gt;
+          &lt;td&gt;139,002,448&lt;/td&gt;
       &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;h2 id=&#34;horizontal-validation&#34;&gt;Horizontal Validation&lt;/h2&gt;
-&lt;h3 id=&#34;statistics&#34;&gt;Statistics&lt;/h3&gt;
-&lt;h3 id=&#34;temp_surface&#34;&gt;TEMP_SURFACE&lt;/h3&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;Metric&lt;/th&gt;
-          &lt;th&gt;OSTIA&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;RMSE&lt;/td&gt;
-          &lt;td&gt;0.7494&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Bias&lt;/td&gt;
-          &lt;td&gt;+0.1213&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;MAE&lt;/td&gt;
-          &lt;td&gt;0.5412&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Corr&lt;/td&gt;
-          &lt;td&gt;0.9380&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Model mean&lt;/td&gt;
-          &lt;td&gt;11.0846&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Obs mean&lt;/td&gt;
-          &lt;td&gt;10.9632&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;details&gt;
-&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
-TEMP_SURFACE Validation Statistics
-################################################################################
-  Format:     1.1
-  Created:    2026-10-20 16:35:01
-  Area:         NSe
-  Experiment:   CMEMS/v03P_avc
-################################################################################
-
-================================================================================
-Period: 2011-2023  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  16:35:01
-
---- OSTIA ---
-  RMSE:          0.7494
-  Bias:         +0.1213
-  MAE:           0.5412
-  Correlation:   0.9380
-  N points:      42,772,236
-  Model mean:   11.0846
-  Obs mean:     10.9632
-  Model std:    4.1320
-  Obs std:      3.9272
-
-  Error distribution:
-    Min:         -8.0227
-    5th pct:      -0.9399
-    25th pct:     -0.2772
-    Median:       +0.0946
-    75th pct:     +0.4968
-    95th pct:     +1.2599
-    Max:         +8.6888
-
-  Monthly breakdown:
-  Month      RMSE      Bias      MAE    Corr
-  --------------------------------------------
-  Jan      0.7162   -0.0999   0.5091  0.9471
-  Feb      0.6698   -0.0822   0.4818  0.9553
-  Mar      0.6004   -0.0769   0.4276  0.9588
-  Apr      0.5654   -0.0634   0.4054  0.9553
-  May      0.7415   +0.1258   0.5299  0.9246
-  Jun      0.9730   +0.4027   0.7272  0.8886
-  Jul      1.0768   +0.5307   0.8215  0.9127
-  Aug      0.8843   +0.3665   0.6746  0.9179
-  Sep      0.6779   +0.2076   0.5126  0.9475
-  Oct      0.5850   +0.1143   0.4379  0.9546
-  Nov      0.6084   +0.0355   0.4536  0.9392
-  Dec      0.6875   -0.0199   0.5065  0.9290
-  --------------------------------------------
-  All      0.7494   +0.1213   0.5412  0.9380
-
-
-================================================================================
-Period: 2011  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  16:35:01
-
---- OSTIA ---
-  RMSE:          0.7000
-  Bias:         +0.1570
-  MAE:           0.5042
-  Correlation:   0.9431
-  N points:      10,685,740
-  Model mean:   10.9820
-  Obs mean:     10.8250
-  Model std:    4.0612
-  Obs std:      3.8866
-
-  Error distribution:
-    Min:         -6.7472
-    5th pct:      -0.8245
-    25th pct:     -0.2183
-    Median:       +0.1180
-    75th pct:     +0.4796
-    95th pct:     +1.1980
-    Max:         +7.0972
-
-
-================================================================================
-Period: 2012  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  16:35:01
-
---- OSTIA ---
-  RMSE:          0.6999
-  Bias:         +0.1015
-  MAE:           0.5080
-  Correlation:   0.9420
-  N points:      10,715,016
-  Model mean:   10.8511
-  Obs mean:     10.7496
-  Model std:    3.8030
-  Obs std:      3.6240
-
-  Error distribution:
-    Min:         -6.9335
-    5th pct:      -0.9495
-    25th pct:     -0.3051
-    Median:       +0.0541
-    75th pct:     +0.4497
-    95th pct:     +1.1867
-    Max:         +8.4484
-
-
-================================================================================
-Period: 2013  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  16:35:01
-
---- OSTIA ---
-  RMSE:          0.8208
-  Bias:         +0.1216
-  MAE:           0.5971
-  Correlation:   0.9309
-  N points:      10,685,740
-  Model mean:   10.6707
-  Obs mean:     10.5491
-  Model std:    4.4430
-  Obs std:      4.1973
-
-  Error distribution:
-    Min:         -8.0227
-    5th pct:      -1.0543
-    25th pct:     -0.3080
-    Median:       +0.0892
-    75th pct:     +0.5118
-    95th pct:     +1.2904
-    Max:         +7.8337
-
-
-================================================================================
-Period: 2014  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  16:35:01
-
---- OSTIA ---
-  RMSE:          0.7701
-  Bias:         +0.1051
-  MAE:           0.5557
-  Correlation:   0.9323
-  N points:      10,685,740
-  Model mean:   11.8350
-  Obs mean:     11.7298
-  Model std:    4.0993
-  Obs std:      3.8753
-
-  Error distribution:
-    Min:         -7.1680
-    5th pct:      -0.9612
-    25th pct:     -0.3134
-    Median:       +0.0664
-    75th pct:     +0.4892
-    95th pct:     +1.2752
-    Max:         +8.6888
-&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
-&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v03p-avc/temp_surface_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v03p-avc/temp_surface_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+&lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v03p-avc/physics/pyGETM/2014-2021/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt=&#34;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v03p-avc/physics/pyGETM/2011-2023/surface/temp_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NSe - Experiment CMEMS/v03P_gvc</title>
@@ -3476,285 +3297,44 @@ Analysed: 2026-10-20  16:35:01
 &lt;p&gt;&lt;strong&gt;Area&lt;/strong&gt;: NSe
 &lt;strong&gt;Experiment&lt;/strong&gt;: CMEMS/v03P_gvc
 &lt;strong&gt;Validation Type&lt;/strong&gt;: Horizontal Validation
-&lt;strong&gt;Variables&lt;/strong&gt;: TEMP_SURFACE&lt;/p&gt;
+&lt;strong&gt;Variables&lt;/strong&gt;: SALT_SURFACE, TEMP_SURFACE&lt;/p&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
           &lt;th&gt;Metric&lt;/th&gt;
+          &lt;th&gt;SALT_SURFACE / CCI-SSS&lt;/th&gt;
           &lt;th&gt;TEMP_SURFACE / OSTIA&lt;/th&gt;
       &lt;/tr&gt;
   &lt;/thead&gt;
   &lt;tbody&gt;
       &lt;tr&gt;
           &lt;td&gt;RMSE&lt;/td&gt;
+          &lt;td&gt;2.0779&lt;/td&gt;
           &lt;td&gt;0.7282&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;Bias&lt;/td&gt;
+          &lt;td&gt;-0.0860&lt;/td&gt;
           &lt;td&gt;0.1029&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;Corr&lt;/td&gt;
+          &lt;td&gt;0.8961&lt;/td&gt;
           &lt;td&gt;0.9385&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;N points&lt;/td&gt;
+          &lt;td&gt;20,474,427&lt;/td&gt;
           &lt;td&gt;57,000,372&lt;/td&gt;
       &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;annual-statistics-trends&#34;&gt;Annual Statistics Trends&lt;/h3&gt;
+&lt;p&gt;&lt;img alt=&#34;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v03p-gvc/physics/pyGETM/2011-2023/surface/salt_surface_timeseries_statistics.png&#34;&gt;
+&lt;em&gt;Salinity (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img alt=&#34;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v03p-gvc/physics/pyGETM/2011-2023/surface/temp_surface_timeseries_statistics.png&#34;&gt;
-&lt;em&gt;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;
-&lt;h2 id=&#34;horizontal-validation&#34;&gt;Horizontal Validation&lt;/h2&gt;
-&lt;h3 id=&#34;statistics&#34;&gt;Statistics&lt;/h3&gt;
-&lt;h3 id=&#34;temp_surface&#34;&gt;TEMP_SURFACE&lt;/h3&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;Metric&lt;/th&gt;
-          &lt;th&gt;OSTIA&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;RMSE&lt;/td&gt;
-          &lt;td&gt;0.7282&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Bias&lt;/td&gt;
-          &lt;td&gt;+0.1029&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;MAE&lt;/td&gt;
-          &lt;td&gt;0.5272&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Corr&lt;/td&gt;
-          &lt;td&gt;0.9385&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Model mean&lt;/td&gt;
-          &lt;td&gt;10.8501&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Obs mean&lt;/td&gt;
-          &lt;td&gt;10.7471&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;details&gt;
-&lt;summary&gt;View Full Statistics Report&lt;/summary&gt;
-&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;################################################################################
-TEMP_SURFACE Validation Statistics
-################################################################################
-  Format:     1.1
-  Created:    2026-10-20 17:09:44
-  Area:         NSe
-  Experiment:   CMEMS/v03P_gvc
-################################################################################
-
-================================================================================
-Period: 2011-2023  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  17:09:44
-
---- OSTIA ---
-  RMSE:          0.7282
-  Bias:         +0.1029
-  MAE:           0.5272
-  Correlation:   0.9385
-  N points:      57,000,372
-  Model mean:   10.8501
-  Obs mean:     10.7471
-  Model std:    4.0200
-  Obs std:      3.8296
-
-  Error distribution:
-    Min:         -8.4287
-    5th pct:      -0.9257
-    25th pct:     -0.2882
-    Median:       +0.0778
-    75th pct:     +0.4711
-    95th pct:     +1.2122
-    Max:         +8.7720
-
-  Monthly breakdown:
-  Month      RMSE      Bias      MAE    Corr
-  --------------------------------------------
-  Jan      0.7064   -0.0653   0.5084  0.9460
-  Feb      0.6590   -0.0729   0.4786  0.9521
-  Mar      0.5868   -0.0761   0.4242  0.9540
-  Apr      0.5445   -0.0809   0.3956  0.9501
-  May      0.7036   +0.1017   0.5013  0.9275
-  Jun      0.9358   +0.3740   0.6993  0.9003
-  Jul      1.0619   +0.5140   0.8124  0.9127
-  Aug      0.8802   +0.3520   0.6708  0.9206
-  Sep      0.6867   +0.1797   0.5192  0.9435
-  Oct      0.5854   +0.0887   0.4399  0.9508
-  Nov      0.5939   +0.0458   0.4421  0.9397
-  Dec      0.6654   +0.0002   0.4871  0.9301
-  --------------------------------------------
-  All      0.7282   +0.1029   0.5272  0.9385
-
-
-================================================================================
-Period: 2011  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  17:09:44
-
---- OSTIA ---
-  RMSE:          0.7029
-  Bias:         +0.1586
-  MAE:           0.5065
-  Correlation:   0.9422
-  N points:      10,685,740
-  Model mean:   10.9836
-  Obs mean:     10.8250
-  Model std:    4.0467
-  Obs std:      3.8866
-
-  Error distribution:
-    Min:         -6.7139
-    5th pct:      -0.8282
-    25th pct:     -0.2169
-    Median:       +0.1214
-    75th pct:     +0.4851
-    95th pct:     +1.2072
-    Max:         +7.0725
-
-
-================================================================================
-Period: 2012  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  17:09:44
-
---- OSTIA ---
-  RMSE:          0.7061
-  Bias:         +0.1007
-  MAE:           0.5114
-  Correlation:   0.9402
-  N points:      10,715,016
-  Model mean:   10.8504
-  Obs mean:     10.7496
-  Model std:    3.7862
-  Obs std:      3.6240
-
-  Error distribution:
-    Min:         -6.6039
-    5th pct:      -0.9570
-    25th pct:     -0.3066
-    Median:       +0.0563
-    75th pct:     +0.4543
-    95th pct:     +1.1928
-    Max:         +8.7720
-
-
-================================================================================
-Period: 2013  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  17:09:44
-
---- OSTIA ---
-  RMSE:          0.8224
-  Bias:         +0.1203
-  MAE:           0.5974
-  Correlation:   0.9295
-  N points:      10,685,740
-  Model mean:   10.6693
-  Obs mean:     10.5491
-  Model std:    4.4218
-  Obs std:      4.1973
-
-  Error distribution:
-    Min:         -8.0227
-    5th pct:      -1.0574
-    25th pct:     -0.3127
-    Median:       +0.0886
-    75th pct:     +0.5139
-    95th pct:     +1.3020
-    Max:         +7.8343
-
-
-================================================================================
-Period: 2014  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  17:09:44
-
---- OSTIA ---
-  RMSE:          0.7654
-  Bias:         +0.0994
-  MAE:           0.5527
-  Correlation:   0.9323
-  N points:      10,685,740
-  Model mean:   11.8292
-  Obs mean:     11.7298
-  Model std:    4.0831
-  Obs std:      3.8753
-
-  Error distribution:
-    Min:         -6.8230
-    5th pct:      -0.9628
-    25th pct:     -0.3180
-    Median:       +0.0630
-    75th pct:     +0.4870
-    95th pct:     +1.2691
-    Max:         +8.6953
-
-
-================================================================================
-Period: 2015  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  17:09:44
-
---- OSTIA ---
-  RMSE:          0.6743
-  Bias:         +0.0823
-  MAE:           0.4992
-  Correlation:   0.9411
-  N points:      10,685,740
-  Model mean:   11.0197
-  Obs mean:     10.9374
-  Model std:    3.6658
-  Obs std:      3.4308
-
-  Error distribution:
-    Min:         -8.4287
-    5th pct:      -0.8612
-    25th pct:     -0.2995
-    Median:       +0.0526
-    75th pct:     +0.4283
-    95th pct:     +1.0969
-    Max:         +8.1413
-
-
-================================================================================
-Period: 2016  |  Model: pyGETM
-================================================================================
-Analysed: 2026-10-20  17:09:44
-
---- OSTIA ---
-  RMSE:          0.5956
-  Bias:         -0.0376
-  MAE:           0.4332
-  Correlation:   0.9426
-  N points:      3,542,396
-  Model mean:   7.5259
-  Obs mean:     7.5636
-  Model std:    1.8137
-  Obs std:      1.8580
-
-  Error distribution:
-    Min:         -5.6062
-    5th pct:      -0.8686
-    25th pct:     -0.3787
-    Median:       -0.0764
-    75th pct:     +0.2465
-    95th pct:     +0.8283
-    Max:         +8.3917
-&lt;/code&gt;&lt;/pre&gt;&lt;/details&gt;
-&lt;p&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v03p-gvc/temp_surface_validation_statistics.txt&#34;&gt;📄 Download Statistics Report (txt)&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validation-data/nse-cmems-v03p-gvc/temp_surface_validation_statistics.yaml&#34;&gt;📄 YAML&lt;/a&gt;&lt;/p&gt;</description>
+&lt;em&gt;Temperature (surface) — annual statistics timeseries (RMSE, bias, correlation)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NSe - WOA/tidal - Tidal Analysis</title>
