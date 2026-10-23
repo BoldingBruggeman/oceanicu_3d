@@ -266,15 +266,34 @@ disagg types, against the backups -- all exactly 3.6x, shapes intact.
   but they still only cover 12 scattered days per year, not a full year.
 - The Amon-vs-daily sample/quantile-resolution issue documented
   elsewhere in this note -- entirely separate mechanism.
-- **The code itself.** `_apply_scale_offset_resample`
-  (`ocean-prep/lib/bias_correction/utils.py:449`) still has this exact
-  bug for any future `bc-correct` run that uses `resample: daily` on an
-  accumulated (not rate) local variable without a scale_factor that
-  already converts it to a rate -- `evspsbl` today, and `pr`/any other
-  accumulated ERA5 variable if `resample: daily` is ever added to it (as
-  was being tested when this was found). The retroactive file patch
-  fixes existing output only; the next real `evspsbl` run will reproduce
-  the bug unless the code is fixed too -- not yet done, pending a
-  decision on the right general fix (sum instead of mean, or require an
-  explicit rate-converting `scale_factor` before allowing `resample:
-  daily` on a non-rate variable).
+- At the time this was first written: **the code itself** still had the
+  bug. That part is now fixed too -- see below.
+
+## Code itself fixed too (2026-10-23, same day)
+
+`_apply_scale_offset_resample` (`ocean-prep/lib/bias_correction/
+utils.py`) now supports `resample: daily_sum`, which sums the day's
+accumulated-depth samples instead of averaging them -- committed as
+`3b4ae72` on `ocean-prep`'s `claude` branch, pushed. For `evspsbl`,
+pair it with `scale_factor: -1000/86400` (the sign flip plus the
+metres-to-kg/m2/s-per-day conversion, applied per-hour before summing
+-- exact since summation is linear, confirmed independent of sample
+count).
+
+Verified against the retroactive file patch above, not just
+algebraically: ran a fresh `bc-correct` (GFDL-ESM4, historical,
+`evspsbl` only, isolated output dir) with the new `resample: daily_sum`
++ corrected `scale_factor`, and diffed it against the real production
+file that had already been divided by 3.6 -- **max abs diff ~7e-12**,
+i.e. float64 roundoff only, not a real difference. The code fix and the
+retroactive rescale converge on exactly the same answer via two
+independent routes.
+
+**Not yet done**: none of the 5 real production configs that include
+`evspsbl` have been switched from `resample: daily` + `scale_factor:
+-1` to `resample: daily_sum` + `scale_factor: -1000/86400` -- the new
+mechanism exists in the code but isn't wired into production yet. The
+already-patched output files remain correct either way (the retroactive
+fix doesn't depend on the config ever being updated), but the *next*
+real `evspsbl` run will reproduce the original bug until the configs
+are updated too.
