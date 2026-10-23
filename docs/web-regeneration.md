@@ -9,9 +9,15 @@ not a dry-run preview).
 2. DEPLOY     ./deploy_ghpages.py --apply       (ocean-post repo)
 ```
 
-Run them in that order, from anywhere — both auto-relay over ssh to
-**bb-server1** if you're not already there, since that's where the real
-analyses data and Hugo content live. You do not need to `ssh` yourself first.
+Run them in that order, from anywhere — both auto-relay over ssh to the
+configured relay host if you're not already there, since that's where the
+real analyses data and Hugo content live. You do not need to `ssh`
+yourself first. The relay host is configured once, in
+`~/.config/oceanicu/hosts.yaml` (`relay_host:`, read by
+`ocean_data.host_config` — see that package's `guides/host-config.md`),
+not hardcoded here — on the real deployment this is the `oceanicu-relay`
+ssh alias (a shared `oceanicu` account on bb-server1's real host, not
+your own personal account there).
 
 ## What each one actually does
 

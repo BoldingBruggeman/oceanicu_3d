@@ -21,6 +21,7 @@ machine use the same directory or even the same username:
 | `health_check.py` | periodic CPU-stall watchdog for whichever chunk is currently running, via `sstat`. **ON HOLD as of 2026-09-02** -- `sstat`'s job accounting proved unreliable on the real cluster; OFF by default (`OCEANICU_HEALTH_CHECK=1` to enable anyway). See "Monitoring a running chunk" below. |
 | `reap_orphaned_chunks.py` | cron watchdog: proactively marks chunks stuck at `status=running` as failed once their SLURM job is confirmed dead (or old enough that it's assumed dead) -- catches a job whose whole cgroup got killed before `chunk_runner.py` itself could record the failure. Login node only (needs `squeue`). See `setup_experiment_tracking.sh`'s own printed cron guidance (`hpc` role, "Optional FOURTH cron") for the crontab line. |
 | `run_chunk.slurm` | the SLURM job. Runs one chunk, then resubmits itself for the next one -- or, once an experiment reaches its `stop_date`, for the next queued experiment (see "The queue" below). |
+| `chunk_chain.py` | `run_chunk.slurm`'s non-SLURM counterpart -- a plain self-chaining Python loop for a host with no scheduler (workstation, cloud VM, orca). See "Launch it (non-SLURM host)" below. Unit-tested in `test_chunk_chain.py`. |
 | `experiment_tracking_server.py` | RPC entrypoint for accessing the registry across machines with no direct network path between them -- see "Working across machines" below. Only needed on the relay machine, and only if you need that at all. |
 | `get_commands_and_update_registry.py` | pulls queued commands in from bb-server1 (optional, `--pull-from`) and replays whatever's pending (see "Command queue" below) against the local registry -- only needed wherever the registry actually lives, and only if a live relay to it isn't possible. Renamed from `apply_commands.py` when the pull step was added. |
 | `setup_experiment_tracking.sh` | one-shot env/directory setup per machine role (see below) -- standalone, no dependency on anything else here. |
@@ -369,6 +370,40 @@ marks when it was set.
 (The no-SLURM `test_experiment_tracking/run_chunk_local.py` stand-in honors the
 same sentinel, for the same reason, if you're testing this locally
 first.)
+
+## Launch it (non-SLURM host)
+
+`chunk_chain.py` is `run_chunk.slurm`'s counterpart for a host with no job
+scheduler at all -- a plain workstation, a cloud VM, orca. Same outer
+decision logic (success -> next chunk; nothing left -> pick up the next
+queued experiment or stop; a chunk failing -> stop, no auto-retry), but as
+a single long-running Python process that calls `chunk_runner.py` in a
+loop instead of `sbatch`-resubmitting a fresh SLURM job each time (there's
+no walltime to renew here, so nothing to gain from a fresh OS process per
+chunk):
+
+```bash
+python3 chunk_chain.py --experiment-id NSe/CMEMS/v01E [--db PATH]
+# or in the background:
+nohup python3 chunk_chain.py --experiment-id NSe/CMEMS/v01E > chunk_chain.log 2>&1 &
+```
+
+`--db`/`OCEANICU_EXPERIMENT_DB` resolve exactly like `chunk_runner.py`'s
+own (no hardcoded default). The experiment must already be registered
+with `--launcher mpiexec --np N` (`oceanicu-experiments add`/`set-launcher`/
+`set-np`) -- `chunk_chain.py` never touches that choice itself, it only
+replaces the outer SLURM-specific loop; which launcher/how many ranks is
+still a per-*experiment* registry setting, read straight off the row by
+`chunk_runner.py` the same way it always was.
+
+Honors `delay-all`/`PAUSE_ALL`/`rerun` exactly like the SLURM path (same
+registry, same sentinels). Not replicated (same reasoning as `run_chunk.
+slurm`'s own on-hold items): the NaN-monitoring log-tail (`chunk_runner.
+py`'s `finish_chunk()` hardcodes `nan_detected=False` today, so there's
+nothing real to mirror) and the `OCEANICU_HEALTH_CHECK` watchdog
+(`sstat`-based, already unreliable and off by default on the real
+cluster). Stops cleanly on SIGINT/SIGTERM, checked between chunks only --
+never kills a chunk that's actually running.
 
 ## The queue
 
