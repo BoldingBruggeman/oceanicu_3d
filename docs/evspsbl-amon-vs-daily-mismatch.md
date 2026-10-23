@@ -205,3 +205,76 @@ still untouched. `/tmp/evspsbl_n20_test{,_cnrm,_mpi}` are left on
 bb-server1 for now. No production config or output was changed by this
 test -- only `evspsbl`, only `historical`, only these three test output
 directories.
+
+## Separate, confirmed bug: all production evspsbl output was 3.6x too large (2026-10-23)
+
+Discovered while testing a `resample: daily` fix for `pr`'s ERA5
+reference (see `tas-era5-hourly-vs-daily-resample.md`): the test's output
+mean dropped from a plausible ~2.7 mm/day to an implausible ~0.1 mm/day.
+That turned out not to be a real physical effect -- it was a bug in
+`_apply_scale_offset_resample`'s `resample: daily` option, and `evspsbl`
+has had `resample: daily` set in every real production config all along.
+
+**The bug**: ERA5 `e` (evaporation, like `tp`/precipitation) is an
+**hourly-accumulated depth in metres**, not a rate. `_apply_scale_offset_
+resample` does `da.resample(time='1D').mean()` to produce a "daily"
+value -- averaging 24 hourly accumulated depths instead of summing them,
+with no prior conversion from an accumulated depth to a rate (unlike
+`net_sw`/`net_lw`, whose `scale_factor: 0.000277778` = 1/3600 already
+converts their own hourly-accumulated J/m² into average W/m² *before*
+`.mean()` runs -- that case is correct; `evspsbl`'s `scale_factor: -1` is
+only a sign flip, nothing else).
+
+Checked directly against real ERA5 `e` data (4E, 55N, 2010): the
+resulting scale error is an exact, data-independent constant --
+`86400 / (24 * 1000) = 3.6` -- because it only depends on "24 hours in a
+day" and "1000 kg/m3 water density", not on the actual evaporation
+values. Verified the day's worth of hourly ERA5 files have complete,
+gap-free 24-sample coverage (spot-checked 1990/2000/2010/2014), so the
+constant holds exactly, not approximately.
+
+Confirmed this constant propagates through the *entire* correction
+unchanged: `evspsbl`'s correction `kind` is multiplicative (`'*'`,
+confirmed in every production config that includes it) and `fut_tau`/
+`q_hist_at_fut` in `_qdm_1d` don't depend on `ref` at all -- only
+`q_ref_at_fut` does, and both `nanquantile` and `np.interp` are exactly
+linear under positive scalar multiplication. So a uniform 3.6x inflation
+of every `ref` value produces a uniform 3.6x inflation of every
+corrected output value, with no distortion to shape -- confirmed
+numerically too: dividing a real production file by 3.6 exactly matches
+a fresh run with a properly rate-converted reference (max abs diff 0.0,
+not just close).
+
+**Fixed, retroactively, on the already-existing files** (not yet fixed
+in the code -- see below): all 1374 real production `evspsbl_bc_*.nc`
+files across all 3 models/all scenarios (687 daily `correct()`-stage
+files + 687 disaggregated files, which inherit the same 3.6x from the
+daily files they're built from) were divided by exactly 3.6, in place,
+on bb-server1. Originals backed up first to
+`/data/BiasCorrected/evspsbl_3p6x_bug_backup_20261023/` (17GB, verified
+1374/1374 files present before touching anything). Ran via
+`/tmp/fix_evspsbl_3p6_scale.py` (temp-file-then-atomic-move per file, no
+partial-write risk), validated on a throwaway copy first (exact 3.6
+ratio, shape/dims/coords/attrs all preserved), then applied to all 1374
+real files: 1374 fixed, 0 failed. Spot-checked 5 files afterwards across
+all 3 models, both historical and an SSP scenario, both daily and
+disagg types, against the backups -- all exactly 3.6x, shapes intact.
+
+**This does NOT fix**:
+- The disaggregated files' separate, independent, already-documented
+  288-hours-not-~8760 shape bug above -- their magnitude is now correct,
+  but they still only cover 12 scattered days per year, not a full year.
+- The Amon-vs-daily sample/quantile-resolution issue documented
+  elsewhere in this note -- entirely separate mechanism.
+- **The code itself.** `_apply_scale_offset_resample`
+  (`ocean-prep/lib/bias_correction/utils.py:449`) still has this exact
+  bug for any future `bc-correct` run that uses `resample: daily` on an
+  accumulated (not rate) local variable without a scale_factor that
+  already converts it to a rate -- `evspsbl` today, and `pr`/any other
+  accumulated ERA5 variable if `resample: daily` is ever added to it (as
+  was being tested when this was found). The retroactive file patch
+  fixes existing output only; the next real `evspsbl` run will reproduce
+  the bug unless the code is fixed too -- not yet done, pending a
+  decision on the right general fix (sum instead of mean, or require an
+  explicit rate-converting `scale_factor` before allowing `resample:
+  daily` on a non-rate variable).
