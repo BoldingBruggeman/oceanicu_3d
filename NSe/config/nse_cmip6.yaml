@@ -336,6 +336,23 @@ output:
     - fish_totlandings
     - fish_demlandings
     - fish_pellandings
+    fabm_ices:
+    - O2_o
+    - O3_pH
+    - O3_pCO2
+    - total_phytoplankton_chl_result
+    - N3_n
+    - N1_p
+    - N5_s
+    - N4_n
+    - total_phytoplankton_carbon_result
+    - total_zooplankton_carbon_result
+    - R1_c
+    - R2_c
+    - R3_c
+    - R6_c
+    - R8_c
+    - R4_c
   files:
   - type: netcdf
     netcdf:
@@ -437,6 +454,22 @@ output:
       - salt
       z_index: 0
       generate_unique_name: true
+  - type: netcdf
+    netcdf:
+      sync_interval: 1
+      format: NETCDF4
+      interval: 1
+      interval_units: DAYS
+      path: ices_daily.nc
+      start: '2010-01-01'
+      stop: '2024-01-01'
+    variable_requests:
+    - groups:
+      - fabm_ices
+      requires_fabm: true
+    - fields:
+      - temp
+      - salt
 hydrography:
   source: WOA
   CMEMS:
