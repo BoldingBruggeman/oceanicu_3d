@@ -291,7 +291,7 @@ def _main_tracked(args: argparse.Namespace) -> int:
                   f"SLURM job is no longer active -- treating as crashed/orphaned.",
                   file=sys.stderr)
             rt.finish_chunk(conn, experiment_id=args.experiment_id, chunk_index=running["chunk_index"],
-                             exit_code=-1, nan_detected=False, user=user)
+                             exit_code=rt.EXIT_CODE_ORPHANED, nan_detected=False, user=user)
             print(f"Marked failed. Investigate, then "
                   f"'oceanicu_experiments.py rerun --experiment-id {args.experiment_id} --from-current' to redo it.",
                   file=sys.stderr)
