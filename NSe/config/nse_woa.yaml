@@ -276,8 +276,9 @@ output:
     - N5_s_sfl_tot_calculator_result
     - N5_s_bfl_tot_calculator_result
     - N5_s_sms_tot_calculator_result
-    fabm_mizer:  # placeholder -- oceanicu_driver.py overwrites this with fish_c1..fish_c100 at generation time
+    fabm_mizer:  # placeholder -- oceanicu_providers.derive_config_value_overrides overwrites this with fish_c1..fish_c100 at generation time
     - fish_c1
+    fabm_mizer_diagnostics:
     - fish_c_tot
     - fish_c_pel
     - fish_c_dem
@@ -354,6 +355,7 @@ output:
       time_average: true
     - groups:
       - fabm_mizer
+      - fabm_mizer_diagnostics
       requires_fabm_dependency: fish/fishing_pressure
       time_average: true
   - type: netcdf

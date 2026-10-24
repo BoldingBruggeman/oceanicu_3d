@@ -37,8 +37,12 @@ silently shadowing one section with the other.
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
+import yaml
+
+from pygetm_config import loader
 from pygetm_config.model import ChoiceSpec, Importance, ParameterSpec, TypeRef
 from pygetm_config.providers import make_provider_slot
 
@@ -914,10 +918,70 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
 # time) and side-effect-free (returns overrides for the caller to apply/
 # consult, never mutates `config`).
 def derive_config_value_overrides(config: dict) -> dict:
+    overrides: dict = {}
+
     fabm_cfg = config.get("fabm") or {}
     if fabm_cfg.get("source") == "ERSEM" and fabm_cfg.get("file"):
-        return {"simulation.fabm": fabm_cfg["file"]}
-    return {}
+        overrides["simulation.fabm"] = fabm_cfg["file"]
+
+    # output.variable_groups.fabm_mizer -- a VECTOR variable (nclass size-
+    # class carbon fields, fish_c1..fish_c<nclass>), not something to
+    # hand-list in every domain config. nclass is read directly from the
+    # configured fabm.yaml itself (instances.<name>.parameters.nclass, for
+    # whichever instance's model starts with "mizer/"). Moved here
+    # 2026-10-24 (from oceanicu_driver.py's own main(), where this ONLY
+    # ever helped that one entrypoint -- same real gap as simulation.fabm
+    # above, now fixed the same way: every generation mode (oceanicu_
+    # driver.py direct/--dump-python, TUI/web 'Generate script') consults
+    # this same deriver via pygetm_config.loader.configure_output/codegen.
+    # _emit_output, which both merge any "output.variable_groups.<name>"
+    # key here into the real variable_groups dict before resolving any
+    # group reference). Falls back to the last known-correct value (100)
+    # with a clear warning if the file can't be found/parsed, rather than
+    # silently guessing. Driven entirely by whether any output.files
+    # variable_requests entry already references the fabm_mizer group,
+    # same "driven by what's already referenced" pattern as before --
+    # ALWAYS overrides whatever the raw YAML had there, since this list is
+    # derived, never hand-maintained (same rule as any other code-generated
+    # content in this project -- see nse_cmip6.yaml's own fabm_mizer key,
+    # which must hold ONLY a placeholder; real Mizer diagnostic names that
+    # aren't part of this nclass-sized expansion belong in a SEPARATE group,
+    # e.g. fabm_mizer_diagnostics).
+    #
+    # Unlike simulation.fabm above, this reads config['fabm']['folder']/
+    # ['file'] directly too -- already flattened by the time this function
+    # runs (same reasoning, see this function's own docstring), so no
+    # fabm_source-keyed nesting workaround is needed here either.
+    if any(
+        "fabm_mizer" in (req.get("groups") or [])
+        for file_entry in config.get("output", {}).get("files", [])
+        for req in file_entry.get("variable_requests", [])
+    ):
+        _FISH_NCLASS_FALLBACK = 100
+        nclass = _FISH_NCLASS_FALLBACK
+        fabm_file = fabm_cfg.get("file")
+        if fabm_file:
+            try:
+                fabm_file_resolved = fabm_file
+                if (fabm_cfg.get("folder") and not Path(fabm_file).is_absolute()
+                        and "$" not in fabm_file):
+                    fabm_file_resolved = str(
+                        Path(loader.resolve_data_path(fabm_cfg["folder"])) / fabm_file)
+                fabm_yaml_path = Path(loader.resolve_data_path(fabm_file_resolved))
+                fabm_yaml = yaml.safe_load(fabm_yaml_path.read_text())
+                for inst in (fabm_yaml.get("instances") or {}).values():
+                    if str(inst.get("model", "")).startswith("mizer/"):
+                        nclass = int(inst["parameters"]["nclass"])
+                        break
+                else:
+                    print(f"WARNING: no mizer instance found in {fabm_yaml_path} -- "
+                          f"using fabm_mizer nclass={_FISH_NCLASS_FALLBACK}", file=sys.stderr)
+            except (OSError, RuntimeError, KeyError, ValueError, yaml.YAMLError) as exc:
+                print(f"WARNING: couldn't read nclass from fabm.yaml ({exc}) -- "
+                      f"using fabm_mizer nclass={_FISH_NCLASS_FALLBACK}", file=sys.stderr)
+        overrides["output.variable_groups.fabm_mizer"] = [f"fish_c{i}" for i in range(1, nclass + 1)]
+
+    return overrides
 
 
 # ----------------------------------------------------------------------

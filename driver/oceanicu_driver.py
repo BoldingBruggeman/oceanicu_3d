@@ -433,58 +433,15 @@ def main(argv=None) -> int:
         fabm[fabm_source] = fabm_cfg
         raw["fabm"] = fabm
 
-    # output.variable_groups.fabm_mizer -- a VECTOR variable (nclass size-
-    # class carbon fields, fish_c1..fish_c<nclass>), not something to
-    # hand-list in every domain config. nclass is read directly from the
-    # configured fabm.yaml itself (instances.<name>.parameters.nclass, for
-    # whichever instance's model starts with "mizer/"). fabm.ERSEM.file is
-    # a bare filename -- joined with fabm.ERSEM.folder (both siblings on
-    # raw's pre-flattened fabm[fabm_source] dict) so this doesn't depend on
-    # generation happening to run from the fabm folder's own directory
-    # (was cwd-relative until 2026-09-24, breaking for any other cwd --
-    # same fix applied to check_inputs.py's mirror of this same lookup).
-    # Still falls back to the last known-correct value (100) with a clear
-    # warning if the file can't be found/parsed, rather than silently
-    # guessing. Driven entirely by whether any
-    # output.files variable_requests entry already references the
-    # fabm_mizer group, same "driven by what's already referenced" pattern
-    # as the debug-group injection below -- always OVERWRITES whatever the
-    # raw YAML had there, since this list is derived, never hand-maintained
-    # (same rule as any other code-generated content in this project).
-    if any(
-        "fabm_mizer" in (req.get("groups") or [])
-        for file_entry in raw.get("output", {}).get("files", [])
-        for req in file_entry.get("variable_requests", [])
-    ):
-        _FISH_NCLASS_FALLBACK = 100
-        _nclass = _FISH_NCLASS_FALLBACK
-        # raw (pre-validate_config) still has fabm.<source>.file nested under
-        # its own source label -- choice-flattening onto the parent dict only
-        # happens INSIDE validate_config, not yet at this point.
-        _fabm_source_cfg = (fabm.get(fabm_source) or {}) if fabm_source else {}
-        _fabm_file = _fabm_source_cfg.get("file")
-        if _fabm_file:
-            try:
-                _fabm_file_resolved = _fabm_file
-                if (_fabm_source_cfg.get("folder") and not Path(_fabm_file).is_absolute()
-                        and "$" not in _fabm_file):
-                    _fabm_file_resolved = str(
-                        Path(loader.resolve_data_path(_fabm_source_cfg["folder"])) / _fabm_file)
-                _fabm_yaml_path = Path(loader.resolve_data_path(_fabm_file_resolved))
-                _fabm_yaml = yaml.safe_load(_fabm_yaml_path.read_text())
-                for _inst in (_fabm_yaml.get("instances") or {}).values():
-                    if str(_inst.get("model", "")).startswith("mizer/"):
-                        _nclass = int(_inst["parameters"]["nclass"])
-                        break
-                else:
-                    print(f"WARNING: no mizer instance found in {_fabm_yaml_path} -- "
-                          f"using fabm_mizer nclass={_FISH_NCLASS_FALLBACK}", file=sys.stderr)
-            except (OSError, RuntimeError, KeyError, ValueError, yaml.YAMLError) as exc:
-                print(f"WARNING: couldn't read nclass from fabm.yaml ({exc}) -- "
-                      f"using fabm_mizer nclass={_FISH_NCLASS_FALLBACK}", file=sys.stderr)
-        raw.setdefault("output", {}).setdefault("variable_groups", {})["fabm_mizer"] = [
-            f"fish_c{i}" for i in range(1, _nclass + 1)
-        ]
+    # output.variable_groups.fabm_mizer expansion (nclass size-class carbon
+    # fields, fish_c1..fish_c<nclass>) moved to oceanicu_providers.
+    # derive_config_value_overrides 2026-10-24 -- that used to live here,
+    # but only ever helped THIS entrypoint, not plain `pygetm-config run`/
+    # `dump-python` or the TUI/web frontend's "Generate script" (same real
+    # gap simulation.fabm's own derivation had, just above). It's now a
+    # real PYGETM_CONFIG_VALUE_DERIVERS entry, consulted by pygetm_config.
+    # loader.configure_output/codegen._emit_output themselves, so every
+    # entrypoint gets the same expanded fabm_mizer group.
 
     raw.setdefault("runtime", {})["time"] = args.start
 
