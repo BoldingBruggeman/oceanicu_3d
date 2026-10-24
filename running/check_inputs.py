@@ -245,7 +245,7 @@ def _list_river_files(config: dict, start: str, stop: str) -> list:
     HIST_CUTOFF_YEAR = 2014
     if rcfg.get("source") == "CMIP6" and datetime.datetime.fromisoformat(start).year <= HIST_CUTOFF_YEAR:
         hist_folder = Path(_resolve_data_path("${RIVER_FOLDER}"))
-        hist_filename = os.environ.get("RIVER_FILE", "EMORID_1990_2024.nc")
+        hist_filename = os.environ.get("RIVER_FILE", "EMORID_1993_2024_conc_nemo_TALK_DIC.nc")
         if config.get("runtime", {}).get("calendar") == "noleap":
             hist_filename = hist_filename.removesuffix(".nc") + "_noleap.nc"
         hist_path = hist_folder / hist_filename
