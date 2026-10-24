@@ -400,6 +400,47 @@ def _parse_db_spec(spec: Union[str, Path, "RemoteSpec"]) -> Union[Path, "RemoteS
     return RemoteSpec(host, db_path, relay_dir)
 
 
+def resolve_db_path_arg(
+    db_arg: Optional[str],
+    *,
+    env_var: str = "OCEANICU_EXPERIMENT_DB",
+    required: bool = True,
+    allow_remote: bool = True,
+) -> Optional[str]:
+    """The one shared --db/env-var resolution convention every running/*.py
+    entrypoint uses: *db_arg* (typically args.db) wins over *env_var* if
+    both are given. Returns the raw string (an ssh://... URL or a local
+    path), unparsed -- connect() and _parse_db_spec() still do their own
+    parsing on top of this; this function only answers "what string was
+    configured, if any". Previously reimplemented independently (with
+    slightly different error-handling styles) in oceanicu_experiments.py,
+    get_commands_and_update_registry.py, and reap_orphaned_chunks.py --
+    centralized here (2026-10-24) per the cross-repo code review's own
+    "DB-path resolution duplicated 6x" finding.
+
+    required=True (default) raises RuntimeError with the project's
+    standard message if neither is given; required=False returns None
+    instead, for callers that treat "nothing configured" as a legitimate
+    state (e.g. oceanicu_experiments.py's dry-run path).
+
+    allow_remote=False is for an entrypoint that must run with a local
+    path only (e.g. get_commands_and_update_registry.py, which only ever
+    runs on the registry's own machine, never over the relay) -- raises
+    if the resolved value is an ssh:// URL, regardless of *required*.
+    """
+    resolved = db_arg or os.environ.get(env_var)
+    if not resolved:
+        if required:
+            raise RuntimeError(f"No database path given: pass --db, or set {env_var}.")
+        return None
+    if not allow_remote and resolved.startswith("ssh://"):
+        raise RuntimeError(
+            f"--db/{env_var} must be a local path here (got {resolved!r} -- "
+            f"ssh:// is not supported by this entrypoint)."
+        )
+    return resolved
+
+
 class RemoteConn:
     """Stands in for a real sqlite3.Connection when the registry lives
     behind a relay. Every @_rpc_or_local-decorated function, called with

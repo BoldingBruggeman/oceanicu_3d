@@ -404,9 +404,10 @@ def main() -> int:
                          "(the HPC's login node, not a compute node).")
     args = p.parse_args()
 
-    args.db = args.db or os.environ.get("OCEANICU_EXPERIMENT_DB")
-    if not args.db:
-        print("ERROR: --db not given and OCEANICU_EXPERIMENT_DB not set.", file=sys.stderr)
+    try:
+        args.db = rt.resolve_db_path_arg(args.db, allow_remote=False)
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
         return 1
 
     if not args.queue and not args.queue_dir:
@@ -415,11 +416,6 @@ def main() -> int:
             print("ERROR: one of --queue/--queue-dir is required (or set "
                   "OCEANICU_HPC_COMMANDS_DIR).", file=sys.stderr)
             return 1
-
-    if args.db.startswith("ssh://"):
-        print("ERROR: --db must be a local path -- get_commands_and_update_registry.py only "
-              "ever runs where the registry actually lives, never over the relay.", file=sys.stderr)
-        return 1
 
     if args.pull_from and not args.queue_dir:
         print("ERROR: --pull-from needs --queue-dir (it syncs a whole directory, "

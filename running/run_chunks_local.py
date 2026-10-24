@@ -68,6 +68,12 @@ def main() -> int:
 
     # Never the real registry -- see module docstring. oceanicu_experiments.py's
     # own add-refusal check exempts /tmp/ paths specifically for this.
+    # Deliberately NOT experiment_tracking.resolve_db_path_arg() -- that's
+    # the shared "db or env var, required" convention every other
+    # entrypoint uses, but this one needs the OPPOSITE defaults: a
+    # fallback value when unset (rather than an error) and a /tmp-only
+    # restriction (rather than allowing any path) -- see the docstring
+    # above for why.
     db_path = os.environ.get("OCEANICU_EXPERIMENT_DB", "/tmp/oceanicu_local_registry.sqlite")
     # Resolved, not a plain string prefix check -- "/tmp/../data/real.sqlite"
     # satisfies str.startswith("/tmp/") while actually opening a path

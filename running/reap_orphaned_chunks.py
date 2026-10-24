@@ -26,7 +26,6 @@ Usage: OCEANICU_EXPERIMENT_DB=/path/submission_registry.sqlite reap_orphaned_chu
 """
 from __future__ import annotations
 
-import os
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -45,8 +44,9 @@ def _ts() -> str:
 
 
 def main() -> int:
-    db = os.environ.get("OCEANICU_EXPERIMENT_DB")
-    if not db:
+    try:
+        db = rt.resolve_db_path_arg(None)
+    except RuntimeError:
         print(f"{_ts()}: ERROR: OCEANICU_EXPERIMENT_DB must be set.", file=sys.stderr)
         return 1
 

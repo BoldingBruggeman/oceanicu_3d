@@ -174,10 +174,9 @@ def _print_table(rows: list, columns: list[str], labels: dict[str, str] | None =
 
 
 def _resolve_real_db_path(args: argparse.Namespace):
-    real = args.db or os.environ.get("OCEANICU_EXPERIMENT_DB")
-    if not real:
-        raise RuntimeError("No database path given: pass --db, or set OCEANICU_EXPERIMENT_DB.")
-    return rt._parse_db_spec(real)  # Path, or RemoteSpec for an ssh:// path
+    resolved = rt.resolve_db_path_arg(args.db)
+    assert resolved is not None  # required=True (default) guarantees this, or raises
+    return rt._parse_db_spec(resolved)  # Path, or RemoteSpec for an ssh:// path
 
 
 def _pull_snapshot_copy(real_db, scratch_db: Path) -> None:
@@ -501,7 +500,7 @@ def _refuse_direct_add_unless_hpc(args: argparse.Namespace) -> "str | None":
     registry is never there)."""
     if args.dry_run:
         return None
-    db = args.db or os.environ.get("OCEANICU_EXPERIMENT_DB") or ""
+    db = rt.resolve_db_path_arg(args.db, required=False) or ""
     if db.startswith("/tmp/"):
         return None
     if os.environ.get("OCEANICU_HPC") == "1":
