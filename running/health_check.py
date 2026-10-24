@@ -210,7 +210,7 @@ def main() -> int:
                 ok, msg = rt.cancel_slurm_job(slurm_job_id)
                 print(f"{_ts()}: health-check: scancel {slurm_job_id}: {'ok' if ok else 'FAILED'} ({msg})")
                 rt.finish_chunk(conn, experiment_id=args.experiment_id, chunk_index=chunk_index,
-                                 exit_code=-1, nan_detected=False, user="health_check")
+                                 exit_code=rt.EXIT_CODE_STALLED, nan_detected=False, user="health_check")
                 if state_path is not None:
                     state_path.unlink(missing_ok=True)
                 return 0

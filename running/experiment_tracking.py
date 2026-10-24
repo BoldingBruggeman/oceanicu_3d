@@ -77,6 +77,37 @@ EXPERIMENT_CONTROLS = ("run", "pause_requested", "paused")
 EXPERIMENT_STATUSES = ("not_started", "in_progress", "paused", "complete", "complete_with_warnings", "failed")
 CHUNK_STATUSES = ("running", "done", "failed")
 
+# finish_chunk() only ever sees status='done' (exit_code==0) or 'failed'
+# (anything else) -- it has no third state for "the process never really
+# exited with this code, we forced a verdict." Four different callers all
+# used to share the single sentinel exit_code=-1 for that forced-verdict
+# case, which made a deliberate human kill indistinguishable (short of
+# reading the free-text history log for the 'user' field) from a job
+# SLURM silently lost (orphaned) or one that hung without crashing
+# (stalled) -- all three rendered as identical "status=failed exit_code=-1"
+# rows. Split into distinct negative sentinels, one per cause, so
+# exit_code alone is self-explanatory; see EXIT_CODE_LABELS for display.
+EXIT_CODE_KILLED = -1  # oceanicu_experiments.py cmd_kill: human-requested scancel
+EXIT_CODE_ORPHANED = -2  # chunk_runner.py / reap_orphaned_chunks.py: SLURM job vanished without finish_chunk()
+EXIT_CODE_STALLED = -3  # health_check.py: SLURM job still alive but TotalCPU stopped advancing
+
+EXIT_CODE_LABELS = {
+    0: "ok",
+    EXIT_CODE_KILLED: "killed",
+    EXIT_CODE_ORPHANED: "orphaned",
+    EXIT_CODE_STALLED: "stalled",
+}
+
+
+def describe_exit_code(exit_code: Optional[int]) -> str:
+    """exit_code, annotated with its EXIT_CODE_LABELS meaning where one is
+    known (e.g. '-2 (orphaned)'); a real process exit code with no
+    special meaning (0 aside) is returned as-is, unannotated."""
+    if exit_code is None:
+        return ""
+    label = EXIT_CODE_LABELS.get(exit_code)
+    return f"{exit_code} ({label})" if label and exit_code != 0 else str(exit_code)
+
 # list_experiments' allowed --sort keys, each mapped to a real ORDER BY
 # clause -- an allow-list, not a passthrough, so a sort key never reaches
 # the query as raw interpolated SQL. "priority" (the pre-existing default)

@@ -674,7 +674,7 @@ def cmd_kill(args: argparse.Namespace) -> int:
             print(f"WARNING: scancel {job_id} failed ({msg}) -- job may already be gone; "
                   f"marking the chunk failed in the DB anyway.", file=sys.stderr)
         rt.finish_chunk(conn, experiment_id=args.experiment_id, chunk_index=chunk_index,
-                         exit_code=-1, nan_detected=False, user=user)
+                         exit_code=rt.EXIT_CODE_KILLED, nan_detected=False, user=user)
     print(f"{args.experiment_id}: chunk {chunk_index} (SLURM job {job_id}) killed and marked failed. "
           f"Use 'rerun --from-current' (or --from-chunk/--from-scratch) to redo it once ready.")
     return 0
@@ -871,6 +871,7 @@ def cmd_show(args: argparse.Namespace) -> int:
         chunks_display = [
             {
                 **dict(c),
+                "exit_code": rt.describe_exit_code(c["exit_code"]),
                 "script_sha256": (c["script_sha256"] or "")[:12],
                 "config_sha256": (c["config_sha256"] or "")[:12],
             }

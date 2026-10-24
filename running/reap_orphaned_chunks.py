@@ -82,7 +82,7 @@ def main() -> int:
                   f"{row['slurm_job_id']!r}) marked running but its job is no "
                   f"longer active -- marking failed.")
             rt.finish_chunk(conn, experiment_id=experiment_id, chunk_index=chunk_index,
-                             exit_code=-1, nan_detected=False, user="reap_orphaned_chunks")
+                             exit_code=rt.EXIT_CODE_ORPHANED, nan_detected=False, user="reap_orphaned_chunks")
             reaped += 1
 
     if reaped:

@@ -172,6 +172,7 @@ data_assignments:
   pre_transform_scale: 1.0
   pre_transform_offset: 0.0
   on_grid: false
+  climatology: true
   file: ${KD490_FOLDER}/KD490_clim.nc
   variable: KD490_filled
 - target: open_boundary.temp
@@ -180,6 +181,78 @@ data_assignments:
 - target: open_boundary.salt
   kind: boundary_type
   boundary_condition_type: SPONGE
+- target: open_boundary.R4_c
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.R4_c.values
+  kind: constant
+  constant_value: 0.0033
+- target: open_boundary.R4_n
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.R4_n.values
+  kind: constant
+  constant_value: 4.158e-05
+- target: open_boundary.R4_p
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.R4_p.values
+  kind: constant
+  constant_value: 2.5938e-06
+- target: open_boundary.R6_c
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.R6_c.values
+  kind: constant
+  constant_value: 0.0033
+- target: open_boundary.R6_n
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.R6_n.values
+  kind: constant
+  constant_value: 4.158e-05
+- target: open_boundary.R6_p
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.R6_p.values
+  kind: constant
+  constant_value: 2.5938e-06
+- target: open_boundary.R8_c
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.R8_c.values
+  kind: constant
+  constant_value: 0.0033
+- target: open_boundary.R8_n
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.R8_n.values
+  kind: constant
+  constant_value: 4.158e-05
+- target: open_boundary.R8_p
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.R8_p.values
+  kind: constant
+  constant_value: 2.5938e-06
+- target: open_boundary.R6_s
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.R6_s.values
+  kind: constant
+  constant_value: 3.8879e-05
+- target: open_boundary.R8_s
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.R8_s.values
+  kind: constant
+  constant_value: 3.8879e-05
+- target: open_boundary.L2_c
+  kind: boundary_type
+  boundary_condition_type: SPONGE
+- target: open_boundary.L2_c.values
+  kind: constant
+  constant_value: 0.0001
 output:
   folder: ${OUTPUT_FOLDER}
   variable_groups:
