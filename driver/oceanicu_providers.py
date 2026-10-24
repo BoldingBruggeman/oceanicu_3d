@@ -979,6 +979,19 @@ def derive_config_value_overrides(config: dict) -> dict:
             except (OSError, RuntimeError, KeyError, ValueError, yaml.YAMLError) as exc:
                 print(f"WARNING: couldn't read nclass from fabm.yaml ({exc}) -- "
                       f"using fabm_mizer nclass={_FISH_NCLASS_FALLBACK}", file=sys.stderr)
+        else:
+            # fabm.source != "ERSEM" (e.g. "none") -- no fabm.file to read at
+            # all, same silent-gap risk the other branches already warn
+            # about. Harmless today only because every real fabm_mizer
+            # variable_requests entry also carries requires_fabm_dependency:
+            # fish/fishing_pressure, which pygetm-config's loader/codegen
+            # check at actual runtime (sim.fabm.has_dependency(...)) and
+            # skips the whole request when FABM isn't configured -- so this
+            # fallback value is computed but never actually requested as
+            # output. Warn anyway so every fallback path is equally visible
+            # (e.g. nse_woa.yaml, nse_cmems_tides.yaml: fabm.source: none).
+            print(f"WARNING: fabm.source={fabm_cfg.get('source')!r} has no fabm.file to read -- "
+                  f"using fabm_mizer nclass={_FISH_NCLASS_FALLBACK}", file=sys.stderr)
         overrides["output.variable_groups.fabm_mizer"] = [f"fish_c{i}" for i in range(1, nclass + 1)]
 
     return overrides
