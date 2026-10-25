@@ -11,7 +11,7 @@
     <item>
       <title>AMM7 — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/</guid>
       <description>&lt;h1 id=&#34;amm7-analysis-overview&#34;&gt;AMM7 Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;AMM7&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -62,7 +62,7 @@
     <item>
       <title>NS — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/</guid>
       <description>&lt;h1 id=&#34;ns-analysis-overview&#34;&gt;NS Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NS&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -122,7 +122,7 @@
     <item>
       <title>NSe — Analysis Overview</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/</guid>
       <description>&lt;h1 id=&#34;nse-analysis-overview&#34;&gt;NSe Analysis Overview&lt;/h1&gt;
 &lt;p&gt;This page summarises the analyses available for the &lt;strong&gt;NSe&lt;/strong&gt; area, organised by type.  Use the table of contents to jump to a specific section.&lt;/p&gt;
@@ -131,7 +131,7 @@
 &lt;p&gt;📊 &lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/#tides&#34;&gt;View Tidal Analysis rankings for NSe →&lt;/a&gt;&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/&#34;&gt;CMEMS/tidal&lt;/a&gt;&lt;/strong&gt; — 2011-2011–2011&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/&#34;&gt;CMEMS/tidal&lt;/a&gt;&lt;/strong&gt; — 2011–2011-2011&lt;/p&gt;
 &lt;table&gt;
   &lt;thead&gt;
       &lt;tr&gt;
@@ -164,7 +164,7 @@
   &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011-2011&#34;&gt;2011-2011&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011&#34;&gt;2011&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011&#34;&gt;2011&lt;/a&gt; · &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/#year-2011-2011&#34;&gt;2011-2011&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
@@ -708,7 +708,7 @@ both equally.&lt;/p&gt;</description>
     <item>
       <title>About</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/about/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/about/</guid>
       <description>&lt;p&gt;This site presents validation results and future-scenario projections
 for &lt;a href=&#34;https://github.com/BoldingBruggeman/getm-rewrite&#34;&gt;pyGETM&lt;/a&gt; ocean
@@ -731,7 +731,7 @@ and (where applicable) future-scenario boundary/forcing data.&lt;/p&gt;</descrip
     <item>
       <title>All Areas Rankings</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/rankings/all/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/all/</guid>
       <description>&lt;h1 id=&#34;all-areas--experiment-rankings&#34;&gt;All Areas — Experiment Rankings&lt;/h1&gt;
 &lt;p&gt;Composite-score ranking pooling experiments from every area together, one chart per validation category, labelled &amp;ldquo;Area: Experiment&amp;rdquo;. Only categories with experiments from two or more areas or runs end up here with a real comparison; see each area’s own rankings page for within-area comparisons.&lt;/p&gt;
@@ -749,14 +749,14 @@ and (where applicable) future-scenario boundary/forcing data.&lt;/p&gt;</descrip
     <item>
       <title>AMM7</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/amm7/</guid>
       <description>AMM7 modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>AMM7 - Experiment Baseline</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-baseline/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-baseline/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -808,7 +808,7 @@ and (where applicable) future-scenario boundary/forcing data.&lt;/p&gt;</descrip
     <item>
       <title>AMM7 - Experiment CMEMS</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-cmems/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-cmems/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -860,7 +860,7 @@ and (where applicable) future-scenario boundary/forcing data.&lt;/p&gt;</descrip
     <item>
       <title>AMM7 - Experiment CMEMS_prof</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-cmems-prof/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-cmems-prof/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -912,7 +912,7 @@ and (where applicable) future-scenario boundary/forcing data.&lt;/p&gt;</descrip
     <item>
       <title>AMM7 - Experiment NetSW_LW</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-netsw-lw/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-netsw-lw/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -964,7 +964,7 @@ and (where applicable) future-scenario boundary/forcing data.&lt;/p&gt;</descrip
     <item>
       <title>AMM7 - Experiment ObsKd</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-obskd/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-obskd/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -1016,12 +1016,12 @@ and (where applicable) future-scenario boundary/forcing data.&lt;/p&gt;</descrip
     <item>
       <title>AMM7 - TPXO9 - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-tpxo9/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-23
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-25
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
@@ -1035,7 +1035,7 @@ and (where applicable) future-scenario boundary/forcing data.&lt;/p&gt;</descrip
     <item>
       <title>AMM7 Rankings</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/rankings/amm7/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/amm7/</guid>
       <description>&lt;h1 id=&#34;amm7-experiment-rankings&#34;&gt;AMM7 Experiment Rankings&lt;/h1&gt;
 &lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;AMM7&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/amm7/overview/&#34;&gt;AMM7 overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
@@ -1053,7 +1053,7 @@ and (where applicable) future-scenario boundary/forcing data.&lt;/p&gt;</descrip
     <item>
       <title>CNRM-ESM2-1 — HISTORICAL</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/cnrm-esm2-1/historical/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/cnrm-esm2-1/historical/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period), historical&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/CNRM-ESM2-1/historical/meteo/evspsbl/plots/calibration_maps_historical_bilinear.png&#34;&gt;
@@ -1159,7 +1159,7 @@ Analysed: 2026-09-09 22:05:44
     <item>
       <title>CNRM-ESM2-1 — SSP1-2.6 — Low emissions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/cnrm-esm2-1/ssp126/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/cnrm-esm2-1/ssp126/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/CNRM-ESM2-1/ssp126/meteo/evspsbl/plots/calibration_maps_ssp126_bilinear.png&#34;&gt;
@@ -1174,7 +1174,7 @@ Analysed: 2026-09-09 22:05:44
     <item>
       <title>CNRM-ESM2-1 — SSP3-7.0 — High emissions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/cnrm-esm2-1/ssp370/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/cnrm-esm2-1/ssp370/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/CNRM-ESM2-1/ssp370/meteo/evspsbl/plots/calibration_maps_ssp370_bilinear.png&#34;&gt;
@@ -1189,7 +1189,7 @@ Analysed: 2026-09-09 22:05:44
     <item>
       <title>Data Sources</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/data-sources/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/data-sources/</guid>
       <description>&lt;p&gt;What data feeds these simulations and what they&amp;rsquo;re checked against, from generic (any model setup) to specific.&lt;/p&gt;
 &lt;h2 id=&#34;forcing--boundary-data-any-model-setup&#34;&gt;Forcing &amp;amp; Boundary Data (Any Model Setup)&lt;/h2&gt;
@@ -1318,7 +1318,7 @@ Analysed: 2026-09-09 22:05:44
     <item>
       <title>GFDL-ESM4 — HISTORICAL</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/gfdl-esm4/historical/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/gfdl-esm4/historical/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period), historical&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/GFDL-ESM4/historical/meteo/evspsbl/plots/calibration_maps_historical_bilinear.png&#34;&gt;
@@ -1424,7 +1424,7 @@ Analysed: 2026-09-10 09:43:24
     <item>
       <title>GFDL-ESM4 — SSP1-2.6 — Low emissions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/gfdl-esm4/ssp126/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/gfdl-esm4/ssp126/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/GFDL-ESM4/ssp126/meteo/evspsbl/plots/calibration_maps_ssp126_bilinear.png&#34;&gt;
@@ -1439,7 +1439,7 @@ Analysed: 2026-09-10 09:43:24
     <item>
       <title>GFDL-ESM4 — SSP3-7.0 — High emissions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/gfdl-esm4/ssp370/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/gfdl-esm4/ssp370/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/GFDL-ESM4/ssp370/meteo/evspsbl/plots/calibration_maps_ssp370_bilinear.png&#34;&gt;
@@ -1454,7 +1454,7 @@ Analysed: 2026-09-10 09:43:24
     <item>
       <title>MLE Comparison — AMM7</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-mle-comparison/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/amm7-mle-comparison/</guid>
       <description>&lt;h1 id=&#34;mle-cross-experiment-comparison--amm7&#34;&gt;MLE Cross-Experiment Comparison — AMM7&lt;/h1&gt;
 &lt;p&gt;SVD-reduced maximum-likelihood ranking of model experiments against a common observation footprint.&lt;/p&gt;
@@ -1507,7 +1507,7 @@ Analysed: 2026-09-10 09:43:24
     <item>
       <title>MLE Comparison — NS</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-mle-comparison/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-mle-comparison/</guid>
       <description>&lt;h1 id=&#34;mle-cross-experiment-comparison--ns&#34;&gt;MLE Cross-Experiment Comparison — NS&lt;/h1&gt;
 &lt;p&gt;SVD-reduced maximum-likelihood ranking of model experiments against a common observation footprint.&lt;/p&gt;
@@ -1596,7 +1596,7 @@ Analysed: 2026-09-10 09:43:24
     <item>
       <title>MPI-ESM1-2-HR — HISTORICAL</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/historical/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/historical/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period), historical&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/MPI-ESM1-2-HR/historical/meteo/evspsbl/plots/calibration_maps_historical_bilinear.png&#34;&gt;
@@ -1702,7 +1702,7 @@ Analysed: 2026-09-09 22:45:14
     <item>
       <title>MPI-ESM1-2-HR — SSP1-2.6 — Low emissions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/ssp126/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/ssp126/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/MPI-ESM1-2-HR/ssp126/meteo/evspsbl/plots/calibration_maps_ssp126_bilinear.png&#34;&gt;
@@ -1717,7 +1717,7 @@ Analysed: 2026-09-09 22:45:14
     <item>
       <title>MPI-ESM1-2-HR — SSP3-7.0 — High emissions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/ssp370/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/ssp370/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/MPI-ESM1-2-HR/ssp370/meteo/evspsbl/plots/calibration_maps_ssp370_bilinear.png&#34;&gt;
@@ -1732,14 +1732,14 @@ Analysed: 2026-09-09 22:45:14
     <item>
       <title>NS</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/ns/</guid>
       <description>NS modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>NS - Experiment Adaptive_1</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-1/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-1/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -1837,7 +1837,7 @@ Analysed: 2026-05-04  12:32:44
     <item>
       <title>NS - Experiment Adaptive_2</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-2/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-2/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -1935,7 +1935,7 @@ Analysed: 2026-05-04  12:35:46
     <item>
       <title>NS - Experiment Adaptive_3</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-3/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-adaptive-3/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2033,7 +2033,7 @@ Analysed: 2026-05-04  12:38:44
     <item>
       <title>NS - Experiment Baseline</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-baseline/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-baseline/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2131,7 +2131,7 @@ Analysed: 2026-05-04  12:23:48
     <item>
       <title>NS - Experiment CMEMS</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-cmems/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-cmems/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2193,7 +2193,7 @@ Analysed: 2026-05-04  12:23:48
     <item>
       <title>NS - Experiment ObsKd</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-obskd/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-obskd/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2291,7 +2291,7 @@ Analysed: 2026-05-04  12:41:44
     <item>
       <title>NS - Experiment SSR_SRT</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-srt/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-srt/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2320,7 +2320,7 @@ Analysed: 2026-05-04  12:41:44
     <item>
       <title>NS - Experiment SSR_STR</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssr-str/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2418,7 +2418,7 @@ Analysed: 2026-05-04  12:26:47
     <item>
       <title>NS - Experiment SSRD_STRD</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/ns-ssrd-strd/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2516,7 +2516,7 @@ Analysed: 2026-05-04  12:29:45
     <item>
       <title>NS Rankings</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/rankings/ns/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/ns/</guid>
       <description>&lt;h1 id=&#34;ns-experiment-rankings&#34;&gt;NS Experiment Rankings&lt;/h1&gt;
 &lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;NS&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/ns/overview/&#34;&gt;NS overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
@@ -2530,19 +2530,19 @@ Analysed: 2026-05-04  12:29:45
     <item>
       <title>NSe</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse/</guid>
       <description>NSe modeling area — validation results and experiment overview.</description>
     </item>
     <item>
       <title>NSe - CMEMS/tidal - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-23
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-25
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
@@ -2557,12 +2557,12 @@ Analysed: 2026-05-04  12:29:45
     <item>
       <title>NSe - CMEMS/tidal_avc - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal-avc/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal-avc/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-23
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-25
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
@@ -2577,12 +2577,12 @@ Analysed: 2026-05-04  12:29:45
     <item>
       <title>NSe - CMEMS/tidal_gvc - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal-gvc/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-tidal-gvc/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-23
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-25
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
@@ -2597,12 +2597,12 @@ Analysed: 2026-05-04  12:29:45
     <item>
       <title>NSe - CMIP6/tidal - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmip6-tidal/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmip6-tidal/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-23
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-25
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;tide-gauge-station-map&#34;&gt;Tide Gauge Station Map&lt;/h3&gt;
@@ -2616,7 +2616,7 @@ Analysed: 2026-05-04  12:29:45
     <item>
       <title>NSe - Experiment CMEMS/spinup</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-spinup/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-spinup/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2775,7 +2775,7 @@ Analysed: 2026-10-07  13:59:52
     <item>
       <title>NSe - Experiment CMEMS/v01E</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2824,7 +2824,7 @@ Analysed: 2026-10-07  13:59:52
     <item>
       <title>NSe - Experiment CMEMS/v01E_avc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e-avc/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e-avc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2874,7 +2874,7 @@ Analysed: 2026-10-07  13:59:52
     <item>
       <title>NSe - Experiment CMEMS/v01E_gvc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e-gvc/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01e-gvc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2923,7 +2923,7 @@ Analysed: 2026-10-07  13:59:52
     <item>
       <title>NSe - Experiment CMEMS/v01P</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -2991,7 +2991,7 @@ Analysed: 2026-10-07  13:59:52
     <item>
       <title>NSe - Experiment CMEMS/v01P_avc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p-avc/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p-avc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -3089,7 +3089,7 @@ Analysed: 2026-10-13  16:48:29
     <item>
       <title>NSe - Experiment CMEMS/v01P_gvc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p-gvc/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v01p-gvc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -3187,7 +3187,7 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>NSe - Experiment CMEMS/v02P_avc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v02p-avc/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v02p-avc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -3244,7 +3244,7 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>NSe - Experiment CMEMS/v02P_gvc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v02p-gvc/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v02p-gvc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -3301,7 +3301,7 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>NSe - Experiment CMEMS/v03P_avc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v03p-avc/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v03p-avc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -3351,7 +3351,7 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>NSe - Experiment CMEMS/v03P_gvc</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v03p-gvc/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-cmems-v03p-gvc/</guid>
       <description>&lt;p&gt;Horizontal Validation results comparing model output against observations.&lt;/p&gt;
 &lt;h2 id=&#34;experiment-information&#34;&gt;Experiment Information&lt;/h2&gt;
@@ -3400,12 +3400,12 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>NSe - WOA/tidal - Tidal Analysis</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/validations/nse-woa-tidal/</guid>
       <description>&lt;p&gt;Harmonic analysis of sea surface elevation compared with satellite products and tide gauge observations.&lt;/p&gt;
 &lt;h2 id=&#34;analysis-summary&#34;&gt;Analysis Summary&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Analyzed Constituents&lt;/strong&gt;: K1, K2, M2, N2, O1, P1, Q1, S2&lt;br&gt;
-&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-23
+&lt;strong&gt;Analysis Date&lt;/strong&gt;: 2026-10-25
 &lt;strong&gt;Satellite Product&lt;/strong&gt;: FES2014/TPXO9&lt;/p&gt;
 &lt;h2 id=&#34;plots&#34;&gt;Plots&lt;/h2&gt;
 &lt;h3 id=&#34;year-2010&#34;&gt;Year 2010&lt;/h3&gt;
@@ -3419,17 +3419,15 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>NSe — Future Boundary Conditions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/areas/nse-boundaries/</guid>
       <description>&lt;p&gt;Cross-model, cross-scenario summary of NSe&amp;rsquo;s future open-boundary conditions: delta-change temperature/salinity (CMIP6, bias-corrected against the CMEMS Northwest Shelf reanalysis), tidal elevation/currents (TPXO9 plus the CMIP6 ensemble-mean sea-level trend), and (as of 2026-09-22) delta-change biogeochemistry &amp;ndash; nitrate, phosphate, silicate, oxygen, dissolved inorganic carbon, and alkalinity &amp;ndash; across all three CMIP6 models and both scenarios (see the bug-fix campaign section below for how that came together).&lt;/p&gt;
-&lt;h2 id=&#34;delta-change-temperature--salinity&#34;&gt;Delta-change (temperature / salinity)&lt;/h2&gt;
-&lt;h3 id=&#34;temperature-thetao&#34;&gt;Temperature (thetao)&lt;/h3&gt;
-&lt;p&gt;&lt;em&gt;Source: AMM7/AMM15 delta-change: GFDL-ESM4/ssp126 [1985-01-01–2014-12-31 vs 2015-01-01–2100-12-31]&lt;/em&gt;&lt;/p&gt;</description>
+&lt;p&gt;&lt;em&gt;This page is the scientific comparison &amp;ndash; per-model/per-scenario plots and the bug-fix history behind them. For an automated pass/fail sanity check of this same bio boundary data (plausible ranges, cross-model consistency, storage encoding), see the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/guides/boundary-final-check-report/&#34;&gt;NSe Bio Boundary QA Report&lt;/a&gt; instead.&lt;/em&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>NSe Rankings</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/rankings/nse/</guid>
       <description>&lt;h1 id=&#34;nse-experiment-rankings&#34;&gt;NSe Experiment Rankings&lt;/h1&gt;
 &lt;p&gt;Composite-score ranking of every experiment validated for &lt;strong&gt;NSe&lt;/strong&gt;, one chart per validation category. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/validations/nse/overview/&#34;&gt;NSe overview&lt;/a&gt; for the full per-experiment statistics these are built from. See &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/rankings/all/&#34;&gt;All Areas&lt;/a&gt; to compare across areas.&lt;/p&gt;
@@ -3448,7 +3446,7 @@ Analysed: 2026-10-13  16:38:24
     <item>
       <title>Regridding</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</guid>
       <description>&lt;h1 id=&#34;regridding-user-guide&#34;&gt;Regridding User Guide&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;ocean_data.regridding&lt;/code&gt; provides xESMF-based regridding with automatic

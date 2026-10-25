@@ -6,12 +6,12 @@
     <description>Recent content in MPI-ESM1-2-HR on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 23 Oct 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 25 Oct 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>MPI-ESM1-2-HR — HISTORICAL</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/historical/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/historical/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period), historical&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/MPI-ESM1-2-HR/historical/meteo/evspsbl/plots/calibration_maps_historical_bilinear.png&#34;&gt;
@@ -117,7 +117,7 @@ Analysed: 2026-09-09 22:45:14
     <item>
       <title>MPI-ESM1-2-HR — SSP1-2.6 — Low emissions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/ssp126/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/ssp126/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period) — SSP1-2.6 — Low emissions, bilinear interpolation&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/MPI-ESM1-2-HR/ssp126/meteo/evspsbl/plots/calibration_maps_ssp126_bilinear.png&#34;&gt;
@@ -132,7 +132,7 @@ Analysed: 2026-09-09 22:45:14
     <item>
       <title>MPI-ESM1-2-HR — SSP3-7.0 — High emissions</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/ssp370/</link>
-      <pubDate>Fri, 23 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/mpi-esm1-2-hr/ssp370/</guid>
       <description>&lt;h2 id=&#34;evaporation-evspsbl&#34;&gt;Evaporation (evspsbl)&lt;/h2&gt;
 &lt;p&gt;&lt;img alt=&#34;Calibration maps (historical period) — SSP3-7.0 — High emissions, bilinear interpolation&#34; loading=&#34;lazy&#34; src=&#34;https://bolding-bruggeman.com/oceanicu_3d/scenarios/meteo/MPI-ESM1-2-HR/ssp370/meteo/evspsbl/plots/calibration_maps_ssp370_bilinear.png&#34;&gt;
