@@ -6,7 +6,7 @@
     <description>Recent content on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 23 Oct 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 25 Oct 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AMM7 — Analysis Overview</title>
@@ -378,6 +378,51 @@ current tool; the title and URL are unchanged.&lt;/p&gt;
 entry point as a subprocess, reusing one YAML config per step
 (&lt;code&gt;config/run_analyses.yaml&lt;/code&gt; maps step names to those per-step config
 files).&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>River Discharge &amp; Nutrient QA Report</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/river-final-check-report/</link>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/river-final-check-report/</guid>
+      <description>&lt;h1 id=&#34;river-discharge--nutrient-qa-report&#34;&gt;River Discharge &amp;amp; Nutrient QA Report&lt;/h1&gt;
+&lt;p&gt;Output of &lt;code&gt;ocean-prep/cli/river_final_check.py&lt;/code&gt; — a pre-production sanity
+check for the EMORID river discharge/nutrient pipeline (the real
+historical record, the nutrient climatology files, and the CMIP6
+delta-change projected flow files), run across all 3 models x 2
+scenarios. See the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/guides/data-quality-checks/&#34;&gt;Data Quality Checks guide&lt;/a&gt;
+for what this tool is and how to run it yourself.&lt;/p&gt;
+&lt;p&gt;This is a point-in-time report (generated 2026-10-25) — re-run the script
+for current data before trusting these specific numbers going forward.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>CMIP6 Meteo Forcing QA Report</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/meteo-final-check-report/</link>
+      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/meteo-final-check-report/</guid>
+      <description>&lt;h1 id=&#34;cmip6-meteo-forcing-qa-report&#34;&gt;CMIP6 Meteo Forcing QA Report&lt;/h1&gt;
+&lt;p&gt;Output of &lt;code&gt;ocean-prep/cli/meteo_final_check.py&lt;/code&gt; — a pre-production sanity
+check for the bias-corrected CMIP6 atmospheric forcing archive
+(&lt;code&gt;driver/scripts/meteo.py&lt;/code&gt;&amp;rsquo;s &lt;code&gt;meteo.source=CMIP6&lt;/code&gt; path reads this
+directly: tas/huss/uas/vas/psl/pr + radiation), run across all 3 models
+x 2 scenarios x historical, 10-day sample per file. See the
+&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/guides/data-quality-checks/&#34;&gt;Data Quality Checks guide&lt;/a&gt; for what this
+tool is and how to run it yourself.&lt;/p&gt;
+&lt;p&gt;This is a point-in-time report (generated 2026-10-25) — re-run the script
+for current data before trusting these specific numbers going forward.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Data Quality Checks</title>
+      <link>https://bolding-bruggeman.com/oceanicu_3d/guides/data-quality-checks/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/data-quality-checks/</guid>
+      <description>&lt;h1 id=&#34;data-quality-checks&#34;&gt;Data Quality Checks&lt;/h1&gt;
+&lt;p&gt;Three sibling pre-production sanity-check scripts, one per forcing
+pipeline, built in &lt;code&gt;ocean-prep/cli/&lt;/code&gt;. Each is a final, automated check
+against the real on-disk production data before it&amp;rsquo;s trusted for a run —
+not a replacement for a real pygetm dry-run or a short real simulation,
+but a check an automated tool can run in minutes that already found
+several real, independent bugs that would otherwise have surfaced as an
+odd-looking plot deep into a production run.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Scenario Analysis</title>
