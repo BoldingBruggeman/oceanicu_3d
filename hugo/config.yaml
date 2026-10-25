@@ -83,12 +83,15 @@ menu:
     - name: Data Sources
       url: data-sources/
       weight: 6
+    - name: Data Quality
+      url: guides/data-quality-checks/
+      weight: 7
     - name: Guides
       url: guides/
-      weight: 7
+      weight: 8
     - name: About
       url: about/
-      weight: 8
+      weight: 9
 
 # Markup settings
 markup:
