@@ -362,22 +362,20 @@ the dominant joint variance pattern, and the log-likelihood in that low-dimensio
 is a principled, multi-dimensional distance from perfect.&lt;/p&gt;</description>
     </item>
     <item>
-      <title>Bio Boundary QA Report</title>
+      <title>NSe Bio Boundary QA Report</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/boundary-final-check-report/</link>
       <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/boundary-final-check-report/</guid>
-      <description>&lt;h1 id=&#34;bio-boundary-qa-report&#34;&gt;Bio Boundary QA Report&lt;/h1&gt;
+      <description>&lt;h1 id=&#34;nse-bio-boundary-qa-report&#34;&gt;NSe Bio Boundary QA Report&lt;/h1&gt;
 &lt;p&gt;Output of &lt;code&gt;ocean-prep/cli/final_boundary_check.py&lt;/code&gt; — a pre-production
-sanity check for the NSe bio open-boundary pipeline
+sanity check for &lt;strong&gt;NSe&amp;rsquo;s own&lt;/strong&gt; bio open-boundary pipeline
 (no3/po4/si/o2/dissic/talk), across models, scenarios, and generation
-methods (raw CMIP6, delta-change, direct bias-correction). See the
-&lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/guides/data-quality-checks/&#34;&gt;Data Quality Checks guide&lt;/a&gt; for what this
-tool is and how to run it yourself.&lt;/p&gt;
-&lt;p&gt;This is a point-in-time report (generated 2026-10-25) — re-run the script
-for current data before trusting these specific numbers going forward.&lt;/p&gt;
-&lt;!-- BEGIN GENERATED REPORT --&gt;
-&lt;h2 id=&#34;summary&#34;&gt;Summary&lt;/h2&gt;
-&lt;p&gt;No problems found.&lt;/p&gt;</description>
+methods (raw CMIP6, delta-change, direct bias-correction). Unlike the
+river/meteo checks, this one is NSe-specific (hardcoded to NSe&amp;rsquo;s own
+boundary output) — a clean run here says nothing about AMM7 or NS. See
+the &lt;a href=&#34;https://bolding-bruggeman.com/oceanicu_3d/guides/data-quality-checks/&#34;&gt;Data Quality Checks guide&lt;/a&gt; for what
+this tool is, how to run it yourself, and how its scope compares to the
+other two.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Run Validation</title>
