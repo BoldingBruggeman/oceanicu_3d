@@ -639,6 +639,13 @@ boundaries:
       folder_template: '{model}/{scenario}/bdy'
       model: <SET BY add_experiments.py --model>
       scenario: <SET BY add_experiments.py --scenario>
+      # Matches nse_cmems.yaml's own explicit choice (see that file's
+      # comment for the full rationale) -- a real secular-trend
+      # extrapolation + Baltic salinity regression for the 2010-2014
+      # dissic/talk gap, rather than the default flat cycled_climatology
+      # (no trend, no Baltic-specific treatment). bio_carbon_pml_trend_
+      # 20100101_20141231.nc already exists for this CMIP6-range bridge.
+      dic_ta_historical_method: pml_trend
       tracers:
         N3_n:
           file: bdy_3d_no3_deltachange_20150101_21001231.nc
