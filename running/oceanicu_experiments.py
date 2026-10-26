@@ -225,6 +225,13 @@ def _snapshot(db_path: Path) -> dict:
     back as "no experiments", no special-casing needed."""
     with rt.connect(db_path) as conn:
         experiments = [dict(r) for r in rt.list_experiments(conn)]
+        # actual_chunk is derived, not a real column (see cmd_list's own
+        # identical merge) -- _EXPERIMENT_COLUMNS/_print_diff expect it on
+        # every row regardless, so it has to be added here too or a
+        # dry-run diff KeyErrors the moment it reaches that column.
+        latest = rt.get_latest_chunk_indices(conn)
+        for e in experiments:
+            e["actual_chunk"] = latest.get(e["experiment_id"], "")
         chunks = {r["experiment_id"]: [dict(c) for c in rt.list_chunks(conn, r["experiment_id"])] for r in experiments}
         history = {r["experiment_id"]: [dict(h) for h in rt.list_history(conn, r["experiment_id"])] for r in experiments}
     return {"experiments": experiments, "chunks": chunks, "history": history}
