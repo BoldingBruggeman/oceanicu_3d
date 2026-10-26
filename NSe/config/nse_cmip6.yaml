@@ -357,6 +357,8 @@ output:
     - O3_fair
     - Q7_c
     - Q6_c
+    - Q6_s
+    - K5_s
     - Y2_c
     - Y3_c
     - Y4_c
@@ -489,6 +491,9 @@ output:
     - groups:
       - fabm_mizer
       - fabm_mizer_diagnostics
+      requires_fabm_variable_prefix: fish
+      time_average: true
+    - groups:
       - fabm_mizer_fishing
       requires_fabm_dependency: fish/fishing_pressure
       time_average: true
