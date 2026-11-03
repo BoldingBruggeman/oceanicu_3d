@@ -353,7 +353,19 @@ output:
     - Z5_c
     - Z6_c
     - B1_c
+    - total_POC_z_flux_result # diagnostic variables can now be sliced in output requests
+    - total_zooplankton_loss_to_POC_result
+    - mld_z_ml
+    - zeu_z_eu
     fabm_ersem_2D:
+    - PP_euph_result
+    - PP_mld_result
+    - zoo_carbon_euph_result
+    - zoo_carbon_mld_result
+    - phy_carbon_mld_result
+    - phy_carbon_euph_result
+    - phy_chl_mld_result
+    - phy_chl_euph_result
     - O3_fair
     - Q7_c
     - Q6_c
