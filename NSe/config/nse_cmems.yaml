@@ -304,9 +304,9 @@ output:
     - ph_sf_result
     - phytoplankton_netPI_result
     - total_phytoplankton_chl_result
-    - total_zooplankton_carbon_result
-    - total_phytoplankton_carbon_result
-    - total_smallzooplankton_carbon_result
+  #  - total_zooplankton_carbon_result # individual components now available
+  #  - total_phytoplankton_carbon_result # individual components now available
+  #  - total_smallzooplankton_carbon_result # individual components now available
     - Z4_fzooc_result
     - Z4_fphytoc_result
     - Z4_fsmallzooc_result
