@@ -57,6 +57,33 @@ open_boundaries:
   mstart: 120
   mstop: 136
   type_2d: FLATHER_TRANSPORT
+  # Phyto-/zooplankton: ZERO_GRADIENT here, SPONGE (with a constant
+  # background value, boundaries.fabm tracers) on all other boundaries.
+  variable_types:
+    P1_Chl: ZERO_GRADIENT
+    P1_c: ZERO_GRADIENT
+    P1_n: ZERO_GRADIENT
+    P1_p: ZERO_GRADIENT
+    P2_Chl: ZERO_GRADIENT
+    P2_c: ZERO_GRADIENT
+    P2_n: ZERO_GRADIENT
+    P2_p: ZERO_GRADIENT
+    P3_Chl: ZERO_GRADIENT
+    P3_c: ZERO_GRADIENT
+    P3_n: ZERO_GRADIENT
+    P3_p: ZERO_GRADIENT
+    P4_Chl: ZERO_GRADIENT
+    P4_c: ZERO_GRADIENT
+    P4_n: ZERO_GRADIENT
+    P4_p: ZERO_GRADIENT
+    P1_s: ZERO_GRADIENT
+    Z4_c: ZERO_GRADIENT
+    Z5_c: ZERO_GRADIENT
+    Z5_n: ZERO_GRADIENT
+    Z5_p: ZERO_GRADIENT
+    Z6_c: ZERO_GRADIENT
+    Z6_n: ZERO_GRADIENT
+    Z6_p: ZERO_GRADIENT
 - side: BOTTOM
   name: 'CelticSeaS'
   l: 0
@@ -696,32 +723,33 @@ boundaries:
           boundary_condition_type: SPONGE
         # Low background boundary values for plankton/zooplankton/detritus pools
         # that have no boundary product (SPONGE, see open_boundary_sponge); the
-        # phyto-/zooplankton ones are ZERO_GRADIENT at the Baltic boundary instead.
+        # phyto-/zooplankton ones are ZERO_GRADIENT at the Baltic boundary instead
+        # (open_boundaries 'Baltic' variable_types).
         # Transferred from scylla's hand-edited generated_nse_cmems.py (2026-11-05).
-        P1_Chl: {constant: 0.0001, boundaries: {Baltic: ZERO_GRADIENT}}
-        P1_c: {constant: 0.0001, boundaries: {Baltic: ZERO_GRADIENT}}
-        P1_n: {constant: 1.26e-06, boundaries: {Baltic: ZERO_GRADIENT}}
-        P1_p: {constant: 7.86e-08, boundaries: {Baltic: ZERO_GRADIENT}}
-        P2_Chl: {constant: 0.0001, boundaries: {Baltic: ZERO_GRADIENT}}
-        P2_c: {constant: 0.0001, boundaries: {Baltic: ZERO_GRADIENT}}
-        P2_n: {constant: 1.26e-06, boundaries: {Baltic: ZERO_GRADIENT}}
-        P2_p: {constant: 7.86e-08, boundaries: {Baltic: ZERO_GRADIENT}}
-        P3_Chl: {constant: 0.0001, boundaries: {Baltic: ZERO_GRADIENT}}
-        P3_c: {constant: 0.0001, boundaries: {Baltic: ZERO_GRADIENT}}
-        P3_n: {constant: 1.26e-06, boundaries: {Baltic: ZERO_GRADIENT}}
-        P3_p: {constant: 7.86e-08, boundaries: {Baltic: ZERO_GRADIENT}}
-        P4_Chl: {constant: 0.0001, boundaries: {Baltic: ZERO_GRADIENT}}
-        P4_c: {constant: 0.0001, boundaries: {Baltic: ZERO_GRADIENT}}
-        P4_n: {constant: 1.26e-06, boundaries: {Baltic: ZERO_GRADIENT}}
-        P4_p: {constant: 7.86e-08, boundaries: {Baltic: ZERO_GRADIENT}}
-        P1_s: {constant: 1.18e-06, boundaries: {Baltic: ZERO_GRADIENT}}
-        Z4_c: {constant: 0.0001, boundaries: {Baltic: ZERO_GRADIENT}}
-        Z5_c: {constant: 0.0001, boundaries: {Baltic: ZERO_GRADIENT}}
-        Z5_n: {constant: 1.26e-06, boundaries: {Baltic: ZERO_GRADIENT}}
-        Z5_p: {constant: 7.86e-08, boundaries: {Baltic: ZERO_GRADIENT}}
-        Z6_c: {constant: 0.0001, boundaries: {Baltic: ZERO_GRADIENT}}
-        Z6_n: {constant: 1.26e-06, boundaries: {Baltic: ZERO_GRADIENT}}
-        Z6_p: {constant: 7.86e-08, boundaries: {Baltic: ZERO_GRADIENT}}
+        P1_Chl: {constant: 0.0001}
+        P1_c: {constant: 0.0001}
+        P1_n: {constant: 1.26e-06}
+        P1_p: {constant: 7.86e-08}
+        P2_Chl: {constant: 0.0001}
+        P2_c: {constant: 0.0001}
+        P2_n: {constant: 1.26e-06}
+        P2_p: {constant: 7.86e-08}
+        P3_Chl: {constant: 0.0001}
+        P3_c: {constant: 0.0001}
+        P3_n: {constant: 1.26e-06}
+        P3_p: {constant: 7.86e-08}
+        P4_Chl: {constant: 0.0001}
+        P4_c: {constant: 0.0001}
+        P4_n: {constant: 1.26e-06}
+        P4_p: {constant: 7.86e-08}
+        P1_s: {constant: 1.18e-06}
+        Z4_c: {constant: 0.0001}
+        Z5_c: {constant: 0.0001}
+        Z5_n: {constant: 1.26e-06}
+        Z5_p: {constant: 7.86e-08}
+        Z6_c: {constant: 0.0001}
+        Z6_n: {constant: 1.26e-06}
+        Z6_p: {constant: 7.86e-08}
         R4_c: {constant: 0.0033}
         R4_n: {constant: 4.158e-05}
         R4_p: {constant: 2.5938e-06}
