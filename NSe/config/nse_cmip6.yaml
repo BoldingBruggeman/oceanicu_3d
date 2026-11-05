@@ -388,9 +388,9 @@ output:
     - B1_c
     - total_POC_z_flux_result # diagnostic variables can now be sliced in output requests
     - total_zooplankton_loss_to_POC_result
+    fabm_ersem_2D:
     - mld_z_ml
     - zeu_z_eu
-    fabm_ersem_2D:
     - PP_euph_result
     - PP_mld_result
     - zoo_carbon_euph_result
