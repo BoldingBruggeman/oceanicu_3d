@@ -576,10 +576,25 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         type=TypeRef(
             kind="mapping",
             nullable=True,
-            inner=TypeRef(kind="mapping", inner=TypeRef(kind="scalar", scalar_type="str")),
+            # per-tracer keys: file/variable/boundary_condition_type (str),
+            # constant (number), boundaries (mapping boundary name -> type).
+            # Union order matters: number, then mapping, then str -- str
+            # validation would otherwise swallow the other two.
+            inner=TypeRef(
+                kind="mapping",
+                inner=TypeRef(
+                    kind="union",
+                    union_options=(
+                        TypeRef(kind="scalar", scalar_type="float"),
+                        TypeRef(kind="mapping", inner=TypeRef(kind="scalar", scalar_type="str")),
+                        TypeRef(kind="scalar", scalar_type="str"),
+                    ),
+                ),
+            ),
         ),
         default=None,
-        help="FABM state variable name -> {file, variable, boundary_condition_type} "
+        help="FABM state variable name -> {file, variable, boundary_condition_type, "
+        "constant, boundaries} "
         "for tracers that get a boundary + real values from this source. "
         "boundary_condition_type is optional, defaults to SPONGE (cfg_fabm.py's own "
         "real, only-ever-used value) -- other valid values are the same "
@@ -597,7 +612,12 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         "pygetm/tracer.py's own Tracer.__init__) and their fabm.yaml-declared "
         "initial_value for the interior IC -- not every FABM state variable needs "
         "an explicit boundary/IC override. `file` is resolved relative to this "
-        "choice's own `folder`.\n\n"
+        "choice's own `folder`. `constant: <value>` instead of file/variable "
+        "prescribes a fixed boundary value (e.g. a low background value for "
+        "plankton/detritus pools that have no boundary product). `boundaries: "
+        "{<open boundary name>: <type>}` overrides the type on individual named "
+        "open boundaries after the all-boundary type, e.g. {Baltic: "
+        "ZERO_GRADIENT}.\n\n"
         "ic_file/ic_variable (2026-10-01): OPTIONAL, CMEMS-only, free keys in "
         "this same per-tracer mapping (no separate ParameterSpec needed -- this "
         "field's own type is already a generic string mapping) -- a separate, "
@@ -1520,7 +1540,26 @@ def derive_data_assignments(config: dict) -> list[dict]:
                 entries.append(
                     {"target": f"open_boundary.{_tracer}", "kind": "boundary_type", "boundary_condition_type": _bc_type}
                 )
+                # Per-boundary type overrides (e.g. {Baltic: ZERO_GRADIENT}) --
+                # emitted after this tracer's all-boundary type and values, which
+                # would otherwise overwrite them.
+                _per_boundary = [
+                    {"target": f"open_boundary.{_tracer}", "kind": "boundary_type",
+                     "boundary_condition_type": _bdy_type, "boundary": _bdy_name}
+                    for _bdy_name, _bdy_type in (_spec.get("boundaries") or {}).items()
+                ]
+                if "constant" in _spec:
+                    # Fixed boundary value instead of a file -- e.g. a low
+                    # background value for plankton/detritus pools that have no
+                    # boundary product.
+                    entries.append(
+                        {"target": f"open_boundary.{_tracer}.values", "kind": "constant",
+                         "constant_value": float(_spec["constant"])}
+                    )
+                    entries.extend(_per_boundary)
+                    continue
                 if _bc_type == "ZERO_GRADIENT":
+                    entries.extend(_per_boundary)
                     # ZERO_GRADIENT computes the boundary value FROM the
                     # interior, unlike SPONGE/CLAMPED -- it never reads
                     # prescribed values at all, so `file`/`variable` are
@@ -1552,5 +1591,6 @@ def derive_data_assignments(config: dict) -> list[dict]:
                         **_fabm_grid_kwargs,
                     }
                 )
+                entries.extend(_per_boundary)
 
     return entries
