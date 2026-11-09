@@ -1,0 +1,57 @@
+format: '1.1'
+variable: POC
+title: POC Profile Validation Statistics
+created: '2026-11-09 14:25:41'
+area: NSe
+experiment: CMIP6/GFDL-ESM4-ssp126/p01E_avc
+periods:
+- period: 2011-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-11-09 14:25:41'
+  datasets:
+    ICES point observations:
+      rmse: 505.789056
+      bias: -179.321828
+      mae: 247.635529
+      correlation: 0.126628
+      n_points: 369
+      mean_model: 198.048132
+      mean_obs: 377.369959
+      std_model: 139.219122
+      std_obs: 470.622213
+      n_profiles: 307
+      error_distribution:
+        min: -5454.635235
+        p05: -1034.376277
+        p25: -189.215035
+        median: -76.980127
+        p75: 25.155277
+        p95: 190.697517
+        max: 519.452377
+      by_depth:
+        0-10m:
+          n: 304
+          bias: -155.106453
+          rmse: 390.783102
+          correlation: 0.167475
+        10-25m:
+          n: 20
+          bias: -643.942626
+          rmse: 1398.201107
+          correlation: 0.072832
+        25-50m:
+          n: 28
+          bias: -147.151942
+          rmse: 417.136825
+          correlation: -0.081969
+        50-100m:
+          n: 16
+          bias: -123.269695
+          rmse: 500.045307
+          correlation: -0.254072
+        100-200m:
+          n: 1
+          bias: -45.970698
+          rmse: 45.970698
+          correlation: null
