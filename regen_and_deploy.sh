@@ -73,6 +73,35 @@ else
     exit 1
 fi
 
+# Not on regen_hosts.yaml's relay_host (e.g. scylla, orca): re-run this
+# whole wrapper there over ssh, so the lock below is taken on the relay,
+# where the shared hugo_out actually lives. Same rule regenerate_hugo.py
+# uses; --no-relay (appended by relay_if_needed) forces a local run.
+relay_rc=0
+python3 - "$HUGO_REPO" "$@" <<'EOF' || relay_rc=$?
+import socket, subprocess, sys, yaml
+from pathlib import Path
+from ocean_data import host_config as oc
+repo, argv = sys.argv[1], sys.argv[2:]
+relay_host = yaml.safe_load(Path(repo, 'regen_hosts.yaml').read_text())['relay_host']
+if socket.gethostname() == relay_host or '--no-relay' in argv:
+    sys.exit(10)
+try:
+    relayed = oc.relay_if_needed(
+        oc.load_host_config('oceanicu'), argv,
+        repo_key='OceanICU/oceanicu_3d', entry_point='./regen_and_deploy.sh',
+    )
+except subprocess.CalledProcessError as e:
+    sys.exit(e.returncode or 1)
+if not relayed:
+    sys.exit(f"ERROR: expected to relay to {relay_host} but relay_if_needed() declined -- check ~/.config/oceanicu/hosts.yaml")
+EOF
+case $relay_rc in
+    0)  exit 0 ;;
+    10) ;;
+    *)  exit "$relay_rc" ;;
+esac
+
 # Where ocean-post lives is NOT the same on every host -- the shared
 # /opt/ocean-src/ocean-post checkout only exists on bb-server1/oceanicu-
 # relay; orca still has its own ~/source/repos/ocean-post. Hardcoding
