@@ -592,7 +592,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         ),
         default=None,
         help="FABM state variable name -> {file, variable, boundary_condition_type, "
-        "constant} "
+        "constant, sponge} "
         "for tracers that get a boundary + real values from this source. "
         "boundary_condition_type is optional, defaults to SPONGE (cfg_fabm.py's own "
         "real, only-ever-used value) -- other valid values are the same "
@@ -600,7 +600,9 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         "entries accept (ZERO_GRADIENT, CLAMPED, SPONGE; FLATHER_ELEV/"
         "FLATHER_TRANSPORT/SOMMERFELD don't apply to a 3D tracer), useful for "
         "testing a tracer's sensitivity to boundary treatment without editing "
-        "Python. `file`/`variable` are REQUIRED for SPONGE/CLAMPED (both read real "
+        "Python. `sponge` (optional, SPONGE only) names an open_boundary_sponges "
+        "entry, for Sponge options other than the shared open_boundary_sponge. "
+        "`file`/`variable` are REQUIRED for SPONGE/CLAMPED (both read real "
         "prescribed values at the boundary) but OPTIONAL for ZERO_GRADIENT (computed "
         "from the interior, never reads a file) -- omit them entirely for a tracer "
         "you just want pinned to ZERO_GRADIENT explicitly. Tracers NOT listed here "
@@ -1534,9 +1536,12 @@ def derive_data_assignments(config: dict) -> list[dict]:
                 # to SPONGE (cfg_fabm.py's own real, only-ever-used value)
                 # when omitted.
                 _bc_type = _spec.get("boundary_condition_type", "SPONGE")
-                entries.append(
-                    {"target": f"open_boundary.{_tracer}", "kind": "boundary_type", "boundary_condition_type": _bc_type}
-                )
+                _bc_entry = {"target": f"open_boundary.{_tracer}", "kind": "boundary_type",
+                             "boundary_condition_type": _bc_type}
+                if _spec.get("sponge"):
+                    # named open_boundary_sponges entry instead of the shared default
+                    _bc_entry["sponge"] = _spec["sponge"]
+                entries.append(_bc_entry)
                 if "constant" in _spec:
                     # Fixed boundary value instead of a file -- e.g. a low
                     # background value for plankton/detritus pools that have no
