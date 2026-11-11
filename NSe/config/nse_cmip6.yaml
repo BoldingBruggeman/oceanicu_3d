@@ -59,31 +59,33 @@ open_boundaries:
   type_2d: FLATHER_TRANSPORT
   # Phyto-/zooplankton: ZERO_GRADIENT here, SPONGE (with a constant
   # background value, boundaries.fabm tracers) on all other boundaries.
-  variable_types:
-    P1_Chl: ZERO_GRADIENT
-    P1_c: ZERO_GRADIENT
-    P1_n: ZERO_GRADIENT
-    P1_p: ZERO_GRADIENT
-    P2_Chl: ZERO_GRADIENT
-    P2_c: ZERO_GRADIENT
-    P2_n: ZERO_GRADIENT
-    P2_p: ZERO_GRADIENT
-    P3_Chl: ZERO_GRADIENT
-    P3_c: ZERO_GRADIENT
-    P3_n: ZERO_GRADIENT
-    P3_p: ZERO_GRADIENT
-    P4_Chl: ZERO_GRADIENT
-    P4_c: ZERO_GRADIENT
-    P4_n: ZERO_GRADIENT
-    P4_p: ZERO_GRADIENT
-    P1_s: ZERO_GRADIENT
-    Z4_c: ZERO_GRADIENT
-    Z5_c: ZERO_GRADIENT
-    Z5_n: ZERO_GRADIENT
-    Z5_p: ZERO_GRADIENT
-    Z6_c: ZERO_GRADIENT
-    Z6_n: ZERO_GRADIENT
-    Z6_p: ZERO_GRADIENT
+  # Commented out with the P/Z boundary values (boundaries.fabm tracers):
+  # without them every boundary is pyGETM's default ZERO_GRADIENT anyway.
+  # variable_types:
+  #   P1_Chl: ZERO_GRADIENT
+  #   P1_c: ZERO_GRADIENT
+  #   P1_n: ZERO_GRADIENT
+  #   P1_p: ZERO_GRADIENT
+  #   P2_Chl: ZERO_GRADIENT
+  #   P2_c: ZERO_GRADIENT
+  #   P2_n: ZERO_GRADIENT
+  #   P2_p: ZERO_GRADIENT
+  #   P3_Chl: ZERO_GRADIENT
+  #   P3_c: ZERO_GRADIENT
+  #   P3_n: ZERO_GRADIENT
+  #   P3_p: ZERO_GRADIENT
+  #   P4_Chl: ZERO_GRADIENT
+  #   P4_c: ZERO_GRADIENT
+  #   P4_n: ZERO_GRADIENT
+  #   P4_p: ZERO_GRADIENT
+  #   P1_s: ZERO_GRADIENT
+  #   Z4_c: ZERO_GRADIENT
+  #   Z5_c: ZERO_GRADIENT
+  #   Z5_n: ZERO_GRADIENT
+  #   Z5_p: ZERO_GRADIENT
+  #   Z6_c: ZERO_GRADIENT
+  #   Z6_n: ZERO_GRADIENT
+  #   Z6_p: ZERO_GRADIENT
 - side: BOTTOM
   name: 'CelticSeaS'
   l: 0
@@ -189,9 +191,23 @@ runtime:
 # Options of the SPONGE open boundary condition (pygetm.open_boundaries.Sponge):
 # tmrlx -- take prescribed boundary values in proportion to INFLOW, blending
 # with the interior sponge-zone mean under outflow. Applies to every SPONGE
-# boundary (temp/salt and all FABM tracers above/below).
+# boundary that has no `sponge:` name, and is the base every named variant
+# in open_boundary_sponges starts from (each lists only what differs).
 open_boundary_sponge:
   tmrlx: true
+  tmrlx_min: 0.0
+# Named SPONGE variants, selected with `sponge: <name>` (data_assignments
+# boundary_type entries, boundaries.fabm tracers). Values from scylla's
+# hand-edited generated_nse_cmems.py (bb-server1:/tmp/generated_nse_cmems.py_scylla):
+# weak   -- temp/salt and the nutrient/O2/carbonate tracers (custom_sponge there)
+# strong -- the detritus/DOC pools R4/R6/R8, R6_s, R8_s, L2_c
+open_boundary_sponges:
+- name: weak
+  tmrlx_max: 0.05
+  tmrlx_ucut: 0.1
+- name: strong
+  tmrlx_max: 0.5
+  tmrlx_ucut: 0.05
 data_assignments:
 - target: simulation.radiation.A
   kind: constant
@@ -211,78 +227,92 @@ data_assignments:
 - target: open_boundary.temp
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: weak
 - target: open_boundary.salt
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: weak
 - target: open_boundary.R4_c
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.R4_c.values
   kind: constant
   constant_value: 0.0033
 - target: open_boundary.R4_n
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.R4_n.values
   kind: constant
   constant_value: 4.158e-05
 - target: open_boundary.R4_p
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.R4_p.values
   kind: constant
   constant_value: 2.5938e-06
 - target: open_boundary.R6_c
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.R6_c.values
   kind: constant
   constant_value: 0.0033
 - target: open_boundary.R6_n
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.R6_n.values
   kind: constant
   constant_value: 4.158e-05
 - target: open_boundary.R6_p
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.R6_p.values
   kind: constant
   constant_value: 2.5938e-06
 - target: open_boundary.R8_c
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.R8_c.values
   kind: constant
   constant_value: 0.0033
 - target: open_boundary.R8_n
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.R8_n.values
   kind: constant
   constant_value: 4.158e-05
 - target: open_boundary.R8_p
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.R8_p.values
   kind: constant
   constant_value: 2.5938e-06
 - target: open_boundary.R6_s
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.R6_s.values
   kind: constant
   constant_value: 3.8879e-05
 - target: open_boundary.R8_s
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.R8_s.values
   kind: constant
   constant_value: 3.8879e-05
 - target: open_boundary.L2_c
   kind: boundary_type
   boundary_condition_type: SPONGE
+  sponge: strong
 - target: open_boundary.L2_c.values
   kind: constant
   constant_value: 0.0001
@@ -653,18 +683,22 @@ boundaries:
           file: bio_monthly_climatology.nc
           variable: no3
           boundary_condition_type: SPONGE
+          sponge: weak
         N1_p:
           file: bio_monthly_climatology.nc
           variable: po4
           boundary_condition_type: SPONGE
+          sponge: weak
         N5_s:
           file: bio_monthly_climatology.nc
           variable: si
           boundary_condition_type: SPONGE
+          sponge: weak
         O2_o:
           file: bio_monthly_climatology.nc
           variable: o2
           boundary_condition_type: SPONGE
+          sponge: weak
     WOA:
       folder: ${BOUNDARY_FOLDER_FABM_WOA}
       tracers:
@@ -672,18 +706,22 @@ boundaries:
           file: woa_n.nc
           variable: n_an
           boundary_condition_type: SPONGE
+          sponge: weak
         N1_p:
           file: woa_p.nc
           variable: p_an
           boundary_condition_type: SPONGE
+          sponge: weak
         N5_s:
           file: woa_i.nc
           variable: i_an
           boundary_condition_type: SPONGE
+          sponge: weak
         O2_o:
           file: woa_o.nc
           variable: o_an
           boundary_condition_type: SPONGE
+          sponge: weak
     CMIP6:
       folder: ${BOUNDARY_FOLDER_FABM_CMIP6}
       folder_template: '{model}/{scenario}/bdy'
@@ -701,67 +739,74 @@ boundaries:
           file: bdy_3d_no3_deltachange_20150101_21001231.nc
           variable: no3
           boundary_condition_type: SPONGE
+          sponge: weak
         N1_p:
           file: bdy_3d_po4_deltachange_20150101_21001231.nc
           variable: po4
           boundary_condition_type: SPONGE
+          sponge: weak
         N5_s:
           file: bdy_3d_si_deltachange_20150101_21001231.nc
           variable: si
           boundary_condition_type: SPONGE
+          sponge: weak
         O2_o:
           file: bdy_3d_o2_deltachange_20150101_21001231.nc
           variable: o2
           boundary_condition_type: SPONGE
+          sponge: weak
         O3_c:
           file: bdy_3d_dissic_deltachange_20150101_21001231.nc
           variable: dissic
           boundary_condition_type: SPONGE
+          sponge: weak
         O3_TA:
           file: bdy_3d_talk_deltachange_20150101_21001231.nc
           variable: talk
           boundary_condition_type: SPONGE
+          sponge: weak
         # Low background boundary values for plankton/zooplankton/detritus pools
-        # that have no boundary product (SPONGE, see open_boundary_sponge); the
-        # phyto-/zooplankton ones are ZERO_GRADIENT at the Baltic boundary instead
-        # (open_boundaries 'Baltic' variable_types).
-        # Transferred from scylla's hand-edited generated_nse_cmems.py (2026-11-05).
-        P1_Chl: {constant: 0.0001}
-        P1_c: {constant: 0.0001}
-        P1_n: {constant: 1.26e-06}
-        P1_p: {constant: 7.86e-08}
-        P2_Chl: {constant: 0.0001}
-        P2_c: {constant: 0.0001}
-        P2_n: {constant: 1.26e-06}
-        P2_p: {constant: 7.86e-08}
-        P3_Chl: {constant: 0.0001}
-        P3_c: {constant: 0.0001}
-        P3_n: {constant: 1.26e-06}
-        P3_p: {constant: 7.86e-08}
-        P4_Chl: {constant: 0.0001}
-        P4_c: {constant: 0.0001}
-        P4_n: {constant: 1.26e-06}
-        P4_p: {constant: 7.86e-08}
-        P1_s: {constant: 1.18e-06}
-        Z4_c: {constant: 0.0001}
-        Z5_c: {constant: 0.0001}
-        Z5_n: {constant: 1.26e-06}
-        Z5_p: {constant: 7.86e-08}
-        Z6_c: {constant: 0.0001}
-        Z6_n: {constant: 1.26e-06}
-        Z6_p: {constant: 7.86e-08}
-        R4_c: {constant: 0.0033}
-        R4_n: {constant: 4.158e-05}
-        R4_p: {constant: 2.5938e-06}
-        R6_c: {constant: 0.0033}
-        R6_n: {constant: 4.158e-05}
-        R6_p: {constant: 2.5938e-06}
-        R8_c: {constant: 0.0033}
-        R8_n: {constant: 4.158e-05}
-        R8_p: {constant: 2.5938e-06}
-        R6_s: {constant: 3.8879e-05}
-        R8_s: {constant: 3.8879e-05}
-        L2_c: {constant: 0.0001}
+        # that have no boundary product (SPONGE). Transferred from scylla's
+        # hand-edited generated_nse_cmems.py (2026-11-05). Phyto-/zooplankton
+        # are commented out, as in scylla's script (2026-11-10): they then keep
+        # pyGETM's default ZERO_GRADIENT on every boundary. To restore them,
+        # uncomment these and the 'Baltic' variable_types above.
+        # P1_Chl: {constant: 0.0001}
+        # P1_c: {constant: 0.0001}
+        # P1_n: {constant: 1.26e-06}
+        # P1_p: {constant: 7.86e-08}
+        # P2_Chl: {constant: 0.0001}
+        # P2_c: {constant: 0.0001}
+        # P2_n: {constant: 1.26e-06}
+        # P2_p: {constant: 7.86e-08}
+        # P3_Chl: {constant: 0.0001}
+        # P3_c: {constant: 0.0001}
+        # P3_n: {constant: 1.26e-06}
+        # P3_p: {constant: 7.86e-08}
+        # P4_Chl: {constant: 0.0001}
+        # P4_c: {constant: 0.0001}
+        # P4_n: {constant: 1.26e-06}
+        # P4_p: {constant: 7.86e-08}
+        # P1_s: {constant: 1.18e-06}
+        # Z4_c: {constant: 0.0001}
+        # Z5_c: {constant: 0.0001}
+        # Z5_n: {constant: 1.26e-06}
+        # Z5_p: {constant: 7.86e-08}
+        # Z6_c: {constant: 0.0001}
+        # Z6_n: {constant: 1.26e-06}
+        # Z6_p: {constant: 7.86e-08}
+        R4_c: {constant: 0.0033, sponge: strong}
+        R4_n: {constant: 4.158e-05, sponge: strong}
+        R4_p: {constant: 2.5938e-06, sponge: strong}
+        R6_c: {constant: 0.0033, sponge: strong}
+        R6_n: {constant: 4.158e-05, sponge: strong}
+        R6_p: {constant: 2.5938e-06, sponge: strong}
+        R8_c: {constant: 0.0033, sponge: strong}
+        R8_n: {constant: 4.158e-05, sponge: strong}
+        R8_p: {constant: 2.5938e-06, sponge: strong}
+        R6_s: {constant: 3.8879e-05, sponge: strong}
+        R8_s: {constant: 3.8879e-05, sponge: strong}
+        L2_c: {constant: 0.0001, sponge: strong}
 meteo:
   source: CMIP6
   ERA5:
