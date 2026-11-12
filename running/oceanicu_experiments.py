@@ -107,6 +107,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -1440,7 +1441,7 @@ def main() -> int:
         real_db = None
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    scratch_db = Path(f"/tmp/oceanicu_experiments_dryrun_{args.cmd}_{stamp}.sqlite")
+    scratch_db = Path(tempfile.gettempdir()) / f"oceanicu_experiments_dryrun_{args.cmd}_{stamp}.sqlite"
     if real_db is None:
         print(f"[dry-run] no --db/OCEANICU_EXPERIMENT_DB configured -- "
               f"starting {scratch_db} completely empty")
