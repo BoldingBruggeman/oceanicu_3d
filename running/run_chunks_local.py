@@ -121,23 +121,17 @@ def main() -> int:
             "(ignoring any --start/--stop/--chunk-kind/--chunk-multiplier given now)."
         )
 
-    print(f"Looping chunk_runner.py for {experiment_id!r} (Ctrl-C to stop; re-run this to resume) ...")
-    while True:
-        result = subprocess.run([
-            sys.executable, str(RUNNING_DIR / "chunk_runner.py"),
-            "--experiment-id", experiment_id,
-            "--db", db_path,
-        ])
-        if result.returncode == 1:
-            print(f"{experiment_id!r}: nothing to do (already complete or paused). Stopping.")
-            return 0
-        if result.returncode != 0:
-            print(
-                f"{experiment_id!r}: chunk failed (exit {result.returncode}). "
-                "Stopping -- fix the issue, then re-run this to resume.",
-                file=sys.stderr,
-            )
-            return result.returncode
+    # Same chunk loop as chunk_chain.py (pause, delay-all, per-experiment
+    # delay, then any other queued experiment in this local registry).
+    import signal
+
+    import chunk_chain
+
+    signal.signal(signal.SIGINT, chunk_chain._handle_shutdown_signal)
+    signal.signal(signal.SIGTERM, chunk_chain._handle_shutdown_signal)
+    print(f"Chaining chunks for {experiment_id!r} (Ctrl-C stops after the current chunk; "
+          f"re-run this to resume) ...")
+    return chunk_chain.chain(experiment_id, db_path)
 
 
 if __name__ == "__main__":

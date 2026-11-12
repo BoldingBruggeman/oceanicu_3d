@@ -27,7 +27,7 @@ Usage: OCEANICU_EXPERIMENT_DB=/path/submission_registry.sqlite reap_orphaned_chu
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -58,24 +58,9 @@ def main() -> int:
             experiment_id = row["experiment_id"]
             chunk_index = row["chunk_index"]
 
-            # Exact same liveness/staleness criteria as chunk_runner.py's
-            # own start-of-chunk orphan check -- see is_slurm_job_running's
-            # own docstring for why this lives in experiment_tracking.py
-            # as shared logic rather than being duplicated here.
-            alive = rt.is_slurm_job_running(row["slurm_job_id"])
-            stale_by_age = False
-            if row["start_time"]:
-                started = datetime.fromisoformat(row["start_time"])
-                stale_by_age = (datetime.now(timezone.utc) - started) > timedelta(days=4)
-
-            if alive:
-                continue  # genuinely still running -- leave it alone
-            if alive is None and not stale_by_age:
-                # squeue unavailable/inconclusive, and not old enough yet
-                # to assume orphaned -- same conservative fallback
-                # chunk_runner.py's own check uses, so a merely-slow
-                # squeue or a brief network blip never causes a false
-                # "orphaned" reap.
+            # Same criteria as chunk_runner.py's start-of-chunk lock; 'unknown'
+            # (squeue inconclusive, chunk not yet old) is left alone.
+            if rt.chunk_orphan_state(row) != "orphaned":
                 continue
 
             print(f"{_ts()}: {experiment_id}: chunk {chunk_index} (SLURM job "

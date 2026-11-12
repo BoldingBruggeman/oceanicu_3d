@@ -289,11 +289,11 @@ def _preview_chunk_runner(scratch_db: Path, experiment_id: str) -> None:
     )
     output = result.stdout + result.stderr
     if "OCEANICU_EXPERIMENT_ROOT_BASE is not set" in output:
-        print(f"    -- can't preview: experiment_root is relative and this machine has no "
-              f"OCEANICU_EXPERIMENT_ROOT_BASE set. NOT a real problem -- this is the same known "
-              f"limitation as the PAUSE-file check (see EXPERIMENT_TRACKING.md's \"One real "
-              f"limitation\" note): resolved on whichever machine actually runs the chunk, "
-              f"once that machine's OCEANICU_EXPERIMENT_ROOT_BASE is exported there. --")
+        print("    -- can't preview: experiment_root is relative and this machine has no "
+              "OCEANICU_EXPERIMENT_ROOT_BASE set. NOT a real problem -- this is the same known "
+              "limitation as the PAUSE-file check (see EXPERIMENT_TRACKING.md's \"One real "
+              "limitation\" note): resolved on whichever machine actually runs the chunk, "
+              "once that machine's OCEANICU_EXPERIMENT_ROOT_BASE is exported there. --")
         return
     for line in output.splitlines():
         print(f"    {line}")
@@ -899,94 +899,33 @@ def cmd_show(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_set_priority(args: argparse.Namespace) -> int:
+# set-* subcommand -> (experiment_tracking setter, args attribute, message after "<id>: ")
+_SET_COMMANDS = {
+    "set-priority": ("set_priority", "priority", "priority set to {v}"),
+    "set-data-roots-file": ("set_data_roots_file", "path", "data_roots_file set to {v!r}"),
+    "set-np": ("set_np", "np", "np set to {v}"),
+    "set-launcher": ("set_launcher", "launcher", "launcher set to {v!r}"),
+    "set-notes": ("set_notes", "notes", "notes set to {v!r}"),
+    "set-chunk-delay": ("set_chunk_delay", "seconds",
+                        "chunk_delay_seconds set to {v} (takes effect on the next chunk/resubmission)"),
+    "set-stop-date": ("set_stop_date", "stop_date", "stop_date set to {v} (takes effect on the next chunk)"),
+    "set-start-date": ("set_start_date", "start_date",
+                       "initial_date set to {v} -- only takes effect if chunk 0 hasn't run yet "
+                       "(next_chunk_start falls back to initial_date only when no chunk is 'done'); "
+                       "otherwise this has no practical effect until a rerun/reset drops all chunks first"),
+}
+
+
+def cmd_set_field(args: argparse.Namespace) -> int:
+    setter, attr, message = _SET_COMMANDS[args.cmd]
+    value = getattr(args, attr)
     with rt.connect(args.db) as conn:
         try:
-            rt.set_priority(conn, args.experiment_id, args.priority, user=rt._current_user())
-        except KeyError as exc:
+            getattr(rt, setter)(conn, args.experiment_id, value, user=rt._current_user())
+        except (KeyError, ValueError) as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
-    print(f"{args.experiment_id}: priority set to {args.priority}")
-    return 0
-
-
-def cmd_set_data_roots_file(args: argparse.Namespace) -> int:
-    with rt.connect(args.db) as conn:
-        try:
-            rt.set_data_roots_file(conn, args.experiment_id, args.path, user=rt._current_user())
-        except KeyError as exc:
-            print(f"ERROR: {exc}", file=sys.stderr)
-            return 1
-    print(f"{args.experiment_id}: data_roots_file set to {args.path!r}")
-    return 0
-
-
-def cmd_set_np(args: argparse.Namespace) -> int:
-    with rt.connect(args.db) as conn:
-        try:
-            rt.set_np(conn, args.experiment_id, args.np, user=rt._current_user())
-        except KeyError as exc:
-            print(f"ERROR: {exc}", file=sys.stderr)
-            return 1
-    print(f"{args.experiment_id}: np set to {args.np}")
-    return 0
-
-
-def cmd_set_launcher(args: argparse.Namespace) -> int:
-    with rt.connect(args.db) as conn:
-        try:
-            rt.set_launcher(conn, args.experiment_id, args.launcher, user=rt._current_user())
-        except KeyError as exc:
-            print(f"ERROR: {exc}", file=sys.stderr)
-            return 1
-    print(f"{args.experiment_id}: launcher set to {args.launcher!r}")
-    return 0
-
-
-def cmd_set_notes(args: argparse.Namespace) -> int:
-    with rt.connect(args.db) as conn:
-        try:
-            rt.set_notes(conn, args.experiment_id, args.notes, user=rt._current_user())
-        except KeyError as exc:
-            print(f"ERROR: {exc}", file=sys.stderr)
-            return 1
-    print(f"{args.experiment_id}: notes set to {args.notes!r}")
-    return 0
-
-
-def cmd_set_chunk_delay(args: argparse.Namespace) -> int:
-    with rt.connect(args.db) as conn:
-        try:
-            rt.set_chunk_delay(conn, args.experiment_id, args.seconds, user=rt._current_user())
-        except KeyError as exc:
-            print(f"ERROR: {exc}", file=sys.stderr)
-            return 1
-    print(f"{args.experiment_id}: chunk_delay_seconds set to {args.seconds} "
-          f"(takes effect on the next chunk/resubmission)")
-    return 0
-
-
-def cmd_set_stop_date(args: argparse.Namespace) -> int:
-    with rt.connect(args.db) as conn:
-        try:
-            rt.set_stop_date(conn, args.experiment_id, args.stop_date, user=rt._current_user())
-        except KeyError as exc:
-            print(f"ERROR: {exc}", file=sys.stderr)
-            return 1
-    print(f"{args.experiment_id}: stop_date set to {args.stop_date} (takes effect on the next chunk)")
-    return 0
-
-
-def cmd_set_start_date(args: argparse.Namespace) -> int:
-    with rt.connect(args.db) as conn:
-        try:
-            rt.set_start_date(conn, args.experiment_id, args.start_date, user=rt._current_user())
-        except KeyError as exc:
-            print(f"ERROR: {exc}", file=sys.stderr)
-            return 1
-    print(f"{args.experiment_id}: initial_date set to {args.start_date} -- only takes effect if chunk 0 "
-          f"hasn't run yet (next_chunk_start falls back to initial_date only when no chunk is 'done'); "
-          f"otherwise this has no practical effect until a rerun/reset drops all chunks first")
+    print(f"{args.experiment_id}: " + message.format(v=value))
     return 0
 
 
@@ -1418,7 +1357,7 @@ def main() -> int:
     c.add_argument("--chunk-kind", default=None, choices=["annual", "monthly", "daily"])
     c.add_argument("--chunk-multiplier", type=int, default=None)
 
-    sp = sub.add_parser("set-priority"); _add_common(sp); sp.set_defaults(func=cmd_set_priority)
+    sp = sub.add_parser("set-priority"); _add_common(sp); sp.set_defaults(func=cmd_set_field)
     sp.add_argument("--experiment-id", required=True)
     sp.add_argument("--priority", type=int, required=True)
 
@@ -1428,15 +1367,15 @@ def main() -> int:
              "of this experiment's own chunks (0 = no delay, the default). Different from "
              "delay-all, which is a global, one-shot TIMED pause covering every experiment.",
     )
-    _add_common(scd); scd.set_defaults(func=cmd_set_chunk_delay)
+    _add_common(scd); scd.set_defaults(func=cmd_set_field)
     scd.add_argument("--experiment-id", required=True)
     scd.add_argument("--seconds", type=int, required=True, metavar="N")
 
-    sd = sub.add_parser("set-stop-date"); _add_common(sd); sd.set_defaults(func=cmd_set_stop_date)
+    sd = sub.add_parser("set-stop-date"); _add_common(sd); sd.set_defaults(func=cmd_set_field)
     sd.add_argument("--experiment-id", required=True)
     sd.add_argument("--stop-date", required=True, metavar="YYYY-MM-DD", type=_date_arg)
 
-    ssd = sub.add_parser("set-start-date"); _add_common(ssd); ssd.set_defaults(func=cmd_set_start_date)
+    ssd = sub.add_parser("set-start-date"); _add_common(ssd); ssd.set_defaults(func=cmd_set_field)
     ssd.add_argument("--experiment-id", required=True)
     ssd.add_argument("--start-date", required=True, metavar="YYYY-MM-DD", type=_date_arg)
 
@@ -1448,7 +1387,7 @@ def main() -> int:
              "change over the experiment's lifetime. Takes effect on the next chunk, never "
              "retroactively.",
     )
-    _add_common(sdrf); sdrf.set_defaults(func=cmd_set_data_roots_file)
+    _add_common(sdrf); sdrf.set_defaults(func=cmd_set_field)
     sdrf.add_argument("--experiment-id", required=True)
     sdrf.add_argument("--path", required=True)
 
@@ -1457,7 +1396,7 @@ def main() -> int:
         help="change this experiment's process count -- takes effect on the next chunk, never "
              "retroactively (never affects a chunk already running).",
     )
-    _add_common(snp); snp.set_defaults(func=cmd_set_np)
+    _add_common(snp); snp.set_defaults(func=cmd_set_field)
     snp.add_argument("--experiment-id", required=True)
     snp.add_argument("--np", type=int, required=True)
 
@@ -1467,7 +1406,7 @@ def main() -> int:
              "with the wrong one for the machine it's actually going to run on. Takes effect on "
              "the next chunk, never retroactively (never affects a chunk already running).",
     )
-    _add_common(sl); sl.set_defaults(func=cmd_set_launcher)
+    _add_common(sl); sl.set_defaults(func=cmd_set_field)
     sl.add_argument("--experiment-id", required=True)
     sl.add_argument("--launcher", required=True, choices=["srun", "mpiexec"])
 
@@ -1476,7 +1415,7 @@ def main() -> int:
         help="change this experiment's free-text notes -- e.g. to record why it was paused "
              "or what a rerun fixed, without needing direct DB access.",
     )
-    _add_common(sn); sn.set_defaults(func=cmd_set_notes)
+    _add_common(sn); sn.set_defaults(func=cmd_set_field)
     sn.add_argument("--experiment-id", required=True)
     sn.add_argument("--notes", required=True)
 
@@ -1607,7 +1546,7 @@ def main() -> int:
         _preview_chunk_runner(scratch_db, eid)
 
     print()
-    print(f"[dry-run] real registry was never opened for writing.")
+    print("[dry-run] real registry was never opened for writing.")
     print(f"[dry-run] resulting DB left at {scratch_db} for inspection:")
     print(f"[dry-run]   sqlite3 {scratch_db}")
     print(f"[dry-run]   python oceanicu_experiments.py --db {scratch_db} list")

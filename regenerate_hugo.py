@@ -236,15 +236,14 @@ def generate_locally(
 
     subprocess.run(cmd, check=True)
 
+    hugo_dir = SCRIPT_DIR / "hugo"
     if args.serve:
-        hugo_dir = SCRIPT_DIR / "hugo"
         print()
         print(f"Starting hugo server here ({hostname}) …")
         print("Open http://localhost:1313/oceanicu_3d/ in a browser. Ctrl-C to stop.")
         subprocess.run(["hugo", "server"], cwd=hugo_dir, check=True)
         return
 
-    hugo_dir = SCRIPT_DIR / "hugo"
     print()
     print(f"Content written to {host_cfg['hugo_out']}/content/")
     print(f"To serve locally:  cd {hugo_dir} && hugo server")

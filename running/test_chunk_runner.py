@@ -131,3 +131,41 @@ def test_dry_run_refuses_commands_acting_outside_the_registry(env, cmd):
         capture_output=True, text=True,
     )
     assert r.returncode == 1 and "doesn't work for" in r.stderr
+
+
+@pytest.mark.parametrize("calendar, expected_stop", [("noleap", "20120301"), (None, "20120229")])
+def test_calendar_from_companion_config(tmp_path, calendar, expected_stop):
+    db = tmp_path / "registry.sqlite"
+    root = tmp_path / "CMIP6"  # the name must not matter
+    root.mkdir()
+    (root / "generated_t.py").write_text("")
+    (root / "generated_t_config.yaml").write_text(f"runtime:\n  calendar: {calendar}\n" if calendar else "")
+    with rt.connect(db) as conn:
+        rt.add_experiment(conn, experiment_id=EXP, experiment_root=str(root), script="generated_t.py",
+                          config="generated_t_config.yaml", initial_date="2012-02-28",
+                          stop_date="2012-06-01", chunk_kind="daily", launcher="mpiexec")
+    r = _run(db, "--dry-run")
+    assert r.returncode == 0, r.stderr
+    assert f"000_20120228_{expected_stop}" in r.stdout
+
+
+@pytest.mark.parametrize("cmd, value, column", [
+    ("set-priority", "7", "priority"), ("set-np", "12", "np"), ("set-launcher", "srun", "launcher"),
+    ("set-notes", "hello", "notes"), ("set-chunk-delay", "30", "chunk_delay_seconds"),
+    ("set-stop-date", "2011-06-01", "stop_date"), ("set-start-date", "2010-02-01", "initial_date"),
+    ("set-data-roots-file", "roots.yaml", "data_roots_file"),
+])
+def test_set_commands(env, cmd, value, column):
+    db, _ = env
+    flag = {"set-chunk-delay": "--seconds", "set-data-roots-file": "--path"}.get(cmd, "--" + cmd[4:])
+    r = subprocess.run(
+        [sys.executable, str(HERE / "oceanicu_experiments.py"), "--db", str(db), cmd,
+         "--experiment-id", EXP, flag, value],
+        capture_output=True, text=True, env=dict(os.environ, OCEANICU_DB_BACKUP_EVERY_N_WRITES="0"),
+    )
+    assert r.returncode == 0, r.stderr
+    assert r.stdout.startswith(f"{EXP}: ")
+    with rt.connect(db) as conn:
+        assert str(rt.get_experiment(conn, EXP)[column]) == value
+        last = conn.execute("SELECT event, detail FROM history ORDER BY rowid DESC LIMIT 1").fetchone()
+    assert last["event"].endswith("_changed") and value in last["detail"]

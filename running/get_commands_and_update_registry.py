@@ -432,6 +432,8 @@ def main() -> int:
         queue_paths = sorted(base_dir.glob("queue_*.yaml"))
         if not queue_paths:
             print(f"{_ts()}: {base_dir}: no queue_*.yaml files found -- nothing to apply.")
+            if args.pull_from:
+                _push_back_pull_status(args.pull_from, base_dir)
             return 0
     else:
         queue_paths = [Path(args.queue)]
@@ -458,6 +460,8 @@ def main() -> int:
     if not pending:
         total = sum(len(d.get("commands", [])) for d in sources.values())
         print(f"{_ts()}: nothing pending across {len(queue_paths)} queue file(s) ({total} total entries).")
+        if args.pull_from and args.queue_dir:
+            _push_back_pull_status(args.pull_from, Path(args.queue_dir))
         return 0
 
     def _record_queue_result(entry: dict, qp: Path, entry_args: dict) -> None:

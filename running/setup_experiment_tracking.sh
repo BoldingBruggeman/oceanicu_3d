@@ -26,7 +26,7 @@
 #     own two independently-configured paths -- never one folder with
 #     the other nested inside it.
 #
-# hpc's 4th arg (optional) is where experiment_tracking.py/apply_commands.py
+# hpc's 4th arg (optional) is where experiment_tracking.py/get_commands_and_update_registry.py
 # etc. actually live on THIS machine -- only used to print ready-to-use
 # cron lines; defaults to a placeholder if omitted.
 #
@@ -35,7 +35,7 @@
 # sets OCEANICU_LOGIN_NODE so run_chunk.slurm can try pushing a fresh
 # registry snapshot out from a compute node right before each
 # self-resubmission (best-effort; see push_registry_snapshot.sh and
-# test_compute_to_login_ssh.sbatch). On THIS project's actual HPC, DO NOT
+# investigations/test_compute_to_login_ssh.sbatch). On THIS project's actual HPC, DO NOT
 # pass this -- confirmed 2026-08-29 that compute nodes here can't ssh to
 # their own login node at all, so it would just silently never fire. Use
 # the login-node cron and/or watch_registry_and_push.sh's inotify

@@ -21,8 +21,8 @@ looked up by --experiment-id. Intended to be called once per SLURM job (see
 run_chunk.slurm), which self-resubmits for the next chunk after this one
 finishes; this script itself only ever does one.
 
-Chunk boundary math (annual/monthly/daily x multiplier) is the same idea
-as the earlier run_chunks.py prototype, calendar-aware via cftime.
+Chunk boundary math (annual/monthly/daily x multiplier) is calendar-aware
+via cftime, on the companion config's runtime.calendar.
 
 Everything for a chunk lives together in ONE directory (logs, 2d/3d
 output, AND the restart file it saves) -- <experiment_root>/NNN_<start>_
@@ -44,7 +44,7 @@ import sqlite3
 import subprocess
 import sys
 import traceback
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -68,6 +68,19 @@ def _sha256_of(path: Optional[str]) -> Optional[str]:
 def _parse_date(s: str, calendar: str):
     import cftime
     return cftime.datetime.strptime(s, "%Y-%m-%d", calendar=calendar)
+
+
+def _experiment_calendar(config_path: str) -> str:
+    """runtime.calendar of the experiment's companion *_config.yaml (the
+    generated script runs on that calendar); pyGETM's default otherwise."""
+    import yaml
+
+    try:
+        with open(config_path) as f:
+            config = yaml.safe_load(f) or {}
+    except OSError as exc:
+        raise RuntimeError(f"can't read {config_path} for runtime.calendar: {exc}") from exc
+    return (config.get("runtime") or {}).get("calendar") or "standard"
 
 
 def _advance_date(start, kind: str, multiplier: int, is_first_chunk: bool = False):
@@ -270,18 +283,13 @@ def _main_tracked(args: argparse.Namespace) -> int:
         # retried, same as any other failure.
         running = rt.get_running_chunk(conn, args.experiment_id)
         if running is not None:
-            alive = rt.is_slurm_job_running(running["slurm_job_id"])
-            stale_by_age = False
-            if running["start_time"]:
-                started = datetime.fromisoformat(running["start_time"])
-                stale_by_age = (datetime.now(timezone.utc) - started) > timedelta(days=4)
-
-            if alive:
+            state = rt.chunk_orphan_state(running)
+            if state == "alive":
                 print(f"{args.experiment_id}: chunk {running['chunk_index']} is already running "
                       f"(SLURM job {running['slurm_job_id']}) -- not starting another.",
                       file=sys.stderr)
                 return 1
-            if alive is None and not stale_by_age:
+            if state == "unknown":
                 print(f"{args.experiment_id}: chunk {running['chunk_index']} is marked running and "
                       f"its SLURM job status can't be confirmed (squeue unavailable) but it "
                       f"isn't old enough yet to treat as orphaned -- not starting another.",
@@ -298,7 +306,7 @@ def _main_tracked(args: argparse.Namespace) -> int:
                   file=sys.stderr)
             return 2
 
-        calendar = "noleap" if "CMIP6" in experiment["script"] or "CMIP6" in experiment["config"] else "standard"
+        calendar = _experiment_calendar(experiment["config"])
         stop_date = _parse_date(experiment["stop_date"], calendar)
 
         start_str = rt.next_chunk_start(conn, args.experiment_id, experiment["initial_date"])

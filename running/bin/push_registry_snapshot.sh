@@ -20,7 +20,7 @@
 #      set (see setup_experiment_tracking.sh) AND ssh from a compute
 #      node to here actually works. **Confirmed 2026-08-29, directly by
 #      PML: compute nodes on this project's HPC cannot ssh to their own
-#      login node at all** (see test_compute_to_login_ssh.sbatch) -- so
+#      login node at all** (see investigations/test_compute_to_login_ssh.sbatch) -- so
 #      on THIS cluster this path never fires, silently and harmlessly.
 #      Kept in the code only for a different cluster where compute-to-
 #      login ssh might actually work; never set OCEANICU_LOGIN_NODE here.

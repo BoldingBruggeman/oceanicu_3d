@@ -74,11 +74,6 @@ def configure_fabm(sim, domain, config: dict) -> None:
     comment for why) -- a config can enable ERSEM dependencies without
     necessarily also using WOA/CMEMS for FABM boundaries, and vice versa.
 
-    NOT YET VERIFIED against real NSe input files (AMM7-EMEP-style
-    N-deposition netCDFs, gelbstoff/CDOM product, WOA tracer
-    climatologies) -- cfg_fabm.py's own inputs are AMM-domain-specific;
-    this port keeps the same dependency names/file-shape expectations,
-    but NSe's own equivalent files need confirming before a real run.
     The N-deposition files themselves were rewritten 2026-09-23 to carry
     real `latitude`/`longitude` dimension coordinates directly (same
     convention as the fish/gelbstoff files below), so no runtime
@@ -331,7 +326,6 @@ def configure_fabm(sim, domain, config: dict) -> None:
     # decades-long archive than any one run needs.
     NDEP_HIST_CUTOFF_YEAR = 2014  # this dataset's own historical/scenario split -- matches meteo.py's CMIP6 HIST_CUTOFF_YEAR
 
-    runtime_cfg = config.get("runtime") or {}
     _start = runtime_cfg.get("time")
     _stop = runtime_cfg.get("stop")
 

@@ -60,8 +60,7 @@ def add_rivers(domain, config: dict):
     # ${VAR} resolution for free but NOT folder_template composition).
     # Missing this meant `folder` alone (e.g. scylla's bare
     # RIVER_FOLDER_CMIP6=/work/shared/oceanICU/BiasCorrected, deliberately
-    # NOT including CMIP6/<model>/<scenario>/rivers -- see
-    # driver/scylla_data_roots.yaml) resolved to a file that never
+    # NOT including CMIP6/<model>/<scenario>/rivers) resolved to a file that never
     # existed (FileNotFoundError, hit on the HPC 2026-09-15).
     folder = Path(resolve_data_path(rcfg["folder"]))
     if rcfg.get("folder_template"):
@@ -226,7 +225,7 @@ def set_river_data(sim, domain, config: dict) -> int:
     has, since both segments share the same noleap calendar here).
 
     ${RIVER_FOLDER}/RIVER_FILE are the SEPARATE machine-configured env
-    var/name for the real historical file (see machines.yaml) --
+    var/name for the real historical file (from the data-roots file) --
     independent of river_discharge's own folder/folder_template/file
     (which for source=CMIP6 locate the PROJECTED future file only, below);
     RIVER_FILE differs by archive vintage (e.g. scylla's real file isn't

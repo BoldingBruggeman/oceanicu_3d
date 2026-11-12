@@ -19,11 +19,6 @@
 # the relay, not here):
 #   cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://relay/abs/path/db.sqlite',OCEANICU_RELAY_DIR='/abs/path/on/relay' run_chunk.slurm
 #
-# OCEANICU_HEALTH_CHECK=1 (optional): the CPU-stall health-check
-# watchdog (health_check.py, via sstat) is ON HOLD, OFF by default --
-# sstat's job accounting proved unreliable on the real cluster. See its
-# own comment further down for the full story.
-#
 # The leading `ALL,` matters -- without it, --export replaces the job's
 # ENTIRE environment with just the listed vars, including dropping HOME
 # (confirmed in production, job 11233: HOME ended up as bare "/", so
@@ -199,12 +194,11 @@ with rt.connect() as conn:
 
 # Best-effort, event-driven push of the registry out to bb-server1, right
 # before each self-resubmission -- only fires if OCEANICU_LOGIN_NODE is
-# set (see setup_experiment_tracking.sh; usually via ~/.bashrc, which this
-# script already sources above, and which is visible here unmodified
-# since $HOME is shared between login and compute nodes) AND ssh from
+# set (see setup_experiment_tracking.sh; exported in the submitting shell,
+# which sbatch --export=ALL passes through) AND ssh from
 # THIS compute node to it actually works. **Confirmed 2026-08-29,
 # directly by PML: compute nodes on this project's HPC cannot ssh to
-# their own login node at all** (see test_compute_to_login_ssh.sbatch)
+# their own login node at all** (see investigations/test_compute_to_login_ssh.sbatch)
 # -- so on THIS cluster this never fires, silently and harmlessly; never
 # set OCEANICU_LOGIN_NODE here. Kept only for a different cluster where
 # compute-to-login ssh might actually work. Backgrounded and silenced: a
@@ -227,48 +221,8 @@ _push_registry_snapshot_best_effort() {
 # chunk_runner.py launches the driver script (srun, or the experiment's
 # `launcher`) and waits for it. Exit codes: 0 chunk done, 1 nothing to do
 # (complete, paused or already running), anything else a failure.
-python chunk_runner.py --experiment-id "$EXPERIMENT_ID" --slurm-job-id "$SLURM_JOB_ID" &
-RUNNER_PID=$!
-
-# OCEANICU_HEALTH_CHECK (optional): the CPU-stall health-check watchdog
-# is ON HOLD, OFF by default -- set (any non-empty value) to turn it on
-# anyway. Was briefly ON by default (2026-09-02), then reverted the same
-# day: confirmed against the REAL cluster that sstat's job accounting is
-# unreliable here -- TotalCPU isn't even a valid --format field, and
-# AveCPU (which is) returns garbage (e.g. "213503982334-14:25:51") for
-# every step of a real job, repeatably, not just once. health_check.py
-# itself was safe throughout (a failed/garbage sstat read is treated as
-# "skip this cycle", never as a false stall -- so nothing was ever
-# wrongly killed), just silently useless -- every cycle no-opped rather
-# than actually monitoring anything. On hold pending a more reliable
-# signal (log-growth was proposed, but has its own real false-positive
-# risk: legitimate gaps between GETM report lines vary a lot by
-# domain/report.days, and scyllapfs write-visibility lag on top of
-# that -- not resolved yet, see EXPERIMENT_TRACKING.md). The `kill`
-# command / chunks.last_health_check column / health_check.py's overall
-# structure all stay in place to build on once a real signal is chosen.
-if [ -z "${OCEANICU_HEALTH_CHECK:-}" ]; then
-    echo "OCEANICU_HEALTH_CHECK not set -- health-check watchdog on hold (default; see comment above)."
-    MONITOR_PID=""
-else
-( HEALTH_CHECK_INTERVAL_SECONDS="${OCEANICU_HEALTH_CHECK_INTERVAL_SECONDS:-600}"
-  while kill -0 "$RUNNER_PID" 2>/dev/null; do
-      sleep "$HEALTH_CHECK_INTERVAL_SECONDS" &
-      wait $! 2>/dev/null
-      # chunk_runner.py may have finished (and RUNNER_PID exited) during
-      # that sleep -- don't bother running a cycle for a chunk that's
-      # already done.
-      kill -0 "$RUNNER_PID" 2>/dev/null || break
-      python3 "$SCRIPT_DIR/health_check.py" --experiment-id "$EXPERIMENT_ID"
-  done ) &
-MONITOR_PID=$!
-fi
-
-wait "$RUNNER_PID"
+python chunk_runner.py --experiment-id "$EXPERIMENT_ID" --slurm-job-id "$SLURM_JOB_ID"
 EXIT_CODE=$?
-
-kill "$MONITOR_PID" 2>/dev/null
-wait "$MONITOR_PID" 2>/dev/null
 
 if [ $EXIT_CODE -eq 1 ]; then
     echo "$EXPERIMENT_ID: nothing to do (already complete or paused) -- not resubmitting."

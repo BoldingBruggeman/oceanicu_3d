@@ -32,11 +32,7 @@ chunk_runner.py's own finish_chunk() call passes nan_detected=False
 unconditionally today -- it's not a real, working check yet in the
 reference implementation either, so there is nothing functioning to
 mirror here; building one would be inventing a capability the source this
-is based on doesn't actually have, not matching it. Likewise the optional
-health-check watchdog (OCEANICU_HEALTH_CHECK) is skipped, for the same
-reason it defaults off in run_chunk.slurm: sstat job accounting was found
-unreliable on the real cluster (see that script's own comment) -- on hold
-pending a real signal, nothing here to copy yet.
+is based on doesn't actually have, not matching it.
 
 Usage:
     python3 chunk_chain.py --experiment-id NSe/CMEMS/v01E [--db PATH]

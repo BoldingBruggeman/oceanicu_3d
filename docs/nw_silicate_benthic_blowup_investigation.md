@@ -177,13 +177,13 @@ likely aren't in `nse_3d.nc` regardless -- only a restart file (which
 holds full state, not just requested diagnostics) can show `K5`'s state
 and `D1m`/`D2m` directly.
 
-We've written `running/diagnose_ersem_benthic_blowup.py` (in the code
+We've written `investigations/diagnose_ersem_benthic_blowup.py` (in the code
 repo, same branch as everything else -- `claude`) to pull whatever of
 this *is* available from the experiment's own existing output/restart
 files at the segment-2 location, without rerunning anything. Usage:
 
 ```bash
-python3 running/diagnose_ersem_benthic_blowup.py \
+python3 investigations/diagnose_ersem_benthic_blowup.py \
     --experiment-root /path/to/experiments/NSe/CMEMS/v01E_gvc
 ```
 

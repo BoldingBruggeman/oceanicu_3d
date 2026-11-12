@@ -1,34 +1,17 @@
 #!/usr/bin/env python
-"""General-purpose pygetm-config driver for OceanICU domain configs (NSe,
-and any future domain that follows the same schema-validated shape) --
-NOT NSe-specific despite its origin as "nse_driver.py"; renamed and moved
-here (out of the old pygetm_config/ directory, which collided with the
-actual `pygetm_config` PACKAGE name) so this general-purpose driver/
-oceanicu_providers.py/scripts/ trio lives separately from any one domain's
-own config, which belongs under that domain's own config directory instead
-(e.g. NSe/config/nse_from_oceanicu.yaml). Demonstrates the composable
-pattern from pygetm-config's docs/yaml_vs_python.md: the Domain itself is
-built generically by pygetm_config.loader from the config's `domain:`
-section (schema-validated, one choice among several -- see
-schema._build_bathymetry_file_choice), since reading a pre-prepared
-bathymetry file turned out to need only variable names and a mask
-convention, not bespoke code. Rivers, by contrast, genuinely stay bespoke,
-project-specific Python here (mirroring OceanICU's real cfg_rivers.py,
-verified against that source): they're dynamic and threshold-filtered from
-an EMORID file at run time, not a static list.
+"""pygetm-config driver for OceanICU domain configs (NSe and any domain with
+the same shape).
 
-This is a REFERENCE / illustrative script -- it needs a real bathymetry NetCDF
-(referenced by the config's own `domain:` section) and a real EMORID
-river-discharge NetCDF to actually run (paths taken from the config's
-`river_discharge:` section, which IS schema-validated -- see
-oceanicu_providers.py, registered automatically below via
-PYGETM_CONFIG_PROVIDERS). Run in a pygetm-capable environment with
-pygetm-config installed there too (`pip install -e ".[introspect]"` from the
-pygetm-config repo) -- no sys.path hacks, this script has no dependency on
-being located near the pygetm-config repo, only on pygetm_config being
-importable:
+The Domain is built generically by pygetm_config.loader from the config's
+`domain:` section; rivers, meteo, hydrography and FABM setup come from the
+project hooks in scripts/*.py, and provider-derived data_assignments from
+oceanicu_providers.py (registered below via PYGETM_CONFIG_PROVIDERS).
 
-    python driver/oceanicu_driver.py NSe/config/nse_from_oceanicu.yaml --start 2024-03-01T00:00:00 --stop 2024-03-02T00:00:00
+Runs the model directly, or with --dump-python writes a standalone script
+(pygetm only, no pygetm-config) for the HPC. Needs pygetm-config installed
+(`pip install -e ".[introspect]"` in the pygetm-config repo):
+
+    python driver/oceanicu_driver.py NSe/config/nse_cmems.yaml --start 2024-03-01T00:00:00 --stop 2024-03-02T00:00:00
 """
 
 from __future__ import annotations
@@ -109,9 +92,7 @@ def main(argv=None) -> int:
         "open-boundary point positions, and river name/lon/lat to {PREFIX}_summary.npz, "
         "then exit. For rendering with ocean-plot (real coastlines, controlled figure "
         "size/DPI, decluttered output) instead of pygetm's own Domain.plot() -- see "
-        "ocean-post's generate_domain_overview_plot. Mutually exclusive with "
-        "--plot-domain (both would need to pick which one wins on PREFIX defaulting; "
-        "just run the command twice if you want both outputs).",
+        "ocean-post's generate_domain_overview_plot. Not together with --plot-domain.",
     )
     parser.add_argument(
         "--skip-unavailable-output",
@@ -140,10 +121,10 @@ def main(argv=None) -> int:
         "Rivers are included: river_discharge.emorid.script (resolved above) points at "
         "scripts/rivers.py's add_rivers(), whose real source gets embedded in the generated "
         "script (see pygetm_config.loader.run_river_discharge_script's docstring). The "
-        "generated script has its own real argparse CLI (-h shows it) -- --start/--stop/"
-        "--dry-run/--load-restart/--load-restart-time/--save-restart/--skip-unavailable-output are genuine "
-        "runtime arguments of THAT script, defaulting to whatever was given here, not fixed "
-        "at generation time. Defaults to generated_<domain>.py, derived from the config "
+        "generated script has its own argparse CLI (-h shows it): --start/--stop/--dry-run/"
+        "--load-restart/--load-restart-time/--save-restart/--skip-unavailable-output are "
+        "runtime arguments of THAT script; --start/--stop given here become its defaults. "
+        "Defaults to generated_<domain>.py, derived from the config "
         "file's own name, or pass a path.",
     )
     parser.add_argument(
@@ -355,17 +336,15 @@ def main(argv=None) -> int:
     # docstring, and the matching comment on boundaries.baroclinic above).
     meteo = raw.get("meteo") or {}
     meteo_source = meteo.get("source")
-    meteo_cfg = (meteo.get(meteo_source) or {}) if meteo_source in ("ERA5", "CMIP6", "CMIP6-raw") else {}
     if meteo_source in ("ERA5", "CMIP6", "CMIP6-raw"):
+        meteo_cfg = meteo.get(meteo_source) or {}
         if not meteo_cfg.get("data_script"):
             meteo_cfg["data_script"] = "${SCRIPT_FOLDER}/meteo.py:set_meteo_data"
         meteo[meteo_source] = meteo_cfg
         raw["meteo"] = meteo
 
         # Propagate meteo.<source>'s shared params into the REAL airsea
-        # constructor config (see the _SHORTWAVE_METHOD_NAMES/
-        # _LONGWAVE_METHOD_NAMES module comment above for the int-to-enum
-        # translation this needs). `type` must be set alongside these
+        # constructor config. `type` must be set alongside these
         # (airsea is a discriminated ChoiceSpec -- FluxesFromMeteo |
         # Fluxes) -- defaults to FluxesFromMeteo, matching this schema's
         # own default choice. setdefault, not overwrite: a config that
@@ -573,10 +552,6 @@ def main(argv=None) -> int:
     # Order matters and matches run_model.py's own create_domain() exactly:
     # open boundaries -> domain.cfl_check() -> rivers.
     loader.add_open_boundaries(domain, config, schema)
-    # pygetm_config.loader has no check_domain_cfl() wrapper (confirmed --
-    # grepped the real devel-branch source, nothing matches) despite this
-    # comment claiming one; call the real pygetm API directly instead,
-    # exactly as run_model.py's own create_domain() does on `main`.
     domain.cfl_check()
 
     # Goes through the SAME generic mechanism --dump-python's generated
@@ -600,6 +575,8 @@ def main(argv=None) -> int:
     # overview plot shouldn't be blocked by it). show_subdomains/tiling
     # dropped accordingly -- no Simulation exists yet to supply a tiling,
     # and MPI subdomain decomposition isn't part of what this flag is for.
+    if args.plot_domain and args.export_domain_summary:
+        parser.error("--plot-domain and --export-domain-summary are mutually exclusive -- run twice")
     if args.plot_domain:
         # domain.plot() itself still calls get_final_mask(), which still
         # validates every open-boundary point is on water and raises if not

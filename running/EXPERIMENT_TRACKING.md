@@ -18,7 +18,6 @@ machine use the same directory or even the same username:
 | `oceanicu_experiments.py` | the CLI you use day to day: register experiments, check status, pause/resume, rerun. |
 | `experiment_defaults.yaml` | single source of truth for `add`'s optional-flag defaults (`chunk_kind`, `chunk_multiplier`, `np`, `launcher`, `priority`, `chunk_delay_seconds`) -- edit this, not scattered argparse literals. Lives here so it travels with `oceanicu_experiments.py` via whatever already deploys `running/`; falls back to hardcoded values if ever missing rather than crashing. |
 | `chunk_runner.py` | runs exactly one chunk. Called by `run_chunk.slurm`; you don't normally invoke it by hand except when testing (see below). |
-| `health_check.py` | periodic CPU-stall watchdog for whichever chunk is currently running, via `sstat`. **ON HOLD as of 2026-09-02** -- `sstat`'s job accounting proved unreliable on the real cluster; OFF by default (`OCEANICU_HEALTH_CHECK=1` to enable anyway). See "Monitoring a running chunk" below. |
 | `reap_orphaned_chunks.py` | cron watchdog: proactively marks chunks stuck at `status=running` as failed once their SLURM job is confirmed dead (or old enough that it's assumed dead) -- catches a job whose whole cgroup got killed before `chunk_runner.py` itself could record the failure. Login node only (needs `squeue`). See `setup_experiment_tracking.sh`'s own printed cron guidance (`hpc` role, "Optional FOURTH cron") for the crontab line. |
 | `run_chunk.slurm` | the SLURM job. Runs one chunk, then resubmits itself for the next one -- or, once an experiment reaches its `stop_date`, for the next queued experiment (see "The queue" below). |
 | `chunk_chain.py` | `run_chunk.slurm`'s non-SLURM counterpart -- a plain self-chaining Python loop for a host with no scheduler (workstation, cloud VM, orca). See "Launch it (non-SLURM host)" below. Unit-tested in `test_chunk_chain.py`. |
@@ -29,7 +28,6 @@ machine use the same directory or even the same username:
 | `bin/watch_registry_and_push.sh` | persistent watcher: calls `push_registry_snapshot.sh` the moment a fresh backup snapshot appears, instead of waiting for the next cron interval. Login node only; meant to be kept alive by `restart_registry_watcher.sh`, not run by hand. |
 | `bin/restart_registry_watcher.sh` | cron watchdog: (re)starts `watch_registry_and_push.sh` if it's not already running. Login node only. |
 | `bin/pull_experiment_files.sh` | pulls freshly staged experiment files (driver script/config) in from bb-server1, filtered the same way `stage` writes them -- see "Command queue". Login node only. `rsync -u`: never overwrites a file that's newer on this machine than on bb-server1, so a driver-script fix hand-edited directly here (e.g. after a chunk failure) survives the next routine pull instead of being silently clobbered by bb-server1's older copy. |
-| `test_compute_to_login_ssh.sbatch` | one-shot test for whether a compute node can reach its own login node -- see "Keeping bb-server1's copy up to date". Not part of normal operation. |
 
 ## Use `oceanicu-experiments`, not `python oceanicu_experiments.py`
 
@@ -400,9 +398,7 @@ Honors `delay-all`/`PAUSE_ALL`/`rerun` exactly like the SLURM path (same
 registry, same sentinels). Not replicated (same reasoning as `run_chunk.
 slurm`'s own on-hold items): the NaN-monitoring log-tail (`chunk_runner.
 py`'s `finish_chunk()` hardcodes `nan_detected=False` today, so there's
-nothing real to mirror) and the `OCEANICU_HEALTH_CHECK` watchdog
-(`sstat`-based, already unreliable and off by default on the real
-cluster). Stops cleanly on SIGINT/SIGTERM, checked between chunks only --
+nothing real to mirror). Stops cleanly on SIGINT/SIGTERM, checked between chunks only --
 never kills a chunk that's actually running.
 
 ## The queue
@@ -556,48 +552,14 @@ constraint as `kill`/`squeue`/`scancel`) -- queueing it from orca/
 bb-server1 works fine (it's just a YAML entry until applied), running
 it directly there does not (`sbatch` itself doesn't exist there).
 
-## Monitoring a running chunk (ON HOLD as of 2026-09-02)
+## Monitoring a running chunk
 
-`health_check.py` (auto-kill a chunk on a real stall, checked every ~10
-min via `run_chunk.slurm`) is **OFF by default, on hold** -- set
-`OCEANICU_HEALTH_CHECK=1` to turn it on anyway, but see why that's not
-recommended yet below.
-
-**What happened:** built to close a real gap (the registry never
-reflected a hung/blown-up run until the job's whole walltime allocation
-expired) by watching the job's own cumulative CPU time via SLURM's
-`sstat` -- no GETM log content needed, so it'd catch a silently HUNG MPI
-job (one rank diverged internally, others stuck in a blocking
-collective) that the old NaN-log-scan approach never could. Deployed
-ON by default the same day, then reverted a few hours later: confirmed
-against the REAL cluster that `sstat`'s job accounting is unreliable
-here -- `TotalCPU` isn't even a valid `--format` field, and `AveCPU`
-(which is) returned garbage (e.g. `213503982334-14:25:51`) for every
-step of a real, healthy 192-task job, repeatably, not a one-off glitch.
-
-**Nothing was ever wrongly killed** -- a failed/garbage `sstat` read is
-always treated as "skip this cycle," never as a false stall -- but the
-watchdog was silently useless the whole time it was on: every cycle
-no-opped instead of actually monitoring anything (confirmed: `oceanicu-
-experiments show` on a real, healthy, multi-chunk-completed experiment
-showed `last_health_check` still empty throughout).
-
-A log-file-growth signal (size/mtime advancing, not content) was
-proposed as the replacement, but has its own real false-positive risk
-that isn't resolved yet: legitimate gaps between GETM's own report
-lines vary a lot by domain size/resolution/`runtime.report.days`, and
-scyllapfs can add its own write-visibility lag from a different node's
-`stat()` on top of that. Picking a stall threshold that's safe for
-every experiment's config, not just the fast-reporting one it happened
-to be checked against, needs more thought before this goes back on by
-default.
-
-**What's still in place, ready to build on:** `oceanicu-experiments
-kill` (immediate hard-kill + DB update, unaffected by any of this --
-see above), `chunks.last_health_check` (the overwrite-not-history-spam
-column), and `health_check.py`'s overall structure (looks up the
-running chunk itself, fail-safe on any unparseable/missing reading).
-Only the actual detection SIGNAL needs replacing.
+There is no automatic stall watchdog. An `sstat`-based one (`health_check.py`)
+was tried and removed: `sstat`'s job accounting is unreliable on the cluster
+(`TotalCPU` is not a valid field, `AveCPU` returns garbage). A log-growth
+signal is the open alternative; it needs a stall threshold that is safe for
+every domain's report interval and scyllapfs write lag. Until then, stop a
+hung chunk by hand with `oceanicu-experiments kill`.
 
 ## Change chunk size mid-experiment
 
@@ -1458,7 +1420,7 @@ compute node to `$OCEANICU_LOGIN_NODE` (if that env var is set, e.g. via
 `setup_experiment_tracking.sh`'s optional 4th `hpc` argument) and run
 `push_registry_snapshot.sh` there. **Confirmed 2026-08-29, directly by
 PML: compute nodes on this project's HPC cannot `ssh` to their own login
-node at all** -- `test_compute_to_login_ssh.sbatch` was built to check
+node at all** -- `investigations/test_compute_to_login_ssh.sbatch` was built to check
 exactly this. So on THIS cluster, never set `OCEANICU_LOGIN_NODE` -- it
 would just silently never fire (harmless, but pointless). The mechanism
 stays in the code because it might work on a different cluster this

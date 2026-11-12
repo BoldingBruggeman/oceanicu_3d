@@ -8,20 +8,10 @@ config only ever picks ONE choice per role; the `source:`-discriminated
 `ChoiceSpec` this module builds, via `make_provider_slot`, supports all of
 them at once).
 
-Not currently wired up as a real installed entry point: `oceanicu_3d` has no
-`pyproject.toml`/packaging today (it's a script directory, not an installed
-package), so there's nothing for an `[project.entry-points]` table to attach
-to yet. If/when this directory (or a subset of it) gets real packaging, the
-entry point would be:
-
-    [project.entry-points."pygetm_config.providers"]
-    oceanicu = "pygetm_config.oceanicu_providers:register_oceanicu_providers"
-
-(adjust the dotted module path to wherever this file actually lives once
-packaged). Until then, `pygetm_config.schema.build_schema()` in a plain
-`pygetm`+`pygetm-config` environment will NOT pick this up automatically --
-call `register_oceanicu_providers()` directly and merge the result into a
-schema's sections by hand if you want to use it before that packaging exists.
+Registered through the PYGETM_CONFIG_PROVIDERS / PYGETM_CONFIG_VALUE_DERIVERS
+environment variables (set by oceanicu_driver.py and by register_oceanicu_
+providers() below), not a packaging entry point: oceanicu_3d is a script
+directory, not an installed package.
 
 Role naming: `boundaries.barotropic`/`boundaries.baroclinic` (not `boundaries`
 as one role) because they draw from genuinely different provider vocabularies
@@ -46,15 +36,9 @@ from pygetm_config import loader
 from pygetm_config.model import ChoiceSpec, Importance, ParameterSpec, TypeRef
 from pygetm_config.providers import make_provider_slot
 
-# Absolute, not "nse_driver.py" -- pygetm_config.providers.load_dotted_target
-# (used by both loader.run_river_discharge_script and codegen.py's
-# _emit_river_discharge_script) resolves a "*.py:name" target as a filesystem
-# path relative to the CURRENT WORKING DIRECTORY at run time, not relative to
-# this file or the YAML config -- same reasoning as PYGETM_CONFIG_PROVIDERS'
-# own absolute-path construction in nse_driver.py's main(). One file per
-# provider role under scripts/ (not one big driver-adjacent file) -- each
-# data_script/script/post_data_script function is fully self-contained (own
-# local imports, no shared module-level state), so splitting cost nothing.
+# Absolute: pygetm_config.providers.load_dotted_target resolves a "*.py:name"
+# target relative to the current working directory, not this file. Each hook
+# in scripts/ is self-contained (codegen embeds a single function's source).
 _SCRIPTS_DIR = Path(__file__).parent / "scripts"
 _RIVERS_SCRIPT_PATH = _SCRIPTS_DIR / "rivers.py"
 _METEO_SCRIPT_PATH = _SCRIPTS_DIR / "meteo.py"
@@ -316,7 +300,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
     # path to where that extraction's era5_<var>_????.nc files already
     # live, same as every other non-CMIP6 provider in this module (CMEMS,
     # WOA, TPXO, emorid). The filename side (fixed "era5_<var>_????.nc"
-    # glob, hardcoded in oceanicu_driver.py's own _meteo_assignments) is not
+    # glob, hardcoded in derive_data_assignments below) is not
     # configurable -- would need wildcarding if a different extraction ever
     # used another naming convention.
 
@@ -362,8 +346,8 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
     )
 
     # CMIP6-raw: meteo read directly from the RAW (not bias-corrected) CMIP6
-    # archive -- /data/CMIP6/{model}/{scenario}/ (CMIP6_RAW_FOLDER, see
-    # machines.yaml), one whole-period file per variable per experiment
+    # archive -- /data/CMIP6/{model}/{scenario}/ (CMIP6_RAW_FOLDER, from the
+    # data-roots file), one whole-period file per variable per experiment
     # (fetched via ocean-data's DataLoader, either Pangeo/GCS or ESGF's own
     # prefer_streaming=False full-file-download path -- see that repo's
     # esgf_loader.py). No net_sw/net_lw composite exists in the raw archive
@@ -805,15 +789,14 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
     # added as another choice without restructuring. Mirrors cfg_fabm.py's
     # own `cfg.fabm.config == "ersem"` check exactly: real FABM setup always
     # needs BOTH sim.fabm (is FABM enabled at all, from simulation.fabm --
-    # see oceanicu_driver.py's propagation of `file` below) AND which
+    # set from `file` by derive_config_value_overrides below) AND which
     # specific model/config is active (this role's own `source`), since
     # different models need different dependencies/ICs/boundaries.
     #
     # `folder` (FABM-specific input files, e.g. cfg_fabm.py's EMEP/gelbstoff
     # netCDFs) comes for free from _shared_provider_base_params(). `file` is
     # the actual fabm.yaml path -- propagated into simulation.fabm by
-    # oceanicu_driver.py (same shape as meteo's shared params propagating
-    # into simulation.airsea).
+    # derive_config_value_overrides below.
     fabm = make_provider_slot(
         "fabm",
         {
@@ -1047,6 +1030,42 @@ def derive_config_value_overrides(config: dict) -> dict:
 # ['boundaries']['baroclinic']['CMEMS']['folder']) -- see
 # yaml_parse._validate_choice / loader._resolve_choice. Must stay
 # pygetm-free (codegen.py calls this too, at GENERATION time).
+_CMIP6_HIST_START, _CMIP6_HIST_END = "20100101", "20141231"
+
+
+def _bdy_folder(role: dict, config: dict, scenario: str) -> Path:
+    """A boundaries.<role>'s folder, with folder_template's {setup}/{model}/
+    {scenario} filled in."""
+    folder = Path(role.get("folder", ""))
+    if role.get("folder_template"):
+        folder = folder / role["folder_template"].format(
+            setup=config.get("setup", ""), model=role.get("model", ""), scenario=scenario
+        )
+    return folder
+
+
+def _cmip6_bdy_files(role: dict, config: dict, calendar_suffix: str, variable: str | None = None) -> list[str]:
+    """[historical, scenario] boundary files of a CMIP6 boundaries.<role>.
+
+    ocean-prep's run-delta-boundaries writes one file per whole period: a
+    fixed historical bridge (2010-2014, nse_delta_bdy_historical.yaml) and
+    the scenario file (role start_date..end_date). pygetm.input.from_nc reads
+    the list as one series; listing both is harmless for a run inside one
+    period. *variable* fills a per-variable filename_template (baroclinic)."""
+    tmpl = role.get("filename_template", "")
+    periods = [
+        ("historical", _CMIP6_HIST_START, _CMIP6_HIST_END),
+        (role.get("scenario", ""), role.get("start_date", ""), role.get("end_date", "")),
+    ]
+    files = []
+    for experiment, start, end in periods:
+        name = tmpl.format(variable=variable, start_date=start, end_date=end)
+        if calendar_suffix:
+            name = name.removesuffix(".nc") + calendar_suffix + ".nc"
+        files.append(str(_bdy_folder(role, config, experiment) / name))
+    return files
+
+
 def derive_data_assignments(config: dict) -> list[dict]:
     entries: list[dict] = []
 
@@ -1084,9 +1103,7 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "open_boundary.salt.values", "kind": "file", "file": str(_woa_folder / "woa_s.nc"), "variable": "s_an", "on_grid": False, "climatology": True},
         ]
     elif baroclinic_source == "CMEMS":
-        _cmems_folder = Path(baroclinic.get("folder", ""))
-        if baroclinic.get("folder_template"):
-            _cmems_folder = _cmems_folder / baroclinic["folder_template"]
+        _cmems_folder = _bdy_folder(baroclinic, config, baroclinic.get("scenario", ""))
         _cmems_file = _cmems_folder / baroclinic.get("filename_template", "").format(
             start_date=baroclinic.get("start_date", ""), end_date=baroclinic.get("end_date", "")
         )
@@ -1119,33 +1136,9 @@ def derive_data_assignments(config: dict) -> list[dict]:
         # period only ever touches its own file's real time range, so
         # listing both is harmless even then -- no need to thread runtime.
         # stop into this deriver the way meteo's script-hook needed to.
-        _HIST_START, _HIST_END = "20100101", "20141231"
-
-        def _cmip6_bdy_folder(experiment: str) -> Path:
-            folder = Path(baroclinic.get("folder", ""))
-            if baroclinic.get("folder_template"):
-                folder = folder / baroclinic["folder_template"].format(
-                    model=baroclinic.get("model", ""), scenario=experiment
-                )
-            return folder
-
-        _fn_tmpl = baroclinic.get("filename_template", "")
-
-        def _cmip6_bdy_files(variable: str) -> list[str]:
-            hist_name = _fn_tmpl.format(variable=variable, start_date=_HIST_START, end_date=_HIST_END)
-            scen_name = _fn_tmpl.format(
-                variable=variable, start_date=baroclinic.get("start_date", ""), end_date=baroclinic.get("end_date", "")
-            )
-            if _calendar_suffix:
-                hist_name = hist_name.removesuffix(".nc") + _calendar_suffix + ".nc"
-                scen_name = scen_name.removesuffix(".nc") + _calendar_suffix + ".nc"
-            hist_path = _cmip6_bdy_folder("historical") / hist_name
-            scen_path = _cmip6_bdy_folder(baroclinic.get("scenario", "")) / scen_name
-            return [str(hist_path), str(scen_path)]
-
         entries += [
-            {"target": "open_boundary.temp.values", "kind": "file", "file": _cmip6_bdy_files("thetao"), "variable": "thetao", "on_grid": True, "climatology": False},
-            {"target": "open_boundary.salt.values", "kind": "file", "file": _cmip6_bdy_files("so"), "variable": "so", "on_grid": True, "climatology": False},
+            {"target": "open_boundary.temp.values", "kind": "file", "file": _cmip6_bdy_files(baroclinic, config, _calendar_suffix, "thetao"), "variable": "thetao", "on_grid": True, "climatology": False},
+            {"target": "open_boundary.salt.values", "kind": "file", "file": _cmip6_bdy_files(baroclinic, config, _calendar_suffix, "so"), "variable": "so", "on_grid": True, "climatology": False},
         ]
 
     # boundaries.barotropic 2D z/u/v boundary VALUES differ by source too --
@@ -1176,13 +1169,7 @@ def derive_data_assignments(config: dict) -> list[dict]:
         # Single file holding zos/uo/vo together -- matches
         # cfg_boundaries.py::data_2d's own generic branch, which reads all
         # three off one resolved `fn`.
-        _folder = Path(barotropic.get("folder", ""))
-        if barotropic.get("folder_template"):
-            _folder = _folder / barotropic["folder_template"].format(
-                setup=config.get("setup", ""),
-                model=barotropic.get("model", ""),
-                scenario=barotropic.get("scenario", ""),
-            )
+        _folder = _bdy_folder(barotropic, config, barotropic.get("scenario", ""))
         _file = _folder / barotropic.get("filename_template", "").format(
             start_date=barotropic.get("start_date", ""), end_date=barotropic.get("end_date", "")
         )
@@ -1201,29 +1188,7 @@ def derive_data_assignments(config: dict) -> list[dict]:
         # together (unlike baroclinic's one-file-per-variable), so this
         # only needs a single two-element file list, reused for all three
         # targets.
-        _HIST_START, _HIST_END = "20100101", "20141231"
-
-        def _cmip6_bdy_folder(experiment: str) -> Path:
-            folder = Path(barotropic.get("folder", ""))
-            if barotropic.get("folder_template"):
-                folder = folder / barotropic["folder_template"].format(
-                    setup=config.get("setup", ""),
-                    model=barotropic.get("model", ""),
-                    scenario=experiment,
-                )
-            return folder
-
-        _fn_tmpl = barotropic.get("filename_template", "")
-        _hist_name = _fn_tmpl.format(start_date=_HIST_START, end_date=_HIST_END)
-        _scen_name = _fn_tmpl.format(
-            start_date=barotropic.get("start_date", ""), end_date=barotropic.get("end_date", "")
-        )
-        if _calendar_suffix:
-            _hist_name = _hist_name.removesuffix(".nc") + _calendar_suffix + ".nc"
-            _scen_name = _scen_name.removesuffix(".nc") + _calendar_suffix + ".nc"
-        _hist_file = _cmip6_bdy_folder("historical") / _hist_name
-        _scen_file = _cmip6_bdy_folder(barotropic.get("scenario", "")) / _scen_name
-        _files = [str(_hist_file), str(_scen_file)]
+        _files = _cmip6_bdy_files(barotropic, config, _calendar_suffix)
         entries += [
             {"target": "open_boundaries.z", "kind": "file", "file": _files, "variable": "zos", "on_grid": True},
             {"target": "open_boundaries.u", "kind": "file", "file": _files, "variable": "uo", "on_grid": True},

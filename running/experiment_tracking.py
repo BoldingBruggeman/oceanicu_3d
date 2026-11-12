@@ -69,7 +69,7 @@ import subprocess
 import sys
 import time
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator, Optional, Union
 
@@ -89,7 +89,7 @@ CHUNK_STATUSES = ("running", "done", "failed")
 # exit_code alone is self-explanatory; see EXIT_CODE_LABELS for display.
 EXIT_CODE_KILLED = -1  # oceanicu_experiments.py cmd_kill: human-requested scancel
 EXIT_CODE_ORPHANED = -2  # chunk_runner.py / reap_orphaned_chunks.py: SLURM job vanished without finish_chunk()
-EXIT_CODE_STALLED = -3  # health_check.py: SLURM job still alive but TotalCPU stopped advancing
+EXIT_CODE_STALLED = -3  # former health_check.py (removed); kept to label old rows
 EXIT_CODE_RUNNER_ERROR = -4  # chunk_runner.py: its own exception after start_chunk() (e.g. srun missing, disk full)
 
 EXIT_CODE_LABELS = {
@@ -211,16 +211,7 @@ CREATE TABLE IF NOT EXISTS chunks (
     -- but chunk_runner.py can also be invoked by hand for testing, so
     -- this records reality per chunk rather than assuming.
     submitted_host TEXT,
-    -- last_health_check added 2026-09-02 (see _migrate_schema). OVERWRITTEN
-    -- on every health_check.py cycle (roughly every 10 min while a chunk
-    -- is actually running) -- deliberately NOT one history row per check
-    -- (a multi-day chunk checked every 10 min would flood the audit log
-    -- with hundreds of routine "still OK" entries for no benefit; only
-    -- the LATEST status matters day-to-day). A genuine state change (the
-    -- watchdog actually killing the job) still gets a real history entry
-    -- via record_health_check, on top of finish_chunk's own
-    -- chunk_failed/run_failed -- this column is a live heartbeat, not
-    -- the audit trail.
+    -- last_health_check: written by the former health_check.py (removed); unused.
     last_health_check TEXT,
     PRIMARY KEY (experiment_id, chunk_index),
     FOREIGN KEY (experiment_id) REFERENCES experiments(experiment_id)
@@ -796,17 +787,27 @@ def list_experiments(
     return conn.execute(f"SELECT * FROM experiments ORDER BY {order_by}").fetchall()
 
 
-@_rpc_or_local
-def set_priority(conn: sqlite3.Connection, experiment_id: str, priority: int, user: Optional[str] = None) -> None:
+def _set_experiment_field(
+    conn: sqlite3.Connection, experiment_id: str, column: str, value, event: str,
+    user: Optional[str], *, repr_values: bool = False,
+) -> None:
+    """UPDATE one experiments column (a fixed name from the set_* functions
+    below, never user input) and log "old -> new" under *event*."""
     old = get_experiment(conn, experiment_id)
     if old is None:
         raise KeyError(f"no such experiment_id: {experiment_id!r}")
     conn.execute(
-        "UPDATE experiments SET priority = ?, updated_at = ? WHERE experiment_id = ?",
-        (priority, _now(), experiment_id),
+        f"UPDATE experiments SET {column} = ?, updated_at = ? WHERE experiment_id = ?",
+        (value, _now(), experiment_id),
     )
-    _log_history(conn, experiment_id, "priority_changed", f"{old['priority']} -> {priority}", user=user)
+    fmt = repr if repr_values else str
+    _log_history(conn, experiment_id, event, f"{fmt(old[column])} -> {fmt(value)}", user=user)
     conn.commit()
+
+
+@_rpc_or_local
+def set_priority(conn: sqlite3.Connection, experiment_id: str, priority: int, user: Optional[str] = None) -> None:
+    _set_experiment_field(conn, experiment_id, 'priority', priority, 'priority_changed', user)
 
 
 @_rpc_or_local
@@ -821,18 +822,7 @@ def set_data_roots_file(
     each chunk hand-off (chunk_runner.py resolves it against experiment_root the
     same way as script/config, if it's a bare filename), same
     next-hand-off-only semantics as set_priority/set_chunk_delay."""
-    old = get_experiment(conn, experiment_id)
-    if old is None:
-        raise KeyError(f"no such experiment_id: {experiment_id!r}")
-    conn.execute(
-        "UPDATE experiments SET data_roots_file = ?, updated_at = ? WHERE experiment_id = ?",
-        (data_roots_file, _now(), experiment_id),
-    )
-    _log_history(
-        conn, experiment_id, "data_roots_file_changed",
-        f"{old['data_roots_file']!r} -> {data_roots_file!r}", user=user,
-    )
-    conn.commit()
+    _set_experiment_field(conn, experiment_id, 'data_roots_file', data_roots_file, 'data_roots_file_changed', user, repr_values=True)
 
 
 @_rpc_or_local
@@ -842,15 +832,7 @@ def set_np(conn: sqlite3.Connection, experiment_id: str, np: int, user: Optional
     at each chunk hand-off, same next-hand-off-only semantics as
     set_priority/set_chunk_delay -- never affects a chunk already
     running."""
-    old = get_experiment(conn, experiment_id)
-    if old is None:
-        raise KeyError(f"no such experiment_id: {experiment_id!r}")
-    conn.execute(
-        "UPDATE experiments SET np = ?, updated_at = ? WHERE experiment_id = ?",
-        (np, _now(), experiment_id),
-    )
-    _log_history(conn, experiment_id, "np_changed", f"{old['np']} -> {np}", user=user)
-    conn.commit()
+    _set_experiment_field(conn, experiment_id, 'np', np, 'np_changed', user)
 
 
 @_rpc_or_local
@@ -861,15 +843,7 @@ def set_launcher(conn: sqlite3.Connection, experiment_id: str, launcher: str, us
     set_chunk_delay -- never affects a chunk already running."""
     if launcher not in ("srun", "mpiexec"):
         raise ValueError(f"launcher must be 'srun' or 'mpiexec', got {launcher!r}")
-    old = get_experiment(conn, experiment_id)
-    if old is None:
-        raise KeyError(f"no such experiment_id: {experiment_id!r}")
-    conn.execute(
-        "UPDATE experiments SET launcher = ?, updated_at = ? WHERE experiment_id = ?",
-        (launcher, _now(), experiment_id),
-    )
-    _log_history(conn, experiment_id, "launcher_changed", f"{old['launcher']} -> {launcher}", user=user)
-    conn.commit()
+    _set_experiment_field(conn, experiment_id, 'launcher', launcher, 'launcher_changed', user)
 
 
 @_rpc_or_local
@@ -879,15 +853,7 @@ def set_notes(conn: sqlite3.Connection, experiment_id: str, notes: Optional[str]
     next-hand-off-only semantics as set_np/set_launcher/set_priority for
     consistency, though notes itself has no runtime effect on chunk
     execution -- it's purely a human-facing record."""
-    old = get_experiment(conn, experiment_id)
-    if old is None:
-        raise KeyError(f"no such experiment_id: {experiment_id!r}")
-    conn.execute(
-        "UPDATE experiments SET notes = ?, updated_at = ? WHERE experiment_id = ?",
-        (notes, _now(), experiment_id),
-    )
-    _log_history(conn, experiment_id, "notes_changed", f"{old['notes']!r} -> {notes!r}", user=user)
-    conn.commit()
+    _set_experiment_field(conn, experiment_id, 'notes', notes, 'notes_changed', user, repr_values=True)
 
 
 @_rpc_or_local
@@ -988,18 +954,7 @@ def set_chunk_delay(
     expiry -- 0 (the default) means no delay; set back to 0 to cancel.
     Takes effect on the very next hand-off, never retroactively, same as
     set_priority/set_stop_date/set_chunk_settings."""
-    old = get_experiment(conn, experiment_id)
-    if old is None:
-        raise KeyError(f"no such experiment_id: {experiment_id!r}")
-    conn.execute(
-        "UPDATE experiments SET chunk_delay_seconds = ?, updated_at = ? WHERE experiment_id = ?",
-        (chunk_delay_seconds, _now(), experiment_id),
-    )
-    _log_history(
-        conn, experiment_id, "chunk_delay_changed",
-        f"{old['chunk_delay_seconds']} -> {chunk_delay_seconds}", user=user,
-    )
-    conn.commit()
+    _set_experiment_field(conn, experiment_id, 'chunk_delay_seconds', chunk_delay_seconds, 'chunk_delay_changed', user)
 
 
 @_rpc_or_local
@@ -1012,15 +967,7 @@ def set_stop_date(conn: sqlite3.Connection, experiment_id: str, stop_date: str, 
     date already reached just means the experiment is already 'done' towards its
     (revised) goal -- it does not undo or delete any chunk already run
     past the new date."""
-    old = get_experiment(conn, experiment_id)
-    if old is None:
-        raise KeyError(f"no such experiment_id: {experiment_id!r}")
-    conn.execute(
-        "UPDATE experiments SET stop_date = ?, updated_at = ? WHERE experiment_id = ?",
-        (stop_date, _now(), experiment_id),
-    )
-    _log_history(conn, experiment_id, "stop_date_changed", f"{old['stop_date']} -> {stop_date}", user=user)
-    conn.commit()
+    _set_experiment_field(conn, experiment_id, 'stop_date', stop_date, 'stop_date_changed', user)
     recompute_experiment_status(conn, experiment_id)
 
 
@@ -1035,15 +982,7 @@ def set_start_date(conn: sqlite3.Connection, experiment_id: str, initial_date: s
     runs next until a rerun/reset (chunk_index=0) drops every chunk row
     first. No recompute_experiment_status call needed -- unlike stop_date,
     initial_date plays no part in status derivation."""
-    old = get_experiment(conn, experiment_id)
-    if old is None:
-        raise KeyError(f"no such experiment_id: {experiment_id!r}")
-    conn.execute(
-        "UPDATE experiments SET initial_date = ?, updated_at = ? WHERE experiment_id = ?",
-        (initial_date, _now(), experiment_id),
-    )
-    _log_history(conn, experiment_id, "initial_date_changed", f"{old['initial_date']} -> {initial_date}", user=user)
-    conn.commit()
+    _set_experiment_field(conn, experiment_id, 'initial_date', initial_date, 'initial_date_changed', user)
 
 
 @_rpc_or_local
@@ -1413,6 +1352,26 @@ def finish_chunk(
         conn.commit()
 
 
+ORPHAN_AGE = timedelta(days=4)
+
+
+def chunk_orphan_state(row) -> str:
+    """'alive', 'unknown' or 'orphaned' for a chunk row marked running.
+
+    'unknown': squeue can't tell (unavailable, or no job id recorded) and the
+    chunk started less than ORPHAN_AGE ago -- callers leave it alone, so a
+    slow squeue never gets a live chunk marked failed. Shared by
+    chunk_runner.py's start-of-chunk lock and reap_orphaned_chunks.py."""
+    alive = is_slurm_job_running(row["slurm_job_id"])
+    if alive:
+        return "alive"
+    if alive is None:
+        started = row["start_time"]
+        if not started or datetime.now(timezone.utc) - datetime.fromisoformat(started) <= ORPHAN_AGE:
+            return "unknown"
+    return "orphaned"
+
+
 def is_slurm_job_running(job_id: Optional[str]) -> Optional[bool]:
     """True/False if squeue can tell us the job is still active; None if
     it can't be determined (no job_id recorded, squeue unavailable, or it
@@ -1459,42 +1418,6 @@ def cancel_slurm_job(job_id: str) -> tuple[bool, str]:
     if result.returncode != 0:
         return False, (result.stderr.strip() or result.stdout.strip() or f"scancel exited {result.returncode}")
     return True, "scancel issued"
-
-
-@_rpc_or_local
-def update_chunk_health_check(conn: sqlite3.Connection, experiment_id: str, chunk_index: int, detail: str) -> None:
-    """OVERWRITE chunks.last_health_check for one routine health_check.py
-    cycle (OK or a not-yet-fatal stall warning) -- called roughly every
-    10 min while a chunk is actually running. Deliberately NOT a history
-    row per check (see the column's own comment in the schema) -- just
-    the live heartbeat, so "is this run still making progress, and when
-    was that last confirmed" is directly answerable from
-    `oceanicu-experiments show` without needing to check squeue or tail
-    a log by hand. A genuine state change (the watchdog actually killing
-    the job) goes through record_health_check instead, a real history
-    entry."""
-    conn.execute(
-        "UPDATE chunks SET last_health_check = ? WHERE experiment_id = ? AND chunk_index = ?",
-        (detail, experiment_id, chunk_index),
-    )
-    conn.commit()
-
-
-@_rpc_or_local
-def record_health_check(
-    conn: sqlite3.Connection, experiment_id: str, chunk_index: int, detail: str,
-    user: Optional[str] = None,
-) -> None:
-    """Log a genuine health-check STATE CHANGE (the watchdog deciding to
-    kill a stalled job) to history -- a real, permanent audit entry,
-    unlike update_chunk_health_check's routine overwritten heartbeat.
-    Explains WHY the chunk_failed/run_failed entries finish_chunk logs
-    right after this happened (a bare exit_code=-1 alone doesn't say
-    "CPU stalled for 20 min", this does). Paired with health_check.py's
-    own CPU-stall detection -- this function just records the result,
-    it doesn't decide anything itself."""
-    _log_history(conn, experiment_id, "health_check", f"chunk {chunk_index}: {detail}", user=user)
-    conn.commit()
 
 
 @_rpc_or_local
@@ -1642,7 +1565,7 @@ def rerun_from(
     cases, not just chunk_index=0 -- a from-current/from-chunk rerun can
     just as easily target the currently-live chunk's own row.
 
-    Does NOT touch files on disk (no chunk_dir is deleted) -- run_chunks.py
+    Does NOT touch files on disk (no chunk_dir is deleted) -- chunk_runner.py
     archives a pre-existing chunk_dir aside before reusing it, so a
     previous attempt's logs/output are never silently overwritten.
 

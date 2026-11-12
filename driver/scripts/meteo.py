@@ -27,7 +27,7 @@ def set_meteo_data(sim, domain, config: dict) -> None:
     meteo.source == "CMIP6" reads the BIAS-CORRECTED archive (ocean-prep's
     own bc-correct pipeline output); meteo.source == "CMIP6-raw" reads
     straight from the RAW CMIP6 archive fetched by ocean-data's DataLoader
-    (/data/CMIP6/{model}/{scenario}/, CMIP6_RAW_FOLDER -- see machines.yaml
+    (/data/CMIP6/{model}/{scenario}/, CMIP6_RAW_FOLDER, from the data-roots file
     and meteo.CMIP6-raw.folder/folder_template), no bias correction applied
     at all. Everything below that says "CMIP6" without qualification
     applies to the bias-corrected path only; the raw path's own filename
@@ -60,9 +60,9 @@ def set_meteo_data(sim, domain, config: dict) -> None:
       formula (Duffie & Beckman eq. 1.10.3). The quadratic fit coefficients
       were calibrated against ERA5 daily-mean ssrd/tcc over NW-Europe
       (-20..30E, 45..75N), 2024-2025 (n=1,546,042 daily grid-cell samples;
-      R^2=0.636, RMSE=0.155, Pearson r=-0.755 -- see
-      driver/calibration/kt_tcc_daily.py and kt_tcc_daily_fit.json in this
-      repo) using this SAME TOA formula, so both sides must be
+      R^2=0.636, RMSE=0.155, Pearson r=-0.755; the calibration scripts
+      kt_tcc_daily.py/kt_tcc_daily_fit.json are not in this repo) using this
+      SAME TOA formula, so both sides must be
       changed together if either is ever recalibrated. Sets
       simulation.airsea.tcc -- FluxesFromMeteo's ROSATI_MIYAKODA (shortwave)
       AND CLARK (longwave) bulk formulas BOTH read tcc (confirmed in
@@ -95,9 +95,7 @@ def set_meteo_data(sim, domain, config: dict) -> None:
     "net"/"components" read the `_disagg_` sub-daily files (matching tas/
     huss/uas/vas/psl/pr). "pseudo_tcc" deliberately reads the DAILY-mean
     file instead (NOT `_disagg_`): the kt->tcc fit was calibrated on daily
-    means (hourly instantaneous kt was too noisy, R^2=0.29 vs 0.64 daily --
-    see driver/calibration/kt_tcc_calibration.py vs kt_tcc_daily.py in this
-    repo), and pygetm's own temporal interpolation smooths the daily tcc
+    means (hourly instantaneous kt was too noisy, R^2=0.29 vs 0.64 daily), and pygetm's own temporal interpolation smooths the daily tcc
     series across each day's sub-daily timesteps same as any other daily
     forcing field.
     `{method}` (each variable's own regridding method) is matched with a
@@ -108,16 +106,11 @@ def set_meteo_data(sim, domain, config: dict) -> None:
     that this glob is deliberately robust to on both sides: it matches
     today's wrongly-named files AND correctly-named files once that
     upstream bug is fixed, with no further change needed here. See
-    oceanicu_driver.py's own CMIP6 branch for the same reasoning.
+    oceanicu_providers.py's CMIP6 branch for the same reasoning.
 
     Registered via meteo.data_script (see pygetm_config.loader.
-    run_meteo_data_script) -- runs AFTER apply_data_assignments, so this
-    correctly overwrites oceanicu_providers.py's own static, single-scenario
-    CMIP6 meteo entries (t2m/qa/u10/v10/sp/tp, and the tcc constant_value=0.5
-    placeholder) rather than being overwritten by them -- those stay in
-    providers.py as a sane fallback for the (only ever config-validation/
-    dry-run) case where no meteo.data_script hook runs at all, same
-    reasoning as tcc's own placeholder.
+    run_meteo_data_script); runs after apply_data_assignments. The providers
+    emit no static CMIP6 meteo entries -- this hook sets every field.
 
     Historical/scenario splicing (t2m/qa/u10/v10/sp/tp and whichever
     radiation_source is active): CMIP6's `historical` experiment is fixed at
@@ -267,22 +260,6 @@ def set_meteo_data(sim, domain, config: dict) -> None:
     # scoping, but a conditionally-executed def still isn't executed on a
     # path that skips it) -- keeping every closure's OWN def unconditional,
     # like _spliced_paths already is, avoids that trap entirely.
-    #
-    # rsds/rsus/pr previously came back renamed (to a shared 'sw', and to
-    # 'precip' respectively) by ocean-data's own CMIP6 normalisation --
-    # name_mappings.py's CF-attribute-based standardize_variable_names,
-    # meant for OCEAN CMIP6 variables (thetao/so/tos -> temp/salt/sst)
-    # matching on generic CF standard_name/long_name substrings, which
-    # unintentionally also caught these atmospheric ones. Fixed at the
-    # source (ocean-data's data_loader.py:_normalise_cmip6_conventions now
-    # skips that rename for known atmospheric variable_ids) and the 9
-    # already-fetched files affected were repaired in place (ncrename) --
-    # every raw-fetched file now keeps its own real CMIP6 variable_id, so
-    # this translation table is no longer needed. Kept as an explicit
-    # empty mapping (not deleted outright) so a REGRESSION in that fix
-    # shows up as a clear KeyError-style failure in _raw_var below rather
-    # than silently reading the wrong file's variable under a stale name.
-    _RAW_STORED_VARNAME: dict = {}
 
     def _raw_paths(var: str) -> list:
         """At most 2 whole-period files (historical, scenario), picked by
@@ -360,9 +337,8 @@ def set_meteo_data(sim, domain, config: dict) -> None:
         return xr.backends.NetCDF4DataStore(nc)
 
     def _raw_var(var: str):
-        varname = _RAW_STORED_VARNAME.get(var, var)
         stores = [_open_with_small_cache(path) for path in _raw_paths(var)]
-        return pygetm.input.from_nc(stores, varname)
+        return pygetm.input.from_nc(stores, var)
 
     if source == "CMIP6-raw":
         # RAW_HIST_START_YEAR guards against silently reading a truncated
