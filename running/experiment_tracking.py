@@ -77,16 +77,8 @@ EXPERIMENT_CONTROLS = ("run", "pause_requested", "paused")
 EXPERIMENT_STATUSES = ("not_started", "in_progress", "paused", "complete", "complete_with_warnings", "failed")
 CHUNK_STATUSES = ("running", "done", "failed")
 
-# finish_chunk() only ever sees status='done' (exit_code==0) or 'failed'
-# (anything else) -- it has no third state for "the process never really
-# exited with this code, we forced a verdict." Four different callers all
-# used to share the single sentinel exit_code=-1 for that forced-verdict
-# case, which made a deliberate human kill indistinguishable (short of
-# reading the free-text history log for the 'user' field) from a job
-# SLURM silently lost (orphaned) or one that hung without crashing
-# (stalled) -- all three rendered as identical "status=failed exit_code=-1"
-# rows. Split into distinct negative sentinels, one per cause, so
-# exit_code alone is self-explanatory; see EXIT_CODE_LABELS for display.
+# Exit codes recorded when chunk_runner did not get the process's own exit
+# status (distinct per cause; see EXIT_CODE_LABELS).
 EXIT_CODE_KILLED = -1  # oceanicu_experiments.py cmd_kill: human-requested scancel
 EXIT_CODE_ORPHANED = -2  # chunk_runner.py / reap_orphaned_chunks.py: SLURM job vanished without finish_chunk()
 EXIT_CODE_STALLED = -3  # former health_check.py (removed); kept to label old rows
@@ -110,11 +102,7 @@ def describe_exit_code(exit_code: Optional[int]) -> str:
     label = EXIT_CODE_LABELS.get(exit_code)
     return f"{exit_code} ({label})" if label and exit_code != 0 else str(exit_code)
 
-# list_experiments' allowed --sort keys, each mapped to a real ORDER BY
-# clause -- an allow-list, not a passthrough, so a sort key never reaches
-# the query as raw interpolated SQL. "priority" (the pre-existing default)
-# stays first so list_experiments() with no args is unchanged. Add more
-# keys here as they come up (per user, 2026-09-08).
+# list_experiments' --sort keys -> ORDER BY (an allow-list, never raw SQL).
 LIST_SORT_KEYS = ("priority", "status", "updated_at", "experiment_id")
 _SORT_ORDER_BY = {
     "priority": "priority DESC, experiment_id",
@@ -140,29 +128,11 @@ CREATE TABLE IF NOT EXISTS experiments (
     status           TEXT NOT NULL DEFAULT 'not_started',
     control          TEXT NOT NULL DEFAULT 'run',
     priority         INTEGER NOT NULL DEFAULT 0,
-    -- chunk_delay_seconds added 2026-08-28 (see _migrate_schema for an
-    -- already-existing experiments table -- CREATE TABLE IF NOT EXISTS
-    -- alone won't add it there). Persistent, per-experiment pacing: wait
-    -- this many seconds before EACH resubmission of this experiment's own
-    -- chunks, or before picking this experiment up as the next queued one
-    -- -- unlike DELAY_ALL (a global, one-shot TIMED pause), this is an
-    -- ongoing setting for this experiment specifically, exactly the same shape as
-    -- chunk_multiplier/priority: default 0 (no delay, previous
-    -- behaviour), settable at `add` time, changeable live via
-    -- set-chunk-delay -- takes effect on the very next hand-off, never
-    -- retroactively, same as chunk_multiplier/stop_date already do.
+    -- Per-experiment pacing: seconds to wait before each resubmission (or
+    -- before starting it as the next queued experiment); set-chunk-delay.
     chunk_delay_seconds INTEGER NOT NULL DEFAULT 0,
-    -- next_load_restart_time added 2026-09-10 (see _migrate_schema for an
-    -- already-existing experiments table). Pending, ONE-SHOT request: which
-    -- internal snapshot (ISO date/datetime) the NEXT chunk to start should
-    -- take from its load_restart file, instead of the file's own default
-    -- (the last snapshot) -- a restart file can hold more than one (see
-    -- pygetm's add_restart(interval=...)/load_restart(time=...)). Set via
-    -- `rerun --restart-time`; consumed and cleared back to NULL by
-    -- start_chunk the moment it actually starts that chunk (see its own
-    -- load_restart_time handling) -- never silently reused for a later
-    -- chunk. NULL (the default) means "use the file's own last snapshot",
-    -- unchanged behavior from before this column existed.
+    -- One-shot: the snapshot time the next chunk loads from its restart file
+    -- (rerun --restart-time); cleared by start_chunk. NULL = last snapshot.
     next_load_restart_time TEXT,
     notes            TEXT,
     created_at       TEXT NOT NULL,
@@ -176,13 +146,7 @@ CREATE TABLE IF NOT EXISTS chunks (
     stop          TEXT NOT NULL,
     chunk_dir     TEXT NOT NULL,
     load_restart  TEXT,
-    -- load_restart_time added 2026-09-10 (see _migrate_schema). Which
-    -- internal snapshot this chunk's own load_restart file was actually
-    -- asked for (see experiments.next_load_restart_time -- consumed and
-    -- recorded here at the moment this row was inserted). NULL means "the
-    -- file's own last snapshot", either because load_restart itself is
-    -- NULL (first chunk) or because no restart-time was pending when this
-    -- chunk started.
+    -- The snapshot time this chunk loaded (NULL = the file's last snapshot).
     load_restart_time TEXT,
     save_restart  TEXT NOT NULL,
     slurm_job_id  TEXT,
@@ -192,24 +156,11 @@ CREATE TABLE IF NOT EXISTS chunks (
     exit_code     INTEGER,
     nan_detected  INTEGER NOT NULL DEFAULT 0,
     status        TEXT NOT NULL DEFAULT 'running',
-    -- script_sha256/config_sha256 added 2026-08-28 (see _migrate_schema --
-    -- CREATE TABLE IF NOT EXISTS alone won't add columns to an
-    -- already-existing chunks table). Content hash of experiment['script']/
-    -- ['config'] AT THE MOMENT this chunk started -- lets a human editing
-    -- the driver script after a failure (a real, expected workflow: chunk
-    -- blows up, fix a bug in the script, `rerun --from-current`) actually
-    -- SEE that the script changed between attempts, rather than the DB
-    -- only ever recording the unchanging path string. See
-    -- chunk_runner.py's own "script_changed"/"config_changed" history
-    -- event, logged automatically by comparing this chunk's hash against
-    -- the experiment's previous chunk.
+    -- Hashes of script/config when the chunk started, so a script fixed
+    -- between attempts shows up (script_changed/config_changed history events).
     script_sha256 TEXT,
     config_sha256 TEXT,
-    -- submitted_host added 2026-08-28 (see _migrate_schema). Hostname of
-    -- whichever machine actually issued this chunk's submission --
-    -- normally the production machine's own sbatch self-resubmission,
-    -- but chunk_runner.py can also be invoked by hand for testing, so
-    -- this records reality per chunk rather than assuming.
+    -- Host that ran this chunk's submission.
     submitted_host TEXT,
     -- last_health_check: written by the former health_check.py (removed); unused.
     last_health_check TEXT,
@@ -219,20 +170,9 @@ CREATE TABLE IF NOT EXISTS chunks (
 
 CREATE INDEX IF NOT EXISTS idx_chunks_experiment ON chunks(experiment_id);
 
--- Append-only audit log: when an experiment was registered, when each chunk
--- started/finished, when the experiment itself reached a terminal state, and
--- every pause/resume/rerun/priority/stop-date/chunk-size change --
--- everything oceanicu_experiments.py can do to an experiment, in the order
--- it happened. Deliberately NOT foreign-keyed to experiments(experiment_id):
--- remove_experiment only ever deletes registry/chunk rows (see its own
--- docstring), never touches
--- files -- history is the same idea applied to the audit trail itself,
--- so it survives an experiment being removed (and, if the same experiment_id is ever
--- re-added later, shows its full lifecycle across that gap too).
--- `user` added 2026-08-28 (see _migrate_schema -- CREATE TABLE IF NOT
--- EXISTS alone won't add a column to an already-existing history table
--- on a registry that predates this, hence the separate ALTER TABLE
--- migration rather than just listing it here).
+-- Append-only audit log of everything done to an experiment. Not
+-- foreign-keyed, so it outlives remove_experiment (and spans a re-add).
+-- Columns added later (e.g. `user`) come from _migrate_schema.
 CREATE TABLE IF NOT EXISTS history (
     id        INTEGER PRIMARY KEY AUTOINCREMENT,
     experiment_id    TEXT NOT NULL,
