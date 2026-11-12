@@ -1,13 +1,6 @@
-"""Meteo forcing pieces that genuinely need real Python, not a static
-data_assignments entry (a domain config's meteo.<source>.data_script and the
-post_data_script hook -- see oceanicu_providers.py). Mirrors cfg_airsea.py's
-own data() -- see each function's own docstring.
-
-Loaded via pygetm_config.providers.load_dotted_target ("path/to/file.py:name"),
-never imported directly -- see oceanicu_driver.py's own module docstring for
-how that's wired (meteo.<source>.data_script/post_data_script defaults, both
-pointing here).
-"""
+"""Meteo forcing that needs Python rather than data_assignments
+(meteo.<source>.data_script and runtime.post_data_script, see
+oceanicu_providers.py). Loaded by "path/to/file.py:name", never imported."""
 
 from __future__ import annotations
 
@@ -17,140 +10,47 @@ from pygetm_config.loader import expand_year_glob, resolve_data_path
 
 
 def set_meteo_data(sim, domain, config: dict) -> None:
-    """Mirrors cfg_airsea.py's own data() -- the piece(s) of meteo forcing
-    that genuinely can't be a static data_assignments entry (pre_transform
-    only supports a scale/offset on ONE file's value; pre_transform_expression
-    is deliberately refused for security reasons).
+    """As cfg_airsea.py's data(), for the CMIP6 sources (ERA5 is plain
+    data_assignments): "CMIP6" reads the bias-corrected archive (ocean-prep
+    bc-correct), "CMIP6-raw" the raw archive (CMIP6_RAW_FOLDER, ocean-data's
+    DataLoader). Sets t2m/qa/u10/v10/sp/tp and the radiation. Runs after
+    apply_data_assignments.
 
-    Handles TWO CMIP6 sources, both spliced across the historical/scenario
-    boundary the same way (see "Historical/scenario splicing" below):
-    meteo.source == "CMIP6" reads the BIAS-CORRECTED archive (ocean-prep's
-    own bc-correct pipeline output); meteo.source == "CMIP6-raw" reads
-    straight from the RAW CMIP6 archive fetched by ocean-data's DataLoader
-    (/data/CMIP6/{model}/{scenario}/, CMIP6_RAW_FOLDER, from the data-roots file
-    and meteo.CMIP6-raw.folder/folder_template), no bias correction applied
-    at all. Everything below that says "CMIP6" without qualification
-    applies to the bias-corrected path only; the raw path's own filename
-    convention, variable-name quirk, and units are covered in its own
-    branch inline below (search "CMIP6-raw" in this function's body).
+    meteo.<source>.radiation_source:
+    - "net" (bias-corrected only): net_sw/net_lw, each bias-corrected as one
+      composite -> swr/ql.
+    - "components": rsds-rsus and rlds-rlus -> swr/ql.
+    - "pseudo_tcc" (default): a cloud fraction from daily-mean rsds alone,
+      for models without reliable net/upward fluxes. kt = rsds / TOA, with
+      TOA the analytic daily-mean insolation (Duffie & Beckman eq. 1.10.3);
+      tcc = quadratic fit of kt, calibrated against ERA5 daily-mean
+      ssrd/tcc over NW Europe 2024-2025 (R^2=0.636; the calibration scripts
+      are not in this repo -- recalibrate formula and fit together). tcc
+      drives both the ROSATI_MIYAKODA shortwave and CLARK longwave formulas.
+      Reads the daily-mean rsds (not _disagg_): the fit is on daily means.
 
-    meteo.CMIP6.radiation_source picks how CMIP6 radiation is supplied
-    ("net" | "components" | "pseudo_tcc", default "pseudo_tcc") --
-    meteo.CMIP6-raw.radiation_source is the same idea with only
-    "components"/"pseudo_tcc" (no "net": that's a bias-correction-pipeline
-    composite, not a raw CMIP6 variable):
+    simulation.airsea.shortwave_method/longwave_method must match: NET_FLUX
+    (-1) for "net"/"components", a bulk formula for "pseudo_tcc"; otherwise
+    the forcing is silently ignored. A mismatch gives a warning.
 
-    - "net": net_sw/net_lw are ALREADY bias-corrected as one direct file
-      each (net_sw = rsds - rsus, net_lw = rlds - rlus, corrected as a
-      single composite quantity) -- ocean-prep's own bias-correction tool's
-      recommended approach whenever net_sw/net_lw files exist for the
-      model/scenario in use. Sets simulation.airsea.swr/ql DIRECTLY.
-    - "components": the older convention -- 4 separate bias-corrected files
-      (rsds/rsus/rlds/rlus), subtracted here at runtime. Kept for models/
-      scenarios that only have these 4 files, not net_sw/net_lw.
-    - "pseudo_tcc" (default): CMIP6 has no cloud-cover field, and net_sw/
-      net_lw/rsus/rlds/rlus have been unreliable to source for some models
-      (GFDL THREDDS outages, CNRM ESGF 403s, GFDL's rsus/rlus only at
-      3-hourly) -- derives a pseudo cloud fraction from bias-corrected
-      daily-mean rsds ALONE via a clearness-index proxy: kt = rsds / TOA,
-      tcc = quadratic fit of kt. TOA is the analytic daily-mean
-      top-of-atmosphere shortwave insolation (W/m^2) -- depends only on
-      latitude and day-of-year (longitude drops out once averaged over a
-      full rotation), the standard closed-form extraterrestrial-radiation
-      formula (Duffie & Beckman eq. 1.10.3). The quadratic fit coefficients
-      were calibrated against ERA5 daily-mean ssrd/tcc over NW-Europe
-      (-20..30E, 45..75N), 2024-2025 (n=1,546,042 daily grid-cell samples;
-      R^2=0.636, RMSE=0.155, Pearson r=-0.755; the calibration scripts
-      kt_tcc_daily.py/kt_tcc_daily_fit.json are not in this repo) using this
-      SAME TOA formula, so both sides must be
-      changed together if either is ever recalibrated. Sets
-      simulation.airsea.tcc -- FluxesFromMeteo's ROSATI_MIYAKODA (shortwave)
-      AND CLARK (longwave) bulk formulas BOTH read tcc (confirmed in
-      pygetm's own airsea.py: update_shortwave_radiation passes
-      self.tcc.all_values to awex.shortwave_radiation, update_longwave_
-      radiation passes it to awex.longwave_radiation alongside sst/t2m/ea/
-      qa) -- so this single derived cloud fraction drives both fluxes, not
-      just shortwave.
+    `{method}` in the bias-corrected filenames is a glob: bc-correct
+    currently writes 'bilinear'/'' for every variable, and the glob matches
+    both that and the correct names.
 
-    Whichever radiation_source is chosen, simulation.airsea.shortwave_method/
-    longwave_method must be set consistently: "net"/"components" need
-    NET_FLUX (-1) on both, or FluxesFromMeteo's default ROSATI_MIYAKODA/
-    CLARK bulk formulas silently recompute (and discard) the swr/ql this
-    sets from tcc every step instead; "pseudo_tcc" needs shortwave_method/
-    longwave_method left at a bulk-formula method (e.g. the default 1) or
-    FluxesFromMeteo never reads tcc and this hook's computation has no
-    effect. A mismatch fails silently rather than loudly -- this genuinely
-    happened once already (an in-progress domain config carried
-    shortwave_method=1/longwave_method=1 while radiation_source defaulted
-    to "net", so the net_sw/net_lw files being read here were being
-    computed and then silently discarded every step). A warning is printed
-    below if the two look inconsistent.
+    Historical/scenario splice: CMIP6 `historical` ends 2014, so a run
+    reaching before 2015 reads historical files for those years and the
+    meteo.<source>.scenario files after, as one series -- derived from the
+    run's start (runtime.time) and stop (runtime.stop), not configured.
 
-    ERA5's own equivalent (a real tcc file plus net/downward-flux file
-    reads) is handled directly via oceanicu_providers.
-    derive_data_assignments's own ERA5 data_assignments instead -- it
-    doesn't need this hook at all.
-
-    Filenames follow the bias-corrected CMIP6 dataset's own convention.
-    "net"/"components" read the `_disagg_` sub-daily files (matching tas/
-    huss/uas/vas/psl/pr). "pseudo_tcc" deliberately reads the DAILY-mean
-    file instead (NOT `_disagg_`): the kt->tcc fit was calibrated on daily
-    means (hourly instantaneous kt was too noisy, R^2=0.29 vs 0.64 daily), and pygetm's own temporal interpolation smooths the daily tcc
-    series across each day's sub-daily timesteps same as any other daily
-    forcing field.
-    `{method}` (each variable's own regridding method) is matched with a
-    glob wildcard rather than hardcoded in all three branches --
-    bc-correct's own disaggregated-output writer has a latent bug (doesn't
-    thread the real per-variable method/scenario through to that specific
-    write path, silently defaulting to 'bilinear'/'' for every variable)
-    that this glob is deliberately robust to on both sides: it matches
-    today's wrongly-named files AND correctly-named files once that
-    upstream bug is fixed, with no further change needed here. See
-    oceanicu_providers.py's CMIP6 branch for the same reasoning.
-
-    Registered via meteo.data_script (see pygetm_config.loader.
-    run_meteo_data_script); runs after apply_data_assignments. The providers
-    emit no static CMIP6 meteo entries -- this hook sets every field.
-
-    Historical/scenario splicing (t2m/qa/u10/v10/sp/tp and whichever
-    radiation_source is active): CMIP6's `historical` experiment is fixed at
-    1850-2014 for every model (a protocol constant, not a config choice --
-    see bc_meteo.yaml's own calibration-window fix, ocean-prep repo), so any
-    run whose own [start, stop) period reaches back before 2015 needs
-    `historical`'s own files for those early years, spliced together with
-    meteo.CMIP6.scenario's files for 2015 onward, as ONE continuous series
-    (pygetm.input.from_nc reads a list of files as one time series, same as
-    a multi-year ERA5 glob already does). This is NOT a config toggle --
-    purely derived from the run's own start/stop against the fixed 2014/2015
-    boundary, so a run entirely on one side of it reduces to exactly the
-    single-folder read this always used to be (per user, 2026-09-07: "if
-    start of the simulation is before 2015 it is always historical - so why
-    not enforce it"). Needs the run's own stop as well as start, so
-    config['runtime']['stop'] is threaded in next to the existing
-    config['runtime']['time'] (=start) -- see oceanicu_driver.py's own
-    raw.setdefault("runtime", {})["stop"] = args.stop and pygetm_config's
-    codegen.py equivalent for generated scripts.
-
-    Deliberately self-contained (no module-level helper functions/
-    constants): pygetm_config.codegen._emit_script_hook embeds only THIS
-    function's own source via inspect.getsource -- a helper defined outside
-    it would silently vanish from a --dump-python'd script (NameError at
-    runtime), a real gap confirmed while implementing this. The nested
-    _spliced_paths() below is fine -- it's part of this function's own
-    source text, not a separate module-level definition.
+    Self-contained (helpers nested): codegen embeds only this function.
     """
     meteo = config.get("meteo") or {}
     source = meteo.get("source")
     if source not in ("CMIP6", "CMIP6-raw"):
         return
 
-    # Same gap/fix as oceanicu_providers.derive_data_assignments' own ERA5
-    # branch (see its comment, 2026-09-14): this function only knows how to
-    # write FluxesFromMeteo-shaped targets (t2m/qa/u10/v10/sp/tp/swr/ql/tcc
-    # below). `simulation.airsea.type: Fluxes` has none of those attributes
-    # -- raise a clear error rather than an AttributeError deep in a
-    # sim.airsea.<x>.set(...) call, or (worse) silently doing nothing and
-    # leaving Fluxes with no real forcing at all.
+    # Only FluxesFromMeteo fields are written here; any other airsea type
+    # gets a clear error instead of an AttributeError or no forcing at all.
     _airsea_type = config.get("simulation", {}).get("airsea", {}).get("type")
     if _airsea_type not in (None, "FluxesFromMeteo"):
         raise ValueError(
@@ -166,15 +66,7 @@ def set_meteo_data(sim, domain, config: dict) -> None:
     import pygetm
     import xarray as xr
 
-    # NOT meteo.get("CMIP6") -- validate_config's choice-flattening puts the
-    # ACTIVE choice's own fields directly on the parent dict (here, `meteo`
-    # itself, since source == "CMIP6"); only the INACTIVE alternative (ERA5)
-    # stays nested under its own label key. A real, reproduced bug: reading
-    # meteo["CMIP6"] found nothing (that key doesn't exist once CMIP6 is
-    # active) and silently fell back to {}, then KeyError'd on "folder" --
-    # exactly the same pitfall oceanicu_providers.derive_data_assignments's
-    # own CMIP6 branch already avoids by reading meteo.get("folder") etc.
-    # directly.
+    # Validated config: the active choice's fields are on `meteo` itself.
     folder_root = Path(resolve_data_path(meteo["folder"]))
     folder_template = meteo.get("folder_template")
     model = meteo.get("model", "")
@@ -186,26 +78,9 @@ def set_meteo_data(sim, domain, config: dict) -> None:
     _start = runtime_cfg.get("time")
     _stop = runtime_cfg.get("stop")
 
-    # Real bug, confirmed directly on a real HPC run (2026-09-27):
-    # config['runtime']['time'] is THIS chunk's own restart point (set
-    # from args.start at every invocation -- see oceanicu_driver.py's own
-    # raw.setdefault("runtime", {})["stop"]/["time"] and codegen.py's
-    # equivalent), not the overall experiment's original start. A chunk
-    # that happens to restart exactly at HIST_CUTOFF_YEAR+1's own Jan 1
-    # midnight (chunk_runner.py's own annual chunking always lands a
-    # later chunk exactly there once realigned) then has start_year >
-    # HIST_CUTOFF_YEAR, so the plain `start_year <= HIST_CUTOFF_YEAR`
-    # check below wrongly excludes historical entirely -- leaving no
-    # record before the scenario file's own first one. The scenario
-    # (bias-corrected, disaggregated) files' own first real record is at
-    # NOON, not midnight (daily-mean convention) -- confirmed directly:
-    # "Cannot interpolate ... to value at 2015-01-01 00:00:00, because
-    # time series starts only at 2015-01-01 12:00:00" -- so there is no
-    # earlier bracketing point at all without historical's own Dec 31
-    # (also noon) record right before it. Symmetric to expand_year_glob's
-    # own documented "stop at midnight Jan 1 still needs that year's
-    # file" allowance, just on the start side of the historical/scenario
-    # seam specifically (the only boundary this splice ever has).
+    # runtime.time is this chunk's start, not the experiment's. A chunk
+    # starting exactly 2015-01-01T00 still needs historical's last record:
+    # the scenario files start at 12:00 (daily-mean convention).
     _start_is_new_year_right_after_cutoff = bool(_start) and datetime.datetime.fromisoformat(_start) == datetime.datetime(
         HIST_CUTOFF_YEAR + 1, 1, 1
     )
@@ -216,12 +91,8 @@ def set_meteo_data(sim, domain, config: dict) -> None:
         return folder_root
 
     def _spliced_paths(filename_template: str) -> list:
-        """One continuous file list for a `????`-year-glob filename (e.g.
-        "tas_bc_*_disagg_????.nc"; "{exp}" optionally substituted with the
-        experiment name for filenames that embed it, e.g. pseudo_tcc's own
-        "rsds_bc_*_{exp}_????.nc") -- splicing historical/scenario as needed
-        for THIS run's own start/stop, per this function's own docstring.
-        """
+        """Year files for a `????` filename ("{exp}" filled with the
+        experiment where the name embeds it), spliced for this run."""
         if not _start or not _stop:
             # No restriction possible (e.g. a --dry-run with neither given)
             # -- match the pre-splicing single-scenario behavior exactly.
@@ -237,10 +108,7 @@ def set_meteo_data(sim, domain, config: dict) -> None:
             pattern = str(_experiment_folder("historical") / filename_template.format(exp="historical"))
             paths += expand_year_glob(pattern, _start, hist_stop)
         elif _start_is_new_year_right_after_cutoff:
-            # This chunk's own start IS the seam itself -- see this
-            # function's own comment above. Only HIST_CUTOFF_YEAR's own
-            # file is needed, for its last (Dec, noon) record to bracket
-            # against scenario's own first (Jan 1, noon) record.
+            # Start at the seam: only the last historical year's file.
             pattern = str(_experiment_folder("historical") / filename_template.format(exp="historical"))
             paths += expand_year_glob(pattern, f"{HIST_CUTOFF_YEAR}-01-01", f"{HIST_CUTOFF_YEAR}-12-31")
         if stop_year > HIST_CUTOFF_YEAR:
@@ -249,28 +117,13 @@ def set_meteo_data(sim, domain, config: dict) -> None:
             paths += expand_year_glob(pattern, scen_start, _stop)
         return paths
 
-    # CMIP6-raw: one whole-period file per variable per experiment (not a
-    # year-per-file glob like the bias-corrected archive), so splicing only
-    # ever needs at most 2 files (historical + scenario), not expand_year_
-    # glob's per-year expansion. Defined unconditionally (same pattern as
-    # _spliced_paths above) -- only ever CALLED from inside a `source ==
-    # "CMIP6-raw"` branch below, but a helper defined only inside one such
-    # branch and called from a separate, later one is unbound the moment
-    # they're not literally the same `if` block (Python has no block
-    # scoping, but a conditionally-executed def still isn't executed on a
-    # path that skips it) -- keeping every closure's OWN def unconditional,
-    # like _spliced_paths already is, avoids that trap entirely.
+    # CMIP6-raw: one whole-period file per variable and experiment, so at
+    # most two files. Defined unconditionally (a def inside one branch would
+    # be unbound when called from another).
 
     def _raw_paths(var: str) -> list:
-        """At most 2 whole-period files (historical, scenario), picked by
-        whether this run's own [start, stop) reaches into each side of
-        HIST_CUTOFF_YEAR -- same splicing intent as _spliced_paths,
-        simplified because there's only one file per side to pick, not a
-        year range to expand. Matched with a `*` wildcard rather than a
-        fixed suffix: the real fetched files carry a fetch-method tag
-        ("_onfly"/"_nostream", an ocean-data implementation detail, not a
-        stable naming convention) that this must not hardcode.
-        """
+        """At most two whole-period files (historical, scenario) for this run.
+        `*` matches the fetch-method tag ("_onfly"/"_nostream")."""
         def _one(experiment: str) -> list:
             pattern = f"{var}_3hr_{experiment}_*.nc"
             candidates = sorted(_experiment_folder(experiment).glob(pattern))
@@ -293,41 +146,13 @@ def set_meteo_data(sim, domain, config: dict) -> None:
         return paths
 
     def _open_with_small_cache(path: str):
-        """Open one file with a small (~1MB) HDF5 chunk cache applied to
-        EVERY variable in it (main var + lat/lon/bnds/height), not HDF5's
-        own default (16-64MB observed) -- that default was sized for
-        these files' old near-contiguous storage; now that they're
-        rechunked to [1, nlat, nlon] (~4.8KB/chunk, see the 2026-09-17
-        rechunk of /data/CMIP6/GFDL-ESM4/{historical,ssp370}), a
-        16-64MB cache holds thousands of chunks nobody needs, and
-        pygetm's per-MPI-rank opens each pay for that memory
-        independently.
-
-        netCDF4.set_chunk_cache()/get_chunk_cache() (module-level, wraps
-        the netCDF-C library's nc_set_chunk_cache/nc_get_chunk_cache) is
-        a PROCESS-WIDE default applied to every variable at the moment
-        its underlying HDF5 dataset is opened -- confirmed directly,
-        2026-09-17: shrinking it, opening a file, then immediately
-        restoring it, leaves every variable in that already-open file
-        at the SMALL size permanently (HDF5 captures the cache size once,
-        at open time, per file handle -- restoring the global default
-        afterwards does not leak back into it), while a second file
-        opened after the restore gets the ORIGINAL default. That bracket
-        -- shrink, open, restore, always via try/finally so a failed
-        open can't leave the small size in effect for every later file
-        in the process -- is what gives file-level (not just one named
-        variable) scoping with no risk to GETM's own history/restart
-        writer, which opens its own files later in the same process and
-        is a separate code path this never touches regardless.
-
-        The cache must be set before xarray/HDF5 touches any data --
-        xr.open_dataset(path) has no kwarg for this -- so this opens the
-        file itself via netCDF4.Dataset and hands pygetm.input.from_nc()
-        the resulting xarray NetCDF4DataStore instead of a bare path;
-        from_nc()/_open() just forward whatever `paths` elements they're
-        given straight to xr.open_dataset(), so a DataStore works there
-        exactly like a path.
-        """
+        """Open *path* with a ~1 MB HDF5 chunk cache for all its variables
+        instead of the 16-64 MB default (the files are chunked [1, nlat,
+        nlon]; every MPI rank pays for the cache). netCDF4's chunk cache is a
+        process-wide default captured at open time, so: shrink, open,
+        restore (try/finally) -- later files, including GETM's own output,
+        keep the default. Returns a NetCDF4DataStore, which from_nc accepts
+        like a path."""
         default_cache = netCDF4.get_chunk_cache()
         netCDF4.set_chunk_cache(1_000_000, 521, 0.75)
         try:
@@ -341,12 +166,7 @@ def set_meteo_data(sim, domain, config: dict) -> None:
         return pygetm.input.from_nc(stores, var)
 
     if source == "CMIP6-raw":
-        # RAW_HIST_START_YEAR guards against silently reading a truncated
-        # series: only 1990-2014 was ever fetched for the historical
-        # experiment (a deliberate, narrower choice than CMIP6's own full
-        # 1850-2014 protocol range -- see fetch_historical.py in ocean-
-        # data's own scratch scripts, not this repo), so a run starting
-        # earlier than that has no raw data to read at all.
+        # Only 1990-2014 was fetched for the raw historical experiment.
         RAW_HIST_START_YEAR = 1990
         if _start and datetime.datetime.fromisoformat(_start).year < RAW_HIST_START_YEAR:
             raise ValueError(
@@ -358,26 +178,13 @@ def set_meteo_data(sim, domain, config: dict) -> None:
                 "protocol range."
             )
 
-        # Units: CMIP6's own native units, unconverted by any bias-
-        # correction step -- tas/huss/uas/vas/ps all match pygetm.airsea's
-        # own expected units directly (K needs -> degC for t2m same as the
-        # bias-corrected branch below; huss kg/kg, uas/vas m/s, ps Pa all
-        # need no conversion). pr is "kg m-2 s-1" (a mass flux -- 1 kg/m^2
-        # of water is 1 mm depth, so this IS already "mm s-1" numerically);
-        # sim.airsea.tp wants "m s-1" (pygetm.airsea's own real Array attrs,
-        # confirmed via introspection) -- same /1000.0 factor as the bias-
-        # corrected branch below, because bias-correction adjusts VALUES
-        # only, never units, so raw and bias-corrected pr share this same
-        # native-CMIP6 unit convention.
+        # Native CMIP6 units (bias correction changes values, not units):
+        # tas K -> degC; pr kg m-2 s-1 is mm s-1, tp wants m s-1 (/1000).
         sim.airsea.t2m.set(_raw_var("tas") - 273.15)
         sim.airsea.qa.set(_raw_var("huss"))
         sim.airsea.u10.set(_raw_var("uas"))
         sim.airsea.v10.set(_raw_var("vas"))
-        # Real surface pressure ("ps"), NOT sea-level pressure ("psl") --
-        # unlike the bias-corrected branch below (which only ever had psl
-        # bias-corrected, per the ocean-prep pipeline's own historical
-        # choice), the raw fetch pulled ps directly, which is the
-        # meteorologically correct field for an airsea flux model anyway.
+        # Surface pressure ps (the bias-corrected archive only has psl).
         sim.airsea.sp.set(_raw_var("ps"))
         sim.airsea.tp.set(_raw_var("pr") / 1000.0)
     else:
@@ -389,15 +196,7 @@ def set_meteo_data(sim, domain, config: dict) -> None:
         sim.airsea.tp.set(pygetm.input.from_nc(_spliced_paths("pr_bc_*_disagg_????.nc"), "pr") / 1000.0)
 
     radiation_source = meteo.get("radiation_source") or "pseudo_tcc"
-    # The REAL pygetm value (simulation.airsea.shortwave_method/
-    # longwave_method, introspected pygetm.airsea.FluxesFromMeteo fields,
-    # choice-flattened onto simulation.airsea directly -- confirmed via a
-    # real --print-config, same flattening this function's own docstring
-    # already warns about for meteo["CMIP6"] vs meteo itself). NOT a
-    # meteo.<source>-level copy -- that used to exist here but could
-    # silently drift from this real value with no warning of its own
-    # (removed 2026-09-07, see oceanicu_providers.py's _meteo_shared
-    # comment for the full story).
+    # shortwave/longwave_method from simulation.airsea (choice-flattened).
     _airsea = config.get("simulation", {}).get("airsea", {})
     shortwave_method = _airsea.get("shortwave_method")
     longwave_method = _airsea.get("longwave_method")
@@ -431,20 +230,13 @@ def set_meteo_data(sim, domain, config: dict) -> None:
         )
 
     def _pseudo_tcc(rsds) -> None:
-        """Shared clearness-index-derived cloud-fraction proxy -- same
-        computation for both CMIP6 sources, differing only in how `rsds`
-        (already the resolved DataArray) was itself read. See this
-        function's own top docstring for the calibration/formula details.
-        """
+        """Set sim.airsea.tcc from *rsds* (see set_meteo_data's docstring)."""
         import numpy as np
 
         solar_constant = 1361.0
         fit_a, fit_b, fit_c = -2.234072161944959, 0.6895789115452573, 0.8957591501340265
 
-        # Raw CMIP6 files keep their native short coordinate names ("lat"/
-        # "lon"); the bias-corrected archive's own files use "latitude"/
-        # "longitude" -- read whichever this particular DataArray actually
-        # has rather than hardcoding one.
+        # Raw CMIP6 has lat/lon, the bias-corrected archive latitude/longitude.
         lat_name = "lat" if "lat" in rsds.coords else "latitude"
         lat = np.deg2rad(rsds[lat_name])
         doy = rsds["time"].dt.dayofyear
@@ -499,24 +291,9 @@ def set_meteo_data(sim, domain, config: dict) -> None:
 
 
 def set_sst_proxy(sim, domain, config: dict) -> None:
-    """Barotropic runtypes (BAROTROPIC_2D/BAROTROPIC_3D) have no computed sea
-    surface temperature to give pygetm's FluxesFromMeteo airsea
-    implementation (which requires sst to be set regardless of runtype), so
-    they use t2m (2m air temperature) as a stand-in. BAROCLINIC runs have a
-    real, model-calculated SST and don't need this substitution at all.
-    Mirrors cfg_airsea.py's own data() function -- its comment there: "if
-    not a baroclinic run use the t2m temperatures as proxy for SST"
-    (`sim.sst = sim.airsea.t2m`). Without this, sim.start()
-    crashes under a non-baroclinic runtype with `AssertionError: sst is
-    masked`.
-
-    Must run AFTER data_assignments (needs sim.airsea.t2m to already hold a
-    real value, not just exist -- cfg_airsea.py's own version of this line
-    lives right after its own t2m/d2m/u10/... assignments, not before them)
-    -- registered via post_data_script (see pygetm_config.loader.
-    run_post_data_script), not river_discharge.script (that hook runs
-    before the simulation object even exists, too early for this).
-    """
+    """Barotropic runs have no model SST, but FluxesFromMeteo needs one: use
+    t2m (as cfg_airsea.py; otherwise sim.start() fails with "sst is
+    masked"). Runs after data_assignments, via runtime.post_data_script."""
     import pygetm
 
     if sim.runtype < pygetm.RunType.BAROCLINIC:

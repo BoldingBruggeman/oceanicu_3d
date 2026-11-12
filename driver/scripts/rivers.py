@@ -1,15 +1,7 @@
-"""EMORID river positioning + discharge data attachment (a domain config's
-river_discharge.emorid.script/data_script -- see oceanicu_providers.py).
-Mirrors cfg_rivers.py's own two-step split ("1) Set name and position of
-rivers... 2) Attach river data to the Simulation object").
-
-Loaded via pygetm_config.providers.load_dotted_target ("path/to/file.py:name"),
-never imported directly -- see oceanicu_driver.py's own module docstring for
-how that's wired (river_discharge.emorid.script/data_script defaults, both
-pointing here) and pygetm_config's docs/yaml_vs_python.md for why this stays
-real Python rather than a static YAML list at all (the *set* of rivers is
-threshold-filtered and domain-footprint-dependent at run time, not fixed).
-"""
+"""River positions and discharge data (river_discharge.<source>.script and
+data_script, see oceanicu_providers.py), as cfg_rivers.py's two steps. Python,
+not a YAML list: the set of rivers depends on the threshold and the domain
+footprint. Loaded by "path/to/file.py:name", never imported."""
 
 from __future__ import annotations
 
@@ -19,85 +11,30 @@ from pygetm_config.loader import resolve_data_path
 
 
 def add_rivers(domain, config: dict):
-    """Mirrors cfg_rivers.py's create() -- dynamic, threshold-filtered, read from
-    an EMORID/JRC discharge file at run time. The *set* of rivers depends on the
-    threshold and the domain's exact footprint, so (per pygetm-config's
-    docs/yaml_vs_python.md) this cannot become a static YAML list without losing
-    that behavior; it has to stay a loop over real data, same as in OceanICU
-    today.
-
-    Reads the validated `river_discharge:` section (a `nested_by_label`
-    ChoiceSpec -- see oceanicu_providers.py), not a free-form dict: whichever
-    source is active ("emorid" or "CMIP6") has its fields flattened onto
-    `config["river_discharge"]` directly by validate_config, regardless of
-    whether the YAML wrote them nested under `emorid:`/`CMIP6:` or flat. Both
-    sources use this SAME function unchanged -- CMIP6's delta-change river
-    projection (stats/cli/river_projection.py's river_flows_future_
-    {scenario}.nc) is keyed by the same EMORID stations, just with a Q_mean
-    variable added so the threshold lookup below finds a match; only
-    folder/folder_template/file (see `file`'s own {model}/{scenario}
-    templating below) differ between the two sources.
-
-    `folder` may be a "${VAR}"/"$VAR" reference (pygetm-config's own lazy
-    data-path resolution mechanism) -- resolve_data_path expands it here,
-    at actual use time, exactly like pygetm-config's own generic kind="path"/
-    kind="file" handling does for core schema fields. This function isn't
-    core pygetm-config code (it's a project-specific script hook, loaded via
-    load_dotted_target), so it has to opt into that resolution explicitly --
-    unlike domain.path/tpxo_folder/data_assignments file, which get it for
-    free via loader._coerce_value's own "path" TypeKind branch.
-    """
+    """As cfg_rivers.py's create(): add every river whose mean discharge
+    exceeds `threshold` and that lies in the domain. Both sources ("emorid",
+    "CMIP6") use the same EMORID stations; the CMIP6 projection file carries
+    a Q_mean for the threshold. Reads the validated, choice-flattened
+    river_discharge section; ${VAR} folders are expanded here."""
     import xarray as xr
     import pygetm
 
     rcfg = config["river_discharge"]
-    # folder_template (e.g. "CMIP6/{model}/{scenario}/rivers") must be
-    # applied here explicitly, same as every other CMIP6 provider does
-    # (oceanicu_providers.py's boundaries.baroclinic/barotropic/fabm
-    # branches all do `folder / folder_template.format(model=..., scenario=...)`)
-    # -- river_discharge has no core-schema equivalent doing this for it
-    # automatically (unlike open_boundaries' file: kind, which gets
-    # ${VAR} resolution for free but NOT folder_template composition).
-    # Missing this meant `folder` alone (e.g. scylla's bare
-    # RIVER_FOLDER_CMIP6=/work/shared/oceanICU/BiasCorrected, deliberately
-    # NOT including CMIP6/<model>/<scenario>/rivers) resolved to a file that never
-    # existed (FileNotFoundError, hit on the HPC 2026-09-15).
+    # river_discharge has no core-schema folder_template handling, so compose
+    # it here (e.g. RIVER_FOLDER_CMIP6 + "CMIP6/{model}/{scenario}/rivers").
     folder = Path(resolve_data_path(rcfg["folder"]))
     if rcfg.get("folder_template"):
         folder = folder / rcfg["folder_template"].format(
             model=rcfg.get("model", ""), scenario=rcfg.get("scenario", "")
         )
-    # .format() is a no-op for "emorid"'s literal filename (no {} in it) --
-    # only source=CMIP6 actually has {model}/{scenario} placeholders here,
-    # same substitution folder_template already does elsewhere (meteo.py's
-    # own folder_template.format(model=..., scenario=...)) -- avoids the
-    # filename and `scenario:` field ever disagreeing with each other.
+    # {model}/{scenario} in `file` (CMIP6 only) keep it in step with `scenario`.
     filename = rcfg["file"].format(model=rcfg.get("model", ""), scenario=rcfg.get("scenario", ""))
-    # river_discharge.CMIP6.daily (2026-09-24): switches to the
-    # day-of-year-disaggregated sibling file, whose own real coverage
-    # starts exactly 2015-01-01 -- see set_river_data's docstring below for
-    # why the plain monthly file can't cover that date. "emorid" has no
-    # `daily` field at all (rcfg.get returns None/falsy), so this is a
-    # no-op for that source, same as `folder_template` above.
+    # CMIP6 `daily`: the daily-disaggregated sibling (see set_river_data).
     if rcfg.get("daily"):
         filename = filename.removesuffix(".nc") + "_daily.nc"
-    # Inlined rather than a shared helper: pygetm_config.codegen's
-    # _emit_script_hook embeds ONE function's source per script/data_script
-    # reference (inspect.getsource on just that function, no dependency
-    # scan of sibling module-level helpers -- see its own docstring on
-    # local imports for the same limitation) -- a separate
-    # _apply_calendar_suffix() here left the generated standalone script
-    # calling an undefined name (NameError, hit on the HPC 2026-09-15).
-    # Same mechanism as oceanicu_providers.derive_data_assignments' own
-    # `_calendar_suffix` for boundaries; applied here directly since
-    # river_discharge's `file:` is read by THIS script hook, not resolved
-    # inside derive_data_assignments (per user, 2026-09-15: "do it the way
-    # it was done for the boundaries"). Applies to EVERY river source
-    # equally, not just CMIP6 -- "emorid"'s own real-observation file needs
-    # the same treatment for a noleap-calendar run. Comes AFTER the `daily`
-    # suffix above -- matches the real on-disk naming (river_flows_future_
-    # {scenario}_daily_noleap.nc, confirmed directly against GFDL-ESM4's
-    # noleap files).
+    # noleap runs read the '_noleap' copy, for every source; after the
+    # `daily` suffix, as on disk (..._daily_noleap.nc). Inlined, not a shared
+    # helper: codegen embeds one function at a time.
     if config.get("runtime", {}).get("calendar") == "noleap":
         filename = filename.removesuffix(".nc") + "_noleap.nc"
     path = folder / filename
@@ -125,118 +62,29 @@ def add_rivers(domain, config: dict):
 
 
 def set_river_data(sim, domain, config: dict) -> int:
-    """Mirrors cfg_rivers.py's own data() -- the second half of
-    river_discharge's job: add_rivers (above) only sets POSITION; this
-    attaches the REAL, time-varying discharge to each river
-    actually present in this subdomain (sim.rivers -- a pygetm.rivers.
-    LocalRiverCollection, keyed by name, only rivers that fall within THIS
-    subdomain -- not necessarily every one add_rivers positioned on the
-    global domain). Needs a live sim.rivers (only exists once the
-    Simulation object is built), so this runs via
-    river_discharge.data_script (see pygetm_config.loader.
-    run_river_discharge_data_script), a separate hook from
-    river_discharge.script's own add_rivers (which runs before sim exists).
+    """As cfg_rivers.py's data(): discharge, salt (0) and FABM nutrients for
+    the rivers in this subdomain (sim.rivers). Runs after data_assignments,
+    via river_discharge.data_script.
 
-    Salt is set to 0.0 (matching cfg_rivers.py's own
-    river["salt"].set(0.0) -- river water is fresh).
+    The EMORID record ${RIVER_FOLDER}/$RIVER_FILE (default
+    EMORID_1993_2024_conc_nemo_TALK_DIC.nc, by archive vintage per machine)
+    holds flow and NO3/NH4/PO4/Si/TALK/DIC as concentrations (mmol/m3; TALK/
+    DIC from NEMO NOWMAPS, 2019-2024 filled with the 2018 mean).
 
-    FABM biogeochemistry (2026-10-01): reads NO3/NH4/PO4/Si/TALK/DIC
-    directly as CONCENTRATIONS (mmol/m3) from Ricardo's
-    EMORID_1993_2024_conc_nemo_TALK_DIC.nc -- no unit conversion needed,
-    unlike the older EMORID_1990_2024.nc this replaces (which stored raw
-    LOADS in t/day, confirmed directly against its own units attrs, and
-    needed a load->concentration conversion at read time using each
-    river's own Q). TALK/DIC are genuine, documented concentrations here
-    (source: NEMO NOWMAPS, 1993-2018 real, 2019-2024 filled with the 2018
-    annual mean, per the file's own long_name attrs) -- so O3_TA/O3_c
-    (alkalinity/DIC) are now set too, unlike before: the OLD file's units
-    convention for those two was an unconfirmed guess (molar_mass=1.0,
-    "assuming...", in the pre-repo reference implementation this descends
-    from), which is why they were excluded previously.
+    Nutrients are never projected. "emorid": after the record ends pygetm
+    holds the last value. "CMIP6": they follow a monthly climatology of the
+    record (EMORID_nutrient_climatology_monthly_{5yr,10yr,full}.nc, site x 12
+    months), each future day taking its calendar month's value.
 
-    No real future-projected nutrient product exists: the CMIP6 river-
-    projection file (river_flows_future_{scenario}[_daily].nc) has ONLY
-    Q/Q_mean/regulated_flag (confirmed directly), no nutrient data at all
-    -- and per user, 2026-10-01, this is deliberate: nutrients are NEVER
-    projected into the future, only flow is. For river_discharge.source
-    == "emorid", nutrients are read from the real historical record and
-    simply never updated past that record's own real coverage -- pygetm's
-    TemporalInterpolation holds the last value beyond it, the same "best
-    we can do" precedent already used for CMIP6 biogeochemical boundaries.
+    Flow for "CMIP6": the record up to its last day (2024-12-31, read from
+    the file), then the projection (river_flows_future_{scenario}[_daily].nc)
+    from the day after. The projection starts 2015, so its overlapping years
+    are sliced away explicitly: pygetm.input.Concatenate is index-based and
+    would break the monotonic time axis.
 
-    For river_discharge.source == "CMIP6" (2026-10-01), nutrients beyond
-    the real record are instead held at a MONTHLY CLIMATOLOGY built from
-    that same real record (${RIVER_FOLDER}/EMORID_nutrient_climatology_
-    monthly_{nutrient_climatology}.nc -- site x month=12, all 6 tracers,
-    one file per baseline period) rather than the flat last-value hold --
-    per user, since a scenario run commonly extends decades past 2024-12-31,
-    and the flat hold would otherwise freeze nutrients at whatever single
-    calendar day the real record happened to end on, losing the real
-    seasonal cycle entirely for the dominant fraction of most scenario runs'
-    own length. `river_discharge.CMIP6.nutrient_climatology` (oceanicu_
-    providers.py) selects which pre-generated baseline period to use --
-    '5yr' (2020-2024, the DEFAULT), '10yr' (2015-2024), or 'full'
-    (1993-2024); these differ materially at some stations (confirmed
-    directly: AURAJOKI's NO3 and Adour's Si both show real, baseline-
-    dependent shifts, not just sampling noise), so this is a real modeling
-    choice, not a cosmetic one. A day-of-year (366-bin) variant was also
-    generated and compared, but dropped entirely -- pygetm's own
-    climatology support only handles 12 monthly records, not 366 daily
-    ones (per user, 2026-10-01). The climatology file's own 1-12 `month`
-    axis is calendar-agnostic (no noleap sibling needed, unlike every
-    other file this function reads) -- each future day is assigned its
-    OWN calendar month's value (via that day's real cftime object, whether
-    on a standard or noleap axis), not a fixed day-length mapping.
-
-    Flow splice (river_discharge.source == "CMIP6" only): real EMORID flow
-    up to its own real LAST DAY, then the CMIP6-projected daily file
-    (river_discharge.CMIP6.daily=true) from the day after -- same
-    historical+future splice PATTERN meteo.py/the open-boundary scripts
-    already use, but at a DIFFERENT cutover: EMORID's own real Q coverage
-    now runs to 2024-12-31 (confirmed directly, 100% finite throughout,
-    including its own final year) -- a decade past the generic CMIP6
-    2014/2015 historical/scenario protocol boundary those other scripts
-    splice at. The cutover is discovered from the historical file's own
-    real last time value, not hardcoded (an earlier version of this
-    function used a fixed HIST_CUTOFF_YEAR=2014, which predates this file
-    and is wrong by a decade for it -- it also only ever opened the
-    historical file for a chunk STARTING in/before the cutoff year, a
-    purely historical optimization that's gone now that the historical
-    file is always needed anyway, for nutrients). `river_flows_future_
-    {scenario}_daily.nc`'s own real coverage starts 2015-01-01 -- a REAL
-    ~10-year overlap with EMORID's now-2024 coverage, unlike the clean
-    2014/2015 handoff meteo/boundaries have; the future file's own
-    pre-cutover years are explicitly sliced away below rather than relying
-    on pygetm.input.Concatenate to do it (it's a dumb, index-based
-    concatenation with no date-awareness -- confirmed directly against its
-    own __getitem__ -- so feeding it two time-OVERLAPPING sources would
-    silently break TemporalInterpolation's monotonic-time assumption at
-    the seam).
-
-    EMORID_1993_2024_conc_nemo_TALK_DIC_noleap.nc (2026-10-01) is built the
-    same way EMORID_1990_2024_noleap.nc already was: every real Feb 29 row
-    DROPPED (8 of them, 1993-2024 -- unlike a monthly-mean file, where
-    relabeling Feb 29 as Feb 28 is lossless, a real daily value would
-    otherwise just vanish silently), remaining dates relabeled onto a
-    cftime.DatetimeNoLeap axis. Validated directly: real values on either
-    side of a dropped Feb 29 are unchanged, and runtime.calendar: noleap
-    now splices 1993-2099 with zero gaps at all (not even the GFDL-ESM4
-    calendar-native 2-day Feb28->Mar1 jump the standard-calendar splice
-    has, since both segments share the same noleap calendar here).
-
-    ${RIVER_FOLDER}/RIVER_FILE are the SEPARATE machine-configured env
-    var/name for the real historical file (from the data-roots file) --
-    independent of river_discharge's own folder/folder_template/file
-    (which for source=CMIP6 locate the PROJECTED future file only, below);
-    RIVER_FILE differs by archive vintage (e.g. scylla's real file isn't
-    necessarily bb-server1/orca's), so it's read from the environment
-    directly rather than hardcoded, defaulting to
-    'EMORID_1993_2024_conc_nemo_TALK_DIC.nc' only if genuinely unset.
-    Verified directly (2026-09-19) that the historical file and the CMIP6
-    projection file share the identical 446-station site_name roster/
-    order, so a per-file by-name lookup (same as below) lines up
-    correctly -- still done independently per file rather than assumed,
-    same caution as the "site_name" vs "name" fallback already applies.
+    The _noleap record drops every real Feb 29 (rather than relabelling), so
+    a noleap run splices without gaps. Stations are looked up by name in each
+    file separately.
     """
     import contextlib
     import datetime
@@ -249,10 +97,8 @@ def set_river_data(sim, domain, config: dict) -> int:
     # above (which never reads a time-varying variable at all).
     time_coder = xr.coders.CFDatetimeCoder(use_cftime=True)
 
-    # The real EMORID record (flow AND concentrations together now) is
-    # the canonical source regardless of river_discharge.source: "emorid"
-    # reads it directly for flow; "CMIP6" splices it with the projected
-    # future file below. Nutrients always come from here -- see docstring.
+    # The EMORID record is always read: flow for "emorid" (and CMIP6 before
+    # the splice), and the nutrients for both.
     hist_folder = Path(resolve_data_path("${RIVER_FOLDER}"))
     hist_filename = os.environ.get("RIVER_FILE", "EMORID_1993_2024_conc_nemo_TALK_DIC.nc")
     if config.get("runtime", {}).get("calendar") == "noleap":
@@ -262,11 +108,7 @@ def set_river_data(sim, domain, config: dict) -> int:
     use_cmip6 = rcfg.get("source") == "CMIP6"
     future_path = None
     if use_cmip6:
-        # folder_template composition -- see add_rivers' own comment above
-        # for why. Only resolved for CMIP6 -- the historical file above is
-        # the "emorid" choice's own real source too now, so its schema
-        # folder/file fields are unused here (still used by add_rivers'
-        # own positioning step, a separate, earlier concern).
+        # The projected file (folder_template as in add_rivers).
         folder = Path(resolve_data_path(rcfg["folder"]))
         if rcfg.get("folder_template"):
             folder = folder / rcfg["folder_template"].format(
@@ -291,18 +133,11 @@ def set_river_data(sim, domain, config: dict) -> int:
                 xr.open_dataset(future_path, engine="netcdf4", decode_times=time_coder)
             ))
 
-        # Real EMORID coverage's own last day -- see docstring for why
-        # this replaces a hardcoded HIST_CUTOFF_YEAR.
+        # Splice at the record's own last day.
         hist_cutoff = hist_ds["time"].values[-1]
 
-        # Nutrient climatology (CMIP6 only -- see docstring for why
-        # "emorid" doesn't need this at all). No folder_template/calendar-
-        # suffix handling needed here unlike every other file this
-        # function reads: the climatology lives directly in ${RIVER_FOLDER}
-        # (same folder as the historical file, not RIVER_FOLDER_CMIP6 --
-        # it's derived FROM the historical file, not a CMIP6 product), and
-        # its own 1-12 `month` axis is calendar-agnostic (no noleap
-        # sibling -- see docstring).
+        # Nutrient climatology (CMIP6 only): in ${RIVER_FOLDER} next to the
+        # record it is derived from; its month axis needs no noleap copy.
         clim_ds = None
         clim_name_to_index: dict = {}
         fut_time = None
@@ -318,18 +153,13 @@ def set_river_data(sim, domain, config: dict) -> int:
                 clim_ds[clim_name_var].values if clim_name_var else range(clim_ds.sizes["site"])
             )
             clim_name_to_index = {str(n): i for i, n in enumerate(clim_site_names)}
-            # Same future time axis the flow splice below uses (post-
-            # cutoff slice of the CMIP6 future file) -- guarantees the
-            # nutrient series lands on the exact same real dates/calendar
-            # (standard or noleap) flow already does, rather than a
-            # separately-constructed axis that could drift out of step.
+            # The future flow's own time axis, so nutrients follow its dates.
             fut_time = datasets[1]["time"].sel(
                 time=slice(hist_cutoff + datetime.timedelta(days=1), None)
             )
             fut_months = fut_time.dt.month.values
 
-        # Same "site_name" vs "name" fallback as add_rivers above -- both
-        # read the same file(s), so if one needs it the other might too.
+        # "site_name" vs "name", as in add_rivers.
         name_to_index_per_ds = []
         for ds in datasets:
             name_var = next((v for v in ("site_name", "name") if v in ds), None)
@@ -343,10 +173,8 @@ def set_river_data(sim, domain, config: dict) -> int:
             if not use_cmip6:
                 flow = datasets[0]["Q"].isel(site=indices[0])
             else:
-                # Real EMORID flow up to (and including) its own real last
-                # day, then the CMIP6-projected daily file from the day
-                # after -- see docstring for why the future file's own
-                # pre-cutover years must be sliced away explicitly here.
+                # EMORID up to its last day, then the projection from the day
+                # after; the projection's overlapping years are sliced away.
                 hist_da = datasets[0]["Q"].isel(site=indices[0]).sel(time=slice(None, hist_cutoff))
                 fut_da = datasets[1]["Q"].isel(site=indices[1]).sel(
                     time=slice(hist_cutoff + datetime.timedelta(days=1), None)
@@ -357,8 +185,7 @@ def set_river_data(sim, domain, config: dict) -> int:
             n_set += 1
 
         if getattr(sim, "fabm", None):
-            # tracer -> real variable name in the historical file --
-            # already concentrations, see docstring.
+            # tracer -> variable in the record (already concentrations).
             _emorid_nutrient_vars = {
                 "N3_n": "NO3",
                 "N4_n": "NH4",
@@ -382,10 +209,7 @@ def set_river_data(sim, domain, config: dict) -> int:
                         time=slice(None, hist_cutoff)
                     )
                     if clim_idx is not None and file_var in clim_ds.data_vars:
-                        # Future segment: each real future day's own
-                        # calendar month looked up in the site's 12-value
-                        # climatology -- see docstring for why this
-                        # replaces a flat last-value hold under CMIP6.
+                        # Future: each day's calendar month from the climatology.
                         clim_vals = clim_ds[file_var].isel(site=clim_idx).values
                         fut_vals = clim_vals[fut_months - 1]
                         fut_nutrient_da = xr.DataArray(
