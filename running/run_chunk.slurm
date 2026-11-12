@@ -1,54 +1,23 @@
 #!/bin/bash
 
-# Runs exactly ONE chunk of a registered simulation, then -- if the experiment
-# isn't paused and hasn't reached its stop_date -- submits itself again
-# for the next chunk. Each submission gets a fresh walltime allocation,
-# so there's no need to track remaining walltime mid-job; the chunk that
-# just ran either finished within one allocation or it didn't (a chunk
-# size chosen sensibly relative to --time should make that a given).
+# Runs ONE chunk of a registered experiment, then, unless it is paused or
+# complete, submits itself for the next chunk (or the next queued
+# experiment). Each chunk gets a fresh walltime allocation.
 #
-# MUST be submitted from INSIDE the directory this script (and
-# chunk_runner.py/experiment_tracking.py) actually live in -- SCRIPT_DIR below
-# is resolved from $SLURM_SUBMIT_DIR, not this script's own path (see why
-# below), so `cd` there first, every time:
-#
-# Usage (local registry):
+# Submit from inside running/ (SCRIPT_DIR comes from $SLURM_SUBMIT_DIR):
 #   cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='/abs/path/to/experiment_registry.sqlite' run_chunk.slurm
-# Usage (registry behind a relay -- see EXPERIMENT_TRACKING.md's "Working across
-# machines"; OCEANICU_RELAY_DIR is where run_tracking_server.py lives ON
-# the relay, not here):
+# With the registry behind a relay (EXPERIMENT_TRACKING.md "Working across
+# machines"; OCEANICU_RELAY_DIR is where experiment_tracking_server.py lives
+# on the relay):
 #   cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://relay/abs/path/db.sqlite',OCEANICU_RELAY_DIR='/abs/path/on/relay' run_chunk.slurm
 #
-# The leading `ALL,` matters -- without it, --export replaces the job's
-# ENTIRE environment with just the listed vars, including dropping HOME
-# (confirmed in production, job 11233: HOME ended up as bare "/", so
-# `source ~/.bashrc` tried to open "//.bashrc" and failed, cascading into
-# "conda: command not found" and every `module load` failing too, since
-# .bashrc/PATH setup never ran). `ALL,` inherits the submitting shell's
-# full environment first, then adds/overrides EXPERIMENT_ID etc. on top.
+# Keep the leading `ALL,`: without it --export replaces the whole job
+# environment (HOME included), and module/conda setup fails.
 #
-# EXPERIMENT_ID must already exist in the registry (oceanicu_experiments.py add).
-# This script locates chunk_runner.py/experiment_tracking.py via
-# $SLURM_SUBMIT_DIR (see SELF/SCRIPT_DIR below), NOT its own path -- deploy
-# all three together anywhere on the production machine, no path to
-# hardcode or configure for that part, but DO always submit from inside
-# that directory (see above).
-#
-# Pace the hand-off to the next chunk/experiment with `oceanicu_experiments.py delay-all
-# --seconds N` (per user, 2026-08-28: "the HPC must be used for something
-# else for a while") -- a TIMED pause, checked LIVE right before EACH
-# self-resubmission, not a static env var baked in at the first `sbatch`
-# (which can't be changed once a job is queued/running). Unlike pause/
-# resume (which stop resubmission indefinitely until a human resumes),
-# this waits out the remainder then proceeds automatically -- set it,
-# forget it, the system catches up on its own. Live-adjustable at any
-# time while jobs are already chaining: run `delay-all --seconds N` again
-# with a new value, or `delay-all --clear` to cancel early. Never
-# interrupts a chunk already running. See experiment_tracking.
-# chunk_delay_sentinel_path/get_chunk_delay_remaining for the mechanism
-# (a DELAY_ALL file next to the registry DB, mirroring PAUSE_ALL's own
-# convention -- content is the delay in seconds, its own mtime marks when
-# it was set).
+# EXPERIMENT_ID must already be registered (oceanicu_experiments.py add).
+# `oceanicu_experiments.py delay-all --seconds N` delays every hand-off to
+# the next chunk (checked live before each resubmission; --clear cancels);
+# set-chunk-delay paces one experiment. Neither interrupts a running chunk.
 
 #SBATCH --job-name=oceanicu_chunk
 #SBATCH --nodes=3
@@ -66,65 +35,23 @@ if [ -z "${EXPERIMENT_ID:-}" ]; then
     exit 1
 fi
 
-# experiment_tracking.py refuses to guess a DB path, deliberately -- this script
-# runs on whatever machine/cluster the job lands on, with whatever folder
-# layout THAT machine has, so there is no path that's safe to assume as a
-# default here either. Must be set on the sbatch command line:
-#   sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='...' run_chunk.slurm
-# (SLURM's --export replaces the job's entire environment with just what's
-# listed, so it has to be given on every submission, not just exported in
-# the submitting shell -- every self-resubmission below already carries it
-# forward for you once it's set on this first one.)
+# No default DB path: it differs per machine. Self-resubmissions carry it on.
 if [ -z "${OCEANICU_EXPERIMENT_DB:-}" ]; then
     echo "ERROR: OCEANICU_EXPERIMENT_DB must be set (sbatch --export=ALL,EXPERIMENT_ID=...,OCEANICU_EXPERIMENT_DB=... run_chunk.slurm)" >&2
     exit 1
 fi
 
-# Where THIS script (and chunk_runner.py/experiment_tracking.py alongside it)
-# actually live -- resolved at runtime, not hardcoded, since this script
-# is deployed independently on every production machine that runs it
-# (different user, different home directory, quite possibly a different
-# checkout location entirely -- a fixed path here would only ever be
-# right for the one machine it was written on).
-#
-# Deliberately NOT ${BASH_SOURCE[0]} -- SLURM copies the submitted script's
-# CONTENT into a per-job spool directory (/var/spool/slurmd/job<ID>/
-# slurm_script) and runs THAT copy, so ${BASH_SOURCE[0]} always resolves to
-# the spool copy, never this script's real deployment location (confirmed
-# in production, job 11233: "python: can't open file '/var/spool/slurmd/
-# job11233/chunk_runner.py'" -- cd "$SCRIPT_DIR" had "succeeded" into the
-# spool dir, which exists but never had chunk_runner.py deployed in it).
-# $SLURM_SUBMIT_DIR is SLURM's own synthesized var for wherever `sbatch`
-# was actually invoked FROM -- unaffected by both the spool-copy behavior
-# above and by --export= filtering (it's not part of "the submitting
-# shell's environment" that --export controls, same category as
-# $SLURM_JOB_ID). Requires `sbatch` to be invoked from INSIDE this
-# directory every time (see the header comment above) -- self-resubmission
-# below satisfies this automatically, since it runs `sbatch ... "$SELF"`
-# only after the `cd "$SCRIPT_DIR"` a few lines down has already happened.
+# Not ${BASH_SOURCE[0]}: SLURM runs a spool copy of this script.
+# $SLURM_SUBMIT_DIR is where sbatch was invoked, i.e. running/
+# (self-resubmission happens after the cd below).
 SCRIPT_DIR="${SLURM_SUBMIT_DIR:?SLURM_SUBMIT_DIR not set -- sbatch must be invoked from inside the directory run_chunk.slurm/chunk_runner.py/experiment_tracking.py actually live in}"
 SELF="$SCRIPT_DIR/run_chunk.slurm"
 export OMP_NUM_THREADS=1
 export SRUN_CPUS_PER_TASK=$SLURM_CPUS_PER_TASK
 
-# module (defined by ~/.bashrc, via environment-modules/Lmod's own init
-# script) is NOT sourced here on purpose -- per user, 2026-09-28,
-# sourcing ~/.bashrc from INSIDE this job script is problematic for a
-# manual `sbatch run_chunk.slurm` invocation (root cause not fully
-# understood, but reproducible). Every real entry point already has it
-# covered from OUTSIDE instead: a manual sbatch inherits it from the
-# submitter's own already-bashrc'd interactive shell; oceanicu_
-# experiments.py's cmd_submit_chunk explicitly sources ~/.bashrc itself
-# before calling sbatch, for the cron/queue-triggered path (a minimal
-# environment with none of ~/.bashrc's effects, unlike an interactive
-# shell) -- see that function's own comment. --export=ALL (below and in
-# this script's own self-resubmission) propagates whichever of those
-# two already got it right, so `module` is defined by the time this
-# script runs regardless of which path started the chain. If `module:
-# command not found` ever reappears, check the ACTUAL submission path
-# first -- this is the second time that exact symptom traces back to a
-# missing source ~/.bashrc, just relocated once already (fd9f27e ->
-# here -> now moved out to cmd_submit_chunk).
+# ~/.bashrc is not sourced here (it breaks a manual sbatch); `module` comes
+# from the submitting environment via --export=ALL -- an interactive shell,
+# or cmd_submit_chunk, which sources ~/.bashrc itself for the queue path.
 
 module purge
 prgenv=igi
@@ -146,13 +73,8 @@ conda activate pygetm
 
 cd "$SCRIPT_DIR" || exit 1
 
-# Live-checks the DELAY_ALL sentinel (oceanicu_experiments.py delay-all --
-# experiment_tracking.get_chunk_delay_remaining's own docstring has the full
-# mechanism) and, if a delay is currently active, waits it out in short
-# polls rather than one fixed sleep -- so a delay that gets shortened,
-# extended, or cleared WHILE this is already waiting takes effect right
-# away instead of only on the next chunk's own hand-off. No-op (returns
-# immediately) when nothing is set.
+# Wait out an active DELAY_ALL, re-checking every <=60 s so a changed or
+# cleared delay takes effect at once.
 _wait_for_delay_all() {
     while true; do
         remaining=$(python -c "
@@ -170,13 +92,8 @@ with rt.connect() as conn:
     done
 }
 
-# Persistent, per-experiment pacing (oceanicu_experiments.py set-chunk-delay / the
-# experiment's own chunk_delay_seconds column, default 0) -- unlike DELAY_ALL
-# above (a global, one-shot TIMED pause), this is an ongoing setting for
-# ONE specific experiment, read fresh each call so a change picks up on the very
-# next hand-off. $1 is the experiment_id about to be (re)submitted -- the NEXT
-# experiment's own delay applies when picking a new one up from the queue, not
-# the experiment that just finished.
+# Per-experiment pacing (chunk_delay_seconds), read fresh each time; $1 is
+# the experiment about to be submitted.
 _wait_for_experiment_chunk_delay() {
     local target_experiment_id="$1"
     local delay
@@ -192,24 +109,11 @@ with rt.connect() as conn:
     fi
 }
 
-# Best-effort, event-driven push of the registry out to bb-server1, right
-# before each self-resubmission -- only fires if OCEANICU_LOGIN_NODE is
-# set (see setup_experiment_tracking.sh; exported in the submitting shell,
-# which sbatch --export=ALL passes through) AND ssh from
-# THIS compute node to it actually works. **Confirmed 2026-08-29,
-# directly by PML: compute nodes on this project's HPC cannot ssh to
-# their own login node at all** (see investigations/test_compute_to_login_ssh.sbatch)
-# -- so on THIS cluster this never fires, silently and harmlessly; never
-# set OCEANICU_LOGIN_NODE here. Kept only for a different cluster where
-# compute-to-login ssh might actually work. Backgrounded and silenced: a
-# slow or failed push must never delay or block the real resubmission
-# that follows it, which proceeds identically either way. On THIS
-# cluster the real mechanisms are both on the login node itself, neither
-# touching this script at all: a periodic cron running
-# push_registry_snapshot.sh, and/or watch_registry_and_push.sh's
-# persistent inotify watcher for near-immediate pushes -- see
-# EXPERIMENT_TRACKING.md "Keeping bb-server1's copy of the registry up
-# to date" / push_registry_snapshot.sh's own header.
+# Push the registry to bb-server1 before resubmitting, if OCEANICU_LOGIN_NODE
+# is set and reachable. Compute nodes on scylla cannot ssh to the login node
+# (investigations/test_compute_to_login_ssh.sbatch), so leave it unset
+# there; the login node's cron/watch_registry_and_push.sh does the push.
+# Backgrounded: never delays the resubmission.
 _push_registry_snapshot_best_effort() {
     if [ -n "${OCEANICU_LOGIN_NODE:-}" ]; then
         ssh -o BatchMode=yes -o ConnectTimeout=5 "$OCEANICU_LOGIN_NODE" \

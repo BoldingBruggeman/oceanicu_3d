@@ -1,129 +1,33 @@
 #!/usr/bin/env python
-"""get_commands_and_update_registry.py -- pull queued commands in from
-bb-server1 (optional), then replay whatever's pending against the LOCAL
-registry. Renamed from apply_commands.py when the --pull-from step was
-added (2026-08-30) -- same file, same core logic, now also does the
-"get" half, not just the "apply" half.
+"""get_commands_and_update_registry.py -- optionally pull queued commands
+from bb-server1, then apply the pending ones to the LOCAL registry. Runs where
+the registry lives (the HPC login node, which can only make outbound
+connections), usually from cron. See EXPERIMENT_TRACKING.md "Command queue".
 
-Deployed alongside oceanicu_experiments.py/experiment_tracking.py/chunk_runner.py
-wherever the real submission_registry.sqlite actually lives (see
-EXPERIMENT_TRACKING.md "Command queue") -- for a registry with no network path
-reachable from wherever experiments are actually defined/queued from (e.g. a
-fully network-isolated HPC whose login node can only ever INITIATE an
-outbound connection, never receive one).
+--pull-from rsyncs the remote hpc_commands/ into a staging area and merges
+each queue file into the local copy BY ENTRY ID: an id already resolved here
+keeps its local status whatever the remote copy says (the remote has no other
+way to learn it). A plain overwrite re-armed applied entries -- including
+submit-chunk, i.e. a second sbatch. Queue files that changed are pushed back
+under an archival (non-queue_*.yaml) name, as a record visible on bb-server1.
 
-**If `--pull-from` is given**, this rsyncs that remote directory (e.g.
-bb-server1's `hpc_commands/`) into `--queue-dir` FIRST, before looking
-for anything pending -- so a single cron job covers both halves: get
-the latest commands, then apply whatever's new. Only makes sense on
-whatever machine actually has outbound network reach (the HPC's LOGIN
-node, not a compute node -- see EXPERIMENT_TRACKING.md "Keeping bb-server1's
-copy of the registry up to date" for the identical constraint on the
-push side, `push_registry_snapshot.sh`). Omit `--pull-from` to run
-exactly as before (`apply_commands.py`'s original behavior, unchanged) --
-e.g. for local testing, or if the local `hpc_commands/` copy is kept up
-to date some other way (a human rsyncing by hand).
+Each pending entry is replayed through oceanicu_experiments.py's own CLI, so
+it gets exactly the same validation as running it directly, and new
+subcommands need no change here. Never takes an ssh:// --db and never calls
+sbatch itself. Before an `add`, the script/config must already be at the
+resolved experiment_root (from `stage` or bin/pull_experiment_files.sh).
 
-Each pending entry is replayed through oceanicu_experiments.py's own CLI
-(reconstructed from the stored args as real --flag values), so applying
-a queued command goes through IDENTICAL validation/behavior as running
-it directly -- no per-action logic is reimplemented here, and this file
-never needs updating when a new oceanicu_experiments.py subcommand is added.
-
-Deliberately narrow: never accepts an ssh:// --db (this only ever makes
-sense run locally, where the registry's own machine is), and NEVER calls
-sbatch, for any experiment, new or resubmitting -- submitting a job is always a
-deliberate manual action on the HPC, whether that's the first chunk of a
-brand-new experiment or anything else. This script only ever touches the
-registry's `experiments`/`history` rows via oceanicu_experiments.py's own commands.
-
-A brand-new experiment's `add` also needs its actual driver script/config
-physically present at `experiment_root` before any chunk can start -- the queue
-file alone only ever carries the DB row. Getting them there is `oceanicu-experiments
-stage`'s job (see its own docstring): it writes directly to the experiment's
-real, resolved `experiment_root` on whatever machine runs it -- there is no
-separate staging directory to copy from here. This file's own role is
-narrower: before applying an `add`, `_verify_experiment_files_present`
-confirms `script`/`config` are actually present at the resolved
-`experiment_root` on THIS machine (populated by `stage` directly if this
-machine IS where staging happened, or by `bin/pull_experiment_files.sh`'s
-filtered sync if not) and fails the command loudly if not -- never
-registering a file-less experiment, without copying anything itself.
-
-Multiple people can queue commands from different places -- rather than
-have them all write to one shared file (a real risk of one rsync
-clobbering another's in-flight edit), each person gets their OWN queue
-file, `queue_<name>.yaml`, in the same directory. `--queue-dir` processes
-every `queue_*.yaml` found there, combined and applied in `queued_at`
-order across all of them, so real submission order is preserved
-regardless of which file an entry lives in. `--queue PATH` (a single,
-exact file) still works too, for a quick one-off or testing.
-
-**One name per queuing MACHINE, not just per person** (confirmed
-2026-09-20): the merge-by-id protection in _merge_queue_file/_pull below
-only protects entries that arrive as NEW ids on the bb-server1<-HPC leg
--- the earlier orca<-relay-side rsync that stages a person's own queue
-file onto bb-server1 in the first place (e.g. the data repo's own
-UPDATE script) is a plain, unmerged overwrite. If the same person queues
-from two different machines (e.g. orca and shark) using the identical
-filename `queue_kb.yaml`, whichever machine's UPDATE runs LAST silently
-overwrites the other's un-synced entries -- there is no id-based
-protection on that hop. Name the file `queue_<name>_<machine>.yaml`
-(e.g. `queue_kb_orca.yaml`) so each machine's own queue is a distinct
-file; still matches the `queue_*.yaml` glob everywhere it needs to.
-
-`hpc_commands/` itself is plain data, deliberately NOT part of the
-`oceanicu_3d` git repo -- see EXPERIMENT_TRACKING.md "Command queue" for where
-it actually lives and how it physically gets here (rsync, at every hop,
-never git/GitHub).
-
-**`--pull-from` merges by id, it does NOT overwrite (fixed 2026-09-02):**
-`_pull` rsyncs the remote directory into a throwaway staging area, then
-`_merge_queue_file` folds each staged file into this machine's own
-local copy keyed by each entry's own unique `id` -- an id this machine
-has already resolved (status != `pending`, from actually applying it)
-keeps its local resolution no matter what the upstream copy still says
-about it (upstream has no push-back channel of its own, so its copy of
-a since-applied id can sit at `pending` forever); only genuinely NEW
-ids get added. This is the actual reason the `id` field exists.
-
-**Why this matters, concretely:** the OLD behavior here was a plain
-directory rsync (`-au`), not a merge -- a fresh pull would silently
-revert every already-resolved entry back to `pending`, and a `submit-
-chunk` entry re-arming itself this way meant a real second `sbatch`
-call, an actually-dangerous double-submission, not just a cosmetic
-inconsistency. Confirmed happening in production, 2026-09-02, which is
-what prompted this fix (previously this section documented it as a
-"known limitation" -- it no longer is one).
-
-After applying, each queue file that had at least one entry change status
-this run is ALSO pushed BACK to the same `--pull-from` remote directory,
-under a renamed, non-`queue_*.yaml` archival name (see
-`_push_back_applied`'s own docstring) -- a human-readable paper trail of
-what got applied/failed and when, visible from bb-server1 without
-needing to log into the HPC. Purely additive on top of the merge fix
-above, not a substitute for it.
+--queue-dir applies every queue_*.yaml there, merged in queued_at order. Use
+one file per person AND machine (queue_kb_orca.yaml): the orca -> bb-server1
+hop is a plain overwrite, so two machines sharing one filename lose entries.
 
 Usage:
     python get_commands_and_update_registry.py --db /local/path/submission_registry.sqlite \\
         --queue-dir /local/path/hpc_commands/ \\
         [--pull-from bb-server1:/data/OceanICU/oceanicu_3d/experiments/hpc_commands]
-
-    # or a single exact file (never combined with --pull-from -- that's
-    # a whole-directory sync, not a single-file one):
     python get_commands_and_update_registry.py --db ... --queue /local/path/hpc_commands/queue_kb.yaml
 
-    # --db and --queue-dir both fall back to an env var if omitted
-    # (OCEANICU_EXPERIMENT_DB, OCEANICU_HPC_COMMANDS_DIR respectively) --
-    # handy for manual invocation once those are already exported, same
-    # convention as oceanicu-experiments' own --db:
-    OCEANICU_EXPERIMENT_DB=... OCEANICU_HPC_COMMANDS_DIR=... python get_commands_and_update_registry.py
-
-Typically run from a cron job (or by hand, or from run_chunk.slurm's own
-execution) on whichever machine physically holds both the registry and
-a local copy of the queue file(s) -- the LOGIN node specifically if
-`--pull-from` is used, since that's the only place with outbound network
-reach -- see EXPERIMENT_TRACKING.md.
+--db and --queue-dir default to $OCEANICU_EXPERIMENT_DB / $OCEANICU_HPC_COMMANDS_DIR.
 """
 from __future__ import annotations
 
