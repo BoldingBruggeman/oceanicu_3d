@@ -125,11 +125,7 @@ _EXPERIMENT_COLUMNS = [
     "updated_at",
 ]
 
-# Shorter display labels for `list`'s own printed header row ONLY -- the
-# real column names above still drive _cell() lookups and cmd_apply's own
-# before/after diff (both keyed off _EXPERIMENT_COLUMNS' real DB column
-# names), so this is purely cosmetic, not a rename of anything stored or
-# compared. Per user, 2026-09-08.
+# Shorter header labels for `list` only (lookups use the real column names).
 _EXPERIMENT_COLUMN_LABELS = {
     "chunk_kind": "chunk",
     "chunk_multiplier": "multiplier",
@@ -159,12 +155,7 @@ def _print_table(rows: list, columns: list[str], labels: dict[str, str] | None =
     if not rows:
         print("(none)")
         return
-    # Width from the DISPLAYED label, not the real column name -- e.g.
-    # chunk_delay_seconds (20 chars) shouldn't pad the column out to 20
-    # chars just because that's the real name, when the printed header is
-    # the much shorter "chunk_delay" (a real bug hit immediately: the
-    # first version of this labels= support fixed the header TEXT but left
-    # width computed off the old long name, per user, 2026-09-08).
+    # Width from the displayed label, not the column name.
     widths = {c: max(len(labels.get(c, c)), *(len(str(_cell(r, c))) for r in rows)) for c in columns}
     header = "  ".join(labels.get(c, c).ljust(widths[c]) for c in columns)
     print(header)
@@ -313,14 +304,8 @@ def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
         return 1
 
     queue_path = Path(queue_path)
-    # Deliberately NOT queue_path.parent.mkdir(...) -- a typo'd/wrong
-    # --queue directory (confirmed happening in production, 2026-10-09:
-    # .../experiments/hpc_commands/queue_kb_orcal.yaml instead of
-    # .../hpc_commands/queue_kb_orca.yaml) would otherwise silently
-    # succeed by creating a new directory nothing ever looks at, instead
-    # of failing loudly where the typo is actually visible. A new FILE
-    # in an EXISTING folder is still fine (see queue_path.write_text
-    # below) -- only a missing PARENT folder is refused.
+    # Never create a missing --queue directory: a typo'd path would "succeed"
+    # into a folder nothing reads. A new file in an existing folder is fine.
     if not queue_path.parent.is_dir():
         print(
             f"ERROR: {queue_path.parent} does not exist -- refusing to create it "
@@ -338,12 +323,7 @@ def _queue_command(queue_path: Path, args: argparse.Namespace) -> int:
     # the matching normalization in get_commands_and_update_registry.py.
     if isinstance(data, list):
         data = {"commands": data}
-    # setdefault's default only applies when the KEY is missing -- a
-    # hand-edited file with a bare "commands:" (no value) parses as
-    # {"commands": None}, and setdefault("commands", []) then returns
-    # that existing None right back (confirmed: this is exactly what a
-    # real queue_kb.yaml did in production -- AttributeError: 'NoneType'
-    # object has no attribute 'insert' on the commands.insert() below).
+    # A bare "commands:" parses as None, which setdefault keeps.
     commands = data.get("commands")
     if commands is None:
         commands = data["commands"] = []
@@ -467,11 +447,7 @@ def cmd_stage(args: argparse.Namespace) -> int:
         cmd += ["--exclude", pattern]
     for pattern in includes:
         cmd += ["--include", pattern]
-    # --include='*/' lets rsync descend into subdirectories to look for
-    # matches (otherwise a bare --exclude='*' below would stop it from
-    # even entering them); --prune-empty-dirs above then drops any
-    # subdirectory that ends up with nothing matched inside it, so this
-    # doesn't create a hollow directory tree in the destination.
+    # '*/' lets rsync descend; --prune-empty-dirs drops directories with no match.
     cmd += ["--include", "*/", "--exclude", "*"]
     cmd += [f"{source_dir}/", f"{dest_dir}/"]
 
@@ -742,37 +718,15 @@ def cmd_submit_chunk(args: argparse.Namespace) -> int:
         f"sbatch --export=ALL,EXPERIMENT_ID={shlex.quote(args.experiment_id)} "
         f"{shlex.quote(str(run_chunk))}"
     )
-    # bash -c, not a direct ["sbatch", ...] argv, specifically so
-    # `source ~/.bashrc` runs first in the SAME shell that then execs
-    # sbatch (see this function's own docstring) -- means a missing
-    # sbatch binary now surfaces as a real bash "command not found"
-    # (rc=127) caught by the generic returncode check below, not a
-    # Python-level FileNotFoundError the way a direct ["sbatch", ...]
-    # argv would have raised.
-    #
-    # `;`, NOT `&&`, between the source and sbatch -- real, reproduced
-    # failure (2026-09-29): ~/.bashrc on scylla exits non-zero for some
-    # still-unclear reason (silently -- no output on either stream), and
-    # `&&` let that alone block sbatch from ever running at all, with
-    # nothing to show for it ("ERROR: sbatch failed (rc=1):" and nothing
-    # after the colon, even after fixing the separate stdout/stderr
-    # reporting gap this same day). Whatever conda/module state ~/.bashrc
-    # manages to set up before hitting that point still ends up in THIS
-    # shell's environment regardless of its own final exit code, and
-    # that's the only reason it's sourced here at all -- sbatch's own
-    # success/failure is what actually matters, not bashrc's.
+    # bash -c so ~/.bashrc is sourced (module/conda for the cron/queue path)
+    # in the shell that runs sbatch. `;` not `&&`: ~/.bashrc on scylla exits
+    # non-zero without output, which must not block sbatch.
     result = subprocess.run(
         ["bash", "-c", f"source ~/.bashrc; {sbatch_cmd}"],
         cwd=script_dir, capture_output=True, text=True,
     )
     if result.returncode != 0:
-        # Combined stdout+stderr, same fix as cmd_pull_code's own (2026-09-28):
-        # get_commands_and_update_registry.py's dispatch captures ONLY this
-        # process's stderr into the queue entry's "note" on failure -- a
-        # version that printed sbatch's real error to stdout and only a
-        # bare "rc=1" to stderr surfaced exactly that useless, detail-free
-        # note in production (confirmed directly, 2026-09-29: "ERROR: sbatch
-        # failed (rc=1):" with nothing after the colon).
+        # Details on stderr: the queue dispatch records stderr as the note.
         output = (result.stdout + result.stderr).strip()
         if "sbatch" in output and "not found" in output:
             print("ERROR: sbatch not found -- submit-chunk only works on a machine that's "
@@ -817,14 +771,7 @@ def cmd_pull_code(args: argparse.Namespace) -> int:
     result = subprocess.run(["git", "-C", str(repo_root), "pull", "origin", "claude"], capture_output=True, text=True)
     output = (result.stdout + result.stderr).strip()
     if result.returncode != 0:
-        # The DETAIL goes to stderr here specifically because
-        # get_commands_and_update_registry.py's own dispatch captures
-        # THIS process's stderr into the queue entry's "note" on failure
-        # (stdout on success) -- an earlier version of this printed the
-        # real git output to stdout unconditionally and only a bare,
-        # detail-free "git pull failed (rc=1)" to stderr, so a real
-        # failure's own cause never made it into the applied-queue_kb-
-        # *.yaml report at all (confirmed directly, 2026-09-28).
+        # Details on stderr: the queue dispatch records stderr as the note.
         print(f"ERROR: git pull failed (rc={result.returncode}): {output}", file=sys.stderr)
         return 1
     if output:
@@ -872,11 +819,7 @@ def cmd_show(args: argparse.Namespace) -> int:
         print()
         print("chunks:")
         chunks = rt.list_chunks(conn, args.experiment_id)
-        # Full sha256 is 64 hex chars -- far too wide for this table, and a
-        # short prefix is all a human needs to eyeball "did this change
-        # between chunks" (experiment_tracking.start_chunk's own script_changed/
-        # config_changed history events already carry the same prefix
-        # length, so a hash spotted here is directly greppable there).
+        # Short hash prefix, as in the script_changed/config_changed history events.
         chunks_display = [
             {
                 **dict(c),
@@ -1238,12 +1181,8 @@ def main() -> int:
                          "changeable later with set-chunk-delay. Different from delay-all, "
                          "which is a global, one-shot TIMED pause, not tied to one experiment.")
     a.add_argument("--notes", default=_EXPERIMENT_DEFAULTS["notes"])
-    # Mirrors the generated driver script's own --fabm/--no-fabm exactly
-    # (see pygetm_config.codegen's _emit_argparse) -- None here means "no
-    # override, run the script's own baked-in FABM setting unchanged";
-    # 'off'/'on' are sentinels for bare --no-fabm/--fabm; anything else is
-    # an explicit fabm.yaml path. chunk_runner.py passes this straight
-    # through to the driver's own --fabm/--no-fabm.
+    # As the generated script's --fabm/--no-fabm: None = its own setting,
+    # 'off'/'on' = bare --no-fabm/--fabm, else a fabm.yaml path.
     a.add_argument("--fabm", nargs="?", const="on", default=_EXPERIMENT_DEFAULTS["fabm"], metavar="PATH",
                     help="override the experiment's FABM state at chunk-run time (bare --fabm "
                          "reuses the script's configured path; --fabm PATH forces a "
@@ -1492,12 +1431,8 @@ def main() -> int:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
 
-    # --- dry run: copy real DB -> scratch, run the REAL command against
-    # the copy, report what changed, never open the real DB for writing.
-    # No --db/OCEANICU_EXPERIMENT_DB configured at all is NOT an error here (same
-    # philosophy as chunk_runner.py's standalone mode) -- dry-run is for
-    # exploring/testing, so it just starts completely empty instead of
-    # copying anything.
+    # --- dry run: run the real command against a scratch copy of the
+    # registry (empty if none is configured) and report what changed.
     try:
         real_db = _resolve_real_db_path(args)
     except RuntimeError:
@@ -1531,11 +1466,8 @@ def main() -> int:
     print(f"[dry-run] result (command exit code {rc}):")
     _print_diff(before, after)
 
-    # Show what run_chunk.slurm would actually submit next, for whichever
-    # experiment(s) this command named -- the registry diff above only says what
-    # changed in the table; this says what that change actually causes to
-    # experiment. --all commands (pause/resume) preview every experiment currently
-    # not_started/in_progress rather than just one.
+    # Preview what run_chunk.slurm would submit next for the named experiment
+    # (or, for --all, every not_started/in_progress one).
     experiment_ids: list[str] = []
     if getattr(args, "experiment_id", None):
         experiment_ids = [args.experiment_id]

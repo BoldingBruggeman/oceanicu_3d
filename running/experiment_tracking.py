@@ -187,29 +187,13 @@ CREATE INDEX IF NOT EXISTS idx_history_run ON history(experiment_id);
 
 
 def _migrate_schema(conn: sqlite3.Connection) -> None:
-    """Additive, idempotent schema fixups that CREATE TABLE IF NOT EXISTS
-    alone can't express -- new columns on a table that may already exist
-    from before the column was added. Safe to run on every connect(): each
-    check is cheap and a no-op once already applied.
+    """Additive, idempotent column migrations (CREATE TABLE IF NOT EXISTS
+    can't add columns); cheap enough for every connect().
 
-    Tolerates a READ-ONLY registry -- e.g. bb-server1's own copy of
-    submission_registry.sqlite, a periodically-pushed MIRROR of the
-    authoritative HPC copy, deliberately not writable there (pushed via
-    push_registry_snapshot.sh, arrives owned by a different user with
-    mode 444). If an ALTER TABLE fails because the connection can't
-    write, this stops trying further migrations and returns quietly
-    rather than raising: a read-only mirror missing a brand-new column
-    is still perfectly usable for anything that doesn't touch that
-    column specifically (i.e. everything except the few functions that
-    actually read/write it) -- letting the exception propagate would
-    break EVERY query through this connection, including pure reads
-    like `show`/`list` that never needed the new column at all.
-    Confirmed happening in production, 2026-09-02: `oceanicu-experiments
-    show` (a pure read) started failing with "attempt to write a
-    readonly database" purely because THIS function tried to add
-    chunks.last_health_check to bb-server1's read-only mirror. A
-    genuinely unexpected DB error (not a readonly one) still re-raises
-    -- only this specific, known-benign case is swallowed."""
+    Tolerates a read-only registry (bb-server1's pushed mirror, mode 444): a
+    failed ALTER TABLE there stops the migrations quietly, so reads like
+    `show`/`list` keep working. Any other DB error re-raises.
+    """
     try:
         history_cols = {row["name"] for row in conn.execute("PRAGMA table_info(history)")}
         if "user" not in history_cols:
@@ -340,26 +324,14 @@ def resolve_db_path_arg(
     required: bool = True,
     allow_remote: bool = True,
 ) -> Optional[str]:
-    """The one shared --db/env-var resolution convention every running/*.py
-    entrypoint uses: *db_arg* (typically args.db) wins over *env_var* if
-    both are given. Returns the raw string (an ssh://... URL or a local
-    path), unparsed -- connect() and _parse_db_spec() still do their own
-    parsing on top of this; this function only answers "what string was
-    configured, if any". Previously reimplemented independently (with
-    slightly different error-handling styles) in oceanicu_experiments.py,
-    get_commands_and_update_registry.py, and reap_orphaned_chunks.py --
-    centralized here (2026-10-24) per the cross-repo code review's own
-    "DB-path resolution duplicated 6x" finding.
+    """The shared --db/env-var convention of every running/*.py entrypoint:
+    *db_arg* wins over *env_var*. Returns the raw string (ssh:// URL or local
+    path); connect() parses it.
 
-    required=True (default) raises RuntimeError with the project's
-    standard message if neither is given; required=False returns None
-    instead, for callers that treat "nothing configured" as a legitimate
-    state (e.g. oceanicu_experiments.py's dry-run path).
-
-    allow_remote=False is for an entrypoint that must run with a local
-    path only (e.g. get_commands_and_update_registry.py, which only ever
-    runs on the registry's own machine, never over the relay) -- raises
-    if the resolved value is an ssh:// URL, regardless of *required*.
+    required=True raises RuntimeError with the standard message if neither is
+    set; required=False returns None (e.g. the dry-run path). allow_remote=
+    False refuses an ssh:// value (get_commands_and_update_registry.py runs
+    where the registry is).
     """
     resolved = db_arg or os.environ.get(env_var)
     if not resolved:
@@ -465,23 +437,15 @@ def list_history(conn: sqlite3.Connection, experiment_id: str) -> list[sqlite3.R
 def connect(
     db_path: Optional[Union[str, Path, "RemoteSpec"]] = None,
 ) -> Iterator[Union[sqlite3.Connection, "RemoteConn"]]:
-    """Open the shared DB (WAL mode, for safe concurrent writers across
-    simultaneously-running SLURM jobs on different experiments), creating the
-    schema on first use.
+    """Open the registry (WAL mode, for concurrent writers from different
+    SLURM jobs), creating the schema on first use.
 
-    *db_path* (or OCEANICU_EXPERIMENT_DB if db_path isn't given) is required --
-    deliberately no hardcoded default path. This code runs on whatever
-    machine/cluster the job lands on, with whatever folder layout that
-    machine has -- SQLite will happily CREATE a new, empty DB file at any
-    writable path, so a wrong guess wouldn't even fail loudly, it would
-    just silently start populating an unrelated registry. Point at a
-    scratch DB during testing (OCEANICU_EXPERIMENT_DB=/tmp/test.sqlite) with zero
-    risk of touching the real one because a flag was forgotten.
+    *db_path* or $OCEANICU_EXPERIMENT_DB is required -- no default: SQLite
+    would silently create an empty registry at a wrong guess. Use e.g.
+    OCEANICU_EXPERIMENT_DB=/tmp/test.sqlite for testing.
 
-    An `ssh://host/abs/path` value (or a RemoteSpec) yields a RemoteConn
-    instead of opening anything locally -- see the module docstring's
-    "Working across machines" section. Every @_rpc_or_local-decorated
-    function accepts either kind of *conn* transparently.
+    An `ssh://host/abs/path` value (or a RemoteSpec) yields a RemoteConn (see
+    the module docstring); @_rpc_or_local functions accept either.
     """
     env_path = os.environ.get("OCEANICU_EXPERIMENT_DB")
     if db_path is None and not env_path:
@@ -510,23 +474,11 @@ def connect(
 
 
 def _ensure_group_writable(db_path: Path) -> None:
-    """Make the DB file (and its WAL-mode -wal/-shm sidecars, once they
-    exist) group-writable, regardless of whichever process's umask
-    happened to create them. Matters specifically for a shared relay:
-    SQLite creates new files honoring the CREATING process's umask, so
-    without this, whichever of two different users (add-machine vs.
-    production machine, see the "Working across machines" module
-    docstring section) happens to touch a given file FIRST silently
-    locks the other one out of writing to it -- even with correct shared
-    -group membership, a common umask like 022 still drops the group-
-    write bit on creation. Ownership/group itself is left alone (that's
-    what the relay directory's own setgid bit + shared group are for --
-    see EXPERIMENT_TRACKING.md); this only ever adds permission bits, never
-    narrows them, so it can't make anything LESS accessible than it
-    already was. Best-effort: a PermissionError here (e.g. this process
-    isn't the file's owner and isn't in its group) is not fatal --
-    it just means whoever DOES need this fixed has to run `chmod`
-    manually once, same as if this helper didn't exist at all.
+    """Add group-write to the DB file and its -wal/-shm sidecars: SQLite
+    creates them with the creating process's umask (often 022), which would
+    lock the other user of a shared relay out. Only adds bits; group
+    ownership comes from the directory's setgid bit (EXPERIMENT_TRACKING.md).
+    Best-effort: a PermissionError is ignored (chmod by hand then).
     """
     for suffix in ("", "-wal", "-shm"):
         candidate = Path(str(db_path) + suffix)
@@ -804,33 +756,13 @@ def rename_experiment(
     force: bool = False,
     user: Optional[str] = None,
 ) -> None:
-    """Change an experiment's experiment_id and/or experiment_root in
-    place -- for reusing/relocating an experiment (e.g. before
-    overwriting its generated files from a fresh remote source) without
-    losing its chunk/history record.
+    """Change an experiment's experiment_id and/or experiment_root, keeping
+    its chunk and history records (history rows are rewritten to the new id).
 
-    No filesystem access here at all -- experiment_root is stored AS
-    GIVEN, unresolved, same convention as add_experiment/
-    set_data_roots_file (resolved fresh on whatever machine next reads
-    it, never baked in here). Moving the actual directory on disk, if
-    that's wanted, is the CALLER's job (oceanicu_experiments.py's
-    cmd_rename) -- it's inherently local-machine-only (the registry can
-    be remote via an ssh:// relay while the files are local), so it
-    can't live in an @_rpc_or_local function's body, which may run on
-    the relay's own process instead of the caller's machine. The caller
-    is expected to do that move FIRST and only call this afterwards, so
-    a failed move never leaves the registry pointing at a location that
-    doesn't exist.
-
-    experiment_id is chunks.experiment_id's FK target (no CASCADE), and
-    -- unlike remove_experiment's own deliberate choice to leave
-    history behind -- this rewrites history rows too, so show/list read
-    as if the experiment always ran under the new id. PRAGMA
-    defer_foreign_keys defers FK enforcement to this transaction's
-    commit instead of per-statement, which is what makes updating the
-    referenced primary key (experiments.experiment_id) safe here at
-    all -- without it, updating chunks first would still reference a
-    row that (for one statement) no longer exists.
+    No filesystem access: experiment_root is stored as given. Moving the
+    directory is the caller's job (cmd_rename), done FIRST, since this may
+    run on the relay. PRAGMA defer_foreign_keys makes updating the
+    referenced primary key safe within the transaction.
     """
     row = get_experiment(conn, experiment_id)
     if row is None:
@@ -927,22 +859,12 @@ def set_start_date(conn: sqlite3.Connection, experiment_id: str, initial_date: s
 
 @_rpc_or_local
 def chunk_delay_sentinel_path(conn: sqlite3.Connection) -> Path:
-    """Path of the DELAY_ALL sentinel: same idea and same location
-    convention as pause_all_sentinel_path (right next to the registry DB
-    file, via PRAGMA database_list), but for a TIMED pause rather than an
-    indefinite one -- "the HPC needs to be used for something else for a
-    while" (user, 2026-08-28), not "stop until a human says resume".
-
-    Content is the delay in seconds; the file's own mtime marks when it
-    was set. resume_time = mtime + int(content). Checked fresh right
-    before every self-resubmission (run_chunk.slurm / run_chunk_local.py)
-    -- if still before resume_time, that hop sleeps out the remainder
-    then proceeds automatically, no manual `resume` needed; once elapsed,
-    the file is simply inert (no auto-cleanup) until touched again with a
-    fresh value. `echo 3600 > <this path>` delays 1 hour from now; `rm`
-    (or letting it expire) goes back to normal. Unlike PAUSE_ALL this
-    never blocks a chunk from ever running -- it only ever adds a bounded
-    wait at the hand-off between one finishing and the next starting."""
+    """Path of the DELAY_ALL sentinel, next to the registry DB (as PAUSE_ALL):
+    a timed pause of every hand-off. Content = delay in seconds, counted from
+    the file's mtime; checked before each self-resubmission, which waits out
+    the remainder and then proceeds. `echo 3600 > <path>` delays an hour;
+    `rm` cancels. Never stops a running chunk.
+    """
     row = conn.execute("PRAGMA database_list").fetchone()
     db_file = row["file"] if row is not None else None
     if not db_file:
@@ -1008,20 +930,11 @@ def _control_or_pause_all(conn: sqlite3.Connection, experiment_id: str) -> bool:
 
 
 def resolve_experiment_root(experiment_root: str) -> str:
-    """Resolve a possibly-relative experiment_root against THIS machine's own
-    OCEANICU_EXPERIMENT_ROOT_BASE -- a per-machine env var, not stored in the DB
-    (mirrors OCEANICU_EXPERIMENT_DB/OCEANICU_RELAY_DIR). Lets an experiment be
-    registered from a workstation that doesn't know exactly where its
-    output will land on the production machine: register with a relative
-    experiment_root (e.g. matching experiment_id's own shape), and each machine that
-    actually touches the filesystem (chunk_runner.py, is_paused, this
-    script) resolves it against its own local base path at the point of
-    use. Same idea as script/config bare filenames already being resolved
-    against experiment_root itself -- one more level up.
-
-    An absolute experiment_root is returned unchanged; no base path needed for
-    those, and existing experiments registered with an absolute experiment_root keep
-    working exactly as before."""
+    """Resolve a relative experiment_root against this machine's
+    $OCEANICU_EXPERIMENT_ROOT_BASE (per machine, not in the DB), so an
+    experiment can be registered without knowing where it will run. Absolute
+    paths are returned unchanged.
+    """
     if Path(experiment_root).is_absolute():
         return experiment_root
     base = os.environ.get("OCEANICU_EXPERIMENT_ROOT_BASE")
@@ -1363,28 +1276,13 @@ def cancel_slurm_job(job_id: str) -> tuple[bool, str]:
 @_rpc_or_local
 def record_queue_command(conn: sqlite3.Connection, experiment_id: str, detail: str,
                           user: Optional[str] = None) -> None:
-    """Log a queued command's real result to history -- a durable,
-    in-DB record of what get_commands_and_update_registry.py actually
-    applied, with its real queue metadata (the command's own id,
-    queued_by, queued_at, which queue file it came from), independent
-    of whatever the applied ACTION's own history entry already records
-    (e.g. chunk_started, removed). Written by get_commands_and_update_
-    registry.py itself, right after each subprocess call to
-    oceanicu_experiments.py returns -- covers both success and failure,
-    so a refused/failed queued command is traceable too, not just
-    successful ones.
+    """Log a queued command's result (its id, queued_by, queued_at, queue
+    file; success or failure) to history, right after
+    get_commands_and_update_registry.py applied it.
 
-    *user* here is deliberately entry['queued_by'] (who actually
-    QUEUED the command, from the queue file itself) -- NOT whoever's
-    OS account happened to run the apply step (typically the HPC
-    login-node cron identity, e.g. 'rict', regardless of who queued
-    it). The action's OWN history entry (chunk_started, removed, ...)
-    still carries that apply-time identity, unchanged; this is a
-    second, complementary entry giving the real originator. Confirmed
-    this distinction caused real confusion in production, 2026-09-02
-    (every queue-applied action showing 'rict' made it look like a
-    colleague was actively intervening, when most were the user's own
-    queued commands finally being applied by cron)."""
+    *user* is entry['queued_by'] -- who queued it -- not the cron account that
+    applied it; the action's own history entry keeps the applying account.
+    """
     _log_history(conn, experiment_id, "queue_command", detail, user=user)
     conn.commit()
 
@@ -1480,45 +1378,21 @@ def rerun_from(
     user: Optional[str] = None, note: Optional[str] = None, force: bool = False,
     restart_time: Optional[str] = None, cancel_jobs: bool = True,
 ) -> int:
-    """Rewind an experiment's tracked history so its NEXT execution redoes chunk
-    *chunk_index* onward (dropping any record of it and everything after).
-    Chunks before it are untouched, so the redo naturally resumes from the
-    same load_restart as before -- next_chunk_start/next_chunk_index just
-    read whatever's left. Three cases, all this one primitive:
+    """Drop the chunk records from *chunk_index* on, so the next submission
+    redoes them; earlier chunks (and so the restart to load) are kept:
 
-      chunk_index=None  "from the present chunk" -- redo the last chunk on
-                         record (whether it failed or you just want it
-                         redone), keep everything before it.
-      chunk_index=N      "from a set chunk" -- redo chunk N onward.
-      chunk_index=0      "from scratch" / "reset" -- drops every chunk; the
-                         next experiment starts at initial_date with no
-                         load_restart -- same state as right after `add`
-                         (see cmd_reset). Never starts anything itself
-                         either way, same as `add` doesn't -- only touches
-                         DB rows, chunk_index=0 included.
+      chunk_index=None  redo the last chunk on record.
+      chunk_index=N     redo chunk N onward.
+      chunk_index=0     from scratch: the state right after `add` (see cmd_reset).
 
-    force=True guard, mirroring remove_experiment's own: refuses to drop
-    a chunk row still marked running (status == 'in_progress') unless
-    forced -- deleting that row out from under a job that's actually
-    still writing to it is real data loss (the row, not the files -- see
-    below), not just a cosmetic inconsistency. Applies to all three
-    cases, not just chunk_index=0 -- a from-current/from-chunk rerun can
-    just as easily target the currently-live chunk's own row.
+    Never starts anything and never touches files (chunk_runner archives an
+    existing chunk_dir aside). A chunk still running is refused unless
+    force=True, which first scancels its job (unless cancel_jobs=False, for
+    --dry-run).
 
-    Does NOT touch files on disk (no chunk_dir is deleted) -- chunk_runner.py
-    archives a pre-existing chunk_dir aside before reusing it, so a
-    previous attempt's logs/output are never silently overwritten.
-
-    restart_time: request a specific internal snapshot (ISO date/datetime)
-    from the redone chunk's own load_restart file, instead of the file's
-    default (its last snapshot) -- only meaningful when that file actually
-    holds more than one (see pygetm's add_restart(interval=...)/
-    load_restart(time=...)). Stored on experiments.next_load_restart_time,
-    a one-shot request consumed and cleared by start_chunk the moment this
-    redone chunk actually starts (see its own docstring) -- never silently
-    reused for a chunk after that. None (default): unchanged behavior,
-    the next chunk uses the file's own last snapshot, same as before this
-    parameter existed.
+    restart_time: which snapshot of the redone chunk's restart file to load
+    (for files holding several), stored as the one-shot
+    experiments.next_load_restart_time. Not allowed for chunk 0.
     """
     row = get_experiment(conn, experiment_id)
     if row is None:

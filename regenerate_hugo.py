@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
-# NOT a hardcoded "#!/opt/conda-envs/ocean-stack/bin/python3" -- tried
-# that (2026-10-13), reverted the same day: that path only exists on
-# bb-server1. This script also runs directly on orca (kb's own machine,
-# before it relays), where it doesn't exist at all -- confirmed live:
-# "cannot execute: required file not found". A shebang is one static
-# path, it can't fall back per-machine -- that logic belongs in a
-# wrapper (regen_and_deploy.sh) or in `conda activate` / an explicit
-# python3 path at the call site, not baked into the file itself.
+# Plain python3 shebang: /opt/conda-envs only exists on bb-server1, and this
+# also runs on orca (before relaying).
 """Regenerate Hugo content from validation results and area metadata.
 
 Usage (--apply is required to actually do anything; without it, this help
@@ -63,24 +57,16 @@ def host_config(config: dict, hostname: str) -> dict:
 
 
 def relay(config: dict, oc_cfg: dict, relay_host: str, args: argparse.Namespace) -> None:
-    # --sync-back and --serve are both local-machine-only concerns (they
-    # run here, after the ssh call returns -- see below) so they're
-    # dropped, not forwarded to the relay. --serve in particular must
-    # never reach the relay: cli.reporting's own --serve runs `hugo
-    # server` on whatever machine it's given to, and bb-server1 is in
-    # Hetzner/Germany -- a live dev server there would have bad latency
-    # for anyone actually browsing it.
+    # --sync-back/--serve run here after the ssh call, never on the relay
+    # (a hugo dev server on bb-server1 would be useless remotely).
     relayed = oc_host_config.relay_if_needed(
         oc_cfg, sys.argv[1:],
         repo_key='OceanICU/oceanicu_3d', entry_point='./regenerate_hugo.py',
         drop_flags=frozenset({"--sync-back", "--serve"}),
     )
     if not relayed:
-        # main() already decided (via regen_hosts.yaml's relay_host) that
-        # relaying was needed before calling this -- if oc_host_config's
-        # own check (via ~/.config/oceanicu/hosts.yaml) disagrees, the two
-        # config sources have drifted out of sync. Fail loudly rather than
-        # silently falling through to "Done" below as if a relay happened.
+        # regen_hosts.yaml said relay but hosts.yaml declined: the two
+        # configs disagree -- fail rather than pretend it relayed.
         sys.exit(
             "ERROR: expected to relay to "
             f"{oc_cfg.get('relay_host')!r} but relay_if_needed() declined -- "
@@ -189,27 +175,15 @@ def generate_locally(
         "--analyses-dir", host_cfg["analyses_dir"],
         "--recursive",
         "--hugo", host_cfg["hugo_out"],
-        # This script's own checkout -- always the right OceanICU/
-        # oceanicu_3d location, unlike ocean-post's sibling-directory
-        # guess (false on bb-server1's real relay account, where
-        # ocean_post is imported from the unrelated /opt/ocean-src
-        # checkout; confirmed live, 2026-10-21, as the cause of the
-        # Data Sources page's "data_inventory_forcing.yaml not found").
+        # From this checkout: on the relay account ocean_post is imported
+        # from /opt/ocean-src, so ocean-post's own guess would be wrong.
         "--forcing-inventory", str(SCRIPT_DIR / "driver" / "data_inventory_forcing.yaml"),
     ]
-    # Real per-host data-path env vars (ERA5_FOLDER, CMIP6_FOLDER, ...), so
-    # the Data Sources page can check real files instead of trusting the
-    # inventory's own hand-maintained scenarios:/status: fields (confirmed
-    # stale, 2026-10-21). The REAL file's canonical home is the private
-    # oceanicu_3d_experiments repo's experiments/NSe/<hostname>_data_roots
-    # .yaml (its own header says so) -- driver/data_roots.yaml.example in
-    # THIS repo is a stale template, not that file (confirmed different
-    # values for ERA5_FOLDER/HYDROGRAPHY_FOLDER_CMEMS, 2026-10-21).
-    # host_cfg["experiments_repo"] (bb-server1 only, so far -- see
-    # regen_hosts.yaml) is where kb's own clone of that private repo lives,
-    # shared with the oceanicu account via the `bb` group (oceanicu itself
-    # has no SSH access to it). Falls back to the stale example file,
-    # unchanged from before, on a host with no experiments_repo entry.
+    # Per-host data roots, so the Data Sources page checks real files. The
+    # real file is experiments/NSe/<hostname>_data_roots.yaml in the
+    # oceanicu_3d_experiments clone (host_cfg["experiments_repo"], shared via
+    # group bb); hosts without one fall back to the stale
+    # driver/data_roots.yaml.example.
     experiments_repo = host_cfg.get("experiments_repo")
     if experiments_repo:
         data_roots_file = Path(experiments_repo) / "experiments" / "NSe" / f"{hostname}_data_roots.yaml"
@@ -222,12 +196,7 @@ def generate_locally(
     cmd += ["--about-file", str(SCRIPT_DIR / "about.md")]
     if host_cfg.get("db"):
         cmd += ["--db", host_cfg["db"]]
-    # --area (this invocation's own one-off override, one or more names)
-    # always wins over the persistent enabled_areas allowlist below --
-    # e.g. `--area NSe AMM7` to regenerate just those areas' own pages
-    # without touching the allowlist or any other area's already-
-    # published pages. Not restricted to names in the allowlist -- a
-    # one-off `--area ENA4` works even if ENA4 isn't in enabled_areas.
+    # --area overrides the enabled_areas allowlist for this run (any area).
     for area in (args.area if args.area else config.get("enabled_areas") or []):
         cmd += ["--area", area]
     # --serve is handled separately below (a plain local hugo server on
@@ -296,12 +265,8 @@ def main() -> None:
     relay_host = args.relay_host or config["relay_host"]
     hostname = socket.gethostname()
 
-    # ~/.config/oceanicu/hosts.yaml -- the generic relay config
-    # (ocean_data.host_config), separate from regen_hosts.yaml's own
-    # enabled_areas/hugo_out/analyses_dir/db (unrelated to relaying,
-    # stays exactly as-is). --relay-host applies to both, so a one-off
-    # override can't make the two sources disagree about which host is
-    # the relay.
+    # --relay-host overrides both ~/.config/oceanicu/hosts.yaml (relaying)
+    # and regen_hosts.yaml, so the two can't disagree on the relay.
     oc_cfg = oc_host_config.load_host_config('oceanicu')
     if args.relay_host:
         oc_cfg = {**oc_cfg, 'relay_host': args.relay_host}
