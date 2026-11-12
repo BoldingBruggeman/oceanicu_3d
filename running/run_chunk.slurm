@@ -224,38 +224,11 @@ _push_registry_snapshot_best_effort() {
 }
 
 # --- run the chunk -----------------------------------------------------
-# chunk_runner.py itself invokes the driver script (via srun -- the
-# preferred launcher, matching the real production SLURM scripts; see
-# its own --launcher/the experiment's `launcher` column for the mpiexec
-# fallback) and waits for it (it does not background the srun the way
-# the old pml.slurm did) -- NaN monitoring runs alongside it here so this
-# script can still scancel a runaway job, and records the NaN on the
-# chunk's own DB row.
-
-# experiment_root may be relative (registered from a workstation that doesn't
-# know exactly where this experiment's output will land HERE) -- resolve it
-# against this machine's own OCEANICU_EXPERIMENT_ROOT_BASE, same as
-# chunk_runner.py does internally. Absolute experiment_root passes through
-# unchanged.
-EXPERIMENT_ROOT=$(python -c "
-import experiment_tracking as rt
-with rt.connect() as conn:
-    print(rt.resolve_experiment_root(rt.get_experiment(conn, '$EXPERIMENT_ID')['experiment_root']))
-")
-POINTER_FILE="$EXPERIMENT_ROOT/.current_chunk_dir"
-rm -f "$POINTER_FILE"
-
+# chunk_runner.py launches the driver script (srun, or the experiment's
+# `launcher`) and waits for it. Exit codes: 0 chunk done, 1 nothing to do
+# (complete, paused or already running), anything else a failure.
 python chunk_runner.py --experiment-id "$EXPERIMENT_ID" --slurm-job-id "$SLURM_JOB_ID" &
 RUNNER_PID=$!
-
-# Wait for chunk_runner.py to tell us which directory it's using (written
-# right before it launches the driver script), then tail that chunk's
-# log for NaN for as long as the runner is alive.
-for _ in $(seq 1 60); do
-    [ -s "$POINTER_FILE" ] && break
-    sleep 1
-done
-LOGFILE="$(cat "$POINTER_FILE" 2>/dev/null)/getm-0000.log"
 
 # OCEANICU_HEALTH_CHECK (optional): the CPU-stall health-check watchdog
 # is ON HOLD, OFF by default -- set (any non-empty value) to turn it on

@@ -673,7 +673,10 @@ def cmd_kill(args: argparse.Namespace) -> int:
                   f"can't scancel it. (Use 'remove --force' instead if you just want the DB row gone.)",
                   file=sys.stderr)
             return 1
-        ok, msg = rt.cancel_slurm_job(job_id)
+        if args.dry_run:
+            ok, msg = True, "dry run, not cancelled"
+        else:
+            ok, msg = rt.cancel_slurm_job(job_id)
         if ok:
             print(f"scancel {job_id}: {msg}")
         else:
@@ -1038,6 +1041,9 @@ def cmd_resume(args: argparse.Namespace) -> int:
 def cmd_delay_all(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         path = rt.chunk_delay_sentinel_path(conn)
+        if args.dry_run:
+            print(f"[dry-run] would {'remove' if args.clear else f'write {args.seconds}s to'} {path}")
+            return 0
         if args.clear:
             Path(path).unlink(missing_ok=True)
             print(f"cleared {path} -- resubmissions proceed immediately again")
@@ -1061,7 +1067,8 @@ def cmd_rerun(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         try:
             n = rt.rerun_from(conn, args.experiment_id, chunk_index=chunk_index, user=rt._current_user(),
-                               note=args.note, force=args.force, restart_time=args.restart_time)
+                               note=args.note, force=args.force, restart_time=args.restart_time,
+                               cancel_jobs=not args.dry_run)
         except (KeyError, ValueError) as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
@@ -1085,7 +1092,7 @@ def cmd_reset(args: argparse.Namespace) -> int:
     with rt.connect(args.db) as conn:
         try:
             n = rt.rerun_from(conn, args.experiment_id, chunk_index=0, user=rt._current_user(),
-                               note=args.note, force=args.force)
+                               note=args.note, force=args.force, cancel_jobs=not args.dry_run)
         except (KeyError, ValueError) as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
@@ -1213,6 +1220,14 @@ def _add_common(sp: argparse.ArgumentParser) -> None:
                          "\"Command queue\"")
 
 
+def _date_arg(value: str) -> str:
+    """argparse type for registry dates: exactly YYYY-MM-DD, the only form
+    chunk_runner._parse_date accepts and the registry compares as strings."""
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        raise argparse.ArgumentTypeError(f"{value!r} is not a YYYY-MM-DD date")
+    return value
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--db", default=None, help="override the SQLite registry path")
@@ -1268,8 +1283,8 @@ def main() -> int:
                          "production path when adding from elsewhere")
     a.add_argument("--script", required=True)
     a.add_argument("--config", required=True)
-    a.add_argument("--initial-date", required=True, metavar="YYYY-MM-DD")
-    a.add_argument("--stop-date", required=True, metavar="YYYY-MM-DD")
+    a.add_argument("--initial-date", required=True, metavar="YYYY-MM-DD", type=_date_arg)
+    a.add_argument("--stop-date", required=True, metavar="YYYY-MM-DD", type=_date_arg)
     a.add_argument("--data-roots-file", default=_EXPERIMENT_DEFAULTS["data_roots_file"])
     a.add_argument("--chunk-kind", default=_EXPERIMENT_DEFAULTS["chunk_kind"], choices=["annual", "monthly", "daily"])
     a.add_argument("--chunk-multiplier", type=int, default=_EXPERIMENT_DEFAULTS["chunk_multiplier"])
@@ -1419,11 +1434,11 @@ def main() -> int:
 
     sd = sub.add_parser("set-stop-date"); _add_common(sd); sd.set_defaults(func=cmd_set_stop_date)
     sd.add_argument("--experiment-id", required=True)
-    sd.add_argument("--stop-date", required=True, metavar="YYYY-MM-DD")
+    sd.add_argument("--stop-date", required=True, metavar="YYYY-MM-DD", type=_date_arg)
 
     ssd = sub.add_parser("set-start-date"); _add_common(ssd); ssd.set_defaults(func=cmd_set_start_date)
     ssd.add_argument("--experiment-id", required=True)
-    ssd.add_argument("--start-date", required=True, metavar="YYYY-MM-DD")
+    ssd.add_argument("--start-date", required=True, metavar="YYYY-MM-DD", type=_date_arg)
 
     sdrf = sub.add_parser(
         "set-data-roots-file",
@@ -1523,10 +1538,11 @@ def main() -> int:
             return 1
         return _queue_command(Path(args.queue), args)
 
-    if args.cmd == "submit-chunk" and args.dry_run:
-        print("ERROR: --dry-run doesn't work for submit-chunk -- it calls sbatch directly, "
-              "with no registry involved to safely redirect at a scratch copy the way every "
-              "other command's --dry-run does. Running this WOULD submit a real job.",
+    # --dry-run only redirects the registry to a scratch copy; these commands
+    # act outside the registry (sbatch, git pull, rsync), so they would run for real.
+    if args.cmd in ("submit-chunk", "pull-code", "stage") and args.dry_run:
+        print(f"ERROR: --dry-run doesn't work for {args.cmd} -- it acts outside the registry "
+              f"(sbatch / git pull / rsync), so running it WOULD do the real thing.",
               file=sys.stderr)
         return 1
 

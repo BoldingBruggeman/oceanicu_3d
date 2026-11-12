@@ -73,9 +73,22 @@ def _expand_year_glob(pattern: str, start: Optional[str], stop: Optional[str]) -
         return [_resolve_data_path(pattern)]
     if not start or not stop:
         return sorted(glob.glob(_resolve_data_path(pattern)))
-    start_year = datetime.datetime.fromisoformat(start).year
+    start_dt = datetime.datetime.fromisoformat(start)
+    start_year = start_dt.year
     stop_dt = datetime.datetime.fromisoformat(stop)
     stop_year = max(stop_dt.year, start_year)
+
+    def _buffer(year: int) -> Optional[str]:
+        path = _resolve_data_path(pattern.replace("????", str(year)))
+        if glob.has_magic(path):
+            matches = sorted(glob.glob(path))
+            if len(matches) > 1:
+                raise ValueError(
+                    f"expand_year_glob: {path!r} matches {len(matches)} "
+                    f"files {matches!r} -- ambiguous, refusing to guess which one"
+                )
+            return matches[0] if matches else None
+        return path if os.path.exists(path) else None
 
     def _resolve_wildcard(path: str) -> str:
         if not glob.has_magic(path):
@@ -92,19 +105,11 @@ def _expand_year_glob(pattern: str, start: Optional[str], stop: Optional[str]) -
         _resolve_wildcard(_resolve_data_path(pattern.replace("????", str(year))))
         for year in range(start_year, stop_year + 1)
     ]
-    if stop_dt.month == 12:
-        buffer_path = _resolve_data_path(pattern.replace("????", str(stop_year + 1)))
-        if glob.has_magic(buffer_path):
-            matches = sorted(glob.glob(buffer_path))
-            if len(matches) > 1:
-                raise ValueError(
-                    f"expand_year_glob: {buffer_path!r} matches {len(matches)} "
-                    f"files {matches!r} -- ambiguous, refusing to guess which one"
-                )
-            if matches:
-                paths.append(matches[0])
-        elif os.path.exists(buffer_path):
-            paths.append(buffer_path)
+    # Same buffer years as pygetm_config.loader.expand_year_glob.
+    if start_dt.month == 1 and (before := _buffer(start_year - 1)):
+        paths.insert(0, before)
+    if stop_dt.month == 12 and (after := _buffer(stop_year + 1)):
+        paths.append(after)
     return paths
 
 
@@ -209,48 +214,45 @@ def _list_meteo_files(config: dict, start: str, stop: str) -> list:
 
 
 def _list_river_files(config: dict, start: str, stop: str) -> list:
-    """Mirrors driver/scripts/rivers.py's add_rivers/set_river_data
-    folder/filename logic -- each whole file's own coverage is checked
-    by the caller (_time_coverage_ok), not here.
+    """Mirrors driver/scripts/rivers.py: add_rivers reads river positions from
+    river_discharge's folder/file; set_river_data always reads flow (and
+    nutrients) from the EMORID record ${RIVER_FOLDER}/$RIVER_FILE and, for
+    source CMIP6, splices the projection file (the same folder/file) after the
+    record's last day and adds the monthly nutrient climatology.
 
-    For river_discharge.source == "CMIP6" specifically, mirrors
-    set_river_data's own historical/scenario splice (same 2014/2015
-    boundary as meteo.py): if [start, stop] reaches back before 2015,
-    the real EMORID historical file (${RIVER_FOLDER}/RIVER_FILE, NOT
-    ${RIVER_FOLDER_CMIP6}) is ALSO listed -- otherwise the checker would
-    keep reporting a coverage gap that set_river_data's own splice
-    already closes for real.
-    Returns [(description, path, found, var)] -- both the projection
-    and the real EMORID file store discharge as "Q"."""
+    Returns [(description, path, found, var, in_coverage)]: in_coverage marks
+    the time series whose combined span must cover [start, stop]."""
     rcfg = config.get("river_discharge")
     if not rcfg:
         return []
+    noleap = config.get("runtime", {}).get("calendar") == "noleap"
     folder = Path(_resolve_data_path(rcfg["folder"]))
     if rcfg.get("folder_template"):
         folder = folder / rcfg["folder_template"].format(
             model=rcfg.get("model", ""), scenario=rcfg.get("scenario", "")
         )
     filename = rcfg["file"].format(model=rcfg.get("model", ""), scenario=rcfg.get("scenario", ""))
-    # river_discharge.CMIP6.daily -- mirrors driver/scripts/rivers.py's
-    # add_rivers/set_river_data (same flag, same "_daily" insertion before
-    # the noleap suffix) so this checker doesn't report a stale gap once a
-    # config switches to the daily file.
     if rcfg.get("daily"):
         filename = filename.removesuffix(".nc") + "_daily.nc"
-    if config.get("runtime", {}).get("calendar") == "noleap":
+    if noleap:
         filename = filename.removesuffix(".nc") + "_noleap.nc"
     path = folder / filename
-    results = [("river discharge", str(path), path.is_file(), "Q")]
 
-    HIST_CUTOFF_YEAR = 2014
-    if rcfg.get("source") == "CMIP6" and datetime.datetime.fromisoformat(start).year <= HIST_CUTOFF_YEAR:
-        hist_folder = Path(_resolve_data_path("${RIVER_FOLDER}"))
-        hist_filename = os.environ.get("RIVER_FILE", "EMORID_1993_2024_conc_nemo_TALK_DIC.nc")
-        if config.get("runtime", {}).get("calendar") == "noleap":
-            hist_filename = hist_filename.removesuffix(".nc") + "_noleap.nc"
-        hist_path = hist_folder / hist_filename
-        results.append(("river discharge (historical)", str(hist_path), hist_path.is_file(), "Q"))
+    hist_folder = Path(_resolve_data_path("${RIVER_FOLDER}"))
+    hist_filename = os.environ.get("RIVER_FILE", "EMORID_1993_2024_conc_nemo_TALK_DIC.nc")
+    if noleap:
+        hist_filename = hist_filename.removesuffix(".nc") + "_noleap.nc"
+    hist_path = hist_folder / hist_filename
 
+    use_cmip6 = rcfg.get("source") == "CMIP6"
+    results = [("river data (EMORID)", str(hist_path), hist_path.is_file(), "Q", True)]
+    if use_cmip6:
+        results.append(("river positions + projected flow", str(path), path.is_file(), "Q", True))
+        clim_period = rcfg.get("nutrient_climatology", "5yr")
+        clim_path = hist_folder / f"EMORID_nutrient_climatology_monthly_{clim_period}.nc"
+        results.append(("river nutrient climatology", str(clim_path), clim_path.is_file(), None, False))
+    elif path != hist_path:
+        results.append(("river positions", str(path), path.is_file(), None, False))
     return results
 
 
@@ -286,7 +288,8 @@ def _resolve_fabm_yaml(fabm_yaml_path: str, fabm_folder: Path) -> str:
     return str(fabm_folder / fabm_yaml_path)
 
 
-def _list_fabm_files(config: dict, start: str, stop: str, fabm_yaml_path: Optional[str]) -> list:
+def _list_fabm_files(config: dict, start: str, stop: str, fabm_yaml_path: Optional[str],
+                     fresh_start: bool = True) -> list:
     """Mirrors driver/scripts/fabm.py's configure_fabm -- the FABM
     *dependency* files (gelbstoff, atmospheric CO2/N2O, N-deposition,
     fish/fishing-pressure), plus boundaries.fabm's own WOA/CMEMS tracer
@@ -327,26 +330,25 @@ def _list_fabm_files(config: dict, start: str, stop: str, fabm_yaml_path: Option
     _add("fabm dependency", "FABM gelbstoff absorption", fabm_folder / "ADY_gle.nc",
          "gelbstoff_absorption_satellite")
 
-    # Atmospheric CO2/N2O (input4MIPs) -- same co2_scenario coupling as
-    # fabm.py's own CO2/N2O dependencies (boundaries.fabm's own scenario,
-    # truthy-checked directly, not gated on boundaries.fabm.source ==
-    # "CMIP6" -- matches fabm.py exactly, see that function's own
-    # comment for why).
+    # Atmospheric CO2/N2O and N-deposition -- as fabm.py's configure_fabm:
+    # scenario = boundaries.fabm.scenario, else fabm.ghg_scenario; historical
+    # 15deg GHG files always, spliced with the scenario's when there is one.
     fabm_cfg_boundaries = config.get("boundaries", {}).get("fabm") or {}
-    co2_scenario = fabm_cfg_boundaries.get("scenario")
-    if co2_scenario:
-        ghg_folder = Path(_resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
-        _add("fabm dependency", f"FABM atmospheric CO2 ({co2_scenario})",
-             ghg_folder / f"co2_{co2_scenario}.nc", "mole_fraction_of_carbon_dioxide_in_air")
-        _add("fabm dependency", f"FABM atmospheric N2O ({co2_scenario})",
-             ghg_folder / f"n2o_{co2_scenario}.nc", "mole_fraction_of_nitrous_oxide_in_air")
+    co2_scenario = fabm_cfg_boundaries.get("scenario") or fabm_cfg.get("ghg_scenario")
+    if not co2_scenario and datetime.datetime.fromisoformat(stop) > datetime.datetime(2015, 1, 1):
+        checks.append(InputCheck(
+            "fabm dependency", "FABM GHG/N-deposition scenario", "(config)", False,
+            "no boundaries.fabm scenario or fabm.ghg_scenario, but the run goes past 2014 -- "
+            "configure_fabm will refuse to start",
+        ))
+    suffix = "_noleap" if config.get("runtime", {}).get("calendar") == "noleap" else ""
+    ghg_folder = Path(_resolve_data_path("${GHG_CONCENTRATION_FOLDER}"))
+    for gas, var in (("co2", "mole_fraction_of_carbon_dioxide_in_air"),
+                     ("n2o", "mole_fraction_of_nitrous_oxide_in_air")):
+        for exp in ("historical", *([co2_scenario] if co2_scenario else [])):
+            _add("fabm dependency", f"FABM atmospheric {gas.upper()} ({exp})",
+                 ghg_folder / f"{gas}_{exp}_15deg{suffix}.nc", var)
 
-    # N-deposition -- same historical/scenario splice (NDEP_HIST_CUTOFF_
-    # YEAR=2014) as fabm.py's own _ndep_scenario_paths, restricted to
-    # [start, stop] via _expand_year_glob rather than a bare `????` glob
-    # (same reasoning as _list_meteo_files above). Falls back to the old
-    # unscenarioed climatology otherwise, exactly matching fabm.py's own
-    # else branch.
     NDEP_HIST_CUTOFF_YEAR = 2014
     start_year = datetime.datetime.fromisoformat(start).year
     stop_year = datetime.datetime.fromisoformat(stop).year
@@ -357,14 +359,17 @@ def _list_fabm_files(config: dict, start: str, stop: str, fabm_yaml_path: Option
             checks.append(InputCheck("fabm dependency", f"FABM N-deposition{desc_suffix}", pattern, False, "no files matched"))
             return
         for m in matches:
-            _add("fabm dependency", f"FABM N-deposition N3_flux{desc_suffix}", m, "N3_flux")
-            _add("fabm dependency", f"FABM N-deposition N4_flux{desc_suffix}", m, "N4_flux")
+            for var in ("N3_flux_ff", "N4_flux_ff"):
+                _add("fabm dependency", f"FABM N-deposition {var}{desc_suffix}", m, var)
 
     if co2_scenario:
+        hist_pattern = str(fabm_folder / "Ndep/AMM7_Ndep_BC-EMEP_historical_y????.nc")
         if start_year <= NDEP_HIST_CUTOFF_YEAR:
             hist_stop = stop if stop_year <= NDEP_HIST_CUTOFF_YEAR else f"{NDEP_HIST_CUTOFF_YEAR}-12-31"
-            pattern = str(fabm_folder / "Ndep/AMM7_Ndep_BC-EMEP_historical_y????.nc")
-            _ndep_segment(" (historical)", pattern, start, hist_stop)
+            _ndep_segment(" (historical)", hist_pattern, start, hist_stop)
+        elif datetime.datetime.fromisoformat(start) == datetime.datetime(NDEP_HIST_CUTOFF_YEAR + 1, 1, 1):
+            _ndep_segment(" (historical)", hist_pattern, f"{NDEP_HIST_CUTOFF_YEAR}-01-01",
+                          f"{NDEP_HIST_CUTOFF_YEAR}-12-31")
         if stop_year > NDEP_HIST_CUTOFF_YEAR:
             scen_start = start if start_year > NDEP_HIST_CUTOFF_YEAR else f"{NDEP_HIST_CUTOFF_YEAR + 1}-01-01"
             pattern = str(fabm_folder / f"Ndep/AMM7_Ndep_BC-EMEP_{co2_scenario}_y????.nc")
@@ -405,12 +410,27 @@ def _list_fabm_files(config: dict, start: str, stop: str, fabm_yaml_path: Option
 
     # boundaries.fabm's own WOA/CMEMS tracer IC files -- mirrors fabm.py's
     # own "WOA/CMEMS-sourced FABM tracer initial conditions" block.
+    # Mirrors hydrography.py's set_hydrography_ic: skipped entirely when
+    # fabm.restart_file seeds the state; CMEMS reads ic_folder/ic_file/
+    # ic_variable, WOA the boundary file/variable; tracers without one keep
+    # their fabm.yaml initial value.
     boundaries_fabm_cfg = config.get("boundaries", {}).get("fabm") or {}
-    if boundaries_fabm_cfg.get("source") in ("WOA", "CMEMS"):
-        ic_folder = Path(_resolve_data_path(boundaries_fabm_cfg["folder"]))
+    if not fresh_start:
+        pass  # a continuation chunk loads its state from the pygetm restart
+    elif fabm_cfg.get("restart_file"):
+        _add("fabm dependency", "FABM restart IC", _resolve_data_path(fabm_cfg["restart_file"]), None,
+             expect_time=False)
+    elif boundaries_fabm_cfg.get("source") in ("WOA", "CMEMS"):
+        is_cmems = boundaries_fabm_cfg["source"] == "CMEMS"
+        ic_folder = Path(_resolve_data_path(
+            boundaries_fabm_cfg["ic_folder"] if is_cmems and boundaries_fabm_cfg.get("ic_folder")
+            else boundaries_fabm_cfg["folder"]))
         for tracer, spec in (boundaries_fabm_cfg.get("tracers") or {}).items():
-            _add("fabm dependency", f"FABM boundary IC {tracer}", ic_folder / spec["file"],
-                 spec.get("variable"), expect_time=False)
+            ic_file = spec.get("ic_file") if is_cmems else spec.get("file")
+            ic_var = spec.get("ic_variable") if is_cmems else spec.get("variable")
+            if ic_file and ic_var:
+                _add("fabm dependency", f"FABM tracer IC {tracer}", ic_folder / ic_file, ic_var,
+                     expect_time=False)
 
     return checks
 
@@ -716,12 +736,12 @@ def check_generated_script(
     req_start_t, req_stop_t = _as_tuple(req_start), _as_tuple(req_stop)
     river_reports = []
     river_bounds = []
-    for desc, path, found, var in river_files:
+    for desc, path, found, var, in_coverage in river_files:
         if not found:
             river_reports.append((desc, path, False, "not found"))
             continue
-        ok, detail = _check_file(path, var=var, expect_time=True)
-        if ok:
+        ok, detail = _check_file(path, var=var, expect_time=in_coverage)
+        if ok and in_coverage:
             bounds = _read_time_bounds(path)
             if bounds:
                 cov_start, cov_stop = bounds
@@ -742,8 +762,9 @@ def check_generated_script(
             if cur_start > prev_stop:
                 union_ok = False
                 break
+    covered = {path for _, path, _, _, in_coverage in river_files if in_coverage}
     for desc, path, file_ok, detail in river_reports:
-        ok = file_ok and (union_ok if river_bounds else True)
+        ok = file_ok and (union_ok if (river_bounds and path in covered) else True)
         if file_ok and not ok:
             detail += f" -- combined coverage does not fully cover requested {req_start}..{req_stop}"
         inputs.append(InputCheck("river", desc, path, ok, detail))
@@ -788,8 +809,9 @@ def check_generated_script(
     # INACTIVE alternative.
     fabm_yaml_for_mizer_check = fabm or (config.get("fabm") or {}).get("file")
     try:
-        inputs.extend(_list_fabm_files(config, start, stop, fabm_yaml_for_mizer_check))
-    except RuntimeError as exc:
+        inputs.extend(_list_fabm_files(config, start, stop, fabm_yaml_for_mizer_check,
+                                       fresh_start=load_restart is None))
+    except (RuntimeError, ValueError, KeyError) as exc:
         inputs.append(InputCheck("fabm dependency", "fabm.folder", "(unresolved)", False, str(exc)))
 
     return CheckReport(inputs=inputs, outputs=outputs)

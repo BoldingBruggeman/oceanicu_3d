@@ -862,8 +862,7 @@ Add `--dry-run` to just print the command without executing it.
 
 Standalone mode has nothing to check it *through* -- no SLURM (`squeue`
 doesn't exist on most machines this runs on, e.g. bb-server1), no DB row
-(zero database interaction, by design), and no `.current_chunk_dir`
-pointer file either (that's only written in tracked mode). What you have
+(zero database interaction, by design). What you have
 instead is the OS process itself and whatever log the driver script
 writes -- both entirely local, no tooling required:
 

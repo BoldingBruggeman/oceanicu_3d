@@ -90,12 +90,14 @@ CHUNK_STATUSES = ("running", "done", "failed")
 EXIT_CODE_KILLED = -1  # oceanicu_experiments.py cmd_kill: human-requested scancel
 EXIT_CODE_ORPHANED = -2  # chunk_runner.py / reap_orphaned_chunks.py: SLURM job vanished without finish_chunk()
 EXIT_CODE_STALLED = -3  # health_check.py: SLURM job still alive but TotalCPU stopped advancing
+EXIT_CODE_RUNNER_ERROR = -4  # chunk_runner.py: its own exception after start_chunk() (e.g. srun missing, disk full)
 
 EXIT_CODE_LABELS = {
     0: "ok",
     EXIT_CODE_KILLED: "killed",
     EXIT_CODE_ORPHANED: "orphaned",
     EXIT_CODE_STALLED: "stalled",
+    EXIT_CODE_RUNNER_ERROR: "runner_error",
 }
 
 
@@ -1350,13 +1352,12 @@ def start_chunk(
         (experiment_id, chunk_index, start, stop, chunk_dir, load_restart, load_restart_time,
          save_restart, slurm_job_id, now, now, script_sha256, config_sha256, submitted_host),
     )
-    if load_restart_time:
-        # One-shot: this chunk just consumed the pending request, so it must
-        # not silently carry over to whatever chunk starts after this one.
-        conn.execute(
-            "UPDATE experiments SET next_load_restart_time = NULL WHERE experiment_id = ?",
-            (experiment_id,),
-        )
+    # One-shot: cleared on every chunk start, consumed or not, so a pending
+    # request never carries over to a later chunk (chunk 0 loads no restart).
+    conn.execute(
+        "UPDATE experiments SET next_load_restart_time = NULL WHERE experiment_id = ?",
+        (experiment_id,),
+    )
     # Unconditional -- always bump updated_at on a new chunk start, not just
     # the first chunk's not_started->in_progress transition. Previously
     # guarded by `AND status != 'in_progress'`, which meant every chunk
@@ -1614,7 +1615,7 @@ def get_latest_chunk_indices(conn: sqlite3.Connection) -> dict[str, int]:
 def rerun_from(
     conn: sqlite3.Connection, experiment_id: str, *, chunk_index: Optional[int] = None,
     user: Optional[str] = None, note: Optional[str] = None, force: bool = False,
-    restart_time: Optional[str] = None,
+    restart_time: Optional[str] = None, cancel_jobs: bool = True,
 ) -> int:
     """Rewind an experiment's tracked history so its NEXT execution redoes chunk
     *chunk_index* onward (dropping any record of it and everything after).
@@ -1678,8 +1679,11 @@ def rerun_from(
         # that happened by accident.
         running = get_running_chunk(conn, experiment_id)
         if running is not None and running["slurm_job_id"]:
-            ok, msg = cancel_slurm_job(running["slurm_job_id"])
-            scancel_note = f"scancel {running['slurm_job_id']}: {'ok' if ok else 'FAILED'} ({msg})"
+            if cancel_jobs:
+                ok, msg = cancel_slurm_job(running["slurm_job_id"])
+                scancel_note = f"scancel {running['slurm_job_id']}: {'ok' if ok else 'FAILED'} ({msg})"
+            else:  # oceanicu_experiments.py --dry-run
+                scancel_note = f"would scancel {running['slurm_job_id']} (dry run, not cancelled)"
     if chunk_index is None:
         row = conn.execute(
             "SELECT MAX(chunk_index) AS n FROM chunks WHERE experiment_id = ?", (experiment_id,)
@@ -1687,6 +1691,11 @@ def rerun_from(
         if row is None or row["n"] is None:
             return 0  # nothing has run yet, nothing to rewind
         chunk_index = int(row["n"])
+    if restart_time and chunk_index == 0:
+        raise ValueError(
+            "--restart-time needs a chunk that loads a restart -- chunk 0 starts from "
+            "initial conditions; rerun from chunk 1 or later instead."
+        )
 
     # Capture the hash of the chunk actually being redone BEFORE dropping
     # it: start_chunk's own script_changed/config_changed detection

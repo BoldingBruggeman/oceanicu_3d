@@ -24,11 +24,10 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
     `simstart.month - 1`) -- NOT pygetm-config's own `climatology: True`
     data_assignments flag, which means something different (keep cycling
     the whole 12-month pattern for the entire run, wrong for an initial
-    condition). (2) sim.density.convert_ts(sim.salt, sim.temp) -- pyGETM's
-    internal state is conservative temperature/absolute salinity, WOA/CMEMS
-    provide in-situ/practical values -- called for BOTH WOA and CMEMS,
-    matching cfg_ic.py's own code exactly (present in both real-data
-    branches, absent from "constant").
+    condition). (2) optional sim.density.convert_ts (hydrography.convert_ts)
+    -- pyGETM's state is conservative temperature/absolute salinity; turn it
+    on when the source files hold practical salinity and potential (CMEMS) or
+    in-situ (WOA) temperature.
 
     Masks out land points afterward (sim.temp/sim.salt set to
     pygetm.constants.FILL_VALUE where sim.T.mask == 0), matching cfg_ic.py's
@@ -108,7 +107,9 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
 
         sim.salt.set(pygetm.input.from_nc(salt_file, salt_var).isel(time=imonth), on_grid=False)
         sim.temp.set(pygetm.input.from_nc(temp_file, temp_var).isel(time=imonth), on_grid=False)
-        #sim.density.convert_ts(sim.salt, sim.temp)
+        if hydro.get("convert_ts"):
+            # WOA's t_an is in-situ temperature; CMEMS thetao is potential.
+            sim.density.convert_ts(sim.salt, sim.temp, in_situ=(source == "WOA"))
 
         sim.temp[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
         sim.salt[..., sim.T.mask == 0] = pygetm.constants.FILL_VALUE
@@ -210,18 +211,15 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
             target_ifaces: (nz_tgt+1,) DECREASING (surface first).
             Returns (nz_tgt, n_tracers).
 
-            Conservative remap of a per-layer-mean profile reduces to
-            interpolating the CUMULATIVE (depth-integrated) profile at the
-            target interfaces, then differencing and dividing by target layer
-            thickness -- exact for a piecewise-constant source, and needs no
-            bespoke overlap-integration code. A target layer extending beyond
-            the source's own depth range is clamped (constant extrapolation,
-            matching numpy.interp's own default) -- e.g. a shallower target
-            grid simply doesn't reach the source's deepest layers at all, which
-            is the physically correct outcome, not an error. nz_src and nz_tgt
-            need not match -- this interpolates on real depth, never on layer
-            index, so it works just as well for a genuine resolution change as
-            for a same-resolution depth/shape mismatch (per user, 2026-09-30).
+            Interpolates the cumulative (depth-integrated) source profile at
+            the target interfaces and divides each layer's content by the part
+            of it the source column covers: exact for a piecewise-constant
+            source. Outside the source's depth range the nearest source layer
+            is extended (constant extrapolation), so a target column reaching
+            higher or deeper than the source (e.g. a restart saved at another
+            tidal elevation) keeps the surface/bottom values instead of
+            getting zeros. Works on real depth, not layer index, so nz_src and
+            nz_tgt need not match.
             """
             src_thick = (source_ifaces[:-1] - source_ifaces[1:])[:, None]
             cum_src = np.concatenate(
@@ -229,18 +227,21 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
                 axis=0,
             )
             x_src = -source_ifaces  # increasing, required by searchsorted below
-            x_tgt = -target_ifaces
+            x_tgt = np.clip(-target_ifaces, x_src[0], x_src[-1])
             idx = np.clip(np.searchsorted(x_src, x_tgt, side="right") - 1, 0, len(x_src) - 2)
             x0, x1 = x_src[idx], x_src[idx + 1]
             with np.errstate(invalid="ignore", divide="ignore"):
                 frac = np.where(x1 > x0, (x_tgt - x0) / (x1 - x0), 0.0)
             cum_at_target = cum_src[idx] + frac[:, None] * (cum_src[idx + 1] - cum_src[idx])
-            cum_at_target[x_tgt <= x_src[0]] = cum_src[0]
-            cum_at_target[x_tgt >= x_src[-1]] = cum_src[-1]
-            tgt_thick = (target_ifaces[:-1] - target_ifaces[1:])[:, None]
-            tgt_content = cum_at_target[1:] - cum_at_target[:-1]
+            covered = (x_tgt[1:] - x_tgt[:-1])[:, None]
             with np.errstate(invalid="ignore", divide="ignore"):
-                return tgt_content / tgt_thick
+                out = (cum_at_target[1:] - cum_at_target[:-1]) / covered
+            # Layers entirely outside the source range: nearest source layer.
+            above = (-target_ifaces[1:] <= x_src[0])
+            below = (-target_ifaces[:-1] >= x_src[-1])
+            out[above] = source_vals[0]
+            out[below] = source_vals[-1]
+            return out
 
         source_vals = None
         benthic_vals = {}
@@ -600,9 +601,9 @@ def set_hydrography_ic(sim, domain, config: dict) -> None:
                     if is_cmems:
                         ic_filename = spec.get("ic_file")
                         ic_variable = spec.get("ic_variable")
-                    else:
-                        ic_filename = spec["file"]
-                        ic_variable = spec["variable"]
+                    else:  # constant / ZERO_GRADIENT tracers have no file
+                        ic_filename = spec.get("file")
+                        ic_variable = spec.get("variable")
                     if not ic_filename or not ic_variable:
                         continue
                     sim[tracer].set(

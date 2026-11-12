@@ -43,6 +43,7 @@ import socket
 import sqlite3
 import subprocess
 import sys
+import traceback
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
@@ -366,39 +367,6 @@ def _main_tracked(args: argparse.Namespace) -> int:
         chunk_name = f"{chunk_index:03d}_{start.strftime('%Y%m%d')}_{stop.strftime('%Y%m%d')}"
         chunk_dir = experiment_root / chunk_name
 
-        # Archive a pre-existing dir aside instead of silently overwriting
-        # it -- happens on a rerun (experiment_tracking.rerun_from only rewinds
-        # the DB, it never deletes files) or after a crash that never
-        # reached finish_chunk(). A previous attempt's logs are worth
-        # keeping for diagnosis, not clobbering.
-        if chunk_dir.exists():
-            stamp = datetime.now().strftime("%Y%m%dT%H%M%S")
-            archived = chunk_dir.with_name(chunk_dir.name + f".attempt-{stamp}")
-            print(f"{chunk_dir} already exists -- archiving aside as {archived.name}")
-            chunk_dir.rename(archived)
-        chunk_dir.mkdir(parents=True)
-
-        # simulation.gotm/simulation.fabm are bare, cwd-relative filenames
-        # in the generated script's own source (resolve_data_path('gotm.
-        # yaml')/('fabm_ersem.yaml'), no ${VAR} to resolve against
-        # experiment_root the way script/config/data_roots_file above just
-        # were) -- deliberate, "each run/chunk keeps its own physical copy,
-        # not a shared reference" (see driver/scripts/fabm.py's own
-        # comments). But the chunk subprocess below runs with cwd=
-        # chunk_dir, several levels below experiment_root -- a real,
-        # reported bug: gotm.yaml/fabm_ersem.yaml sitting only in
-        # experiment_root (where `stage`/pull_experiment_files.sh put
-        # them) are invisible from inside chunk_dir, so pygetm.simulation.
-        # Simulation's own GOTM(gotm) raised "Configuration file gotm.yaml
-        # does not exist" even though the file is right there one level
-        # up. Copied fresh into EVERY chunk_dir here, matching stage's own
-        # gotm.yaml/fabm*.yaml whitelist exactly -- missing entirely for a
-        # FABM-off experiment (glob matches nothing), not an error.
-        for name in ("gotm.yaml", *[p.name for p in experiment_root.glob("fabm*.yaml")]):
-            src = experiment_root / name
-            if src.is_file():
-                shutil.copy2(src, chunk_dir / name)
-
         load_restart = None
         load_restart_time = None
         if chunk_index > 0:
@@ -407,36 +375,28 @@ def _main_tracked(args: argparse.Namespace) -> int:
                 print(f"ERROR: chunk {chunk_index} has no completed predecessor to load a restart from.",
                       file=sys.stderr)
                 return 2
-            # Pending, one-shot request (see experiments.next_load_restart_time's
-            # own schema comment) -- e.g. from `rerun --restart-time`, to resume
-            # from a specific snapshot in a restart file that holds more than
-            # one, instead of the file's own default (its last snapshot).
-            # start_chunk consumes and clears it below once this chunk's row
-            # is actually inserted.
+            # One-shot request (e.g. `rerun --restart-time`); start_chunk clears it.
             load_restart_time = experiment.get("next_load_restart_time")
 
         setup_name = Path(experiment["config"]).stem
         save_restart = str(chunk_dir / f"restart_{setup_name}_{stop.strftime('%Y%m%d')}.nc")
+        run_kwargs = dict(
+            script=experiment["script"],
+            start_iso=start.strftime("%Y-%m-%dT%H:%M:%S"), stop_iso=stop.strftime("%Y-%m-%dT%H:%M:%S"),
+            save_restart=save_restart, load_restart=load_restart, data_roots_file=experiment["data_roots_file"],
+            chunk_dir=chunk_dir, launcher=experiment["launcher"] or "srun", np=experiment["np"],
+            fabm=experiment.get("fabm"), load_restart_time=load_restart_time,
+        )
 
         print(f"{args.experiment_id}  chunk {chunk_index:03d}  {start} -> {stop}")
         if args.dry_run:
-            _run_one(
-                script=experiment["script"],
-                start_iso=start.strftime("%Y-%m-%dT%H:%M:%S"), stop_iso=stop.strftime("%Y-%m-%dT%H:%M:%S"),
-                save_restart=save_restart, load_restart=load_restart, data_roots_file=experiment["data_roots_file"],
-                chunk_dir=chunk_dir, launcher=experiment["launcher"] or "srun", np=experiment["np"], dry_run=True,
-                fabm=experiment.get("fabm"), load_restart_time=load_restart_time,
-            )
-            chunk_dir.rmdir()  # dry-experiment shouldn't leave an empty dir behind
+            # Before any filesystem change: a dry run must leave the experiment untouched.
+            _run_one(**run_kwargs, dry_run=True)
             return 0
 
-        # The running-chunk check above and this insert aren't wrapped in
-        # one atomic transaction, so two processes starting at the exact
-        # same instant could both pass the check and then collide here
-        # (experiment_id, chunk_index) is the primary key. Rare in practice (a
-        # new chunk only ever starts via one sbatch resubmission at a
-        # time), but fail cleanly rather than crash if it ever happens --
-        # whichever process loses just backs off, the winner proceeds.
+        # The running-chunk check above and this insert aren't one transaction;
+        # (experiment_id, chunk_index) is the primary key, so a second process
+        # racing this one loses here and backs off before touching any files.
         try:
             rt.start_chunk(
                 conn, experiment_id=args.experiment_id, chunk_index=chunk_index,
@@ -449,40 +409,42 @@ def _main_tracked(args: argparse.Namespace) -> int:
         except sqlite3.IntegrityError:
             print(f"{args.experiment_id}: chunk {chunk_index} was just claimed by another process "
                   f"-- backing off.", file=sys.stderr)
-            chunk_dir.rmdir()
             return 1
 
-        # Pointer file so a wrapper (e.g. run_chunk.slurm) that needs this
-        # chunk's log path to tail it live doesn't have to guess or parse
-        # stdout -- it can just wait for this file and read it. Written
-        # only AFTER start_chunk() actually wins the DB race (not before
-        # it, as this used to be): the double-submit race above means two
-        # processes could each write this same experiment-wide pointer
-        # file for their OWN chunk_dir before either one knows who wins --
-        # whoever wrote last would leave the pointer aimed at the LOSER's
-        # chunk_dir, which then gets rmdir()'d a few lines up, leaving the
-        # wrapper tailing a directory that no longer exists even though
-        # the winner's chunk is the one actually running.
-        (experiment_root / ".current_chunk_dir").write_text(str(chunk_dir) + "\n")
-
-    # DB connection closed while the (potentially long-running) simulation
-    # executes, so it isn't held open across the whole chunk.
-    result = _run_one(
-        script=experiment["script"],
-        start_iso=start.strftime("%Y-%m-%dT%H:%M:%S"), stop_iso=stop.strftime("%Y-%m-%dT%H:%M:%S"),
-        save_restart=save_restart, load_restart=load_restart, data_roots_file=experiment["data_roots_file"],
-        chunk_dir=chunk_dir, launcher=experiment["launcher"] or "srun", np=experiment["np"], dry_run=False,
-        fabm=experiment.get("fabm"), load_restart_time=load_restart_time,
-    )
-    assert result is not None  # dry_run=False above always returns a CompletedProcess
+    # From here on the chunk row exists: any failure must be recorded on it,
+    # or it stays 'running' until the orphan reaper finds it days later.
+    try:
+        _prepare_chunk_dir(chunk_dir, experiment_root)
+        result = _run_one(**run_kwargs, dry_run=False)
+        assert result is not None  # dry_run=False always returns a CompletedProcess
+        exit_code = result.returncode
+    except Exception:
+        traceback.print_exc()
+        exit_code = rt.EXIT_CODE_RUNNER_ERROR
 
     with rt.connect(args.db) as conn:
         rt.finish_chunk(
             conn, experiment_id=args.experiment_id, chunk_index=chunk_index,
-            exit_code=result.returncode, nan_detected=False, user=user,
+            exit_code=exit_code, nan_detected=False, user=user,
         )
 
-    return 0 if result.returncode == 0 else 2
+    return 0 if exit_code == 0 else 2
+
+
+def _prepare_chunk_dir(chunk_dir: Path, experiment_root: Path) -> None:
+    """Create chunk_dir, archiving a previous attempt's dir aside (a rerun only
+    rewinds the DB), and copy gotm.yaml/fabm*.yaml into it: the generated
+    script opens them relative to its cwd, which is chunk_dir."""
+    if chunk_dir.exists():
+        stamp = datetime.now().strftime("%Y%m%dT%H%M%S")
+        archived = chunk_dir.with_name(chunk_dir.name + f".attempt-{stamp}")
+        print(f"{chunk_dir} already exists -- archiving aside as {archived.name}")
+        chunk_dir.rename(archived)
+    chunk_dir.mkdir(parents=True)
+    for name in ("gotm.yaml", *[p.name for p in experiment_root.glob("fabm*.yaml")]):
+        src = experiment_root / name
+        if src.is_file():
+            shutil.copy2(src, chunk_dir / name)
 
 
 def main() -> int:
@@ -523,10 +485,16 @@ def main() -> int:
     args = p.parse_args()
 
     if args.experiment_id:
+        # Exit 1 means "nothing to do" to every wrapper (run_chunk.slurm,
+        # chunk_chain.py, run_chunks_local.py) -- Python's own exit status for
+        # an uncaught exception is also 1, so every error must map to 2.
         try:
             return _main_tracked(args)
         except RuntimeError as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
+            return 2
+        except Exception:
+            traceback.print_exc()
             return 2
 
     required = ["script", "start", "stop"]

@@ -130,14 +130,27 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                 "path/to/file.py:function_name implementing this source's real "
                 "initial-condition attachment (mirrors cfg_ic.py's own create() -- "
                 "a monthly-climatology-index pick, `.isel(time=imonth)`, not "
-                "expressible as a data_assignments entry, plus a conditional "
-                "density conversion, sim.density.convert_ts -- see "
+                "expressible as a data_assignments entry, plus the optional "
+                "density conversion, convert_ts -- see "
                 "pygetm_config.loader.run_hydrography_data_script's own "
                 "docstring). Only runs when NOT loading from a restart. Same "
                 "convention as river_discharge.data_script/meteo.data_script/"
                 "PYGETM_CONFIG_PROVIDERS. 'constant' hydrography doesn't need "
                 "this -- it's plain data_assignments (simulation.temp/"
                 "simulation.salt, kind=constant), no Python at all."
+            ),
+            importance=Importance.BASIC,
+        ),
+        ParameterSpec(
+            name="convert_ts",
+            type=TypeRef(kind="scalar", scalar_type="bool"),
+            default=False,
+            help=(
+                "convert the initial T/S to pyGETM's conservative temperature and "
+                "absolute salinity (sim.density.convert_ts) after reading them. "
+                "Turn on when the files hold practical salinity and potential "
+                "(CMEMS) or in-situ (WOA) temperature; leave off when they are "
+                "already CT/SA."
             ),
             importance=Importance.BASIC,
         ),
@@ -1473,7 +1486,13 @@ def derive_data_assignments(config: dict) -> list[dict]:
                 ("pml_trend", "CMIP6"): "bio_carbon_pml_trend_20100101_20141231.nc",
                 ("pml_trend", "CMEMS"): "bio_carbon_pml_trend_20100101_20240728.nc",
             }.get((_dic_ta_historical_method, boundaries_fabm_source))
-            if boundaries_fabm_source == "CMEMS" and _dic_ta_hist_file is None:
+            # The bridge is only read for dissic/talk tracers, and not at all
+            # when CMEMS is cycled as a climatology (no dated gap to fill).
+            _needs_dic_ta_bridge = not _fabm_grid_kwargs["climatology"] and any(
+                "constant" not in _spec and _spec.get("variable") in ("dissic", "talk")
+                for _spec in _fabm_tracers.values()
+            )
+            if boundaries_fabm_source == "CMEMS" and _dic_ta_hist_file is None and _needs_dic_ta_bridge:
                 # cycled_climatology's own CMEMS-range (2010-01-01 to
                 # 2024-07-28) equivalent does not exist -- that method's
                 # generator script was a since-deleted scratchpad, never
@@ -1522,14 +1541,13 @@ def derive_data_assignments(config: dict) -> list[dict]:
                     "dissic": _cmems_fabm_folder / _dic_ta_hist_file,
                     "talk": _cmems_fabm_folder / _dic_ta_hist_file,
                 }
-            elif boundaries_fabm_source == "CMEMS":
+            elif boundaries_fabm_source == "CMEMS" and _needs_dic_ta_bridge:
                 _fabm_hist_files = {
                     "dissic": _cmems_fabm_folder / _dic_ta_hist_file,
                     "talk": _cmems_fabm_folder / _dic_ta_hist_file,
                 }
             else:
-                # WOA -- no bridge file needed (global climatology, not a
-                # real time series with any coverage gap to bridge).
+                # WOA, or CMEMS without a dissic/talk bridge to read.
                 _fabm_hist_files = {}
             for _tracer, _spec in _fabm_tracers.items():
                 # boundary_condition_type is optional per-tracer -- defaults
