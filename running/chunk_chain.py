@@ -81,7 +81,9 @@ def run_chunk_once(experiment_id: str, db: Optional[str], python: str = sys.exec
     cmd = [python, str(SCRIPT_DIR / "chunk_runner.py"), "--experiment-id", experiment_id]
     if db:
         cmd += ["--db", db]
-    result = subprocess.run(cmd, cwd=str(SCRIPT_DIR))
+    # Own session: a terminal Ctrl-C reaches only this loop, which then stops
+    # after the chunk, not the chunk itself.
+    result = subprocess.run(cmd, cwd=str(SCRIPT_DIR), start_new_session=True)
     return result.returncode
 
 
@@ -135,9 +137,10 @@ def chain(experiment_id: str, db: Optional[str], *, rt=None, run_chunk=run_chunk
                     print(f"chunk_chain: picking up next queued experiment: {next_id}")
                     current = next_id
                     continue
-                # Not complete but nothing to do -> paused.
-                print(f"chunk_chain: {current}: paused -- not resubmitting. "
-                      f"'oceanicu_experiments.py resume --experiment-id {current}' to continue.")
+                # Not complete but nothing to do: paused, or another chunk is
+                # already running (chunk_runner printed which).
+                print(f"chunk_chain: {current}: nothing to do (paused, or a chunk is already "
+                      f"running -- see above) -- stopping.")
                 return 0
 
             # exit_code == 0: chunk succeeded -- check paused before looping

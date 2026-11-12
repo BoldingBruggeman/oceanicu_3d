@@ -91,7 +91,9 @@ def _advance_date(start, kind: str, multiplier: int, is_first_chunk: bool = Fals
         mm = mm - 1 + multiplier
         yy += mm // 12
         mm = mm % 12 + 1
-        return start.replace(year=yy, month=mm)
+        # Clamp e.g. Jan 31 + 1 month to the last day of February.
+        last_day = start.replace(year=yy, month=mm, day=1).daysinmonth
+        return start.replace(year=yy, month=mm, day=min(start.day, last_day))
     # annual: only the first chunk (is_first_chunk, start == initial_date)
     # realigns to the next 1 January; later chunks keep whatever offset
     # they inherited and advance by the full multiplier.

@@ -166,9 +166,11 @@ def set_river_data(sim, domain, config: dict) -> int:
             site_names = ds[name_var].values if name_var else range(ds.sizes["site"])
             name_to_index_per_ds.append({str(n): i for i, n in enumerate(site_names)})
 
+        missing = []
         for name, river in sim.rivers.items():
             indices = [nti.get(name) for nti in name_to_index_per_ds]
             if any(i is None for i in indices):
+                missing.append(name)
                 continue
             if not use_cmip6:
                 flow = datasets[0]["Q"].isel(site=indices[0])
@@ -183,6 +185,11 @@ def set_river_data(sim, domain, config: dict) -> int:
             river.flow.set(flow)
             river["salt"].set(0.0)
             n_set += 1
+        if missing:
+            sim.logger.warning(
+                f"set_river_data: no discharge data for {len(missing)} river(s) "
+                f"(not in every data file): {missing}"
+            )
 
         if getattr(sim, "fabm", None):
             # tracer -> variable in the record (already concentrations).

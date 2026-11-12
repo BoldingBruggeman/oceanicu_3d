@@ -32,6 +32,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import fcntl
 import os
 import shutil
 import subprocess
@@ -69,7 +70,8 @@ def _args_dict_to_cli(args_dict: dict) -> list[str]:
             if value:
                 cli.append(flag)
             continue
-        cli.extend([flag, str(value)])
+        # --flag=value, so a value starting with "-" isn't read as an option.
+        cli.append(f"{flag}={value}")
     return cli
 
 
@@ -325,6 +327,17 @@ def main() -> int:
         print("ERROR: --pull-from needs --queue-dir (it syncs a whole directory, "
               "not a single --queue file).", file=sys.stderr)
         return 1
+
+    # One run at a time (cron every 15 min, a slow pull can overlap the next):
+    # two runs could both apply the same pending command, e.g. a second sbatch.
+    lock_dir = Path(args.queue_dir) if args.queue_dir else Path(args.queue).parent
+    lock_file = open(lock_dir / ".get_commands.lock", "a")
+    try:
+        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        print(f"{_ts()}: another get_commands_and_update_registry.py run holds "
+              f"{lock_file.name} -- skipping this round.")
+        return 0
 
     if args.pull_from:
         pull_error = _pull(args.pull_from, Path(args.queue_dir))

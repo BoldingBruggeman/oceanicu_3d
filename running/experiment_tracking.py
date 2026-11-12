@@ -447,11 +447,7 @@ def connect(
     An `ssh://host/abs/path` value (or a RemoteSpec) yields a RemoteConn (see
     the module docstring); @_rpc_or_local functions accept either.
     """
-    env_path = os.environ.get("OCEANICU_EXPERIMENT_DB")
-    if db_path is None and not env_path:
-        raise RuntimeError("No database path given: pass --db, or set OCEANICU_EXPERIMENT_DB.")
-    resolved = db_path if db_path is not None else env_path
-    assert resolved is not None  # guaranteed by the check above
+    resolved = db_path if db_path is not None else resolve_db_path_arg(None)
     spec = _parse_db_spec(resolved)
     if isinstance(spec, RemoteSpec):
         yield RemoteConn(spec)
@@ -1078,6 +1074,7 @@ def next_chunk_start(conn: sqlite3.Connection, experiment_id: str, initial_date:
     own initial_date if nothing has run yet. This is the ONLY source of
     truth for 'what's next' -- no separately-stored plan to drift from
     reality."""
+    # MAX over YYYY-MM-DD strings is chronological.
     row = conn.execute(
         "SELECT MAX(stop) AS s FROM chunks WHERE experiment_id = ? AND status = 'done'",
         (experiment_id,),
@@ -1495,6 +1492,8 @@ def recompute_experiment_status(conn: sqlite3.Connection, experiment_id: str) ->
         new_status = "failed"
     else:
         done = [c for c in chunks if c["status"] == "done"]
+        # String comparison: valid because every date is stored as YYYY-MM-DD
+        # (oceanicu_experiments.py's _date_arg, chunk_runner's strftime).
         reached_end = bool(done) and done[-1]["stop"] >= experiment["stop_date"]
         any_warning = any(c["status"] == "failed" or c["nan_detected"] for c in chunks)
         if reached_end and not any_warning:

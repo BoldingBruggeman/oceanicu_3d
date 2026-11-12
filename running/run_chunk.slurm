@@ -98,11 +98,11 @@ _wait_for_experiment_chunk_delay() {
     local target_experiment_id="$1"
     local delay
     delay=$(python -c "
-import experiment_tracking as rt
+import sys, experiment_tracking as rt
 with rt.connect() as conn:
-    experiment = rt.get_experiment(conn, '$target_experiment_id')
+    experiment = rt.get_experiment(conn, sys.argv[1])
     print(experiment['chunk_delay_seconds'] if experiment else 0)
-")
+" "$target_experiment_id")
     if [ "$delay" -gt 0 ]; then
         echo "  $target_experiment_id: chunk_delay_seconds=$delay -- waiting before submitting..."
         sleep "$delay"
@@ -140,11 +140,12 @@ if [ $EXIT_CODE -ne 0 ]; then
 fi
 
 # --- self-chain for the next chunk --------------------------------------
+# The ID goes in as argv, never pasted into the Python source.
 STATUS=$(python -c "
-import experiment_tracking as rt
+import sys, experiment_tracking as rt
 with rt.connect() as conn:
-    print(rt.get_experiment(conn, '$EXPERIMENT_ID')['status'])
-")
+    print(rt.get_experiment(conn, sys.argv[1])['status'])
+" "$EXPERIMENT_ID")
 
 if [ "$STATUS" = "complete" ] || [ "$STATUS" = "complete_with_warnings" ]; then
     echo "$EXPERIMENT_ID: reached stop_date (status=$STATUS)."
@@ -167,11 +168,11 @@ with rt.connect() as conn:
 fi
 
 PAUSED=$(python -c "
-import experiment_tracking as rt
+import sys, experiment_tracking as rt
 with rt.connect() as conn:
-    experiment = rt.get_experiment(conn, '$EXPERIMENT_ID')
-    print(rt.is_paused(conn, '$EXPERIMENT_ID', experiment['experiment_root']))
-")
+    experiment = rt.get_experiment(conn, sys.argv[1])
+    print(rt.is_paused(conn, sys.argv[1], experiment['experiment_root']))
+" "$EXPERIMENT_ID")
 if [ "$PAUSED" = "True" ]; then
     echo "$EXPERIMENT_ID: paused -- not resubmitting. 'oceanicu_experiments.py resume --experiment-id $EXPERIMENT_ID' to continue."
     exit 0

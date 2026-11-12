@@ -169,3 +169,31 @@ def test_set_commands(env, cmd, value, column):
         assert str(rt.get_experiment(conn, EXP)[column]) == value
         last = conn.execute("SELECT event, detail FROM history ORDER BY rowid DESC LIMIT 1").fetchone()
     assert last["event"].endswith("_changed") and value in last["detail"]
+
+
+@pytest.mark.parametrize("start, calendar, mult, expected", [
+    ((2012, 1, 31), "standard", 1, (2012, 2, 29)),
+    ((2011, 1, 31), "noleap", 1, (2011, 2, 28)),
+    ((2012, 1, 15), "standard", 13, (2013, 2, 15)),
+    ((2012, 3, 31), "standard", 1, (2012, 4, 30)),
+])
+def test_monthly_advance_clamps_day(start, calendar, mult, expected):
+    import cftime
+    import chunk_runner
+    got = chunk_runner._advance_date(cftime.datetime(*start, calendar=calendar), "monthly", mult)
+    assert (got.year, got.month, got.day) == expected
+
+
+def test_get_commands_args_use_equals_form():
+    import get_commands_and_update_registry as gc
+    assert gc._args_dict_to_cli({"notes": "-- paused", "np": 4, "force": True, "x": None, "y": False}) == [
+        "--notes=-- paused", "--np=4", "--force"]
+
+
+def test_direct_add_allowed_only_for_real_tmp(monkeypatch):
+    import argparse
+    import oceanicu_experiments as oe
+    monkeypatch.delenv("OCEANICU_HPC", raising=False)
+    ns = lambda db: argparse.Namespace(dry_run=False, db=db)
+    assert oe._refuse_direct_add_unless_hpc(ns("/tmp/scratch.sqlite")) is None
+    assert oe._refuse_direct_add_unless_hpc(ns("/tmp/../data/real.sqlite")) is not None

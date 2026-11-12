@@ -484,7 +484,8 @@ def _refuse_direct_add_unless_hpc(args: argparse.Namespace) -> "str | None":
     if args.dry_run:
         return None
     db = rt.resolve_db_path_arg(args.db, required=False) or ""
-    if db.startswith("/tmp/"):
+    # Resolved: "/tmp/../data/real.sqlite" starts with "/tmp/" too.
+    if db and "://" not in db and Path(db).resolve().is_relative_to("/tmp"):
         return None
     if os.environ.get("OCEANICU_HPC") == "1":
         return None
@@ -1453,6 +1454,8 @@ def main() -> int:
 
     before = _snapshot(scratch_db)
     args.db = scratch_db  # redirect the command at the scratch copy only
+    # No backup git repo next to a throwaway scratch registry.
+    os.environ["OCEANICU_DB_BACKUP_EVERY_N_WRITES"] = "0"
 
     print(f"[dry-run] running: {args.cmd} ...")
     try:

@@ -330,12 +330,12 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
             name="file",
             type=TypeRef(kind="scalar", scalar_type="str"),
             help=(
-                "discharge NetCDF filename, relative to `folder`/`folder_template` "
-                "-- EMORID/JRC's own file for source=emorid, or "
-                "'river_flows_future_{scenario}.nc' for source=CMIP6 (scripts/"
-                "rivers.py formats {model}/{scenario} placeholders in this field "
-                "itself, same as `folder_template` does) -- see stats/cli/"
-                "river_projection.py's own output naming"
+                "river NetCDF filename, relative to `folder`/`folder_template`, used for "
+                "the river POSITIONS (and the threshold) -- an EMORID file for "
+                "source=emorid, 'river_flows_future_{scenario}.nc' for source=CMIP6 "
+                "({model}/{scenario} are filled in), which also gives the projected "
+                "flow. Discharge history and nutrients always come from "
+                "${RIVER_FOLDER}/$RIVER_FILE (data-roots file), for both sources."
             ),
             importance=Importance.BASIC,
         ),

@@ -231,7 +231,7 @@ def test_run_chunk_once_builds_expected_command(monkeypatch):
     class FakeCompleted:
         returncode = 0
 
-    def fake_run(cmd, cwd=None):
+    def fake_run(cmd, cwd=None, start_new_session=False):
         captured["cmd"] = cmd
         captured["cwd"] = cwd
         return FakeCompleted()
@@ -256,7 +256,7 @@ def test_run_chunk_once_omits_db_flag_when_none(monkeypatch):
     class FakeCompleted:
         returncode = 1
 
-    def fake_run(cmd, cwd=None):
+    def fake_run(cmd, cwd=None, start_new_session=False):
         captured["cmd"] = cmd
         return FakeCompleted()
 

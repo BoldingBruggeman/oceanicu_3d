@@ -14,10 +14,15 @@
 set -euo pipefail
 
 apply=false
+RELAY_HOST_OVERRIDE=""   # --relay-host, also honoured by regenerate_hugo.py
+prev=""
 for arg in "$@"; do
-    if [ "$arg" = "--apply" ]; then
-        apply=true
-    fi
+    case "$arg" in
+        --apply) apply=true ;;
+        --relay-host=*) RELAY_HOST_OVERRIDE="${arg#--relay-host=}" ;;
+    esac
+    [ "$prev" = "--relay-host" ] && RELAY_HOST_OVERRIDE="$arg"
+    prev="$arg"
 done
 
 # This script's directory is the oceanicu_3d checkout (kb and the shared
@@ -44,17 +49,20 @@ fi
 # Not on regen_hosts.yaml's relay_host: re-run the whole wrapper there, so
 # the lock below is taken where hugo_out lives. --no-relay forces a local run.
 relay_rc=0
-python3 - "$HUGO_REPO" "$@" <<'EOF' || relay_rc=$?
+python3 - "$HUGO_REPO" "$RELAY_HOST_OVERRIDE" "$@" <<'EOF' || relay_rc=$?
 import socket, subprocess, sys, yaml
 from pathlib import Path
 from ocean_data import host_config as oc
-repo, argv = sys.argv[1], sys.argv[2:]
-relay_host = yaml.safe_load(Path(repo, 'regen_hosts.yaml').read_text())['relay_host']
+repo, override, argv = sys.argv[1], sys.argv[2], sys.argv[3:]
+relay_host = override or yaml.safe_load(Path(repo, 'regen_hosts.yaml').read_text())['relay_host']
 if socket.gethostname() == relay_host or '--no-relay' in argv:
     sys.exit(10)
+oc_cfg = oc.load_host_config('oceanicu')
+if override:
+    oc_cfg = {**oc_cfg, 'relay_host': override}
 try:
     relayed = oc.relay_if_needed(
-        oc.load_host_config('oceanicu'), argv,
+        oc_cfg, argv,
         repo_key='OceanICU/oceanicu_3d', entry_point='./regen_and_deploy.sh',
     )
 except subprocess.CalledProcessError as e:
@@ -70,19 +78,31 @@ esac
 
 # ocean-post's checkout differs per host: repos.ocean-post from
 # ~/.config/oceanicu/hosts.yaml (this host, else relay_host's entry).
-DEPLOY_REPO="$(python3 -c "
-import socket
+# _host_value SOURCE KEY: KEY (dotted) of this host's entry, else the relay
+# host's, in SOURCE -- "oceanicu" (~/.config/oceanicu/hosts.yaml) or a YAML path.
+_host_value() {
+    python3 - "$1" "$2" "$RELAY_HOST_OVERRIDE" <<'EOF'
+import socket, sys, yaml
 from pathlib import Path
-from ocean_data import host_config as oc
-cfg = oc.load_host_config('oceanicu')
-hostname = socket.gethostname()
-entry = cfg.get('hosts', {}).get(hostname)
+source, key, override = sys.argv[1:4]
+if source == "oceanicu":
+    from ocean_data import host_config as oc
+    cfg = oc.load_host_config("oceanicu")
+else:
+    cfg = yaml.safe_load(Path(source).read_text())
+hosts = cfg.get("hosts", {})
+entry = hosts.get(socket.gethostname())
 if entry is None:
-    entry = cfg.get('hosts', {}).get(cfg.get('relay_host'))
-repo = (entry or {}).get('repos', {}).get('ocean-post')
-if repo:
-    print(Path(repo).expanduser())
-")"
+    entry = hosts.get(override or cfg.get("relay_host"))
+value = entry or {}
+for part in key.split("."):
+    value = value.get(part) if isinstance(value, dict) else None
+if value:
+    print(Path(value).expanduser())
+EOF
+}
+
+DEPLOY_REPO="$(_host_value oceanicu repos.ocean-post)"
 if [ -z "$DEPLOY_REPO" ]; then
     echo "ERROR: no repos.ocean-post entry for host $(hostname) (or relay_host) in ~/.config/oceanicu/hosts.yaml" >&2
     exit 1
@@ -93,18 +113,7 @@ fi
 # second run never deploys the first one's half-written content. The lock
 # lives in hugo_out (shared by both accounts, group bb), not the per-account
 # checkout.
-HUGO_OUT="$(python3 -c "
-import socket, yaml
-from pathlib import Path
-cfg = yaml.safe_load(Path('$HUGO_REPO/regen_hosts.yaml').read_text())
-hostname = socket.gethostname()
-entry = cfg.get('hosts', {}).get(hostname)
-if entry is None:
-    entry = cfg.get('hosts', {}).get(cfg.get('relay_host'))
-out = (entry or {}).get('hugo_out')
-if out:
-    print(Path(out).expanduser())
-")"
+HUGO_OUT="$(_host_value "$HUGO_REPO/regen_hosts.yaml" hugo_out)"
 if [ -z "$HUGO_OUT" ]; then
     echo "ERROR: no hosts.$(hostname).hugo_out entry (or relay_host's) in $HUGO_REPO/regen_hosts.yaml" >&2
     exit 1
