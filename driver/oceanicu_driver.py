@@ -31,31 +31,8 @@ from pygetm_config.schema import build_schema
 from pygetm_config.yaml_parse import validate_config
 
 
-
-# The five data_script/script/post_data_script target functions that used to
-# live in this file directly (add_rivers/set_river_data/set_meteo_data/
-# set_sst_proxy/set_hydrography_ic) now live in scripts/ -- one file per
-# provider role, grouped by role rather than fully atomized (river position +
-# data stay together, see oceanicu_providers.py's own comment on why), since
-# this file itself was becoming a grab-bag of unrelated per-role logic.
-# Nothing about HOW they're loaded changed: still load_dotted_target'd via
-# "path/to/file.py:name" (see scripts/rivers.py, scripts/meteo.py,
-# scripts/hydrography.py), never imported directly here -- see those files'
-# own module docstrings.
-
-# meteo.<source>.shortwave_method/longwave_method were removed from the
-# schema 2026-09-07 (see oceanicu_providers.py's own _meteo_shared comment):
-# they were a stale copy of simulation.airsea.<type>.shortwave_method/
-# longwave_method (the REAL pygetm.airsea.FluxesFromMeteo constructor
-# params) that could silently drift out of sync with it -- set_meteo_data
-# now reads the real simulation.airsea value directly instead. This file
-# used to propagate meteo.<source>.shortwave_method/longwave_method into
-# simulation.airsea.<type> here, recreating exactly that drift risk; removed
-# along with the int->enum-name translation dicts it needed, since the
-# schema now rejects those meteo-level fields outright (confirmed: a real
-# config still carrying them, NSe/config/nse_from_oceanicu.yaml, failed
-# validate_config with "unknown field" until the leftover fields were
-# dropped from it too).
+# Hook functions (rivers, meteo, hydrography, fabm) live in scripts/ and are
+# loaded by "path/to/file.py:name", never imported here.
 
 
 def main(argv=None) -> int:
@@ -73,11 +50,7 @@ def main(argv=None) -> int:
         help="build the domain (open boundaries + rivers added, no Simulation), plot it "
         "(mesh, and mask -- both include river/open-boundary markers via domain.plot()'s "
         "own show_rivers/show_open_boundaries defaults), save the two PNGs, then exit -- "
-        "before build_simulation()/any hydrography/data-assignment loading. Deliberately "
-        "does NOT build a Simulation (unlike run_model.py's own --plot_domain): these plots "
-        "only need `domain`, and requiring a full Simulation would make this flag fail "
-        "whenever the final land/sea mask has an unrelated problem (e.g. a stale open-"
-        "boundary point now on land) that has nothing to do with wanting a domain overview. "
+        "before building the Simulation, so an unrelated land/sea-mask problem doesn't block it. "
         "Saves {PREFIX}_mesh.png and {PREFIX}_mask.png; PREFIX defaults to "
         "domain_<config file's stem>, or pass one to override.",
     )
@@ -105,7 +78,7 @@ def main(argv=None) -> int:
         "--print-config",
         action="store_true",
         help="print the fully validated/merged config as YAML and exit -- use this to check "
-        "a modified nse_from_oceanicu.yaml is resolving the way you expect (e.g. after "
+        "a modified config is resolving the way you expect (e.g. after "
         "switching a provider's source:) without actually building or running anything",
     )
     parser.add_argument(
@@ -204,56 +177,25 @@ def main(argv=None) -> int:
     )
     args = parser.parse_args(argv)
 
-    # Must happen before build_schema()/anything pygetm-related -- see
-    # pygetm_config.loader's module docstring "Debugging" note: pyGETM's own
-    # first domain-construction call has a side effect of configuring the root
-    # logger itself, and a log call made before that point is silently dropped
-    # (Python's "handler of last resort" only shows WARNING+ with no handler
-    # configured yet) -- relying on that side effect's timing isn't safe.
+    # Before anything pygetm-related: a log call made before pyGETM configures
+    # the root logger would be dropped (see pygetm_config.loader "Debugging").
     logging.basicConfig(level=getattr(logging, args.log_level), format="%(levelname)s:%(name)s:%(message)s")
 
-    # Before any real file access -- populates os.environ for whatever
-    # ${VAR}/$VAR data-path references a config uses (see loader.
-    # resolve_data_path). Every domain config's own domain.path/tpxo_folder/
-    # hydrography.folder/river_discharge.folder/meteo.folder uses ${VAR}
-    # syntax, resolved lazily at the point of actual use, not baked in here.
+    # Before any file access: fills os.environ for ${VAR} data paths.
     loader.apply_data_roots(args.data_root, args.data_roots_file)
 
-    # Auto-register oceanicu_providers.py (this directory) via the zero-
-    # packaging PYGETM_CONFIG_PROVIDERS env var (see pygetm-config's
-    # docs/providers.md) -- setdefault, not a hard override, so a caller can
-    # still point at a different registry explicitly if they want. Must
-    # happen BEFORE build_schema(), which is what actually reads this env var
-    # (via providers.discover_provider_sections()).
-    # PYGETM_CONFIG_DATA_ASSIGNMENTS_DERIVERS is NOT set here separately --
-    # register_oceanicu_providers() itself sets it (as a side effect, the
-    # moment build_schema() below resolves this PYGETM_CONFIG_PROVIDERS
-    # entry), so THIS process (direct run / --dump-python) doesn't need a
-    # second explicit setdefault call here. Does NOT reach `pygetm-config
-    # edit --schema dist/schema.json`/`web` -- that pygetm-free workflow
-    # never calls build_schema()/register_oceanicu_providers() at all (a
-    # pre-built schema.json is the whole point), so a real TUI/web launch
-    # still needs PYGETM_CONFIG_DATA_ASSIGNMENTS_DERIVERS exported
-    # explicitly -- see driver/README.md's own TUI launch instructions.
+    # Register oceanicu_providers.py before build_schema() reads the env var;
+    # it sets PYGETM_CONFIG_DATA_ASSIGNMENTS_DERIVERS itself. The pygetm-free
+    # TUI/web (prebuilt schema.json) still need that exported explicitly --
+    # see driver/README.md.
     os.environ.setdefault(
         "PYGETM_CONFIG_PROVIDERS",
         f"{Path(__file__).resolve().parent / 'oceanicu_providers.py'}:register_oceanicu_providers",
     )
 
-    # SCRIPT_FOLDER/GOTM_FOLDER, same setdefault-after-apply_data_roots
-    # pattern as PYGETM_CONFIG_PROVIDERS above -- an explicit --data-root/
-    # roots-file override (already applied by apply_data_roots) wins;
-    # otherwise default to THIS checkout's own real locations, so a plain
-    # `oceanicu_driver.py run` works out of the box with zero configuration.
-    # The config fields themselves (below) are written as
-    # "${SCRIPT_FOLDER}/rivers.py:add_rivers" etc, not a frozen
-    # Path(__file__)-relative absolute string, so the frozen artifacts
-    # --dump-python produces (generated_config.yaml, and simulation.gotm's
-    # own resolve_data_path(...) call embedded live in the generated script)
-    # stay portable if the pair is later copied to a different machine or
-    # checkout location -- a $VAR template survives that round-trip the same
-    # way data files do (loader.resolve_data_path, and providers.
-    # load_dotted_target for .script/.data_script/post_data_script targets).
+    # Default to this checkout's own scripts/ and repo root; an explicit
+    # --data-root/roots-file wins. Configs refer to "${SCRIPT_FOLDER}/...",
+    # so generated artifacts stay portable.
     os.environ.setdefault("SCRIPT_FOLDER", str(Path(__file__).resolve().parent / "scripts"))
     os.environ.setdefault("GOTM_FOLDER", str(Path(__file__).resolve().parent.parent))
 
@@ -262,54 +204,25 @@ def main(argv=None) -> int:
     with open(args.config) as f:
         raw = yaml.safe_load(f)
 
-    # river_discharge.emorid.script's own schema default (see
-    # oceanicu_providers.py, computed from THAT file's own __file__) isn't
-    # auto-injected by validate_config -- it only ever keeps fields
-    # EXPLICITLY present in the raw YAML, never fills in unset ones (a
-    # schema `default` is template/TUI-display-only). Set it here explicitly
-    # if the YAML doesn't override it, so a domain config itself doesn't
-    # need a machine-specific absolute path baked in. Written as
-    # "${SCRIPT_FOLDER}/rivers.py:..." rather than a frozen
-    # Path(__file__)-relative absolute string, matching the SCRIPT_FOLDER/
-    # GOTM_FOLDER setdefault above. Only "emorid" today (the one real
-    # registered source, see oceanicu_providers.py's own river_discharge
-    # role).
+    # validate_config never fills schema defaults, so set the hook targets
+    # here when the YAML doesn't; ${SCRIPT_FOLDER} keeps them portable.
     river_discharge = raw.get("river_discharge") or {}
     emorid_cfg = river_discharge.get("emorid") or {}
     if river_discharge.get("source") == "emorid":
         if not emorid_cfg.get("script"):
             emorid_cfg["script"] = "${SCRIPT_FOLDER}/rivers.py:add_rivers"
-        # The second half of river_discharge's job: real discharge data,
-        # mirroring cfg_rivers.py's own create()/data() split. Same $VAR
-        # reasoning as `script` above.
+        # The data half of river_discharge (as cfg_rivers.py's create()/data()).
         if not emorid_cfg.get("data_script"):
             emorid_cfg["data_script"] = "${SCRIPT_FOLDER}/rivers.py:set_river_data"
         river_discharge["emorid"] = emorid_cfg
         raw["river_discharge"] = river_discharge
 
-    # simulation.gotm: run_model.py always passes gotm=Path("gotm.yaml") to
-    # Simulation() -- a real, non-trivial GOTM turbulence-closure config
-    # (turb_method/tke_method/len_scale_method/stab_method/turb_param), not
-    # pyGETM's own internal k-epsilon defaults. Bare filename (2026-09-25,
-    # per user: "treat gotm.yaml as fabm.yaml") -- resolved cwd-relative at
-    # the generated script's own runtime, same "each run keeps its own
-    # physical copy sitting next to its own generated_*.{py,yaml}"
-    # convention fabm.ERSEM.file already uses, and the SAME convention
-    # every older (pre-pygetm-config) experiment folder under experiments/
-    # already has its own gotm.yaml copy for (AMM7/ENA4/ENA8/NS's own
-    # Baseline/TPXO9/etc. run dirs -- confirmed directly, ${GOTM_FOLDER}
-    # was a newer, single-shared-file simplification specific to the
-    # oceanicu_driver.py-generated family, now reverted). No longer a
-    # "path"-kind ${VAR} reference -- was "${GOTM_FOLDER}/gotm.yaml".
+    # simulation.gotm: a bare filename, resolved relative to the run
+    # directory, which keeps its own copy (like fabm.yaml).
     if not (raw.get("simulation") or {}).get("gotm"):
         raw.setdefault("simulation", {})["gotm"] = "gotm.yaml"
 
-    # hydrography.<source>.data_script's own schema default (see
-    # oceanicu_providers.py) isn't auto-injected either (same reasoning as
-    # river_discharge.script/data_script above). "constant" hydrography
-    # doesn't get one at all -- it's fully expressible as plain
-    # data_assignments, no Python needed (see set_hydrography_ic's own
-    # docstring).
+    # Default hydrography.<source>.data_script ("constant" needs none).
     hydrography = raw.get("hydrography") or {}
     hydrography_source = hydrography.get("source")
     if hydrography_source in ("WOA", "CMEMS"):
@@ -319,21 +232,11 @@ def main(argv=None) -> int:
         hydrography[hydrography_source] = hydro_cfg
         raw["hydrography"] = hydrography
 
-    # boundaries.baroclinic's 3D temp/salt boundary VALUES (WOA vs CMEMS,
-    # differing folder/variable/on_grid/climotology shape) are now computed
-    # by oceanicu_providers.derive_data_assignments, registered above via
-    # PYGETM_CONFIG_DATA_ASSIGNMENTS_DERIVERS -- loader.apply_data_assignments/
-    # codegen._emit_data_assignments both call it automatically (see that
-    # function's own docstring for why this moved out of main(): a
-    # setdefault-style injection HERE only ever helped driver runs, never
-    # TUI/web's own 'Generate script', which doesn't run main() at all).
+    # boundaries.* values come from oceanicu_providers.derive_data_assignments
+    # (PYGETM_CONFIG_DATA_ASSIGNMENTS_DERIVERS), for every entrypoint.
 
-    # meteo.<source>.data_script's own schema default (see
-    # oceanicu_providers.py) isn't auto-injected either (same reasoning as
-    # river_discharge.script/data_script above). meteo's own 1:1 file-read
-    # fields (u10/v10/t2m/qa-or-d2m/sp/tp/tcc/swr/ql) are now computed by
-    # oceanicu_providers.derive_data_assignments (see that function's own
-    # docstring, and the matching comment on boundaries.baroclinic above).
+    # Default meteo.<source>.data_script; the 1:1 meteo file reads come from
+    # oceanicu_providers.derive_data_assignments.
     meteo = raw.get("meteo") or {}
     meteo_source = meteo.get("source")
     if meteo_source in ("ERA5", "CMIP6", "CMIP6-raw"):
@@ -343,66 +246,24 @@ def main(argv=None) -> int:
         meteo[meteo_source] = meteo_cfg
         raw["meteo"] = meteo
 
-        # Propagate meteo.<source>'s shared params into the REAL airsea
-        # constructor config. `type` must be set alongside these
-        # (airsea is a discriminated ChoiceSpec -- FluxesFromMeteo |
-        # Fluxes) -- defaults to FluxesFromMeteo, matching this schema's
-        # own default choice. setdefault, not overwrite: a config that
-        # already has its own simulation.airsea.* block wins. Written into
-        # the ACTIVE label's own nested sub-dict (`_airsea_type_cfg`), not
-        # flat onto `_airsea_cfg` itself -- every ChoiceSpec in the schema
-        # uses the nested-by-label shape (every alternative kept under its
-        # own <label>: key, see yaml_parse.py), so a config that already has
-        # simulation.airsea.FluxesFromMeteo: {...} persisted (the TUI/web-
-        # editable form) must get these setdefault fills in THAT same
-        # sub-dict, not as stray flat keys alongside it -- which
-        # yaml_parse._validate_choice correctly rejects as unknown fields.
+        # Shared meteo params go into the active simulation.airsea.<type>
+        # sub-dict (nested-by-label ChoiceSpec shape); setdefault, so an
+        # explicit simulation.airsea block wins.
         _airsea_cfg = raw.setdefault("simulation", {}).setdefault("airsea", {})
         _airsea_cfg.setdefault("type", "FluxesFromMeteo")
         _airsea_type_cfg = _airsea_cfg.setdefault(_airsea_cfg["type"], {})
-        # Always derived from meteo_source, never left to a config value --
-        # ERA5 only provides d2m (dewpoint), CMIP6 only provides huss
-        # (specific humidity), so an explicit humidity_measure in the YAML
-        # that disagrees with meteo_source is always wrong, not a valid
-        # override (e.g. a config copy-pasted from an ERA5 setup, still
-        # reading DEW_POINT_TEMPERATURE, silently mismatched against qa
-        # being populated from huss). Mirrors cfg_airsea.py's own
-        # unconditional derivation from cfg.meteo.source.
+        # Always derived from the source: ERA5 provides d2m, CMIP6 huss.
         _airsea_type_cfg["humidity_measure"] = (
             "DEW_POINT_TEMPERATURE" if meteo_source == "ERA5" else "SPECIFIC_HUMIDITY"
         )
         if meteo_cfg.get("evaporation") is not None:
             _airsea_type_cfg.setdefault("calculate_evaporation", meteo_cfg["evaporation"])
     elif meteo_source == "Fluxes":
-        # Same auto-derivation as the ERA5/CMIP6/CMIP6-raw branch above, for
-        # the "Fluxes" meteo source added later (2026-09-14) -- that branch's
-        # own `_airsea_cfg.setdefault("type", "FluxesFromMeteo")` only ever
-        # ran for the three original sources (it's inside the `if
-        # meteo_source in (...)` block above, which meteo_source=="Fluxes"
-        # never enters), so a config using meteo.source: Fluxes still had to
-        # set simulation.airsea.type: Fluxes by hand -- exactly the
-        # duplication derive_data_assignments' own mismatch ValueError
-        # guards against catching, not something it removes. No shared
-        # params to propagate here (humidity_measure/shortwave_method/
-        # longwave_method/evaporation are all FluxesFromMeteo-specific), so
-        # just the `type` default.
+        # meteo.source Fluxes needs simulation.airsea.type Fluxes.
         raw.setdefault("simulation", {}).setdefault("airsea", {}).setdefault("type", "Fluxes")
 
-    # fabm.<source>'s own schema default (fabm.data_script) isn't
-    # auto-injected either (same reasoning as river_discharge.script/
-    # data_script/meteo.data_script above).
-    #
-    # Propagating fabm.<source>.file into simulation.fabm (pygetm.
-    # Simulation's own fabm= constructor kwarg) used to happen here too --
-    # removed 2026-09-26: only ever helped THIS entrypoint (oceanicu_
-    # driver.py's own main()), not plain `pygetm-config run`/`dump-python`
-    # or the TUI/web frontend's "Generate script", which never run this
-    # function at all. Now a real, generic pygetm-config extension point
-    # instead (PYGETM_CONFIG_VALUE_DERIVERS -- see oceanicu_providers.
-    # derive_config_value_overrides and register_oceanicu_providers' own
-    # setdefault for it), consulted by codegen._emit_simulation/loader.
-    # build_simulation themselves, so every entrypoint gets the same
-    # effective simulation.fabm value.
+    # Default fabm.ERSEM.data_script. simulation.fabm itself comes from
+    # oceanicu_providers.derive_config_value_overrides (every entrypoint).
     fabm = raw.get("fabm") or {}
     fabm_source = fabm.get("source")
     if fabm_source == "ERSEM":
@@ -412,30 +273,13 @@ def main(argv=None) -> int:
         fabm[fabm_source] = fabm_cfg
         raw["fabm"] = fabm
 
-    # output.variable_groups.fabm_mizer expansion (nclass size-class carbon
-    # fields, fish_c1..fish_c<nclass>) moved to oceanicu_providers.
-    # derive_config_value_overrides 2026-10-24 -- that used to live here,
-    # but only ever helped THIS entrypoint, not plain `pygetm-config run`/
-    # `dump-python` or the TUI/web frontend's "Generate script" (same real
-    # gap simulation.fabm's own derivation had, just above). It's now a
-    # real PYGETM_CONFIG_VALUE_DERIVERS entry, consulted by pygetm_config.
-    # loader.configure_output/codegen._emit_output themselves, so every
-    # entrypoint gets the same expanded fabm_mizer group.
+    # The fabm_mizer output group expansion is done by oceanicu_providers.
+    # derive_config_value_overrides, for every entrypoint.
 
     raw.setdefault("runtime", {})["time"] = args.start
 
-    # runtime.debug_output (SCHEMA-ONLY flag, see pygetm-config's own
-    # _build_runtime_section -- not a real pygetm parameter): matches
-    # cfg_output.py's real cfg.runtime.debug_output gating exactly, but
-    # expressed as a per-run toggle here rather than a static YAML choice.
-    # cfg_output.py ADDS the debug fields to the SAME output file that
-    # already carries the matching non-debug group (never its own separate
-    # file) -- so this walks output.files, and for any file whose
-    # variable_requests already reference a *_debug-having group (barotropic_
-    # 2d/barotropic_3d/baroclinic_3d), appends a new variable_requests entry
-    # for that group's *_debug counterpart. Driven entirely by which groups a
-    # file already references, not by hardcoded filenames -- stays correct
-    # if nse_from_oceanicu.yaml's own file layout changes.
+    # runtime.debug_output (schema-only flag): every output file that
+    # requests a group with a *_debug counterpart also gets that counterpart.
     if bool(raw.get("runtime", {}).get("debug_output", False)):
         _debug_group_for = {
             "barotropic_2d": "barotropic_2d_debug",
@@ -459,27 +303,12 @@ def main(argv=None) -> int:
         print(e, file=sys.stderr)
         return 1
 
-    # post_data_script now has a real schema home at runtime.post_data_script
-    # (pygetm-config's schema.py::_build_runtime_section) -- injected here,
-    # not into `raw` before validate_config, purely so a config missing it
-    # still gets this default even though validate_config already ran
-    # (validate_config itself would happily carry a YAML-provided value at
-    # this same path). Now largely redundant for OceanICU's own use --
-    # pygetm-config's core apply_data_assignments/_emit_data_assignments
-    # already set sim.sst automatically for non-BAROCLINIC runs -- but kept
-    # as a harmless belt-and-suspenders default; set_sst_proxy just re-does
-    # the same assignment.
+    # Default post_data_script (sets sim.sst; redundant with pygetm-config's
+    # own non-BAROCLINIC sst handling, kept as a harmless default).
     config.setdefault("runtime", {}).setdefault("post_data_script", "${SCRIPT_FOLDER}/meteo.py:set_sst_proxy")
 
-    # config['runtime']['stop'] has no schema meaning of its own (unlike
-    # 'time'/post_data_script above) -- injected directly into the VALIDATED
-    # config dict, same timing/reasoning as post_data_script just above
-    # (schema validation already ran; putting this in `raw` before it, like
-    # 'time', fails validation with "runtime.stop: unknown field", a real
-    # error hit while implementing this). Exists purely so a script-hook
-    # function (scripts/meteo.py's set_meteo_data) can read the run's own
-    # stop without args being in its scope -- mirrors pygetm-config's own
-    # codegen.py equivalent for generated scripts.
+    # runtime.stop is not a schema field, so it goes into the validated
+    # config: script hooks (set_meteo_data, configure_fabm) read the run's stop.
     config.setdefault("runtime", {})["stop"] = args.stop
 
     if args.print_config:
@@ -492,32 +321,16 @@ def main(argv=None) -> int:
         if isinstance(args.dump_python, str):
             out_path = args.dump_python
         else:
-            # Same shared naming convention as the TUI/web frontends use
-            # (codegen.default_generated_script_path) -- NOT a hand-rolled
-            # duplicate: this used to strip a "_from_oceanicu" suffix that
-            # default_generated_script_path doesn't, producing a DIFFERENT
-            # default filename (generated_nse.py) than TUI/web's own
-            # Ctrl+G/generate button (generated_nse_from_oceanicu.py) for
-            # the exact same config -- the three generation modes must
-            # agree, including on this.
+            # Same default name as the TUI/web "Generate script".
             out_path = codegen.default_generated_script_path(args.config)
         config_yaml_path = str(Path(out_path).with_name(Path(out_path).stem + "_config.yaml"))
-        # Argparse/config-loading/script-hook boilerplate goes to a
-        # companion "_utils.py" module -- a user only needs to see the main
-        # generated file's own pyGETM call sequence, not the rivers.py/
-        # hydrography.py/meteo.py hook bodies embedded inline in the way.
+        # Boilerplate and embedded hook bodies go to a companion _utils.py.
         utils_module_path = str(Path(out_path).with_name(Path(out_path).stem + "_utils.py"))
         script = codegen.generate_script(
             config,
             schema,
             stop=args.stop,
-            # NOT args.dry_run -- --dump-python never builds/runs anything
-            # itself, so THIS invocation's --dry-run is inert; naively
-            # forwarding it would bake "dry-run-only forever" into the
-            # GENERATED script's own default the moment someone dry-runs
-            # generation once, even though they fully intend to give it a
-            # real --stop and run it for real later (see codegen.
-            # generate_script's own docstring for the full reasoning).
+            # Never forward --dry-run: it would become the generated script's default.
             dry_run=False,
             load_restart=args.load_restart,
             save_restart=args.save_restart,
@@ -534,11 +347,7 @@ def main(argv=None) -> int:
         print(f"wrote {config_yaml_path}", file=sys.stderr)
 
         out_dir = Path(out_path).resolve().parent
-        # Shared with the TUI/web 'Generate script' actions -- see that
-        # function's own docstring for why this reads simulation.fabm
-        # through the registered value derivers rather than fabm_source/
-        # fabm here directly (same reasoning as the 2026-09-26 fix that
-        # made PYGETM_CONFIG_VALUE_DERIVERS exist in the first place).
+        # Shared with the TUI/web "Generate script".
         copied = codegen.copy_companion_files(config, out_dir)
         for name in copied:
             print(f"copied companion file: {name}", file=sys.stderr)
@@ -547,58 +356,24 @@ def main(argv=None) -> int:
     domain = loader.build_domain(config, schema)
     print(f"domain built: {domain.nx} x {domain.ny}", file=sys.stderr)
 
-    # From here on, entirely generic -- driven by the schema/config like any
-    # other pyGETM setup, regardless of how `domain` was actually built above.
-    # Order matters and matches run_model.py's own create_domain() exactly:
-    # open boundaries -> domain.cfl_check() -> rivers.
+    # Order: open boundaries -> cfl_check -> rivers.
     loader.add_open_boundaries(domain, config, schema)
     domain.cfl_check()
 
-    # Goes through the SAME generic mechanism --dump-python's generated
-    # scripts use (river_discharge.script, see pygetm_config.loader.
-    # run_river_discharge_script) rather than calling add_rivers() directly,
-    # so real execution here and the generated standalone script are
-    # provably consistent, not two separately-maintained paths to the same
-    # rivers. add_rivers() itself is unchanged and lives in scripts/rivers.py
-    # -- river_discharge.emorid.script (resolved above) just points at it
-    # by path.
+    # Same hook mechanism as the generated scripts (river_discharge.script).
     n_rivers = loader.run_river_discharge_script(domain, config)
-    print(f"{n_rivers} river(s) added from {config['river_discharge']['file']}", file=sys.stderr)
+    print(f"{n_rivers} river(s) added", file=sys.stderr)
 
-    # --plot-domain deliberately plots BEFORE build_simulation(): the two
-    # figures only need `domain` (bathymetry/mask/mesh/open boundaries/
-    # rivers are all on it already by this point) -- building a full
-    # Simulation needs a valid final land/sea mask with every open-boundary
-    # point on water, which this domain-overview feature has no reason to
-    # require (confirmed hitting exactly that unrelated, real open-boundary/
-    # mask mismatch for real while first exercising this flag; a domain
-    # overview plot shouldn't be blocked by it). show_subdomains/tiling
-    # dropped accordingly -- no Simulation exists yet to supply a tiling,
-    # and MPI subdomain decomposition isn't part of what this flag is for.
+    # --plot-domain plots before build_simulation(): it only needs `domain`,
+    # and must not be blocked by an open-boundary/mask problem.
     if args.plot_domain and args.export_domain_summary:
         parser.error("--plot-domain and --export-domain-summary are mutually exclusive -- run twice")
     if args.plot_domain:
-        # domain.plot() itself still calls get_final_mask(), which still
-        # validates every open-boundary point is on water and raises if not
-        # (confirmed: moving the call above build_simulation() wasn't
-        # enough by itself -- this is pygetm's own domain.plot() doing the
-        # same check independently, not something build_simulation() alone
-        # does). allow_on_land is pygetm's own real, intended escape hatch
-        # for exactly this (open_boundaries.py: downgrades the check from a
-        # raised Exception to a logged WARNING) -- used ONLY here, for this
-        # visualization, never for build_simulation() below, so an actual
-        # simulation run still fails loudly on a real land-point problem.
-        # The warning itself still prints either way -- this doesn't hide
-        # the underlying issue, just stops it from blocking a plot.
+        # domain.plot() validates that open-boundary points are on water;
+        # allow_on_land downgrades that to a warning, for this plot only.
         domain.open_boundaries.allow_on_land = True
         prefix = args.plot_domain if isinstance(args.plot_domain, str) else f"domain_{Path(args.config).stem}"
-        # Real, not derived/assumed: domain.lon/lat are pygetm's own public
-        # T-grid coordinate arrays, already built above -- extent is a
-        # straight min/max; "resolution" is reported as the real native
-        # grid point counts (nx/ny) rather than a computed average degree
-        # spacing, since a curvilinear/rotated-pole grid's spacing isn't
-        # actually uniform across the domain -- stating the exact grid
-        # shape avoids implying a precision the grid doesn't have.
+        # Grid shape rather than a mean spacing: the grid needn't be uniform.
         extent = (
             f"{domain.ny} × {domain.nx} grid points"
             f"  ·  lon [{float(domain.lon.min()):.2f}, {float(domain.lon.max()):.2f}]°E"
@@ -617,14 +392,8 @@ def main(argv=None) -> int:
         return 0
 
     if args.export_domain_summary:
-        # Same early-exit point as --plot-domain, same allow_on_land reasoning
-        # (get_final_mask() below still validates open boundaries) -- see that
-        # flag's own comments just above. This one doesn't render anything
-        # itself; it hands the real numbers to a separate ocean-plot-based
-        # renderer instead (pygetm's own Domain.plot() isn't built for a
-        # polished web graphic -- no real coastline, fixed dev-tool figure
-        # sizing, no river-label decluttering at 250+ rivers; see ocean-post's
-        # generate_domain_overview_plot for the actual rendering).
+        # Same early exit and allow_on_land as --plot-domain; rendering is
+        # done by ocean-post's generate_domain_overview_plot.
         import numpy as np
         from pygetm import core
         from pygetm.open_boundaries import Side
@@ -642,18 +411,8 @@ def main(argv=None) -> int:
         t_lat = domain.lat[1::2, 1::2]
         t_H = domain.H[1::2, 1::2]
 
-        # Open-boundary point positions. l/mstart/mstop are 0-based T-grid
-        # indices (confirmed via pygetm's own add_by_index() docstring:
-        # "l, mstart, mstop are 0-based indices of a T point in the global
-        # domain") -- so they index directly into t_lon/t_lat (already
-        # T-grid-sliced above), NOT into domain.lon/domain.lat themselves,
-        # which are full supergrid arrays (2*ny+1 x 2*nx+1). Indexing
-        # domain.lon[j, i] with a raw T-grid j/i (as an earlier version of
-        # this code did) silently picked a real but wrong point near the
-        # domain's (0,0) corner instead of the actual boundary location --
-        # this is what put every boundary marker in the wrong place on the
-        # rendered overview maps. Rivers already do this conversion
-        # correctly below (i_sup = 1 + 2*i); this mirrors that.
+        # l/mstart/mstop are 0-based T-grid indices, so they index t_lon/t_lat,
+        # not the supergrid domain.lon/lat.
         bdy_lon, bdy_lat = [], []
         for b in domain.open_boundaries._boundaries:
             for m in range(b.mstart, b.mstop, b.mstep or 1):
@@ -661,10 +420,7 @@ def main(argv=None) -> int:
                 bdy_lon.append(float(t_lon[j, i]))
                 bdy_lat.append(float(t_lat[j, i]))
 
-        # River positions -- mirrors Domain.plot()'s own show_rivers block
-        # exactly (map_to_grid immediately before reading .items(), same
-        # i_sup/j_sup = 1+2*i/j supergrid conversion) so this stays correct
-        # if that convention ever changes upstream.
+        # River positions: as Domain.plot()'s show_rivers (supergrid index 1+2*i).
         domain.rivers.map_to_grid(core.Locator(**domain._tcoords(mask=final_mask)))
         river_lon, river_lat, river_name = [], [], []
         for name, river in domain.rivers.items():
@@ -687,47 +443,25 @@ def main(argv=None) -> int:
 
     sim = loader.build_simulation(domain, config, schema)
 
-    # Before apply_data_assignments, matching cfg_ic.py's own placement
-    # (before cfg_boundaries.data_2d/data_3d) in run_model.py's create_
-    # simulation(). load_restart= is only applied when not resuming from a
-    # restart -- a restart already has its own real initial condition.
+    # Before apply_data_assignments; skipped when resuming from a restart.
     loader.run_hydrography_data_script(sim, domain, config, load_restart=args.load_restart)
 
     loader.apply_data_assignments(sim, domain, config, schema)
 
-    # The second half of river_discharge's job -- real discharge data,
-    # mirroring cfg_rivers.py's own create()/data() split. Needs the LIVE
-    # sim.rivers collection, so this runs after apply_data_assignments,
-    # same generic mechanism as the other two hooks below --
-    # river_discharge.emorid.data_script (resolved above) points at
-    # set_river_data(), also in scripts/rivers.py.
+    # Discharge data needs the live sim.rivers, so after apply_data_assignments.
     n_river_data = loader.run_river_discharge_data_script(sim, domain, config)
     print(f"{n_river_data} river(s) given real discharge data", file=sys.stderr)
 
-    # Goes through the SAME generic mechanism --dump-python's generated
-    # scripts use (post_data_script, see pygetm_config.loader.
-    # run_post_data_script), same reasoning as run_river_discharge_script
-    # above -- real execution and the generated script are provably
-    # consistent, not two separately-maintained paths. set_sst_proxy() itself
-    # is unchanged and lives in scripts/meteo.py -- post_data_script (resolved
-    # above) just points at it by path.
+    # Same hook mechanism as the generated scripts (runtime.post_data_script).
     loader.run_post_data_script(sim, domain, config)
 
     loader.configure_output(
         sim, config, schema, skip_unavailable_fields=args.skip_unavailable_output, load_restart=args.load_restart
     )
 
-    # Mirrors cli.py's own --load-restart/--save-restart handling exactly
-    # (loader.start_simulation has no restart support of its own -- this
-    # replicates its two lines by hand, using loader.build_start_kwargs,
-    # which exists specifically for this override case; see its own
-    # docstring). add_restart() must be registered before sim.start(), same
-    # as any other output file; load_restart()'s own return value overrides
-    # runtime.time -- resuming from a restart always uses the restart's own
-    # saved time, not whatever runtime.time/--start the config/CLI gave --
-    # unless --load-restart-time picks a different snapshot from a restart
-    # file that holds more than one (sim.load_restart's own time= kwarg;
-    # None means its own default, the last snapshot in the file).
+    # As cli.py's --load-restart/--save-restart: add_restart() before
+    # sim.start(); load_restart() returns the time to start from (the
+    # restart's, or --load-restart-time's snapshot).
     if args.save_restart:
         restart_kwargs: dict = {}
         _interval = args.save_restart_interval

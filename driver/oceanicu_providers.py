@@ -45,12 +45,8 @@ _METEO_SCRIPT_PATH = _SCRIPTS_DIR / "meteo.py"
 _HYDROGRAPHY_SCRIPT_PATH = _SCRIPTS_DIR / "hydrography.py"
 _FABM_SCRIPT_PATH = _SCRIPTS_DIR / "fabm.py"
 
-# Shared across every CMIP6-sourced role (boundaries.{barotropic,baroclinic},
-# meteo) -- CMIP6 folder_templates all use {model}/{scenario} placeholders
-# (verified: nse_model_config.yaml's boundaries.barotropic.CMIP6/baroclinic.
-# CMIP6/meteo.CMIP6 blocks all declare `model: "MPI-ESM1-2-HR"` and
-# `scenario: "ssp585"`), so these two extra params are identical everywhere
-# CMIP6 shows up, same reasoning as meteo's own _meteo_shared below.
+# model/scenario fill the {model}/{scenario} folder_template placeholders
+# of every CMIP6-sourced role (boundaries.{barotropic,baroclinic}, meteo).
 _CMIP6_SHARED = (
     ParameterSpec(
         name="model",
@@ -68,38 +64,18 @@ _CMIP6_SHARED = (
 
 
 def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
-    # setdefault, not override -- an explicit PYGETM_CONFIG_DATA_ASSIGNMENTS_
-    # DERIVERS export still wins. Helps every caller that builds the schema
-    # LIVE (oceanicu_driver.py direct/--dump-python, `pygetm-config run`,
-    # `pygetm-config dump`) -- for those, this one setdefault is enough, no
-    # need for oceanicu_driver.py's own main() to ALSO set the same env var
-    # separately (that duplication was the earlier bug here).
-    #
-    # Does NOT help `pygetm-config edit --schema dist/schema.json`/`web`
-    # (the REAL way this project's TUI actually gets launched, see driver/
-    # README.md) -- that pygetm-free workflow deliberately loads a PRE-BUILT
-    # schema.json and never calls build_schema()/this function at all, so
-    # PYGETM_CONFIG_DATA_ASSIGNMENTS_DERIVERS must be exported EXPLICITLY
-    # before launching `pygetm-config edit`, same as SCRIPT_FOLDER already
-    # has to be -- see driver/README.md's own TUI launch instructions for
-    # both exports. Confirmed directly: this setdefault provably never
-    # fires in that code path (no live pygetm import happens there at all).
+    # setdefault: an explicit export wins. Reaches every caller that builds the
+    # schema live (oceanicu_driver.py, `pygetm-config run`/`dump`), not the
+    # pygetm-free `pygetm-config edit --schema schema.json`/`web`, which must
+    # export both variables explicitly (driver/README.md).
     import os
 
     os.environ.setdefault(
         "PYGETM_CONFIG_DATA_ASSIGNMENTS_DERIVERS",
         f"{Path(__file__)}:derive_data_assignments",
     )
-    # Same setdefault, same caveat (TUI/web's pre-built schema.json path
-    # doesn't run this function either -- export explicitly there too):
-    # bridges fabm.ERSEM.file (this project's own custom "fabm" role) to
-    # simulation.fabm (pygetm-config's core field, what codegen._emit_
-    # simulation actually bakes into the Simulation() call) -- see
-    # derive_config_value_overrides's own docstring for why this needs to
-    # be a real deriver, not just oceanicu_driver.py's own main() setting
-    # it by hand (real gap, caught 2026-09-26: that only ever helped
-    # oceanicu_driver.py's own entrypoint, not plain `pygetm-config run`/
-    # `dump-python` or the TUI).
+    # Bridges fabm.ERSEM.file to simulation.fabm (and the mizer output group)
+    # for every entrypoint -- see derive_config_value_overrides.
     os.environ.setdefault(
         "PYGETM_CONFIG_VALUE_DERIVERS",
         f"{Path(__file__)}:derive_config_value_overrides",
@@ -143,19 +119,12 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
     hydrography = make_provider_slot(
         "hydrography",
         {
-            # CMEMS/WOA: cfg_ic.py just does pygetm.input.from_nc(cfg.hydrography.
-            # {CMEMS,WOA}.folder / "<fixed filename>", ...) -- no extra params
-            # beyond the shared folder, PLUS data_script for the real
-            # .isel(time=imonth)/convert_ts logic.
+            # CMEMS/WOA: fixed filenames under `folder`; data_script does the
+            # monthly pick and optional convert_ts.
             "CMEMS": _hydrography_data_script,
             "WOA": _hydrography_data_script,
-            # constant: a fundamentally different shape -- cfg_ic.py's
-            # `cfg.hydrography.source == "constant"` branch does
-            # sim.temp.set(cfg.hydrography.constant.temp) directly, no file/folder
-            # at all. The shared base params (folder/folder_template/...) still
-            # get attached by make_provider_slot (nothing to override them off),
-            # but are simply unused/None here -- harmless, matches how this
-            # provider is actually used.
+            # constant: uniform values, no files (the shared folder params
+            # are present but unused).
             "constant": (
                 ParameterSpec(
                     name="temp",
@@ -185,9 +154,7 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                     importance=Importance.BASIC,
                 ),
             ),
-            # CMEMS: cfg_boundaries.py::data_2d's generic (non-TPXO) branch --
-            # reads <variable>/uo/vo from a single resolved file via the
-            # shared folder/folder_template/filename_template base.
+            # CMEMS: <variable>/uo/vo from one file.
             "CMEMS": (
                 ParameterSpec(
                     name="variable",
@@ -217,39 +184,16 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         "boundaries.baroclinic",
         {
             "CMEMS": (),
-            # WOA: uses its own boundaries.baroclinic.WOA.folder (the
-            # role-universal shared base's `folder` param, same as every
-            # other choice here) -- read directly by oceanicu_driver.py, not
-            # reused from hydrography.WOA.folder. This schema models each
-            # role as independently configured, so a project using WOA for
-            # both hydrography AND boundaries.baroclinic sets the same real
-            # folder value under both roles' own folder field.
+            # WOA: its own folder, independent of hydrography.WOA.folder.
             "WOA": (),
             "CMIP6": _CMIP6_SHARED,
         },
         default="CMEMS",
     )
 
-    # Shared across meteo sources -- cfg_airsea.py's create() reads these BEFORE
-    # branching on cfg.meteo.source (they configure the shared FluxesFromMeteo
-    # instance, not anything source-specific), so both ERA5 and CMIP6 need them
-    # identically. make_provider_slot's shared base (folder/folder_template/...)
-    # is role-universal across ALL providers.py roles, not customizable per-role,
-    # so this is declared here and passed to both choices below instead.
-    #
-    # shortwave_method/longwave_method used to live here too (a cfg_airsea.py-
-    # era leftover from before simulation.airsea.shortwave_method/
-    # longwave_method existed as real, introspected pygetm.airsea.
-    # FluxesFromMeteo fields in their own right) -- removed 2026-09-07 (per
-    # user: "it seems short and long wave radiation methods are set two
-    # places in airsea and meteo?"). They were never real pygetm inputs from
-    # here; set_meteo_data's own radiation_source-consistency check read
-    # this COPY instead of the real simulation.airsea value, so the two
-    # could silently drift apart (a real, reproduced case: simulation.
-    # airsea's own value got updated to NET_FLUX for radiation_source:
-    # 'net', this copy didn't, and set_meteo_data warned using stale data).
-    # set_meteo_data now reads the real value directly -- see its own
-    # docstring/code for exactly where.
+    # Shared by the meteo sources: they configure the shared FluxesFromMeteo,
+    # not anything source-specific. (shortwave/longwave_method live only in
+    # simulation.airsea; set_meteo_data reads them from there.)
     _meteo_shared = (
         ParameterSpec(
             name="evaporation",
@@ -294,19 +238,10 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         ),
     )
 
-    # ERA5, unlike CMIP6, has no "model"/"scenario" concept -- there's
-    # exactly one extraction/processing run per domain, so it isn't worth a
-    # separate sub-folder placeholder at all: `folder` is just the full real
-    # path to where that extraction's era5_<var>_????.nc files already
-    # live, same as every other non-CMIP6 provider in this module (CMEMS,
-    # WOA, TPXO, emorid). The filename side (fixed "era5_<var>_????.nc"
-    # glob, hardcoded in derive_data_assignments below) is not
-    # configurable -- would need wildcarding if a different extraction ever
-    # used another naming convention.
+    # ERA5 has no model/scenario: `folder` is the extraction's directory and
+    # the era5_<var>_????.nc naming is fixed (derive_data_assignments).
 
-    # meteo-CMIP6-specific, NOT part of _CMIP6_SHARED -- that tuple is also
-    # used by boundaries.barotropic/baroclinic.CMIP6, which has no radiation
-    # concept at all.
+    # meteo-CMIP6 only; boundaries' CMIP6 choices have no radiation.
     _meteo_cmip6_radiation = (
         ParameterSpec(
             name="radiation_source",
@@ -345,14 +280,9 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         ),
     )
 
-    # CMIP6-raw: meteo read directly from the RAW (not bias-corrected) CMIP6
-    # archive -- /data/CMIP6/{model}/{scenario}/ (CMIP6_RAW_FOLDER, from the
-    # data-roots file), one whole-period file per variable per experiment
-    # (fetched via ocean-data's DataLoader, either Pangeo/GCS or ESGF's own
-    # prefer_streaming=False full-file-download path -- see that repo's
-    # esgf_loader.py). No net_sw/net_lw composite exists in the raw archive
-    # (that's a bias-correction-pipeline-computed quantity) -- only
-    # 'components' and 'pseudo_tcc' apply, not 'net'.
+    # CMIP6-raw: the raw (not bias-corrected) archive, one whole-period file
+    # per variable per experiment; no net_sw/net_lw (a bias-correction
+    # composite), so only 'components' and 'pseudo_tcc'.
     _meteo_cmip6_raw_radiation = (
         ParameterSpec(
             name="radiation_source",
@@ -381,52 +311,20 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
     meteo = make_provider_slot(
         "meteo",
         {
-            # humidity_measure differs by source (DEW_POINT_TEMPERATURE for ERA5
-            # vs SPECIFIC_HUMIDITY for CMIP6/CMIP6-raw, per cfg_airsea.py) but
-            # that's a fixed consequence of the source choice, not itself a
-            # configurable field -- not modeled as a param here.
+            # humidity_measure follows from the source (oceanicu_driver.py).
             "ERA5": _meteo_shared,
             "CMIP6": _meteo_shared + _CMIP6_SHARED + _meteo_cmip6_radiation,
             "CMIP6-raw": _meteo_shared + _CMIP6_SHARED + _meteo_cmip6_raw_radiation,
-            # For simulation.airsea.type: Fluxes (prescribed taux/tauy/sp/shf/
-            # swr/pe) ONLY -- reads each field as a real time/spatially-varying
-            # NetCDF file instead of Fluxes' own static YAML constants. Added
-            # 2026-09-14 per user: constant (Fluxes' own static values, no
-            # meteo section needed) or from-file (this) should both be
-            # straightforward. Only `folder` needed (make_provider_slot's
-            # shared base) -- see derive_data_assignments' own "Fluxes" branch
-            # below for the fixed flux_<field>_????.nc naming convention (one
-            # glob per field, all six always required, matching ERA5's own
-            # all-or-nothing pattern -- a field you want to stay constant
-            # instead just means not using this provider at all).
+            # For simulation.airsea.type Fluxes: every flux field read from
+            # flux_<field>_????.nc under `folder` (derive_data_assignments).
             "Fluxes": (),
         },
         default="ERA5",
     )
 
-    # Narrower than the roles above: cfg_rivers.py's real cfg.rivers.source
-    # is actually TWO-LEVEL -- "historic" (itself wrapping a further
-    # cfg.rivers.historic.source choice, "emorid" being the only one
-    # currently used) as one sibling of top-level cfg.rivers.source, and
-    # "CMIP6" as another. make_provider_slot builds a single FLAT
-    # source-discriminated choice, with no support for a nested sub-choice
-    # like "historic"'s own source -- modeling this properly would need
-    # either a second, nested ChoiceSpec in providers.py itself, or
-    # flattening "historic+emorid" into one combined choice name.
-    #
-    # "CMIP6" reuses add_rivers/set_river_data UNCHANGED -- stats/cli/
-    # river_projection.py's delta-change output (river_flows_future_
-    # {scenario}.nc) is keyed by the SAME 446 EMORID stations the
-    # station_filter already narrowed things down to (same site_name/lat/lon
-    # identity, just Q replaced with the projected future series), so it's
-    # schema-compatible with the "emorid" reader as-is -- river_projection.py
-    # was given a Q_mean variable (site-mean of the projected Q) purely so
-    # add_rivers's own qmean-pattern threshold lookup finds a match; nothing
-    # in scripts/rivers.py changed beyond adding {model}/{scenario}
-    # formatting to `file` itself (same substitution folder_template already
-    # does) -- keeps `file: river_flows_future_{scenario}.nc` in sync with
-    # `scenario:` automatically, rather than needing the literal scenario
-    # name written out twice.
+    # One flat choice: "emorid" (the historical record) or "CMIP6" (delta-
+    # change projections on the same EMORID stations, read by the same
+    # add_rivers/set_river_data; `file` may hold {model}/{scenario}).
     _river_shared_fields = (
         ParameterSpec(
             name="file",
@@ -479,16 +377,8 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         ),
     )
 
-    # CMIP6-only: river_flows_future_{scenario}.nc is monthly-mean,
-    # timestamped at month-END -- its own real coverage only starts
-    # 2015-01-31, so any run/chunk requesting 2015-01-01 hits a real
-    # ~30-day gap before that first record (found running
-    # running/check_inputs.py's --extended-dry-run, 2026-09-24). ocean-prep's
-    # river-projection --disaggregate now also writes a day-of-year-shaped
-    # daily sibling (river_flows_future_{scenario}_daily.nc, real coverage
-    # starting exactly 2015-01-01) -- this flag switches scripts/rivers.py's
-    # add_rivers/set_river_data to read that file instead. Default False:
-    # existing configs keep reading the monthly file unchanged.
+    # CMIP6 only. `daily`: the monthly file's first record is 2015-01-31, so
+    # a run from 2015-01-01 needs the daily-disaggregated sibling.
     _river_cmip6_only = (
         ParameterSpec(
             name="daily",
@@ -503,21 +393,10 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
             ),
             importance=Importance.BASIC,
         ),
-        # No real future-projected nutrient product exists (see
-        # set_river_data's docstring) -- flow gets the real splice above,
-        # but nutrients beyond EMORID's own real coverage (2024-12-31) are
-        # held at a MONTHLY CLIMATOLOGY built from that same real record,
-        # not a real projection. Three pre-generated baseline variants sit
-        # in ${RIVER_FOLDER} (EMORID_nutrient_climatology_monthly_{this}.
-        # nc, site x month=12, all 6 tracers) -- 5yr/10yr/full differ
-        # materially at some stations (confirmed 2026-10-01: AURAJOKI's
-        # NO3 and Adour's Si both show real, baseline-dependent shifts, not
-        # just noise), so this is a real modeling choice, not cosmetic.
-        # Day-of-year climatology was ALSO generated and compared (noisier,
-        # especially for Si -- fewer real samples per calendar day than
-        # per calendar month) but dropped entirely: per user, 2026-10-01,
-        # pygetm's own climatology support only handles 12 monthly records,
-        # not 366 daily ones.
+        # No projected nutrients exist: beyond EMORID's record (2024-12-31)
+        # they follow a monthly climatology of it. The baselines differ
+        # materially at some stations, so the choice is exposed. pygetm's
+        # climatology support takes 12 monthly records, not day-of-year.
         ParameterSpec(
             name="nutrient_climatology",
             type=TypeRef(kind="scalar", scalar_type="str"),
@@ -544,38 +423,18 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         default="emorid",
     )
 
-    # FABM boundary/IC data (WOA-sourced tracer initial values + SPONGE
-    # boundaries in cfg_fabm.py today) gets its own role, separate from
-    # BOTH hydrography (T/S initial conditions) and fabm (which
-    # biogeochemical model/dependencies) -- mirrors boundary_baroclinic's
-    # own independence from hydrography above (that role's own comment:
-    # "This schema models each role as independently configured") for the
-    # identical reason: FABM boundary nutrients could legitimately come
-    # from a different source than T/S (e.g. CMEMS biogeochemistry) without
-    # restructuring later. cfg_fabm.py's real WOA branch currently checks
-    # `cfg.hydrography.source == "WOA"` -- driver/scripts/fabm.py checks
-    # this role's own `boundaries.fabm.source` instead.
-    # Which FABM state variables actually get an explicit SPONGE boundary +
-    # real values (vs. quietly keeping whatever boundary type FABM/pygetm
-    # defaults to, e.g. ZERO_GRADIENT) is NOT fixed -- unlike T/S, where
-    # exactly two tracers (temp/salt) always need one. A biogeochemical
-    # model can have dozens of state variables and only some of them
-    # (typically the ones with real open-ocean gradients, e.g. nutrients)
-    # need boundary forcing at all. So this is a per-source, per-config
-    # mapping rather than a hardcoded list: tracer name -> {file, variable}
-    # (file resolved relative to this choice's own `folder`). Read by
-    # derive_data_assignments below (boundary_type + values) AND by
-    # scripts/fabm.py's own configure_fabm (the WOA-only initial-condition
-    # pick, which needs a real .isel(time=imonth), so can't be a
-    # data_assignments entry -- see that function's own docstring).
+    # boundaries.fabm is independent of hydrography and of `fabm`: nutrient
+    # boundaries may come from another source than T/S. `tracers` maps each
+    # FABM state variable that gets a boundary to its file/variable (or a
+    # constant); read by derive_data_assignments (boundary type + values) and
+    # by hydrography.py's set_hydrography_ic (one-time IC).
     _fabm_tracers_param = ParameterSpec(
         name="tracers",
         type=TypeRef(
             kind="mapping",
             nullable=True,
-            # per-tracer keys: file/variable/boundary_condition_type (str),
-            # constant (number). Union order matters: number before str --
-            # str validation would otherwise swallow numbers.
+            # per-tracer keys: file/variable/boundary_condition_type/sponge (str),
+            # constant (number). Union order matters: number before str.
             inner=TypeRef(
                 kind="mapping",
                 inner=TypeRef(
@@ -589,78 +448,27 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         ),
         default=None,
         help="FABM state variable name -> {file, variable, boundary_condition_type, "
-        "constant, sponge} "
-        "for tracers that get a boundary + real values from this source. "
-        "boundary_condition_type is optional, defaults to SPONGE (cfg_fabm.py's own "
-        "real, only-ever-used value) -- other valid values are the same "
-        "boundary_condition_type names data_assignments' own kind=boundary_type "
-        "entries accept (ZERO_GRADIENT, CLAMPED, SPONGE; FLATHER_ELEV/"
-        "FLATHER_TRANSPORT/SOMMERFELD don't apply to a 3D tracer), useful for "
-        "testing a tracer's sensitivity to boundary treatment without editing "
-        "Python. `sponge` (optional, SPONGE only) names an open_boundary_sponges "
-        "entry, for Sponge options other than the shared open_boundary_sponge. "
-        "`file`/`variable` are REQUIRED for SPONGE/CLAMPED (both read real "
-        "prescribed values at the boundary) but OPTIONAL for ZERO_GRADIENT (computed "
-        "from the interior, never reads a file) -- omit them entirely for a tracer "
-        "you just want pinned to ZERO_GRADIENT explicitly. Tracers NOT listed here "
-        "keep pygetm's own ZERO_GRADIENT default "
-        "(every Tracer, FABM ones included, gets ArrayOpenBoundaries(self, "
-        "ZERO_GRADIENT) at construction, before any config runs -- see "
-        "pygetm/tracer.py's own Tracer.__init__) and their fabm.yaml-declared "
-        "initial_value for the interior IC -- not every FABM state variable needs "
-        "an explicit boundary/IC override. `file` is resolved relative to this "
-        "choice's own `folder`. `constant: <value>` instead of file/variable "
-        "prescribes a fixed boundary value (e.g. a low background value for "
-        "plankton/detritus pools that have no boundary product). A different "
-        "type on one boundary goes in that open_boundaries entry's own "
-        "variable_types.\n\n"
-        "ic_file/ic_variable (2026-10-01): OPTIONAL, CMEMS-only, free keys in "
-        "this same per-tracer mapping (no separate ParameterSpec needed -- this "
-        "field's own type is already a generic string mapping) -- a separate, "
-        "grid-shaped file/variable for this tracer's one-time initial condition, "
-        "resolved against the CMEMS choice's own sibling `ic_folder` field, NOT "
-        "`folder`/`variable` (the real boundary-forcing product/variable name, "
-        "not usable as a full-domain IC -- see `ic_folder`'s own comment in "
-        "oceanicu_providers.py for why). Read by scripts/hydrography.py's own "
-        "set_hydrography_ic, not here.",
+        "constant, sponge, ic_file, ic_variable} for tracers that get a boundary from "
+        "this source. boundary_condition_type defaults to SPONGE (also ZERO_GRADIENT, "
+        "CLAMPED). `file` (relative to `folder`) and `variable` are required for "
+        "SPONGE/CLAMPED, unused for ZERO_GRADIENT. `constant: <value>` prescribes a fixed "
+        "boundary value instead (e.g. a low background for plankton/detritus pools). "
+        "`sponge` (SPONGE only) names an open_boundary_sponges entry. A different type "
+        "on one boundary goes in that open_boundaries entry's variable_types. Unlisted "
+        "tracers keep pygetm's ZERO_GRADIENT and their fabm.yaml initial_value.\n\n"
+        "ic_file/ic_variable (CMEMS only): a grid-shaped file/variable under `ic_folder` "
+        "for the one-time initial condition (read by hydrography.py's set_hydrography_ic).",
         importance=Importance.BASIC,
     )
 
-    # Shared between CMEMS and CMIP6 (2026-10-02, real gap hit directly:
-    # a genuine NSe/CMEMS run spanning 2010-2011 crashed with no
-    # dissic/talk boundary at all -- nse_cmems.yaml's own tracers never
-    # had O3_c/O3_TA entries, since the real CMEMS product
-    # (bio_carbon_new) only starts 2024-02-28/07-29, same real-data gap
-    # CMIP6 already has its own historical-bridge splice for. Not a
-    # CMIP6-only concern: EVERY source whose real dissic/talk file
-    # doesn't reach back far enough needs the SAME bridge file, not a
-    # separate mechanism) -- see derive_data_assignments' own
-    # _fabm_hist_files dict for how each source's bridge file set
-    # differs (CMIP6: all 6 tracers, since its own real projection file
-    # only starts 2015; CMEMS: dissic/talk only, since CMEMS's own
-    # no3/po4/si/o2 file already has full real historical coverage).
-    #
-    # Two real methods exist (2026-10-01, per user: "we might want to
-    # use both methods later"), kept available side by side rather than
-    # one replacing the other:
-    #   cycled_climatology (default, unchanged behavior) -- a flat
-    #     day-of-year climatology cycled from the real ~2-year ANFC
-    #     record, no secular trend. Generated by a since-deleted
-    #     scratchpad script (2026-09-25); the file itself
-    #     (bio_carbon_climatology_cycled_20100101_20141231.nc) still
-    #     exists.
-    #   pml_trend -- a real secular-trend extrapolation (Atlantic/
-    #     NW-shelf segments) + a real salinity regression (Baltic
-    #     segment 7), both reusing published coefficients from
-    #     Partridge et al. (PML, Dec 2025) directly rather than
-    #     independently re-fitting our own (confirmed 2026-10-01: our
-    #     own regional GLODAP subset is too sparse for that -- see
-    #     docs/pml-amm7-ersem-comparison.md and ocean-prep/cli/
-    #     derive_historical_dic_ta.py, the script that builds
-    #     bio_carbon_pml_trend_20100101_20141231.nc). Default stays
-    #     cycled_climatology (unchanged, already-proven behavior) until
-    #     pml_trend has been validated against a real run -- an
-    #     explicit opt-in, not a silent switch.
+    # Historical bridge for dissic/talk, for the years a source's own product
+    # doesn't cover (CMIP6 starts 2015; CMEMS bio_carbon_new 2024-07-29):
+    #   cycled_climatology -- day-of-year climatology of the ~2-year ANFC
+    #     record, no trend (bio_carbon_climatology_cycled_20100101_20141231.nc;
+    #     CMIP6 range only).
+    #   pml_trend -- secular-trend extrapolation + Baltic salinity regression
+    #     from Partridge et al. (PML, 2025) coefficients (ocean-prep
+    #     derive_historical_dic_ta.py; docs/pml-amm7-ersem-comparison.md).
     _dic_ta_historical_method_param = ParameterSpec(
         name="dic_ta_historical_method",
         type=TypeRef(kind="scalar", scalar_type="str"),
@@ -679,28 +487,11 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
     boundary_fabm = make_provider_slot(
         "boundaries.fabm",
         {
-            # WOA: a global climatology (on_grid=False, climatology=True,
-            # cycling the same 12-month pattern all run) -- mirrors
-            # boundary_baroclinic's own WOA branch.
+            # WOA: global climatology (on_grid=False, climatology=True).
             "WOA": (_fabm_tracers_param,),
-            # CMEMS: real biogeochemistry data already sitting at the
-            # boundary points (on_grid=True always). `climatology` picks
-            # between reading it as a real, non-cycling time series
-            # (default -- e.g. a historical/near-term run covering the
-            # period the real CMEMS file actually spans) or cycling a
-            # single representative year (e.g. a 12-month mean derived from
-            # that same file) for periods no real data can cover at all --
-            # a future CMIP6-scenario run's own future years, since no
-            # reliable CMIP6-projected biogeochemical boundary is
-            # achievable (per user, 2026-09-07: "we have to do the best we
-            # can"). pygetm.core.Array.set's own climatology kwarg already
-            # supports on_grid=True + climatology=True together (confirmed
-            # directly against pygetm.input.InputManager.add's docstring --
-            # climatology only requires "a single climatological year...
-            # representative for any true year", independent of on_grid) --
-            # this was previously unreachable here only because
-            # derive_data_assignments hardcoded climatology=False for every
-            # CMEMS use, not a real pygetm limitation.
+            # CMEMS: values at the boundary points (on_grid=True). `climatology`
+            # cycles the file as one representative year, for periods no
+            # real data covers (e.g. a scenario run's future years).
             "CMEMS": (
                 _dic_ta_historical_method_param,
                 ParameterSpec(
@@ -709,118 +500,50 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
                     default=False,
                     help="cycle this file as a single representative year "
                     "(pygetm's own climatology=True) instead of reading it "
-                    "as a real, non-cycling time series -- see this choice's "
-                    "own comment in oceanicu_providers.py for when to use "
-                    "each.",
+                    "as a real, non-cycling time series -- for periods "
+                    "no real data covers.",
                     importance=Importance.ADVANCED,
                 ),
-                # Separate from `tracers[*].file` (2026-10-01, real bug hit
-                # directly, twice): that field is a real, nbdyp-shaped
-                # (boundary-points-only) product -- correct for the SPONGE
-                # boundary read, but structurally unusable as a full-domain
-                # initial condition (no horizontal grid dimension for
-                # pygetm.input's own vertical_interpolation to find). First
-                # attempt pointed a (then-named) `ic_file` at bio_monthly_
-                # climatology.nc instead, on the assumption that file was a
-                # full regional grid (matching the OLD, never-actually-run
-                # CMEMS fabm boundary design this replaced) -- confirmed
-                # directly on bb-server1 (ncdump -h) that it is ALSO
-                # (time=12, nbdyp=310, depth=57): every CMEMS bio product in
-                # this project turned out to be boundary-point-shaped, none
-                # usable as a full-domain IC. There is no genuinely
-                # grid-shaped CMEMS/CMIP6 biogeochemistry product anywhere
-                # in this project's data (confirmed directly, same session)
-                # -- WOA's own global climatology (/data/FABM/woa_{n,p,i,
-                # o}.nc) is the only one, so it's the fallback IC source
-                # here too, same as WOA's own tracers[*].file already is
-                # for ITS own boundary+IC. ic_folder (this field) + each
-                # tracer's own OPTIONAL ic_file/ic_variable (free keys in
-                # `tracers[*]`, no separate ParameterSpec needed -- that
-                # field's own type is already a generic string mapping)
-                # point at WOA's real per-tracer file/variable naming
-                # (woa_n.nc/n_an, woa_p.nc/p_an, woa_i.nc/i_an, woa_o.nc/
-                # o_an -- same convention boundaries.fabm.WOA's own
-                # `tracers` already uses) -- deliberately NOT reusing
-                # `folder` (this choice's own boundary-forcing folder) nor
-                # `tracers[*].variable` (this choice's own boundary
-                # variable name, e.g. "no3", which doesn't match WOA's
-                # "n_an" convention). Neither ic_folder nor a tracer's own
-                # ic_file/ic_variable set -> no explicit tracer IC is set
-                # from this source at all (see scripts/hydrography.py's
-                # own set_hydrography_ic for the fallback -- either fabm.
-                # ERSEM.restart_file's seed, if configured, or (absent that
-                # too) each tracer's own fabm.yaml-declared initial_value,
-                # same as any tracer not listed in `tracers` at all).
+                # ic_folder + per-tracer ic_file/ic_variable: a grid-shaped IC
+                # source. Every CMEMS/CMIP6 bio product here is boundary-point
+                # shaped (nbdyp), so `folder`/`tracers[*].variable` can't serve as
+                # an IC; typically WOA's files (woa_n.nc/n_an, ...). Unset ->
+                # restart_file or the fabm.yaml initial_value.
                 ParameterSpec(
                     name="ic_folder",
                     type=TypeRef(kind="scalar", scalar_type="str", nullable=True),
                     default=None,
-                    help="OPTIONAL: folder for a separate, grid-shaped (NOT "
-                    "boundary-point-shaped) initial-condition read per "
-                    "tracer -- see each tracer's own OPTIONAL ic_file/"
-                    "ic_variable keys in `tracers`, and this field's own "
-                    "comment in oceanicu_providers.py for why this can't "
-                    "just reuse `folder`/`tracers[*].variable`. Typically "
-                    "${BOUNDARY_FOLDER_FABM_WOA}, reusing WOA's own real "
-                    "per-tracer files (no genuinely grid-shaped CMEMS/CMIP6 "
-                    "biogeochemistry product exists in this project).",
+                    help="OPTIONAL: folder for a grid-shaped initial condition per "
+                    "tracer (each tracer's ic_file/ic_variable in `tracers`). The "
+                    "CMEMS boundary files only hold boundary points, so they can't "
+                    "serve as an IC. Typically ${BOUNDARY_FOLDER_FABM_WOA}.",
                     importance=Importance.BASIC,
                 ),
                 _fabm_tracers_param,
             ),
-            # CMIP6: same real time series shape as CMEMS (on_grid=True,
-            # climatology=False) -- boundary-VALUES only, mirrors
-            # boundary_baroclinic's own CMIP6 branch (_CMIP6_SHARED gives
-            # model/scenario, filling folder_template's {model}/{scenario}
-            # placeholders). NOT a valid initial-condition source -- mirrors
-            # hydrography.py's set_hydrography_ic, which only ever accepts
-            # WOA/CMEMS for the IC (`if source not in ("WOA", "CMEMS"):
-            # return`); CMIP6 delta-change output has no equivalent
-            # "monthly_ic" snapshot file convention. See scripts/fabm.py's
-            # own configure_fabm docstring for the matching IC-side gate.
+            # CMIP6: boundary values only (on_grid=True, climatology=False);
+            # not an IC source -- no CMIP6 "monthly_ic" files exist.
             "CMIP6": _CMIP6_SHARED + (_fabm_tracers_param, _dic_ta_historical_method_param),
         },
         default="WOA",
     )
 
-    # pyGETM/FABM supports many biogeochemical models (ERSEM here, but
-    # others are possible) -- source-discriminated like every other role
-    # here, not a bare enable/disable flag, so a future second model can be
-    # added as another choice without restructuring. Mirrors cfg_fabm.py's
-    # own `cfg.fabm.config == "ersem"` check exactly: real FABM setup always
-    # needs BOTH sim.fabm (is FABM enabled at all, from simulation.fabm --
-    # set from `file` by derive_config_value_overrides below) AND which
-    # specific model/config is active (this role's own `source`), since
-    # different models need different dependencies/ICs/boundaries.
-    #
-    # `folder` (FABM-specific input files, e.g. cfg_fabm.py's EMEP/gelbstoff
-    # netCDFs) comes for free from _shared_provider_base_params(). `file` is
-    # the actual fabm.yaml path -- propagated into simulation.fabm by
-    # derive_config_value_overrides below.
+    # Source-discriminated so another model can be added as a choice. FABM
+    # needs both simulation.fabm (from `file`, via derive_config_value_
+    # overrides) and the model choice itself. `folder` holds its input files.
     fabm = make_provider_slot(
         "fabm",
         {
-            # Explicit "off" choice -- previously FABM could only be disabled
-            # implicitly (omit the whole `fabm:` section, or set source:
-            # ERSEM with no `file`), which isn't discoverable in a TUI/web
-            # frontend's own source dropdown (ERSEM was the ONLY visible
-            # choice). oceanicu_driver.py's `if fabm_source == "ERSEM":`
-            # gate (and run_fabm_data_script's own no-op-if-unconfigured
-            # design) already skip every FABM data-setting step for any
-            # OTHER source value, "none" included -- no other code change
-            # needed. Zero extra params: the 5 shared base params (folder,
-            # folder_template, ...) still show up (make_provider_slot always
-            # merges those in) but are genuinely unused for this choice,
-            # same as any other minimal provider.
+            # Explicit "off" choice, visible in the TUI/web source dropdown;
+            # every FABM step is skipped for any source other than ERSEM.
             "none": (),
             "ERSEM": (
                 ParameterSpec(
                     name="file",
                     type=TypeRef(kind="path"),
                     default=None,
-                    help="path to the fabm.yaml driving this run -- propagated into "
-                    "simulation.fabm (pygetm.Simulation's own fabm= constructor kwarg) "
-                    "by oceanicu_driver.py. Required to actually enable FABM.",
+                    help="path to the fabm.yaml driving this run -- becomes simulation.fabm "
+                    "(pygetm.Simulation's fabm= kwarg). Required to enable FABM.",
                     importance=Importance.BASIC,
                 ),
                 ParameterSpec(
@@ -893,16 +616,8 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
         default="ERSEM",
     )
 
-    # Dict order here IS the section order everywhere downstream (TUI
-    # navigation tree, generated YAML template, ...) -- pygetm_config.schema.
-    # build_schema() preserves registration order rather than alphabetizing
-    # it (see that module's own comment). Matches run_model.py's real
-    # create_simulation() processing order exactly: cfg_ic.create (hydrography,
-    # line 172) -> cfg_boundaries.data_2d/data_3d (boundaries, lines 174-176)
-    # -> cfg_rivers.data (river_discharge, line 178) -> cfg_airsea.data
-    # (meteo, line 180) -> cfg_fabm.configure (boundaries.fabm has no own
-    # position -- read directly by fabm's own configure_fabm, not a
-    # separate step; fabm, line 193, last).
+    # Dict order is the section order everywhere downstream (TUI tree,
+    # generated YAML template): hydrography, boundaries, rivers, meteo, FABM.
     return {
         "hydrography": hydrography,
         "boundaries.barotropic": boundary_barotropic,
@@ -915,23 +630,11 @@ def register_oceanicu_providers() -> dict[str, ChoiceSpec]:
 
 
 # ----------------------------------------------------------------------
-# config-value deriver -- registered via PYGETM_CONFIG_VALUE_DERIVERS
-# (pygetm_config.providers.derive_config_value_overrides), so ALL THREE
-# generation modes (oceanicu_driver.py direct/--dump-python, TUI/web
-# 'Generate script') get the SAME simulation.fabm value -- not just
-# whichever ran oceanicu_driver.py's own main() (real gap, caught
-# 2026-09-26: setting fabm.ERSEM.file in the TUI alone produced a
-# generated script whose fabm= always fell back to None, since only
-# oceanicu_driver.py's main() ever bridged fabm.ERSEM.file to
-# simulation.fabm by hand -- the TUI's "Generate script" path never ran
-# that code at all).
-#
-# Reads the VALIDATED, choice-flattened config shape, same as
-# derive_data_assignments below -- config['fabm']['file'] directly, not
-# config['fabm']['ERSEM']['file'] (see that function's own comment on
-# why). Must stay pygetm-free (codegen.py calls this too, at GENERATION
-# time) and side-effect-free (returns overrides for the caller to apply/
-# consult, never mutates `config`).
+# config-value deriver, registered via PYGETM_CONFIG_VALUE_DERIVERS so every
+# entrypoint (driver, --dump-python, TUI/web "Generate script") gets the same
+# values. Reads the validated, choice-flattened config (config['fabm']['file'],
+# not ['fabm']['ERSEM']['file']); pygetm-free and side-effect-free, since
+# codegen calls it at generation time.
 def derive_config_value_overrides(config: dict) -> dict:
     overrides: dict = {}
 
@@ -939,34 +642,10 @@ def derive_config_value_overrides(config: dict) -> dict:
     if fabm_cfg.get("source") == "ERSEM" and fabm_cfg.get("file"):
         overrides["simulation.fabm"] = fabm_cfg["file"]
 
-    # output.variable_groups.fabm_mizer -- a VECTOR variable (nclass size-
-    # class carbon fields, fish_c1..fish_c<nclass>), not something to
-    # hand-list in every domain config. nclass is read directly from the
-    # configured fabm.yaml itself (instances.<name>.parameters.nclass, for
-    # whichever instance's model starts with "mizer/"). Moved here
-    # 2026-10-24 (from oceanicu_driver.py's own main(), where this ONLY
-    # ever helped that one entrypoint -- same real gap as simulation.fabm
-    # above, now fixed the same way: every generation mode (oceanicu_
-    # driver.py direct/--dump-python, TUI/web 'Generate script') consults
-    # this same deriver via pygetm_config.loader.configure_output/codegen.
-    # _emit_output, which both merge any "output.variable_groups.<name>"
-    # key here into the real variable_groups dict before resolving any
-    # group reference). Falls back to the last known-correct value (100)
-    # with a clear warning if the file can't be found/parsed, rather than
-    # silently guessing. Driven entirely by whether any output.files
-    # variable_requests entry already references the fabm_mizer group,
-    # same "driven by what's already referenced" pattern as before --
-    # ALWAYS overrides whatever the raw YAML had there, since this list is
-    # derived, never hand-maintained (same rule as any other code-generated
-    # content in this project -- see nse_cmip6.yaml's own fabm_mizer key,
-    # which must hold ONLY a placeholder; real Mizer diagnostic names that
-    # aren't part of this nclass-sized expansion belong in a SEPARATE group,
-    # e.g. fabm_mizer_diagnostics).
-    #
-    # Unlike simulation.fabm above, this reads config['fabm']['folder']/
-    # ['file'] directly too -- already flattened by the time this function
-    # runs (same reasoning, see this function's own docstring), so no
-    # fabm_source-keyed nesting workaround is needed here either.
+    # output.variable_groups.fabm_mizer: fish_c1..fish_c<nclass>, with nclass
+    # read from the mizer instance in fabm.yaml (fallback 100, with a warning).
+    # Only when some output file requests the group; always overrides the
+    # YAML's placeholder (real Mizer diagnostics belong in another group).
     if any(
         "fabm_mizer" in (req.get("groups") or [])
         for file_entry in config.get("output", {}).get("files", [])
@@ -995,16 +674,9 @@ def derive_config_value_overrides(config: dict) -> dict:
                 print(f"WARNING: couldn't read nclass from fabm.yaml ({exc}) -- "
                       f"using fabm_mizer nclass={_FISH_NCLASS_FALLBACK}", file=sys.stderr)
         else:
-            # fabm.source != "ERSEM" (e.g. "none") -- no fabm.file to read at
-            # all, same silent-gap risk the other branches already warn
-            # about. Harmless today only because every real fabm_mizer
-            # variable_requests entry also carries requires_fabm_dependency:
-            # fish/fishing_pressure, which pygetm-config's loader/codegen
-            # check at actual runtime (sim.fabm.has_dependency(...)) and
-            # skips the whole request when FABM isn't configured -- so this
-            # fallback value is computed but never actually requested as
-            # output. Warn anyway so every fallback path is equally visible
-            # (e.g. nse_woa.yaml, nse_cmems_tides.yaml: fabm.source: none).
+            # No fabm.file (e.g. fabm.source none). Harmless: fabm_mizer
+            # requests also require fish/fishing_pressure, so they are skipped
+            # when FABM is off.
             print(f"WARNING: fabm.source={fabm_cfg.get('source')!r} has no fabm.file to read -- "
                   f"using fabm_mizer nclass={_FISH_NCLASS_FALLBACK}", file=sys.stderr)
         overrides["output.variable_groups.fabm_mizer"] = [f"fish_c{i}" for i in range(1, nclass + 1)]
@@ -1013,23 +685,10 @@ def derive_config_value_overrides(config: dict) -> dict:
 
 
 # ----------------------------------------------------------------------
-# data_assignments deriver -- registered via PYGETM_CONFIG_DATA_ASSIGNMENTS_
-# DERIVERS (pygetm_config.providers.derive_extra_data_assignments), so ALL
-# THREE generation modes (oceanicu_driver.py direct/--dump-python, TUI/web
-# 'Generate script') compute the SAME boundaries.baroclinic/meteo
-# data_assignments -- not just whichever ran oceanicu_driver.py's own
-# main(). Moved out of oceanicu_driver.py's main() (this session's earlier,
-# incomplete fix: a setdefault-style injection that only fired for driver
-# runs, so a TUI-only edit of boundaries.baroclinic.source never produced
-# the corresponding open_boundary.temp/salt.values at all).
-#
-# Reads the VALIDATED config shape (validate_config's own OUTPUT, same as
-# codegen._emit_data_assignments/loader.apply_data_assignments both already
-# pass in): the ACTIVE choice label's own fields are flattened directly
-# onto the parent dict (config['boundaries']['baroclinic']['folder'], not
-# ['boundaries']['baroclinic']['CMEMS']['folder']) -- see
-# yaml_parse._validate_choice / loader._resolve_choice. Must stay
-# pygetm-free (codegen.py calls this too, at GENERATION time).
+# data_assignments deriver, registered via PYGETM_CONFIG_DATA_ASSIGNMENTS_
+# DERIVERS so every entrypoint computes the same boundaries/meteo entries.
+# Same validated, choice-flattened config shape and pygetm-free rule as
+# derive_config_value_overrides above.
 _CMIP6_HIST_START, _CMIP6_HIST_END = "20100101", "20141231"
 
 
@@ -1069,31 +728,16 @@ def _cmip6_bdy_files(role: dict, config: dict, calendar_suffix: str, variable: s
 def derive_data_assignments(config: dict) -> list[dict]:
     entries: list[dict] = []
 
-    # runtime.calendar (see schema._build_runtime_section) forces the WHOLE
-    # simulation onto a non-standard calendar (currently only 'noleap', to
-    # match a raw CMIP6 model like GFDL-ESM4 -- see driver/scripts/meteo.py)
-    # -- every OTHER real-world-calendar data source the sim reads then
-    # needs a matching pre-converted copy, or pygetm's own calendar check
-    # raises (Concatenate(...) is incompatible with simulation calendar
-    # noleap). '_noleap' is the fixed suffix these pre-converted copies use
-    # (ocean-prep's run-tidal-boundaries/run-delta-boundaries with
-    # --calendar noleap for bdy_2d/bdy_3d, a one-off convert_calendar +
-    # to_netcdf for EMORID rivers -- see nse_tidal_bdy_noleap.yaml /
-    # nse_delta_bdy_noleap.yaml / nse_delta_bdy_historical_noleap.yaml).
-    # Empty string when calendar is None/'standard' (the overwhelming
-    # majority of configs) -- every existing experiment's file paths stay
-    # byte-identical to before this was added.
+    # runtime.calendar noleap (raw CMIP6 models, e.g. GFDL-ESM4): every other
+    # data source needs a pre-converted '_noleap' copy, or pygetm refuses to
+    # mix calendars. Empty for the standard calendar.
     _calendar_suffix = (
         "_noleap" if config.get("runtime", {}).get("calendar") == "noleap" else ""
     )
 
-    # boundaries.baroclinic 3D temp/salt boundary VALUES differ by source --
-    # WOA: a global climatology (on_grid=False, climatology=True, cycling
-    # the same 12-month pattern all run) vs CMEMS: a real time series
-    # already sitting at the boundary points (on_grid=True,
-    # climatology=False) -- mirrors cfg_boundaries.py::data_3d. The
-    # boundary_type (SPONGE) entries are source-independent and stay static
-    # in the YAML's own data_assignments block (unaffected by this).
+    # boundaries.baroclinic temp/salt values (cfg_boundaries.py::data_3d):
+    # WOA a global climatology, CMEMS/CMIP6 time series at the boundary
+    # points. The boundary types stay in the YAML's data_assignments.
     baroclinic = config.get("boundaries", {}).get("baroclinic", {})
     baroclinic_source = baroclinic.get("source")
     if baroclinic_source == "WOA":
@@ -1112,50 +756,15 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "open_boundary.salt.values", "kind": "file", "file": str(_cmems_file), "variable": "so", "on_grid": True, "climatology": False},
         ]
     elif baroclinic_source == "CMIP6":
-        # ocean-prep's run-delta-boundaries writes one file PER VARIABLE
-        # (bdy_3d_{variable}_{start}_{end}.nc), unlike CMEMS's single file
-        # holding both thetao/so -- filename_template is formatted once per
-        # target with variable='thetao'/'so' rather than reused as-is.
-        #
-        # Historical/scenario splice (same trick as meteo's own CMIP6
-        # splicing in scripts/meteo.py's set_meteo_data, per user,
-        # 2026-09-07): unlike meteo's per-year files, run-delta-boundaries
-        # writes ONE file per whole period -- a fixed historical bridge
-        # file (2010-01-01..2014-12-31, ocean-prep's own nse_delta_bdy_
-        # historical.yaml -- see that config's own header for why this
-        # period specifically) and one scenario file covering the real
-        # future period (baroclinic.start_date/end_date, e.g.
-        # 2015-01-01..2100-12-31 for ssp126). Both real files already exist
-        # on disk (confirmed 2026-09-07). Simpler than meteo's glob-based
-        # splice: `file:` accepts an exact-path LIST as-is (codegen.py's
-        # own list branch, no glob/wildcard resolution involved at all,
-        # unlike expand_year_glob), so this just concatenates the two
-        # whole-period files -- pygetm.input.from_nc reads them as one
-        # continuous series, same mechanism as meteo's per-year list.
-        # Unconditional (not start/stop-gated): a run entirely within one
-        # period only ever touches its own file's real time range, so
-        # listing both is harmless even then -- no need to thread runtime.
-        # stop into this deriver the way meteo's script-hook needed to.
+        # One file per variable (bdy_3d_{variable}_...), historical bridge +
+        # scenario file -- see _cmip6_bdy_files.
         entries += [
             {"target": "open_boundary.temp.values", "kind": "file", "file": _cmip6_bdy_files(baroclinic, config, _calendar_suffix, "thetao"), "variable": "thetao", "on_grid": True, "climatology": False},
             {"target": "open_boundary.salt.values", "kind": "file", "file": _cmip6_bdy_files(baroclinic, config, _calendar_suffix, "so"), "variable": "so", "on_grid": True, "climatology": False},
         ]
 
-    # boundaries.barotropic 2D z/u/v boundary VALUES differ by source too --
-    # TPXO: a harmonic tidal-constituent lookup (kind="tpxo", keyed by the
-    # open boundary's own lon/lat, no file+variable pair) vs CMEMS/CMIP6: a
-    # real time series already sitting at the boundary points, read directly
-    # (kind="file", zos/uo/vo) -- mirrors cfg_boundaries.py::data_2d exactly,
-    # same TPXO-vs-generic-else split. Used to be three STATIC `kind: tpxo`
-    # entries baked into every nse_*.yaml's own data_assignments -- harmless
-    # only because every domain happened to also set source: TPXO; silently
-    # wrong the moment one didn't (confirmed 2026-09-02: nse_cmems.yaml sets
-    # boundaries.barotropic.source: CMEMS but the generated script still
-    # called pygetm.input.tpxo.get, because nothing ever read that source
-    # flag). Made dynamic here instead, matching boundaries.baroclinic's own
-    # already-dynamic branch above -- this is also what makes a TUI-only
-    # switch of boundaries.barotropic.source (no direct YAML edit) "just
-    # work", same as it already does for boundaries.baroclinic.source.
+    # boundaries.barotropic z/u/v (cfg_boundaries.py::data_2d): TPXO tidal
+    # constituents, or CMEMS/CMIP6 time series at the boundary points.
     barotropic = config.get("boundaries", {}).get("barotropic", {})
     barotropic_source = barotropic.get("source")
     if barotropic_source == "TPXO":
@@ -1166,9 +775,7 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "open_boundaries.v", "kind": "tpxo", "tpxo_folder": _tpxo_folder, "tpxo_variable": "v", "on_grid": True},
         ]
     elif barotropic_source == "CMEMS":
-        # Single file holding zos/uo/vo together -- matches
-        # cfg_boundaries.py::data_2d's own generic branch, which reads all
-        # three off one resolved `fn`.
+        # One file holding zos/uo/vo.
         _folder = _bdy_folder(barotropic, config, barotropic.get("scenario", ""))
         _file = _folder / barotropic.get("filename_template", "").format(
             start_date=barotropic.get("start_date", ""), end_date=barotropic.get("end_date", "")
@@ -1179,15 +786,7 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "open_boundaries.v", "kind": "file", "file": str(_file), "variable": "vo", "on_grid": True},
         ]
     elif barotropic_source == "CMIP6":
-        # Same historical/scenario splice as boundaries.baroclinic's own
-        # CMIP6 branch above (see that branch's comment for the full
-        # reasoning) -- real files confirmed on disk for both periods
-        # 2026-09-07, same NSe/CMIP6/{model}/{scenario}/bdy/ tree
-        # baroclinic's own files sit in (bdy_2d_*.nc there, alongside
-        # baroclinic's bdy_3d_{variable}_*.nc). ONE file holds zos/uo/vo
-        # together (unlike baroclinic's one-file-per-variable), so this
-        # only needs a single two-element file list, reused for all three
-        # targets.
+        # One file holding zos/uo/vo, historical bridge + scenario file.
         _files = _cmip6_bdy_files(barotropic, config, _calendar_suffix)
         entries += [
             {"target": "open_boundaries.z", "kind": "file", "file": _files, "variable": "zos", "on_grid": True},
@@ -1195,40 +794,11 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "open_boundaries.v", "kind": "file", "file": _files, "variable": "vo", "on_grid": True},
         ]
 
-    # meteo's straightforward 1:1 file-read fields -- differ by SOURCE (ERA5
-    # vs CMIP6 use different target fields entirely: d2m/DEW_POINT_
-    # TEMPERATURE vs qa/SPECIFIC_HUMIDITY), so still can't be one single
-    # static list independent of source the way boundaries.baroclinic's
-    # matching targets could theoretically share. swr/swr_downwards/ql/
-    # ql_downwards emitted unconditionally for ERA5 (like the already-
-    # migrated real domains' own static YAML entries) -- pygetm_config.
-    # loader._airsea_flux_target_inactive/codegen.py's own copy already
-    # skip whichever doesn't match simulation.airsea's actual shortwave_
-    # method/longwave_method, so no need to duplicate that condition here.
-    # BUT that only covers picking between FluxesFromMeteo's OWN swr/ql
-    # sub-choices -- it says nothing about simulation.airsea not being
-    # FluxesFromMeteo at all. Real, reproduced bug (2026-09-14): a config
-    # with `simulation.airsea.type: Fluxes` (prescribed taux/tauy/sp/shf/
-    # swr/pe -- a completely different pygetm.airsea class with no t2m/d2m/
-    # u10/v10/tp/tcc attributes at all) but a `meteo:` section still active
-    # (e.g. left over from copying a template) crashed at generation-time
-    # call-site execution with `AttributeError: 'Fluxes' object has no
-    # attribute 't2m'`.
-    #
-    # NOT fixed by silently skipping these entries when airsea.type !=
-    # FluxesFromMeteo: per user, 2026-09-14, `Fluxes` with time/spatially-
-    # varying values sourced from FILES (feeding taux/tauy/shf/swr/pe
-    # directly, instead of FluxesFromMeteo's own bulk-formula inputs) is a
-    # legitimate thing to want -- a silent skip would leave `Fluxes` at its
-    # literal YAML defaults with NO real forcing at all, and LOOK like it
-    # worked. So: meteo.source="Fluxes" is its own real branch below
-    # (targets Fluxes' own field names), and a MISMATCHED combination
-    # (an ERA5/CMIP6/CMIP6-raw source, which only know FluxesFromMeteo's
-    # field names, paired with a non-FluxesFromMeteo airsea.type -- or,
-    # symmetrically, meteo.source="Fluxes" paired with an airsea.type that
-    # isn't "Fluxes") raises a clear, actionable error instead of either
-    # crashing on an AttributeError deep in a set() call or silently doing
-    # nothing.
+    # meteo's 1:1 file reads, by source (ERA5 d2m vs CMIP6 qa). The loader/
+    # codegen skip whichever swr/ql target simulation.airsea's methods don't
+    # use. A meteo source that doesn't match simulation.airsea.type
+    # (FluxesFromMeteo fields vs Fluxes fields) raises: skipping silently
+    # would leave the run without real forcing.
     meteo = config.get("meteo", {})
     meteo_source = meteo.get("source")
     _airsea_type = config.get("simulation", {}).get("airsea", {}).get("type")
@@ -1250,14 +820,8 @@ def derive_data_assignments(config: dict) -> list[dict]:
             "matches FluxesFromMeteo instead."
         )
     if meteo_source == "Fluxes":
-        # Two real modes in ONE provider, not two: no `folder` configured
-        # (default) means "constant" -- stay a valid, active source: Fluxes
-        # choice (satisfies the discriminator, keeps this whole meteo:
-        # section legal) that derives NOTHING, so simulation.airsea.Fluxes'
-        # own static YAML values (taux/tauy/sp/shf/swr/pe) win untouched.
-        # A real `folder` switches to "from file" -- per user, 2026-09-14:
-        # "constant... but file method shall be configurable" -- configuring
-        # the folder IS the switch, no separate mode flag needed.
+        # No `folder`: Fluxes' own static YAML values stay (nothing derived).
+        # A `folder` switches every field to flux_<field>_????.nc files.
         _folder_raw = meteo.get("folder")
         if _folder_raw:
             _folder = Path(_folder_raw)
@@ -1285,30 +849,10 @@ def derive_data_assignments(config: dict) -> list[dict]:
             {"target": "simulation.airsea.ql_downwards", "kind": "file", "file": str(_folder / "era5_strd_????.nc"), "variable": "strd", "pre_transform_scale": 1 / 3600.0},
         ]
     elif meteo_source in ("CMIP6", "CMIP6-raw"):
-        # t2m/qa/u10/v10/sp/tp deliberately have NO entry here at all (not
-        # even a placeholder) -- set_meteo_data (scripts/meteo.py,
-        # meteo.data_script's own default) sets all six UNCONDITIONALLY,
-        # before its own radiation_source branching even starts, so a
-        # static entry here would NEVER be the value actually used, only
-        # ever immediately overwritten. A `kind: constant` placeholder used
-        # to sit here for these six (and before that, an even-more-fragile
-        # real `kind: file` read of the active scenario's own folder, which
-        # could crash for years outside that one scenario's own coverage --
-        # see the historical/scenario splice's own comment in set_meteo_data
-        # for that story) -- removed entirely 2026-09-07, per user: "but if
-        # we know it is overwritten - write them in the first place [why]".
-        # Writing a value nothing ever reads is pure noise, and previously
-        # WAS a real point of confusion (a constant sitting right next to
-        # real file reads reads as a real, permanent value, not a
-        # placeholder about to vanish a few lines later).
-        #
-        # tcc is genuinely different, and keeps its own real placeholder
-        # below: set_meteo_data only overwrites it conditionally (when
-        # radiation_source == "pseudo_tcc"); for "net"/"components" it's
-        # never touched again after this, yet still needs SOME real value
-        # (pygetm's own FluxesFromMeteo requires every field it reads to be
-        # set before sim.start(), even one it then never actually consults
-        # because shortwave_method/longwave_method route around it).
+        # t2m/qa/u10/v10/sp/tp: no entries -- set_meteo_data always sets them.
+        # tcc needs a value even when unused (FluxesFromMeteo requires every
+        # field before sim.start()); set_meteo_data overwrites it for
+        # pseudo_tcc only.
         entries += [
             {
                 "target": "simulation.airsea.tcc",
@@ -1323,55 +867,19 @@ def derive_data_assignments(config: dict) -> list[dict]:
             },
         ]
 
-    # FABM tracer boundary type + values (WOA-sourced) -- mirrors
-    # boundaries.baroclinic's own WOA branch above exactly (straightforward
-    # 1:1 climatology file reads, no computation needed), the same
-    # meteo/CMIP6-vs-ERA5 split reasoning: ERA5's plain reads live here as
-    # data_assignments, only CMIP6's genuinely COMPUTED radiation_source
-    # branches stay imperative in scripts/meteo.py. FABM's ERSEM dependency
-    # setup (gelbstoff/CO2/EMEP -- needs pygetm.input preprocessing) and the
-    # IC's one-time `.isel(time=imonth)` pick genuinely can't be
-    # data_assignments (same reason hydrography.py's own T/S IC pick can't
-    # be either -- climatology=True cycles all 12 months for the whole run,
-    # not "pick one month once") -- both stay in scripts/fabm.py.
-    #
-    # Gated here (not static in each nse_*.yaml, unlike open_boundary.temp/
-    # salt's SPONGE entries) because FABM tracer targets have NO runtype/
-    # enabled-state skip coverage in pygetm_config.loader --
-    # _tracer_target_invalid_for_runtype's own docstring: "FABM-added
-    # tracers are dynamic/model-specific and NOT covered ... a config with
-    # one still crashes at execution time". An unconditional
-    # open_boundary.N3_n entry would crash every nse_*.yaml today (FABM off
-    # by default, fabm.ERSEM.file unset) -- gating on the same condition
-    # oceanicu_driver.py itself uses to decide whether simulation.fabm gets
-    # set at all (fabm.source == "ERSEM" and fabm.ERSEM.file truthy) is the
-    # only way to keep this safe.
+    # FABM tracer boundary types + values. Gated on FABM being on
+    # (fabm.source ERSEM with a file): pygetm-config can't skip a FABM tracer
+    # target when FABM is off, so an unconditional entry would crash. The IC
+    # pick and the ERSEM dependencies are hooks (hydrography.py, fabm.py).
     fabm_cfg = config.get("fabm", {})
     if fabm_cfg.get("source") == "ERSEM" and fabm_cfg.get("file"):
         boundaries_fabm = config.get("boundaries", {}).get("fabm", {})
         boundaries_fabm_source = boundaries_fabm.get("source")
-        # WOA vs CMEMS vs CMIP6: same on_grid distinction as boundaries.
-        # baroclinic's own WOA/CMEMS/CMIP6 branches above -- a global
-        # climatology (WOA) vs a real time series already at the boundary
-        # points (CMEMS, CMIP6 delta-change output). Which TRACERS get a
-        # boundary at all is config-driven either way (boundaries.
-        # fabm.<source>.tracers -- see that ParameterSpec's own help text
-        # for why this isn't a fixed list).
-        #
-        # CMEMS's own `climatology` is config-driven (boundaries.fabm.
-        # CMEMS.climatology, default False) rather than hardcoded like WOA/
-        # CMIP6 -- see that field's own ParameterSpec comment above for why
-        # (a future CMIP6-scenario run's own future years need CMEMS cycled
-        # as a stand-in climatology, since no real CMIP6-projected BGC
-        # boundary is achievable; a historical/near-term run reads the same
-        # source as a real, non-cycling time series instead).
+        # WOA: global climatology; CMEMS/CMIP6: time series at the boundary
+        # points; CMEMS `climatology` optionally cycles one year.
         _fabm_grid_kwargs = {
             "WOA": {"on_grid": False, "climatology": True},
-            # NOT boundaries_fabm["CMEMS"]["climatology"] -- validate_config's
-            # choice-flattening puts the ACTIVE choice's own fields directly
-            # on boundaries_fabm itself (see _fabm_tracers below, and
-            # scripts/meteo.py's own set_meteo_data docstring for the same,
-            # previously-reproduced pitfall).
+            # Validated config: the active choice's fields are on boundaries_fabm.
             "CMEMS": {"on_grid": True, "climatology": bool(boundaries_fabm.get("climatology", False))},
             "CMIP6": {"on_grid": True, "climatology": False},
         }.get(boundaries_fabm_source)
@@ -1379,72 +887,20 @@ def derive_data_assignments(config: dict) -> list[dict]:
         if _fabm_grid_kwargs is not None and _fabm_tracers:
             _fabm_folder = Path(boundaries_fabm.get("folder", ""))
             if boundaries_fabm_source == "CMIP6" and boundaries_fabm.get("folder_template"):
-                # Mirrors boundaries.baroclinic's own CMIP6 branch exactly
-                # (model/scenario fill the folder_template placeholders).
-                # Unlike that branch, `file` per tracer stays a literal
-                # filename (not filename_template.format(variable=...)) --
-                # real CMIP6 BGC delta-change output naming isn't confirmed
-                # for NSe yet, same status as CMEMS's own tracers[*].file.
+                # model/scenario fill folder_template; `file` stays literal.
                 _fabm_folder = _fabm_folder / boundaries_fabm["folder_template"].format(
                     model=boundaries_fabm.get("model", ""), scenario=boundaries_fabm.get("scenario", "")
                 )
-            # Historical/scenario splice (2026-09-25, per user), same trick
-            # as boundaries.baroclinic/barotropic's own CMIP6 branches above
-            # -- FABM nutrient boundaries had none until now, a real gap
-            # found running the extended-dry-run over a pre-2015 period.
-            # Per-tracer historical source, NOT the raw CMIP6 historical
-            # experiment used first (rejected, per user: CMEMS is the more
-            # correct real-observation source for this bridge period):
-            #   no3/po4/si/o2: real, already-dated CMEMS reanalysis --
-            #     bio_daily_20100101_20141231.nc, a pre-trimmed slice of
-            #     BOUNDARY_FOLDER_FABM_CMEMS's own bio_daily_2010-01-01_to_
-            #     2026-08-17.nc (trimmed to avoid overlapping the scenario
-            #     file's own 2015+ coverage, which would break
-            #     TemporalInterpolation's monotonic-time assumption --
-            #     same reason baroclinic/barotropic's own historical files
-            #     are dedicated 2010-2014-only files, not full-length ones).
-            #   dissic/talk: no real CMEMS coverage exists that far back
-            #     (bio_carbon_new only starts 2024-07-29) -- instead a
-            #     day-of-year climatology built from that real ~2-year
-            #     record (bio_carbon_climatology_cycled_20100101_
-            #     20141231.nc, generated 2026-09-25; Feb 29 -- absent from
-            #     the source window entirely -- falls back to Feb 28,
-            #     same convention ocean-prep's own delta_change.py.
-            #     _analog_date uses for an analogous gap).
-            # BOUNDARY_FOLDER_FABM_CMEMS stays an UNRESOLVED "${VAR}"
-            # literal here, like every other folder in this whole function
-            # -- derive_data_assignments runs at GENERATION time (always on
-            # orca, which never has this data or a matching data-roots-file),
-            # not at the generated script's own runtime; os.environ.get
-            # here was a real, caught bug (found 2026-09-25 testing this
-            # exact splice) -- it read as unset during generation, silently
-            # falling through to the plain single-file (no splice) case.
-            # `Path("${VAR}") / "name"` still does plain string-join (no
-            # actual filesystem resolution happens until the generated
-            # script's own resolve_data_path(...) call, baked in later by
-            # codegen), so this is safe.
+            # Historical bridge files (all in ${BOUNDARY_FOLDER_FABM_CMEMS},
+            # left unresolved: this runs at generation time):
+            #   no3/po4/si/o2: bio_daily_20100101_20141231.nc, CMEMS reanalysis
+            #     trimmed to end before the scenario file (no time overlap).
+            #   dissic/talk: see dic_ta_historical_method.
+            # CMIP6 needs all six (its projections start 2015); CMEMS only
+            # dissic/talk (bio_carbon_new starts 2024-07-29); WOA none.
             _cmems_fabm_folder = Path("${BOUNDARY_FOLDER_FABM_CMEMS}")
-            # dissic/talk's own historical-bridge file -- see this choice's
-            # own dic_ta_historical_method ParameterSpec comment above for
-            # the two available methods and why both are kept. Date range
-            # of the bridge file ITSELF differs by source (2026-10-02,
-            # real gap hit directly): CMIP6's own real projection file
-            # starts 2015-01-01, so its bridge only needs to cover
-            # 2010-2014. CMEMS's own real dissic/talk product
-            # (bio_carbon_new) only starts 2024-07-29 (confirmed directly
-            # -- NOT 2024-02-28, an earlier, stale assumption) -- a bridge
-            # covering only 2010-2014 would leave a real ~10-year gap
-            # (2015-01-01 to 2024-07-28) with NEITHER a bridge NOR real
-            # coverage, exactly the gap that broke a real NSe/CMEMS
-            # 2010-2011 run. CMEMS's own bridge file is therefore extended
-            # to cover 2010-01-01 to 2024-07-28 (the day before real
-            # coverage begins, zero overlap) -- same derive_historical_
-            # dic_ta.py script, just a longer --stop. Only regenerated for
-            # pml_trend (the method actually selected for CMEMS, see
-            # nse_cmems.yaml) -- cycled_climatology's own extended-range
-            # equivalent does not exist (that method's generator script
-            # was a since-deleted scratchpad, never recreated) and is
-            # NOT safe to select for CMEMS until/unless it is.
+            # dissic/talk bridge: CMIP6 2010-2014; CMEMS 2010-01-01..2024-07-28
+            # (pml_trend only -- no cycled_climatology file for that range).
             _dic_ta_historical_method = boundaries_fabm.get("dic_ta_historical_method", "cycled_climatology")
             _dic_ta_hist_file = {
                 ("cycled_climatology", "CMIP6"): "bio_carbon_climatology_cycled_20100101_20141231.nc",
@@ -1458,45 +914,16 @@ def derive_data_assignments(config: dict) -> list[dict]:
                 for _spec in _fabm_tracers.values()
             )
             if boundaries_fabm_source == "CMEMS" and _dic_ta_hist_file is None and _needs_dic_ta_bridge:
-                # cycled_climatology's own CMEMS-range (2010-01-01 to
-                # 2024-07-28) equivalent does not exist -- that method's
-                # generator script was a since-deleted scratchpad, never
-                # recreated for this range (see dic_ta_historical_method's
-                # own ParameterSpec comment). Fail loudly at generation
-                # time rather than crash later with `Path / None` deep
-                # inside this function, or -- worse -- silently resolve to
-                # a short, still-gapped bridge file.
+                # No cycled_climatology file for CMEMS's range: fail at
+                # generation rather than read a gapped bridge.
                 raise ValueError(
                     "boundaries.fabm.CMEMS.dic_ta_historical_method=cycled_climatology has no real "
                     "bridge file covering CMEMS's own real dissic/talk gap (2010-01-01 to 2024-07-28) -- "
                     "use pml_trend instead, or build bio_carbon_climatology_cycled_20100101_20240728.nc "
                     "first."
                 )
-            # Per-source bridge-file set (2026-10-02, real gap hit
-            # directly on a genuine NSe/CMEMS 2010-2011 run: no dissic/
-            # talk boundary at all, since nse_cmems.yaml's own tracers
-            # had no O3_c/O3_TA entries and CMEMS's own real dissic/talk
-            # product -- bio_carbon_new -- only starts 2024-02-28/07-29).
-            # CMIP6: ALL 6 tracers need a bridge -- its own real
-            # projection file (river_flows_future-style delta-change
-            # output) only starts 2015-01-01. CMEMS: only dissic/talk
-            # need one -- no3/po4/si/o2's own real file (bio_daily_
-            # 2010-01-01_to_2026-08-17.nc) already has full real
-            # historical coverage, no bridge needed there at all. WOA
-            # needs no bridge file set (empty dict) -- it's a global
-            # climatology, not a real time series with any coverage gap
-            # to bridge.
-            # NOT a single dict literal keyed by boundaries_fabm_source (a
-            # real bug hit directly, 2026-10-07, generating a genuine NSe/
-            # WOA/validation/E combo -- WOA's own ERSEM-enabled boundaries.
-            # fabm.WOA branch reaches this code too, now that
-            # add_experiments.py supports it): a dict literal's values are
-            # ALL evaluated eagerly, regardless of which key is later
-            # looked up -- so the CMEMS/CMIP6 branches' own `_cmems_fabm_
-            # folder / _dic_ta_hist_file` crashed with `Path / None` for
-            # WOA even though neither branch is WOA's own and `.get(...,
-            # {})` would have returned {} for it. Only construct the
-            # branch that actually matches.
+            # Built per source, not as one eager dict literal: the CMEMS/CMIP6
+            # values would raise `Path / None` for WOA.
             if boundaries_fabm_source == "CMIP6":
                 _fabm_hist_files = {
                     "no3": _cmems_fabm_folder / "bio_daily_20100101_20141231.nc",
@@ -1515,9 +942,7 @@ def derive_data_assignments(config: dict) -> list[dict]:
                 # WOA, or CMEMS without a dissic/talk bridge to read.
                 _fabm_hist_files = {}
             for _tracer, _spec in _fabm_tracers.items():
-                # boundary_condition_type is optional per-tracer -- defaults
-                # to SPONGE (cfg_fabm.py's own real, only-ever-used value)
-                # when omitted.
+                # boundary_condition_type defaults to SPONGE.
                 _bc_type = _spec.get("boundary_condition_type", "SPONGE")
                 _bc_entry = {"target": f"open_boundary.{_tracer}", "kind": "boundary_type",
                              "boundary_condition_type": _bc_type}
@@ -1526,23 +951,14 @@ def derive_data_assignments(config: dict) -> list[dict]:
                     _bc_entry["sponge"] = _spec["sponge"]
                 entries.append(_bc_entry)
                 if "constant" in _spec:
-                    # Fixed boundary value instead of a file -- e.g. a low
-                    # background value for plankton/detritus pools that have no
-                    # boundary product.
+                    # Fixed value, e.g. a low background for plankton/detritus pools.
                     entries.append(
                         {"target": f"open_boundary.{_tracer}.values", "kind": "constant",
                          "constant_value": float(_spec["constant"])}
                     )
                     continue
                 if _bc_type == "ZERO_GRADIENT":
-                    # ZERO_GRADIENT computes the boundary value FROM the
-                    # interior, unlike SPONGE/CLAMPED -- it never reads
-                    # prescribed values at all, so `file`/`variable` are
-                    # optional (and simply unused if given) for this type;
-                    # no .values entry is emitted. Real, user-caught gap:
-                    # this used to unconditionally require `_spec["file"]`,
-                    # which crashed with a bare KeyError for a tracer that
-                    # genuinely never needed one.
+                    # ZERO_GRADIENT never reads prescribed values: no .values entry.
                     continue
                 if "file" not in _spec or "variable" not in _spec:
                     raise ValueError(
