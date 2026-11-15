@@ -1,0 +1,23 @@
+# NSe settings for ocean-prep's final checks (final-boundary-check,
+# meteo-final-check, river-final-check --config NSe/config/final_checks.yaml).
+# Paths as on bb-server1; ${VAR} data roots work too.
+models: [GFDL-ESM4, CNRM-ESM2-1, MPI-ESM1-2-HR]
+scenarios: [ssp126, ssp370]
+
+# final-boundary-check
+bdy_dir: /data/OceanICU/oceanicu_3d/data/NSe/CMIP6
+ref_files:
+  no3: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy/bio_daily_2010-01-01_to_2026-08-17.nc
+  po4: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy/bio_daily_2010-01-01_to_2026-08-17.nc
+  si: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy/bio_daily_2010-01-01_to_2026-08-17.nc
+  o2: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy/bio_daily_2010-01-01_to_2026-08-17.nc
+  dissic: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy/bio_carbon_new_2024-07-29_to_2026-08-17.nc
+  talk: /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy/bio_carbon_new_2024-07-29_to_2026-08-17.nc
+
+# meteo-final-check
+folder_cmip6: /data/BiasCorrected
+
+# river-final-check
+river_folder: /data/EMORID
+river_folder_cmip6: /data/BiasCorrected
+hist_file: EMORID_1993_2024_conc_nemo_TALK_DIC.nc
