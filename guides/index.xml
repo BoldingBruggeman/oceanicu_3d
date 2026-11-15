@@ -6,7 +6,7 @@
     <description>Recent content in Guides on Ocean Model Validation</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 25 Oct 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 15 Nov 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://bolding-bruggeman.com/oceanicu_3d/guides/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Tidal Analysis</title>
@@ -546,15 +546,13 @@ both equally.&lt;/p&gt;</description>
     <item>
       <title>Regridding</title>
       <link>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</link>
-      <pubDate>Sun, 25 Oct 2026 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 15 Nov 2026 00:00:00 +0000</pubDate>
       <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/regridding/</guid>
       <description>&lt;h1 id=&#34;regridding-user-guide&#34;&gt;Regridding User Guide&lt;/h1&gt;
 &lt;p&gt;&lt;code&gt;ocean_data.regridding&lt;/code&gt; provides xESMF-based regridding with automatic
 weight-file caching, domain subsetting, and coordinate name normalisation.
 The &lt;code&gt;regrid&lt;/code&gt; command (&lt;code&gt;cli/regrid.py&lt;/code&gt;) exposes the same functionality as a
-command-line tool. ocean-post re-exports the same API from
-&lt;code&gt;ocean_post.regridding&lt;/code&gt; for backward compatibility; import from
-&lt;code&gt;ocean_data.regridding&lt;/code&gt; in new code.&lt;/p&gt;
+command-line tool. Import the API from &lt;code&gt;ocean_data.regridding&lt;/code&gt;.&lt;/p&gt;
 &lt;hr&gt;
 &lt;h2 id=&#34;contents&#34;&gt;Contents&lt;/h2&gt;
 &lt;ol&gt;

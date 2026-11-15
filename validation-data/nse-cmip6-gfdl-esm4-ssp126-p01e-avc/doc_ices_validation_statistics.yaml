@@ -1,0 +1,57 @@
+format: '1.1'
+variable: DOC
+title: DOC Profile Validation Statistics
+created: '2026-11-09 14:28:21'
+area: NSe
+experiment: CMIP6/GFDL-ESM4-ssp126/p01E_avc
+periods:
+- period: 2011-2023
+  is_all_period: true
+  model: pyGETM
+  analysed: '2026-11-09 14:28:21'
+  datasets:
+    ICES point observations:
+      rmse: 854.431945
+      bias: 769.161656
+      mae: 769.411687
+      correlation: -0.113733
+      n_points: 818
+      mean_model: 907.856567
+      mean_obs: 138.694911
+      std_model: 355.79174
+      std_obs: 76.425437
+      n_profiles: 535
+      error_distribution:
+        min: -102.26285
+        p05: 203.553291
+        p25: 431.398819
+        median: 814.075376
+        p75: 1045.781227
+        p95: 1372.176845
+        max: 1681.399393
+      by_depth:
+        0-10m:
+          n: 522
+          bias: 891.272732
+          rmse: 952.491022
+          correlation: -0.318535
+        10-25m:
+          n: 184
+          bias: 584.378657
+          rmse: 670.372325
+          correlation: -0.092581
+        25-50m:
+          n: 42
+          bias: 805.652703
+          rmse: 865.910828
+          correlation: -0.002469
+        50-100m:
+          n: 49
+          bias: 377.081069
+          rmse: 418.327844
+          correlation: -0.097315
+        100-200m:
+          n: 21
+          bias: 194.752823
+          rmse: 201.10326
+          correlation: -0.148283
