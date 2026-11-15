@@ -59,13 +59,14 @@ reference:
     zos:      /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy      # hourly 2-D files (zos variable)
     uo:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy      # hourly 2-D barotropic transport
     vo:       /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy      # hourly 2-D barotropic transport
-    # talk/dissic: same directory -- load_ref_dataset scans for whichever
-    # file in the directory actually contains the requested variable, so
-    # this doesn't need to point at bio_carbon_new_*.nc by name. Real
-    # coverage is 2024-07-29 to 2026-08-17 only (see reference_period on
-    # each variable entry below, not this file's own period: block).
-    talk:     /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
-    dissic:   /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy
+    # talk/dissic (real coverage 2024-07-29 to 2026-08-17 only, see
+    # reference_period on each variable entry below): a dedicated directory holding only a symlink to
+    # bio_carbon_new_2024-07-29_to_2026-08-17.nc -- the shared bdy/ directory
+    # also holds the bio_carbon_pml_trend_* and bio_carbon_climatology_cycled_*
+    # bridge files with the same variables, which load_ref_dataset's scan
+    # would try to merge (MergeError, 2026-11-15). Same fix as no3/po4/si/o2.
+    talk:     /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy_deltaref_bio_carbon
+    dissic:   /data/OceanICU/oceanicu_3d/data/NSe/CMEMS/bdy_deltaref_bio_carbon
     # no3/po4/si/o2: NOT the shared bdy/ directory -- bio_monthly_
     # climatology.nc (the real, production BOUNDARY_FOLDER_FABM_CMEMS
     # file, still needed there for boundaries.fabm.CMEMS -- never move it)
