@@ -397,7 +397,7 @@ All subcommands default to a &lt;strong&gt;dry run&lt;/strong&gt; — add &lt;co
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;&lt;code&gt;import-stats&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;Import existing CSV statistics files into &lt;code&gt;statistics.db&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Import the statistics files into &lt;code&gt;statistics.db&lt;/code&gt; (&lt;code&gt;--rebuild&lt;/code&gt;: rebuild it from them)&lt;/td&gt;
       &lt;/tr&gt;
       &lt;tr&gt;
           &lt;td&gt;&lt;code&gt;migrate&lt;/code&gt;&lt;/td&gt;
@@ -449,47 +449,17 @@ multiple analysis scripts run in parallel:&lt;/p&gt;
       <guid>https://bolding-bruggeman.com/oceanicu_3d/guides/statistics-db/</guid>
       <description>&lt;h1 id=&#34;statistics-database-guide&#34;&gt;Statistics Database Guide&lt;/h1&gt;
 &lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
-&lt;p&gt;Every analysis script writes its results to human-readable TXT/CSV files inside
-the &lt;code&gt;analyses/&lt;/code&gt; tree &lt;strong&gt;and&lt;/strong&gt; records the same numbers in a SQLite database at
-&lt;code&gt;analyses/statistics.db&lt;/code&gt;.  The database makes it easy to compare experiments,
-track how metrics change over time, and query across areas and variables without
-parsing text files.&lt;/p&gt;
-&lt;p&gt;The database is managed by &lt;code&gt;lib/stats_db.py&lt;/code&gt;.&lt;/p&gt;
-&lt;h2 id=&#34;tables&#34;&gt;Tables&lt;/h2&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;Table&lt;/th&gt;
-          &lt;th&gt;Purpose&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;statistics&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;Core metrics from 2-D gridded, 3-D, and profile analyses&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;monthly_statistics&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;Month-by-month breakdown (child of &lt;code&gt;statistics&lt;/code&gt;)&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;tidal_statistics&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;Tidal constituent summary aggregated across stations&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;mle_rankings&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;MLE cross-experiment ranking rows&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;&lt;code&gt;bc_statistics&lt;/code&gt;&lt;/td&gt;
-          &lt;td&gt;Bias-correction calibration and future-period metrics&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3 id=&#34;statistics&#34;&gt;statistics&lt;/h3&gt;
-&lt;p&gt;One row per &lt;em&gt;(area, experiment, variable, period, layer, model, obs_source,
-depth_label)&lt;/em&gt; combination.  A &lt;code&gt;UNIQUE&lt;/code&gt; constraint on those eight columns means
-re-running an analysis &lt;strong&gt;upserts&lt;/strong&gt; the row rather than duplicating it.&lt;/p&gt;</description>
+&lt;p&gt;Every analysis script writes its results to a human-readable TXT file and a
+machine-readable YAML sidecar (&lt;code&gt;&amp;lt;variable&amp;gt;_validation_statistics.yaml&lt;/code&gt;) inside
+the &lt;code&gt;analyses/&lt;/code&gt; tree, and records the numbers in a SQLite database at
+&lt;code&gt;analyses/statistics.db&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The YAML sidecar is the record the reporting, rankings and summary plots read
+(&lt;code&gt;statistics.load_stats_document&lt;/code&gt;, &lt;code&gt;load_period_stats&lt;/code&gt;, &lt;code&gt;load_monthly_stats&lt;/code&gt;,
+&lt;code&gt;summary_common.read_stats_file&lt;/code&gt;); the TXT file is not read back. The
+database is an index for queries across experiments, areas and variables; it
+can be rebuilt from the files with &lt;code&gt;manage-analyses import-stats --apply --rebuild&lt;/code&gt;. On bb-server1 a nightly copy is kept in
+&lt;code&gt;/data/OceanICU/backups/statsdb/&lt;/code&gt; (&lt;code&gt;backup_statsdb.sh&lt;/code&gt;, 30 days plus the 1st of
+each month).&lt;/p&gt;</description>
     </item>
     <item>
       <title>Reporting</title>
@@ -538,8 +508,8 @@ lives in the site&amp;rsquo;s own repo (e.g. &lt;code&gt;oceanicu_3d/regenerate_
 and its own &lt;code&gt;docs/web-regeneration.md&lt;/code&gt; has the full detail for that
 side.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;Either path ends up calling &lt;code&gt;cli.reporting:main&lt;/code&gt; (as &lt;code&gt;ocean-reporting&lt;/code&gt; in
-one case, &lt;code&gt;python3 -m cli.reporting&lt;/code&gt; in the other) and this repo&amp;rsquo;s own
+&lt;p&gt;Either path ends up calling &lt;code&gt;ocean_post.cli.reporting:main&lt;/code&gt; (as &lt;code&gt;ocean-reporting&lt;/code&gt; in
+one case, &lt;code&gt;python3 -m ocean_post.cli.reporting&lt;/code&gt; in the other) and this repo&amp;rsquo;s own
 &lt;code&gt;deploy_ghpages.py&lt;/code&gt; directly. A bug or fix in &lt;code&gt;lib/reporting.py&lt;/code&gt; affects
 both equally.&lt;/p&gt;</description>
     </item>
