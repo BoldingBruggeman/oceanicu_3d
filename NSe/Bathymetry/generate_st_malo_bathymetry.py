@@ -29,7 +29,7 @@ PYTHON = Path("/home/kb/miniconda3/envs/ocean-stack/bin/python3")
 
 
 def run_pipeline(extra_args: list[str]) -> None:
-    """Run cli.bathymetry_regrid against st_malo_bathy_create.yaml.
+    """Run ocean_prep.cli.bathymetry_regrid against st_malo_bathy_create.yaml.
 
     Run with cwd=ocean-prep (not oceanicu_3d, unlike generate_nse_bathymetry.py's
     own config): st_malo_bathy_create.yaml's own output.report_dir ("./report/
@@ -38,7 +38,7 @@ def run_pipeline(extra_args: list[str]) -> None:
     own reports -- verified directly: a real run with this exact cwd wrote
     ocean-prep/report/st_malo/st_malo_report.md.
     """
-    cmd = [str(PYTHON), "-m", "cli.bathymetry_regrid", "--config", str(CONFIG)] + extra_args
+    cmd = [str(PYTHON), "-m", "ocean_prep.cli.bathymetry_regrid", "--config", str(CONFIG)] + extra_args
     print("Running:", " ".join(cmd))
     subprocess.run(cmd, check=True, cwd=str(CONFIG.parent.parent))
     print(f"Report dir: {CONFIG.parent.parent / 'report' / 'st_malo'}")

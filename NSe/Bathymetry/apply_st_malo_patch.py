@@ -50,7 +50,7 @@ def main() -> None:
     args = p.parse_args()
 
     cmd = [
-        str(PYTHON), "-m", "cli.bathymetry_splice",
+        str(PYTHON), "-m", "ocean_prep.cli.bathymetry_splice",
         "--parent", str(PARENT_FILE),
         "--patch", str(PATCH_FILE),
         "--output", str(OUT_FILE),

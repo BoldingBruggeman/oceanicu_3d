@@ -171,7 +171,7 @@ def generate_locally(
         sys.exit(f"ERROR: no python3 found for conda env {host_cfg['conda_env']!r} at {env_python}")
 
     cmd = [
-        str(env_python), "-m", "cli.reporting",
+        str(env_python), "-m", "ocean_post.cli.reporting",
         "--analyses-dir", host_cfg["analyses_dir"],
         "--recursive",
         "--hugo", host_cfg["hugo_out"],
@@ -203,7 +203,7 @@ def generate_locally(
     for area in (args.area if args.area else config.get("enabled_areas") or []):
         cmd += ["--area", area]
     # --serve is handled separately below (a plain local hugo server on
-    # this machine), never forwarded to cli.reporting -- see the refusal
+    # this machine), never forwarded to ocean_post.cli.reporting -- see the refusal
     # check above for why.
 
     subprocess.run(cmd, check=True)

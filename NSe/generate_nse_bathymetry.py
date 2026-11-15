@@ -62,10 +62,10 @@ def run_pipeline(use_fixes: bool, extra_args: list[str]) -> None:
     output.report_dir is a relative path ("./report/nse/"), and it should
     land next to this script/config, not inside the ocean-prep checkout.
     This works because ocean-prep is pip-installed editable in the
-    ocean-prep conda env, so 'cli.bathymetry_regrid' is importable from any
+    ocean-prep conda env, so 'ocean_prep.cli.bathymetry_regrid' is importable from any
     working directory — no need to cd into the ocean-prep repo.
     """
-    cmd = [str(PYTHON), "-m", "cli.bathymetry_regrid", "--config", str(CONFIG)]
+    cmd = [str(PYTHON), "-m", "ocean_prep.cli.bathymetry_regrid", "--config", str(CONFIG)]
     if use_fixes:
         cmd += ["--fixes-file", str(FIXES_FILE), "--accept-fixes"]
     cmd += extra_args
