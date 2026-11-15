@@ -194,6 +194,9 @@ def generate_locally(
     # /about/ unconditionally, but there was no generator for it at all
     # (confirmed live, 2026-10-21: a 404, not a stale page).
     cmd += ["--about-file", str(SCRIPT_DIR / "about.md")]
+    # NSe-specific pages (boundaries page, raw-CMIP6 section) live in this
+    # project, not in ocean-post.
+    cmd += ["--page-plugin", str(SCRIPT_DIR / "reporting" / "nse_pages.py")]
     if host_cfg.get("db"):
         cmd += ["--db", host_cfg["db"]]
     # --area overrides the enabled_areas allowlist for this run (any area).
