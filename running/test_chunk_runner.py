@@ -195,5 +195,23 @@ def test_direct_add_allowed_only_for_real_tmp(monkeypatch):
     import oceanicu_experiments as oe
     monkeypatch.delenv("OCEANICU_HPC", raising=False)
     ns = lambda db: argparse.Namespace(dry_run=False, db=db)
-    assert oe._refuse_direct_add_unless_hpc(ns("/tmp/scratch.sqlite")) is None
-    assert oe._refuse_direct_add_unless_hpc(ns("/tmp/../data/real.sqlite")) is not None
+    assert oe._refuse_direct_unless_hpc(ns("/tmp/scratch.sqlite")) is None
+    assert oe._refuse_direct_unless_hpc(ns("/tmp/../data/real.sqlite")) is not None
+
+
+def test_direct_delay_all_refused_off_hpc(monkeypatch, tmp_path, capsys):
+    import argparse
+    import oceanicu_experiments as oe
+    monkeypatch.delenv("OCEANICU_HPC", raising=False)
+    db = "ssh://oceanicu-relay/data/OceanICU/oceanicu_3d/experiments/submission_registry.sqlite"
+    args = argparse.Namespace(dry_run=False, db=db, seconds=3600, clear=False)
+    assert oe.cmd_delay_all(args) == 1
+    assert "refusing to delay-all directly" in capsys.readouterr().err
+
+    monkeypatch.setenv("OCEANICU_HPC", "1")
+    real = tmp_path / "submission_registry.sqlite"
+    with oe.rt.connect(str(real)):
+        pass
+    args = argparse.Namespace(dry_run=False, db=str(real), seconds=60, clear=False)
+    assert oe.cmd_delay_all(args) == 0
+    assert (tmp_path / "DELAY_ALL").read_text() == "60"

@@ -467,8 +467,8 @@ def cmd_stage(args: argparse.Namespace) -> int:
     return 0
 
 
-def _refuse_direct_add_unless_hpc(args: argparse.Namespace) -> "str | None":
-    """A direct (non---queue) `add` against the real path is exactly the
+def _refuse_direct_unless_hpc(args: argparse.Namespace, what: str = "add") -> "str | None":
+    """A direct (non---queue) `add` or `delay-all` against the real path is exactly the
     footgun documented in "Set up an experiment": bb-server1's mirror copy sits
     at the SAME path string as the authoritative registry on the HPC
     (deliberately, so push_registry_snapshot.sh needs no path
@@ -491,7 +491,7 @@ def _refuse_direct_add_unless_hpc(args: argparse.Namespace) -> "str | None":
     if os.environ.get("OCEANICU_HPC") == "1":
         return None
     return (
-        "refusing to add directly -- this doesn't look like the HPC "
+        f"refusing to {what} directly -- this doesn't look like the HPC "
         "(OCEANICU_HPC is not set) and the target isn't an obvious scratch "
         "path. Use --queue instead (the default, correct way -- see "
         "EXPERIMENT_TRACKING.md \"Set up an experiment\"), or export OCEANICU_HPC=1 if this "
@@ -500,7 +500,7 @@ def _refuse_direct_add_unless_hpc(args: argparse.Namespace) -> "str | None":
 
 
 def cmd_add(args: argparse.Namespace) -> int:
-    refusal = _refuse_direct_add_unless_hpc(args)
+    refusal = _refuse_direct_unless_hpc(args)
     if refusal:
         print(f"ERROR: {refusal}", file=sys.stderr)
         return 1
@@ -923,6 +923,11 @@ def cmd_resume(args: argparse.Namespace) -> int:
 
 
 def cmd_delay_all(args: argparse.Namespace) -> int:
+    # The DELAY_ALL file only acts on the HPC; written anywhere else it does nothing.
+    refusal = _refuse_direct_unless_hpc(args, "delay-all")
+    if refusal:
+        print(f"ERROR: {refusal}", file=sys.stderr)
+        return 1
     with rt.connect(args.db) as conn:
         path = rt.chunk_delay_sentinel_path(conn)
         if args.dry_run:

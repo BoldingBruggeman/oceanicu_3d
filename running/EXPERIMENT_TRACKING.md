@@ -174,9 +174,9 @@ only the machine can. So `add` specifically checks for that machine
 directly: it refuses to run unless `OCEANICU_HPC=1` is set (only by
 `setup_experiment_tracking.sh`'s `hpc` role) or the target is an obvious `/tmp/`
 scratch path (this project's own testing convention) or `--dry-run` is
-set (already redirected to a throwaway copy regardless). This guard is
-on `add` only for now, not the other direct write commands
-(`pause`/`set-*`/etc.) -- same footgun, not yet extended there.
+set (already redirected to a throwaway copy regardless). `delay-all` has
+the same guard, since its `DELAY_ALL` file only acts on the HPC. The other
+direct write commands (`pause`/`set-*`/etc.) don't have it yet.
 
 ```bash
 oceanicu-experiments add \
@@ -348,6 +348,10 @@ for a while" -- with:
 oceanicu-experiments delay-all --seconds 3600   # wait 1h before the next submission
 oceanicu-experiments delay-all --clear          # cancel early
 ```
+
+Off the HPC, add `--queue <file>`: without it `delay-all` refuses (unless
+`OCEANICU_HPC=1`, a `/tmp/` scratch registry or `--dry-run`), because the
+`DELAY_ALL` file would otherwise land on the local machine and do nothing.
 
 Unlike pause/resume (a separate, existing mechanism -- see below -- which
 stops resubmission indefinitely until a human runs `resume`), this is a
