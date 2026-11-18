@@ -1,0 +1,27 @@
+# scylla update after the 2026-11-15 refactor -- see scylla_update_20261115.md
+# Set these two first:
+STACK=/path/to/folder/with/ocean-stack     # holds ocean-stack/, ocean-post/, ...
+O3D=/path/to/oceanicu_3d
+
+# 1. Code
+conda activate ocean-stack
+bash $STACK/ocean-stack/update-and-test.sh
+[ -d $STACK/ocean-run ] && git -C $STACK/ocean-run pull && pip install --no-deps -e $STACK/ocean-run
+git -C $O3D checkout claude && git -C $O3D pull
+python -c "import ocean_post.cli.reporting, ocean_prep.cli.bc; print('ok')"
+
+# 2. Find old 'python -m cli.' calls in your own scripts/job files
+grep -rn "\-m cli\.\|\"cli\.\|'cli\." $O3D/running $O3D/NSe ~/bin 2>/dev/null
+
+# 3. Analyses tree (only if analyses live on scylla)
+A=/path/to/analyses
+manage-analyses migrate --analyses-dir $A
+manage-analyses migrate --analyses-dir $A --apply
+manage-analyses import-stats --analyses-dir $A --apply --rebuild
+
+# 4. Data re-sync from bb-server1
+$O3D/running/bin/sync_biascorrected_from_bbserver1.sh GFDL-ESM4 ssp126
+$O3D/running/bin/sync_biascorrected_from_bbserver1.sh MPI-ESM1-2-HR ssp126
+# MPI-ESM1-2-HR delta-change bio boundaries (regenerated 2026-11-15); dry run first
+$O3D/running/bin/sync_nse_from_bbserver1.sh -n --exclude='bdy_old_*' --exclude='regen_delta_*'
+$O3D/running/bin/sync_nse_from_bbserver1.sh --exclude='bdy_old_*' --exclude='regen_delta_*'
