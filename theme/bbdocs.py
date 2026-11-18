@@ -5,8 +5,9 @@ from its output checkout::
 
     sys.path.insert(0, str(out / "theme")); import bbdocs
 
-and every page links ``theme/style.css``, ``theme/code.css`` and ``theme/related.js`` (the
-related-sites list in the footer), so a change of look needs only a submodule update.
+and every page links ``theme/style.css``, ``theme/code.css``, ``theme/mode.js`` (the light/dark
+button) and ``theme/related.js`` (the related-sites list in the footer), so a change of look needs
+only a submodule update.
 """
 from __future__ import annotations
 
@@ -37,7 +38,8 @@ def head(here: str, title: str, description: str, extra: str = "") -> str:
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{html.escape(title)}</title><meta name="description" content="{html.escape(description)}">
 <link rel="icon" href="{r}{THEME}/logo_stacked.png">
-<link rel="stylesheet" href="{r}{THEME}/style.css"><link rel="stylesheet" href="{r}{THEME}/code.css">{extra}</head>"""
+<link rel="stylesheet" href="{r}{THEME}/style.css"><link rel="stylesheet" href="{r}{THEME}/code.css">
+<script src="{r}{THEME}/mode.js"></script>{extra}</head>"""
 
 
 def topbar(here: str, brand: str, nav: str) -> str:

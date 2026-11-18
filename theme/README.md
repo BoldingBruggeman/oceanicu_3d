@@ -9,8 +9,9 @@ template (neutral white/grey, the logo colours as accents, Calibri):
 - https://bolding-bruggeman.com/oceanicu_3d/ (OceanICU model validation; a Hugo site, the theme is a
   submodule at `hugo/static/theme` and its `hugo/layouts/` write the same page frame as `bbdocs.py`)
 
-Dark mode follows the reader's system setting: `style.css` redefines the colour tokens under
-`prefers-color-scheme: dark`, the logos get a light plate, and figures keep their white `--plate`.
+Dark mode follows the reader's system setting, or the light/dark button at the end of the top bar
+(`mode.js`, kept per browser): `style.css` redefines the colour tokens for dark, the logos get a
+light plate, and figures keep their white `--plate`.
 
 Each docs repository has this repository as a submodule at `theme/`:
 
@@ -24,6 +25,7 @@ git submodule update --remote theme && git commit -am "Theme" && git push   # af
 | `style.css` | colours, fonts, top bar, title band, side menu, text, cards, footer |
 | `code.css` | code highlighting: pygments `friendly`, `github-dark` in dark mode, for `.codehilite` (Python-Markdown) and `.highlight` (Hugo); written by `make_code_css.py` |
 | `logo_wide.png`, `logo_stacked.png` | the logos (top bar, footer, icon) |
+| `mode.js` | the light/dark button; loaded in `<head>` so a reader's choice applies before the page is drawn |
 | `related.js` | the related-sites line in every footer -- the one list of sites |
 | `bbdocs.py` | the page frame and helpers the site builders import from `theme/` |
 

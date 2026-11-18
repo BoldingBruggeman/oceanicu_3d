@@ -29,8 +29,10 @@
   --measure: 72ch;
   color-scheme: light;
 }
+/* dark mode: the system setting, unless the reader chose with the top-bar button (mode.js sets
+   data-theme="light" or "dark" on <html>) */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --ink: #E1E5E8;
     --head: #F2F4F5;
     --paper: #14191E;
@@ -50,9 +52,38 @@
     --plate: #FFFFFF;     /* figures with a white background stay on white */
     color-scheme: dark;
   }
-  /* the logos have teal lettering on a transparent background: put them on a light plate */
-  .brand img, .footin img { background: #FFFFFF; border-radius: 4px; padding: 3px 6px; box-sizing: content-box; }
 }
+:root[data-theme="dark"] {
+  --ink: #E1E5E8;
+  --head: #F2F4F5;
+  --paper: #14191E;
+  --paper-2: #1D242B;
+  --teal: #4DB6C2;      /* accent1, lightened for a dark background */
+  --blue: #5CB8E6;
+  --cyan: #19B3D1;
+  --navy: #93BEDD;
+  --mist: #3D7480;
+  --grey: #9AA3AA;
+  --rule: #333D46;
+  --code: #10151A;
+  --quote: #17262C;
+  --ink-2: #B4BCC2;
+  --magenta: #E57AB3;
+  --ok: #63BF7B;
+  --plate: #FFFFFF;     /* figures with a white background stay on white */
+  color-scheme: dark;
+}
+/* the logos have teal lettering on a transparent background: on dark, put them on a light plate */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .brand img, :root:not([data-theme="light"]) .footin img { background: #FFFFFF; border-radius: 4px; padding: 3px 6px; box-sizing: content-box; }
+}
+:root[data-theme="dark"] .brand img, :root[data-theme="dark"] .footin img { background: #FFFFFF; border-radius: 4px; padding: 3px 6px; box-sizing: content-box; }
+
+/* the light/dark button (mode.js) at the end of the top bar */
+.bb-mode { font: inherit; font-size: 1.05rem; line-height: 1; color: var(--head); background: transparent;
+  border: 1px solid var(--rule); border-radius: 4px; padding: 0.2rem 0.45rem; cursor: pointer;
+  align-self: center; margin-left: 0.3rem; }
+.bb-mode:hover { border-color: var(--teal); color: var(--teal); }
 * { box-sizing: border-box; }
 html { scroll-padding-top: 5rem; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.075rem/1.6 var(--font); }

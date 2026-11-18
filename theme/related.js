@@ -5,7 +5,7 @@
     ["nesting-docs", "pyGETM nesting", "https://bolding.github.io/nesting-docs/"],
     ["config-docs", "pygetm-config", "https://bolding.github.io/config-docs/"],
     ["ocean-docs", "ocean-* packages", "https://bolding.github.io/ocean-docs/"],
-    ["oceanicu_3d", "OceanICU model validation", "https://bolding-bruggeman.com/oceanicu_3d/"]
+    ["oceanicu_3d", "OceanICU shelf-sea models", "https://bolding-bruggeman.com/oceanicu_3d/"]
   ];
   document.querySelectorAll(".bb-related").forEach(function (el) {
     var self = el.getAttribute("data-self");
