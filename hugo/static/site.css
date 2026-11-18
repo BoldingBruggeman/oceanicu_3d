@@ -2,5 +2,6 @@
 .footin .ack { display: flex; gap: 1rem; align-items: center; flex: 1 1 32rem; }
 .footin .ack img.eu { height: 48px; width: auto; flex: none; }
 .footin .ack p { font-size: 0.82rem; max-width: 44rem; }
-@media (prefers-color-scheme: dark) { .doc img.eu { background: #FFFFFF; border-radius: 4px; padding: 4px 8px; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .doc img.eu { background: #FFFFFF; border-radius: 4px; padding: 4px 8px; } }
+:root[data-theme="dark"] .doc img.eu { background: #FFFFFF; border-radius: 4px; padding: 4px 8px; }
 @media (max-width: 52rem) { .footin .ack { flex-wrap: wrap; } }

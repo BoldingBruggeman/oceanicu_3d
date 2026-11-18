@@ -1,6 +1,6 @@
 baseURL: 'https://bolding-bruggeman.com/oceanicu_3d/'
 languageCode: 'en-us'
-title: 'Ocean Model Validation'
+title: 'OceanICU shelf-sea models'
 # The page frame is in layouts/ (the Bolding & Bruggeman look of the docs sites); its style
 # sheets, logos and related-sites list are the docs-theme submodule at static/theme
 # (git submodule update --init after a clone).
@@ -22,7 +22,7 @@ outputs:
 
 params:
   description: "Validation results and future-scenario projections of pyGETM setups in the OceanICU project"
-  brand: "OceanICU model validation"
+  brand: "OceanICU shelf-sea models"
   site: "oceanicu_3d"        # this site's key in theme/related.js
 
 # The top bar; desc is the text of the card on the home page
