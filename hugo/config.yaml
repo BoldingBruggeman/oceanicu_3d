@@ -1,97 +1,65 @@
 baseURL: 'https://bolding-bruggeman.com/oceanicu_3d/'
 languageCode: 'en-us'
 title: 'Ocean Model Validation'
-theme: 'PaperMod'
+# The page frame is in layouts/ (the Bolding & Bruggeman look of the docs sites); its style
+# sheets, logos and related-sites list are the docs-theme submodule at static/theme
+# (git submodule update --init after a clone).
 contentDir: '/data/kb/OceanICU/oceanicu_3d/content'
 publishDir: '/data/kb/OceanICU/oceanicu_3d/public'
 staticDir:
   - static
   - '/data/kb/OceanICU/oceanicu_3d/static'
-pagination:
-  pagerSize: 50
 
 # Rewrite root-absolute URLs (e.g. /validation-data/...) to include the
 # baseURL subpath.  Required when the site is served from a subdirectory
 # (e.g. https://user.github.io/repo/) rather than a bare domain.
 canonifyURLs: true
 
+disableKinds: [taxonomy, term, rss]
+outputs:
+  home: [HTML]
+  section: [HTML]
+
 params:
-  # Theme settings
-  env: production
-  description: "Ocean model validation and analysis dashboard"
-  author: "Ocean Modeling Team"
-  
-  # Prevent PaperMod from auto-listing pages from any section on the home page
-  mainSections: []
+  description: "Validation results and future-scenario projections of pyGETM setups in the OceanICU project"
+  brand: "OceanICU model validation"
+  site: "oceanicu_3d"        # this site's key in theme/related.js
 
-  # Favicon / touch-icon theme color, matched to the icon's own background
-  # (hugo/static/{favicon*,apple-touch-icon.png,safari-pinned-tab.svg}) --
-  # otherwise PaperMod's own default (#2e2e33) wouldn't match.
-  assets:
-    theme_color: "#0e344a"
-    msapplication_TileColor: "#0e344a"
-
-  # Theme appearance
-  defaultTheme: auto  # auto, light, dark
-  disableThemeToggle: false
-  
-  # Features
-  ShowReadingTime: false
-  ShowShareButtons: false
-  ShowPostNavLinks: true
-  ShowBreadCrumbs: true
-  ShowCodeCopyButtons: true
-  ShowRssButtonInSectionTermList: false
-  
-  # Table of contents
-  ShowToc: true
-  TocOpen: false
-  UseHugoToc: true   # Use Hugo's built-in TOC (avoids slow regex on large files)
-  
-  # Clean URLs
-  disableSpecial1stPost: false
-  
-  # Cover images
-  cover:
-    linkFullImages: true
-    
-  # Search
-  fuseOpts:
-    isCaseSensitive: false
-    shouldSort: true
-    location: 0
-    distance: 1000
-    threshold: 0.4
-    minMatchCharLength: 0
-    keys: ["title", "permalink", "summary", "content"]
-
-# Menu configuration
+# The top bar; desc is the text of the card on the home page
 menu:
   main:
     - name: Areas
       url: areas/
       weight: 1
+      params: {desc: "The model domains and their simulations."}
     - name: Validations
       url: validations/
       weight: 2
+      params: {desc: "Model results against observations, per area and experiment."}
     - name: Rankings
       url: rankings/
       weight: 3
+      params: {desc: "Experiments compared by their skill scores."}
     - name: Scenarios
       url: scenarios/
       weight: 4
+      params: {desc: "Bias-corrected CMIP6 forcing and the scenario simulations."}
     - name: Data Sources
       url: data-sources/
       weight: 6
+      params: {desc: "Atmospheric forcing, ocean boundaries and rivers feeding each area."}
     - name: Data Quality
       url: guides/data-quality-checks/
       weight: 7
+      params: {desc: "The checks of the forcing before a production run."}
     - name: Guides
       url: guides/
       weight: 8
+      params: {desc: "How the validation and reporting tools are used."}
     - name: About
       url: about/
       weight: 9
+      params: {desc: "The project, the model setups and the acknowledgement."}
 
 # Markup settings
 markup:
@@ -101,40 +69,25 @@ markup:
     renderer:
       unsafe: true  # Allow HTML in markdown
   highlight:
-    style: monokai
+    noClasses: false   # token classes, coloured by theme/code.css (light and dark)
     lineNos: false
-    noClasses: false
   tableOfContents:
     endLevel: 3
     ordered: false
     startLevel: 2
-
-# Outputs
-outputs:
-  home:
-    - HTML
-    - RSS
-    - JSON  # For search
-
-# Taxonomies
-taxonomies:
-  tag: tags
-  category: categories
 
 # Permalinks
 permalinks:
   areas: /areas/:slug/
   validations: /validations/:slug/
   scenarios: /scenarios/:slug/
-  
-# Privacy settings
+
 privacy:
   disqus:
     disable: true
   googleAnalytics:
     disable: true
 
-# Build settings
 minify:
   disableXML: true
   minifyOutput: true

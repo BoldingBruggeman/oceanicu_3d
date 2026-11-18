@@ -1,0 +1,7 @@
+{{ define "main" }}{{ $side := partial "side.html" . }}
+<div class="layout{{ if not (trim $side " \n") }} single{{ end }}">{{ $side }}<article class="doc">
+{{ .Content }}
+{{- /* a section lists what is in it, unless it is a plain page (type: page, e.g. areas/ with its own table) */ -}}
+{{ if ne .Type "page" }}{{ with .Pages }}{{ if $.Content }}<h2>In this section</h2>{{ end }}{{ partial "cards.html" . }}{{ end }}{{ end }}
+</article></div>
+{{ end }}

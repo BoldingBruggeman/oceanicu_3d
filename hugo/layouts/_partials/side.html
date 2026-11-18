@@ -1,0 +1,25 @@
+{{- /* The side menu: the level-2 headings of the page ("On this page", when there are two or more)
+       and, on a page inside a section, the other pages of that section. Empty when neither applies. */ -}}
+{{- define "_partials/inline/h2.html" -}}
+  {{- range . -}}
+    {{- if eq .Level 2 }}<li><a href="#{{ .ID }}">{{ .Title | plainify | htmlUnescape }}</a></li>
+    {{- else if lt .Level 2 }}{{ partial "inline/h2.html" .Headings }}{{ end -}}
+  {{- end -}}
+{{- end -}}
+{{- $toc := partial "inline/h2.html" .Fragments.Headings -}}
+{{- $n := len (findRE "<li>" $toc) -}}
+{{- $sib := slice -}}
+{{- if and .IsPage .Parent (not .Parent.IsHome) -}}
+  {{- $sib = .Parent.Pages -}}
+{{- end -}}
+{{- if or (gt $n 1) (gt (len $sib) 1) -}}
+<aside class="side">
+{{- if gt $n 1 }}<h2>On this page</h2><ul>{{ $toc }}</ul>{{ end -}}
+{{- if gt (len $sib) 1 -}}
+<h2>{{ .Parent.LinkTitle }}</h2><ul>
+{{- $self := .RelPermalink -}}
+{{- range $sib }}<li><a href="{{ .RelPermalink }}"{{ if eq .RelPermalink $self }} aria-current="page"{{ end }}>{{ .LinkTitle }}</a></li>{{ end -}}
+</ul>
+{{- end -}}
+</aside>
+{{- end -}}

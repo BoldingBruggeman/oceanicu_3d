@@ -1,0 +1,10 @@
+{{- /* The footer: the stacked logo, B&B, the related sites (theme/related.js), the generation date,
+       and the EU funding acknowledgement of OceanICU (statement and disclaimer as on ocean-icu.eu). */ -}}
+<footer class="foot"><div class="footin"><img src="{{ "theme/logo_stacked.png" | relURL }}" alt="Bolding &amp; Bruggeman">
+<div><p>Bolding &amp; Bruggeman · <a href="https://www.bolding-bruggeman.com">www.bolding-bruggeman.com</a></p>
+<p class="bb-related" data-self="{{ site.Params.site }}"></p>
+<p class="note">{{ if not .Date.IsZero }}Page generated {{ .Date.Format "2 January 2006" }}. {{ end }}Results of the pyGETM setups in <a href="https://github.com/BoldingBruggeman/oceanicu_3d">oceanicu_3d</a>.</p></div>
+<div class="ack"><a href="https://ocean-icu.eu/"><img class="eu" src="{{ "eu_funded.png" | relURL }}" alt="Funded by the European Union"></a>
+<p>This work was funded by the European Union under grant agreement no. 101083922 (<a href="https://ocean-icu.eu/">OceanICU</a>). Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or European Research Executive Agency. Neither the European Union nor the granting authority can be held responsible for them.</p></div>
+</div></footer>
+<script src="{{ "theme/related.js" | relURL }}" defer></script>

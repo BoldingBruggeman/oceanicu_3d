@@ -1,0 +1,8 @@
+{{- /* The grey title band, with the breadcrumbs above the title. */ -}}
+<section class="band"><div class="bandin">
+{{- if not .IsHome -}}
+<div class="crumbs">{{ range .Ancestors.Reverse }}<a href="{{ .RelPermalink }}">{{ if .IsHome }}Home{{ else }}{{ .LinkTitle }}{{ end }}</a> › {{ end }}</div>
+{{- end -}}
+<h1>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }}{{ end }}</h1>
+{{- with (cond .IsHome site.Params.description .Description) }}<p>{{ . }}</p>{{ end -}}
+</div></section>

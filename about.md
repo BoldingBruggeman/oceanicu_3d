@@ -31,3 +31,19 @@ and [Scenarios](/scenarios/) for the resulting projections.
 
 The model setups and the tooling that generates this site are open
 source: [github.com/BoldingBruggeman/oceanicu_3d](https://github.com/BoldingBruggeman/oceanicu_3d).
+
+## Acknowledgement
+
+<img class="eu" src="/eu_funded.png" alt="Funded by the European Union" width="260">
+
+This work was funded by the European Union under grant agreement
+no. 101083922 ([OceanICU](https://ocean-icu.eu/)). Views and opinions
+expressed are however those of the author(s) only and do not necessarily
+reflect those of the European Union or European Research Executive
+Agency. Neither the European Union nor the granting authority can be
+held responsible for them.
+
+[OceanICU](https://ocean-icu.eu/about-oceanicu/) is a five-year Horizon
+Europe project that aims to produce new data, information and
+understanding on the role of the ocean, with a new understanding of the
+biological carbon pump and tools for policy makers and ocean industries.

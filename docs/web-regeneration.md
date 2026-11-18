@@ -72,6 +72,33 @@ the next regeneration, not just skipped. Check that list before assuming
 "regenerate everything" is safe, and don't chain regenerate → deploy
 blindly; look at what actually changed first.
 
+## The look: `hugo/layouts/` and the docs-theme submodule
+
+The site has the Bolding & Bruggeman look of the other documentation sites
+(nesting-docs, config-docs, ocean-docs): `hugo/layouts/` writes the page
+frame, and its style sheets, logos and related-sites list are the
+[docs-theme](https://github.com/bolding/docs-theme) submodule at
+`hugo/static/theme`. After a clone or a `git pull` that moves it:
+
+```
+git submodule update --init
+```
+
+`deploy_ghpages.py` stops when the submodule is not checked out. The EU
+acknowledgement of OceanICU is in the footer of every page
+(`hugo/layouts/_partials/footer.html`) and on the About page (`about.md`).
+
+## The check before every deploy
+
+`deploy_ghpages.py` scans the built site for the team's server names,
+accounts and private paths (its `FORBIDDEN` list) and pushes nothing when
+it finds one; it prints the file and line. `deploy_ghpages.py --check`
+builds and checks without deploying. Fix the source -- the generator, a
+`guides/*.md` file in ocean-post, or a hand-placed page under `content/` --
+not the built output. The guides about servers and deployment
+(`INTERNAL_GUIDES` in ocean-post's `lib/reporting_sources.py`) are not
+published.
+
 ## A real bug this surfaced (2026-09-21), in case it recurs
 
 `ocean-post/lib/reporting.py`'s `_generate_scenarios_page()` crashed with

@@ -1,0 +1,3 @@
+{{ define "main" }}{{ $side := partial "side.html" . }}
+<div class="layout{{ if not (trim $side " \n") }} single{{ end }}">{{ $side }}<article class="doc">{{ .Content }}</article></div>
+{{ end }}

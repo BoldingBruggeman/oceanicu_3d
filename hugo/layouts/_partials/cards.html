@@ -1,0 +1,13 @@
+{{- /* Cards for a list of pages: title, description (or the start of the text), the number of pages below. */ -}}
+{{- with . -}}
+<div class="cards">
+{{- range . -}}
+<a class="card" href="{{ .RelPermalink }}"><h3>{{ .LinkTitle }}</h3>
+{{- $sum := replaceRE `(?s)<h[1-6][^>]*>.*?</h[1-6]>` "" (string .Summary) -}}
+{{- $d := .Description | default ($sum | plainify | htmlUnescape | truncate 150) -}}
+{{- with $d }}<p>{{ . }}</p>{{ end -}}
+{{- if .IsSection }}{{ with len .Pages }}<span class="n">{{ . }} page{{ if gt . 1 }}s{{ end }}</span>{{ end }}{{ end -}}
+</a>
+{{- end -}}
+</div>
+{{- end -}}

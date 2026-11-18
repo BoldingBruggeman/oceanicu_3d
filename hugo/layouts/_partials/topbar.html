@@ -1,0 +1,15 @@
+{{- /* The top bar: the wide logo, the site name, menu.main; the longest menu URL that starts this
+       page's URL is the current one (so Data Quality, not Guides, on guides/data-quality-checks/). */ -}}
+{{- $here := .RelPermalink -}}
+{{- $cur := "" -}}
+{{- range site.Menus.main -}}
+  {{- $u := .URL | relURL -}}
+  {{- if and (hasPrefix $here $u) (gt (len $u) (len $cur)) }}{{ $cur = $u }}{{ end -}}
+{{- end -}}
+<header class="topbar"><div class="topin"><a class="brand" href="{{ "" | relURL }}"><img src="{{ "theme/logo_wide.png" | relURL }}" alt="Bolding &amp; Bruggeman"><span>{{ site.Params.brand }}</span></a>
+<nav aria-label="Site">
+{{- range site.Menus.main -}}
+{{- $u := .URL | relURL -}}
+<a href="{{ $u }}"{{ if eq $u $cur }} aria-current="page"{{ end }}>{{ .Name }}</a>
+{{- end -}}
+</nav></div></header>
