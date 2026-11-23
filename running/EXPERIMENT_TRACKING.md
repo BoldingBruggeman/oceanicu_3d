@@ -5,8 +5,7 @@ simulations on SLURM and keeping track of what's been run and what's
 next, without hand-editing a spreadsheet.
 
 No packaging -- plain files. This is where they live in the repo; on any
-machine that actually runs them (production machine, relay -- see
-"Working across machines" below), deploy the ones that machine needs
+machine that actually runs them (production machine, relay), deploy the ones that machine needs
 together in one directory, wherever makes sense there -- `run_chunk.slurm`
 finds its own deployed location at runtime (see "Launch it"), so there's
 no path to hardcode or tell it about, and no requirement that every
@@ -21,8 +20,7 @@ machine use the same directory or even the same username:
 | `reap_orphaned_chunks.py` | cron watchdog: proactively marks chunks stuck at `status=running` as failed once their SLURM job is confirmed dead (or old enough that it's assumed dead) -- catches a job whose whole cgroup got killed before `chunk_runner.py` itself could record the failure. Login node only (needs `squeue`). See `setup_experiment_tracking.sh`'s own printed cron guidance (`hpc` role, "Optional FOURTH cron") for the crontab line. |
 | `run_chunk.slurm` | the SLURM job. Runs one chunk, then resubmits itself for the next one -- or, once an experiment reaches its `stop_date`, for the next queued experiment (see "The queue" below). |
 | `chunk_chain.py` | `run_chunk.slurm`'s non-SLURM counterpart -- a plain self-chaining Python loop for a host with no scheduler (workstation, cloud VM, orca). See "Launch it (non-SLURM host)" below. Unit-tested in `test_chunk_chain.py`. |
-| `experiment_tracking_server.py` | RPC entrypoint for accessing the registry across machines with no direct network path between them -- see "Working across machines" below. Only needed on the relay machine, and only if you need that at all. |
-| `get_commands_and_update_registry.py` | pulls queued commands in from bb-server1 (optional, `--pull-from`) and replays whatever's pending (see "Command queue" below) against the local registry -- only needed wherever the registry actually lives, and only if a live relay to it isn't possible. Renamed from `apply_commands.py` when the pull step was added. |
+| `get_commands_and_update_registry.py` | pulls queued commands in from bb-server1 (optional, `--pull-from`) and replays whatever's pending (see "Command queue" below) against the local registry -- only needed wherever the registry actually lives. Renamed from `apply_commands.py` when the pull step was added. |
 | `setup_experiment_tracking.sh` | one-shot env/directory setup per machine role (see below) -- standalone, no dependency on anything else here. |
 | `bin/push_registry_snapshot.sh` | pushes the registry out to bb-server1 (see "Keeping bb-server1's copy of the registry up to date") -- only needed wherever the registry actually lives. Refuses to push a 0-experiment snapshot over a remote that already has real ones (`OCEANICU_ALLOW_EMPTY_PUSH=1` overrides) -- added after a real incident where something emptied the HPC's own copy and the routine push then destroyed bb-server1's good copy too. |
 | `bin/watch_registry_and_push.sh` | persistent watcher: calls `push_registry_snapshot.sh` the moment a fresh backup snapshot appears, instead of waiting for the next cron interval. Login node only; meant to be kept alive by `restart_registry_watcher.sh`, not run by hand. |
@@ -94,9 +92,9 @@ workstation that only ever queues commands and stages files needs no
 `OCEANICU_EXPERIMENT_DB` at all. `oceanicu-experiments --dry-run` is the same way
 (happy to run with no DB configured, see "Dry-run" below). A database
 path is required for everything else -- `list`/`show` against a real or
-mirrored registry, and any direct write command run where a live path
-genuinely exists (the production machine itself, or the `ssh://` relay)
--- either `--db PATH` on the command, or `export OCEANICU_EXPERIMENT_DB=PATH`
+mirrored registry (an `ssh://` path reads a snapshot, see "Reading the
+registry from another machine"), and any direct write command run on the
+production machine itself -- either `--db PATH` on the command, or `export OCEANICU_EXPERIMENT_DB=PATH`
 in the environment, including on the `sbatch` command line itself for
 `run_chunk.slurm` (see "Launch it"). This code runs on whatever
 machine/cluster a job lands on, with whatever folder layout that machine
@@ -154,8 +152,7 @@ applies identically either way.
 the <em>authoritative</em> registry (rare; expand if that's you)</summary>
 
 Same command, without `--queue`, run wherever that live path actually
-is: on the production machine itself, or anywhere via the `ssh://` relay
-(see "Working across machines"). **A copy of the registry sitting
+is: on the production machine itself. **A copy of the registry sitting
 somewhere reachable is not the same thing as a live path to it** -- if
 bb-server1 (or anywhere else) only ever holds a read-only mirror (see
 "Keeping bb-server1's copy of the registry up to date"), pointing `--db`
@@ -211,7 +208,7 @@ relative `experiment-root` is resolved against `OCEANICU_EXPERIMENT_ROOT_BASE`, 
 var set independently on each machine that actually touches this experiment's
 files (chunk_runner.py, `run_chunk.slurm`, is_paused's own PAUSE-file
 check) -- not stored in the DB, same idea as
-`OCEANICU_EXPERIMENT_DB`/`OCEANICU_RELAY_DIR`. An absolute `experiment-root` is used
+`OCEANICU_EXPERIMENT_DB`. An absolute `experiment-root` is used
 as-is and needs no base path at all; existing experiments registered with one
 keep working unchanged. If a relative `experiment-root` is used and
 `OCEANICU_EXPERIMENT_ROOT_BASE` isn't set on whichever machine is currently
@@ -296,13 +293,9 @@ submission regardless -- `run_chunk.slurm` refuses to guess either, same
 as the Python layer, since there's no path that's safe to assume on a
 machine whose folder layout isn't known in advance; every self-
 resubmission after that (next chunk, or next experiment) carries both
-forward automatically (`OCEANICU_RELAY_DIR` too, if it was set -- see
-"Working across machines" below for when that applies).
-
-**`OCEANICU_RELAY_DIR` is NOT needed here** -- only relevant when
-`OCEANICU_EXPERIMENT_DB` is an `ssh://` relay URL (see "Working across
-machines"). On this project's actual HPC the registry is a plain local
-file, so that code path never triggers; leave it out entirely.
+forward automatically. `OCEANICU_EXPERIMENT_DB` must be the local registry
+file here: an `ssh://` path is a read-only snapshot, so chunk_runner.py could
+not record anything.
 
 **If `OCEANICU_EXPERIMENT_DB` is already set in your own shell** (e.g.
 via `setup_experiment_tracking.sh hpc`'s `.bashrc` export), reference it
@@ -892,150 +885,63 @@ git show <sha>:submission_registry.sqlite > /abs/path/to/submission_registry.sql
 The backup repo has no automatic pruning -- for a DB this small, unlimited
 history is cheap; squash/prune by hand later if it ever matters.
 
-## Working across machines with no direct network path
+## Reading the registry from another machine
 
-Experiments are often ADDED from one machine (wherever you're planning from) and
-RUN on another (the SLURM/production machine) -- and those two often
-can't reach each other directly at all. There's no multi-writer sync for
-this (SQLite doesn't do that safely -- periodically copying the DB file
-back and forth risks one side's writes silently clobbering the other's).
+The registry lives in exactly ONE place, the machine that runs the chunks.
+There is no multi-writer sync (SQLite doesn't do that safely), so other
+machines change it only through the command queue (see "Command queue"
+below), and read it through bb-server1's mirror (see "Keeping bb-server1's
+copy of the registry up to date").
 
-Two different answers to that, depending on what's actually reachable:
-
-- **A live, two-way network path exists** (this section): the registry
-  lives in exactly ONE place, and a **third machine that both sides CAN
-  reach acts as a relay** -- both the add-machine and the production
-  machine operate on the exact same database, remotely, over SSH to that
-  relay.
-- **No live path exists at all** (e.g. a fully network-isolated HPC
-  reachable only via a human's own terminal login, whose login node can
-  at best only ever *initiate* an outbound connection): see "Command
-  queue" further down instead -- commands and new-experiment files cross the
-  boundary as plain files via whatever transport actually exists
-  (`rsync`, a human carrying a file), not a live connection.
-
-The rest of this section is about the relay case:
-
-**One-time setup on the relay:** a plain `git clone`/`git pull` of this repo
-is enough -- point `OCEANICU_RELAY_DIR` (below) directly at its `running/`
-directory. Do **not** hand-copy `experiment_tracking.py`/
-`experiment_tracking_server.py` out to some other directory instead: a
-manually-deployed copy has no mechanism to ever pick up later fixes/
-renames, and *will* silently drift out of sync with the client side (this
-happened for real once already -- a stale copy under `/data/.../experiments/`
-kept using the pre-rename `run_id`/`list_runs` names long after the client
-side had moved on, breaking every relay call until someone noticed and
-manually diffed the two copies). A `git pull` on the relay is the only
-thing that should ever need to happen to keep this current.
-
-**Then, from any machine that can SSH to the relay** (add-machine or
-production machine alike), point at the registry with an `ssh://` DB path
-instead of a local one:
+To read that mirror from a workstation, point at it with an `ssh://` DB path:
 
 ```bash
-export OCEANICU_EXPERIMENT_DB=ssh://oceanicu-relay/abs/path/to/submission_registry.sqlite
-export OCEANICU_RELAY_DIR=/abs/path/to/oceanicu_3d/running   # the git checkout's running/ dir, ON the relay
-oceanicu-experiments add --experiment-id ...          # exactly the same as local use from here on
+export OCEANICU_EXPERIMENT_DB=ssh://oceanicu-relay/data/OceanICU/oceanicu_3d/experiments/submission_registry.sqlite
+oceanicu-experiments list
+oceanicu-experiments show --experiment-id ...
+oceanicu-experiments --dry-run rerun --experiment-id ... --from-current
 ```
 
-**Filename is `submission_registry.sqlite`, deliberately not
-`experiment_registry.sqlite`.** The relay's own experiment-tree directory
-(wherever `OCEANICU_EXPERIMENT_ROOT_BASE` points, `/data/OceanICU/oceanicu_3d/
-experiments/` in this project's real deployment) legitimately holds more
-than just this system's files: staged driver/config scripts, real chunk
-output once running, AND -- entirely separately -- a reporting/scenario-
-catalog database maintained by the Hugo site pipeline (`ocean-post`'s
-`cli.reporting`, tracking which runs have been post-processed with plots/
-results after completion; unrelated schema, unrelated code, just sharing
-the same directory by design). That other system's own DB already claimed
-the name `experiment_registry.sqlite` for itself (see `regen_hosts.yaml`'s
-`db:` field) -- this system's registry uses a distinct name specifically to
-never collide with it.
+Each command fetches a consistent snapshot of that file (sqlite's backup
+API on the remote host, one `ssh` call, about a second) and opens it
+read-only: `list`, `show` and `--dry-run` work; a write is refused with a
+pointer to `--queue`. The snapshot has no sentinel files next to it, so
+`PAUSE_ALL` and `DELAY_ALL` read as absent, and a per-experiment `PAUSE`
+file is only seen if it exists on the machine you're on.
 
-A copy-pasteable starting point for both lines lives in
-`relay.env.example` -- copy it to `relay.env` (gitignored) and source it,
-same content on every machine. It also sets `PATH` to include
-`running/bin` (see "Use `oceanicu-experiments`" at the top) as a convenience,
-same as anywhere else.
+`relay.env.example` is a starting point: copy it to `relay.env`
+(gitignored) and source it. It also puts `running/bin` on `PATH`.
 
-**`oceanicu-relay` is a `~/.ssh/config` `Host` alias, not a raw
-hostname -- this is the recommended way to point at the relay**,
-specifically because the add-machine and the production machine will
-usually need different usernames (sometimes a different `IdentityFile`,
-occasionally a `ProxyJump`) to reach the very same relay, and `~/.ssh/config`
-is where that kind of per-machine connection detail is already supposed
-to live -- not leaked into an application-level environment variable that
-would then have to differ per machine too. Set up per machine:
+**`oceanicu-relay` is a `~/.ssh/config` `Host` alias**, so the per-machine
+connection details (username, `IdentityFile`, `ProxyJump`) stay in
+`~/.ssh/config` and the environment variable is the same everywhere:
 
 ```
-# ~/.ssh/config, on EACH machine that talks to the relay --
-# same alias name everywhere, details filled in per machine
 Host oceanicu-relay
     HostName bb-server1
-    User alice              # whatever THIS machine's account on the relay is
-    # IdentityFile ~/.ssh/id_relay   # if it needs its own key
-    # ProxyJump some-gateway        # if this machine can't reach it directly
+    User alice              # this machine's account on bb-server1
 ```
 
-With that in place, `OCEANICU_EXPERIMENT_DB`/`OCEANICU_RELAY_DIR` (and
-`relay.env`) become byte-for-byte identical across every machine -- only
-the `~/.ssh/config` stanza varies, which is one-time setup per machine,
-not something anyone has to remember on every command.
+`ssh://user@host/...` works too.
 
-Skipping the alias and writing `ssh://user@relay-host/...` directly also
-works (RemoteConn just runs plain `ssh <whatever's in the URI>`, so
-anything `ssh` itself accepts as a target is valid here) -- only use this
-if you have a real reason not to want an alias; the alias form is
-strictly less to get wrong day to day.
+**Filename is `submission_registry.sqlite`, deliberately not
+`experiment_registry.sqlite`:** the same directory on bb-server1 also holds
+ocean-post's reporting/scenario-catalog database, which already uses that
+name (see `regen_hosts.yaml`'s `db:` field).
 
-`OCEANICU_RELAY_DIR` is a property of the relay's own deployment, not of
-any one database, so it's always separate from the DB path itself. Every
-command works exactly as documented everywhere else in this file --
-`add`/`list`/`pause`/`rerun`/`--dry-run`/`chunk_runner.py --dry-run`, all
-of it -- the `ssh://` prefix is the only thing that changes. Each call is
-one `ssh relay-host` round trip; given how infrequently these actually
-happen (chunk boundaries are hours-to-days apart, not a tight loop),
-that's a total non-issue even though the production machine's `chunk_runner.py`
-still runs the actual simulation fully locally, only the bookkeeping goes
-over the relay.
+A **relative `experiment_root`** resolves against `OCEANICU_EXPERIMENT_ROOT_BASE`
+on the machine you're on; if that is not set, the `--dry-run` "what
+run_chunk.slurm would do next" preview says so instead of rendering.
 
-For `run_chunk.slurm`, put both on the `sbatch` command line together --
-SLURM's `--export` replaces the whole job environment with just what's
-listed, so both have to be given on the first submission (every
-self-resubmission after that carries both forward for you):
-
-```bash
-cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://...',OCEANICU_RELAY_DIR='...' run_chunk.slurm
-```
-
-**One real limitation:** the per-experiment `<experiment_root>/PAUSE` sentinel file
-(see "Pause / resume" above) always lives on whichever machine actually
-has that experiment's output -- normally the production machine, never the
-relay -- so it's checked locally by whichever machine is asking, not
-relayed. Concretely: `oceanicu-experiments --dry-run` run from the
-add-machine can preview everything else correctly, but can't see a
-per-experiment PAUSE file that only exists on the production machine's
-filesystem (it'll just read as absent). The DB `control` column and the
-`PAUSE_ALL` sentinel (which lives next to the DB, i.e. on the relay) both
-work correctly from anywhere, including in that preview.
-
-Same category, second instance: a **relative `experiment_root`** resolves
-against `OCEANICU_EXPERIMENT_ROOT_BASE` (see above), which is also set
-per-machine and normally only on the production machine. The
-`--dry-run` "what run_chunk.slurm would do next" preview runs
-`chunk_runner.py --dry-run` for real, right there on the add-machine, so
-it needs a real resolved path -- if that machine has no
-`OCEANICU_EXPERIMENT_ROOT_BASE` of its own, that one preview step can't render
-and says so explicitly instead of showing a raw error. Not a sign of a
-real problem: the actual `add` still registers correctly either way, and
-resolution happens for real once the chunk actually runs on the
-production machine, which does have its own `OCEANICU_EXPERIMENT_ROOT_BASE` set.
+(Until 2026-11 an `ssh://` path was a live read-write connection: every
+registry call was a remote call through `experiment_tracking_server.py` on
+the relay. Since the HPC applies changes from the command queue and the
+bb-server1 copy is a read-only mirror, only reading was ever used; the
+remote calls were removed.)
 
 ## Command queue: registering experiments with no network path to the registry
 
-The relay above (`ssh://` + `experiment_tracking_server.py`) needs a live,
-two-way network path -- it doesn't work when the registry's own machine
-can't be reached from outside AT ALL (a fully network-isolated HPC,
+The registry's own machine can't be reached from outside AT ALL (a fully network-isolated HPC,
 reachable only via a human with terminal access to it, that in turn only
 ever talks to ONE other machine -- e.g. this project's own PML HPC,
 which only ever interacts with bb-server1, never GitHub directly). For

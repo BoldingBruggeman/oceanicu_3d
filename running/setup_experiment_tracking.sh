@@ -220,8 +220,8 @@ case "$role" in
         # experiment_registry.sqlite -- this same directory may also host a
         # completely separate reporting/scenario-catalog DB (e.g.
         # ocean-post's cli.reporting) that's already claimed that other
-        # name for itself. See EXPERIMENT_TRACKING.md "Working across
-        # machines" for the full story (found the hard way once already).
+        # name for itself. See EXPERIMENT_TRACKING.md "Reading the
+        # registry from another machine" for the full story (found the hard way once already).
         add_to_bashrc "[ -z \"\${OCEANICU_EXPERIMENT_DB:-}\" ] && export OCEANICU_EXPERIMENT_DB=$path/submission_registry.sqlite"
         add_to_bashrc "export PATH=\"\$HOME/source/repos/OceanICU/oceanicu_3d/running/bin:\$PATH\""
         echo "Relay ready: experiment tree at $path, hpc_commands/ queue at"
@@ -233,15 +233,8 @@ case "$role" in
         echo "the relay, so it never needs its own ssh:// URL back to itself),"
         echo "running/bin added to PATH -- both for direct interactive use here."
         echo
-        echo "For the ssh:// relay itself (workstation <-> bb-server1), point"
-        echo "OCEANICU_RELAY_DIR (on EVERY machine that connects through here) at"
-        echo "a git checkout of oceanicu_3d/running on THIS machine -- e.g.:"
-        echo "  export OCEANICU_RELAY_DIR=$HOME/source/repos/OceanICU/oceanicu_3d/running"
-        echo "Do NOT hand-deploy a separate copy of experiment_tracking.py/"
-        echo "experiment_tracking_server.py elsewhere -- that copy has no way to"
-        echo "ever pick up future fixes and WILL silently drift out of sync (this"
-        echo "happened for real once already, see EXPERIMENT_TRACKING.md). A plain"
-        echo "git pull here is the only thing that should ever need to happen."
+        echo "Workstations read this registry with an ssh:// path (a read-only"
+        echo "snapshot, see relay.env.example) and change it through the queue."
         echo
         echo "Workstations should rsync onward into exactly these two paths --"
         echo "e.g. (adjust bb-server1/paths to match this machine's real hostname"

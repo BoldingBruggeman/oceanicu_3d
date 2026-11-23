@@ -24,46 +24,21 @@ An experiment's status only ever becomes "complete" (not just "complete_with_
 warnings") when every chunk exited 0, none hit a NaN, and the last chunk's
 stop reaches the experiment's own stop_date -- see recompute_experiment_status.
 
-Working across machines with no direct network path between them
--------------------------------------------------------------------
-Experiments are often ADDED from one machine (wherever you're planning from)
-and RUN on another (the SLURM/production machine) -- and those two often
-can't reach each other directly at all. There's no multi-writer sync here
-(SQLite doesn't do that safely, and periodically copying the file back
-and forth risks one side's writes silently clobbering the other's).
-Instead: the registry lives in exactly ONE place, and a THIRD machine
-that BOTH sides can reach acts as a relay -- both the add-machine and the
-production machine operate on the SAME database, remotely, over SSH to
-that relay, via experiment_tracking_server.py (deployed there once).
-
-Point at a relay instead of a local file by using an `ssh://` DB path:
-    OCEANICU_EXPERIMENT_DB=ssh://user@relay-host/abs/path/to/submission_registry.sqlite
-    OCEANICU_RELAY_DIR=/abs/path/to/oceanicu_3d/running   # where *_server.py lives on the relay
-connect() below detects the ssh:// prefix and transparently switches to
-RemoteConn (an RPC proxy: each call is one `ssh relay-host python
-experiment_tracking_server.py` round trip carrying one JSON request/response) --
-callers never need to know which mode they're in. Every function that
-does no filesystem I/O of its own (the large majority: get_experiment,
-start_chunk, finish_chunk, ...) is decorated with @_rpc_or_local and
-"just works" either way, no per-function remote-handling code needed.
-
-Two functions deliberately DON'T get that blanket treatment, because they
-touch a filesystem path that is NOT necessarily where the DB lives:
-is_paused's per-experiment `<experiment_root>/PAUSE` sentinel is a path on
-whichever machine actually has that experiment's output (normally the
-production machine, never the relay), so that one check always runs locally
-on the CALLING
-machine, while the DB-column and PAUSE_ALL checks still go through the
-(possibly remote) connection. next_experiment_to_start follows the same split.
+Reading the registry from another machine
+------------------------------------------
+The registry lives in ONE place, the machine that runs the chunks; other
+machines change it only through the command queue (oceanicu_experiments.py
+--queue, applied there by get_commands_and_update_registry.py). To READ it
+from elsewhere, point at a copy with an `ssh://` DB path:
+    OCEANICU_EXPERIMENT_DB=ssh://relay-host/abs/path/to/submission_registry.sqlite
+connect() then fetches a consistent snapshot of that file (sqlite's backup
+API on the remote host, one ssh call, once per process) and opens it
+read-only: list, show and --dry-run work, any write is refused.
 """
 
 from __future__ import annotations
 
-import functools
-import inspect
-import json
 import os
-import shlex
 import sqlite3
 import subprocess
 import sys
@@ -71,7 +46,7 @@ import time
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Iterator, Optional, Union
+from typing import Iterator, Optional, Union
 
 EXPERIMENT_CONTROLS = ("run", "pause_requested", "paused")
 EXPERIMENT_STATUSES = ("not_started", "in_progress", "paused", "complete", "complete_with_warnings", "failed")
@@ -235,15 +210,10 @@ def _now() -> str:
 
 def _current_user() -> str:
     """Best-effort identity of whoever is actually running this command,
-    for the history log. Captured at the ORIGINAL call site
-    (oceanicu_experiments.py's CLI entry points, chunk_runner.py's own
-    process) and
-    threaded through as an explicit `user` argument -- NOT derived lazily
-    inside _log_history itself, because a @_rpc_or_local-decorated
-    function's body can end up executing on the RELAY's own process (see
-    RemoteConn/experiment_tracking_server.py) under a shared service account
-    that has nothing to do with which human actually typed the command on
-    their own machine. os.environ checks first (USER/LOGNAME cover the
+    for the history log. Captured at the call site (oceanicu_experiments.py's
+    CLI entry points, chunk_runner.py) and passed on as an explicit `user`
+    argument; for a queued command that is the queue entry's own user, not
+    the account that applies the queue. os.environ checks first (USER/LOGNAME cover the
     common cases cheaply); getpass.getuser() as a last resort (it itself
     checks the same env vars first, then falls back to the pwd database)."""
     for var in ("USER", "LOGNAME"):
@@ -261,13 +231,9 @@ def _log_history(
     conn: sqlite3.Connection, experiment_id: str, event: str, detail: Optional[str] = None,
     user: Optional[str] = None,
 ) -> None:
-    """Append one audit-log row. Not itself @_rpc_or_local -- it's only
-    ever called from inside another already-decorated function's own
-    body, with a real conn either way (locally, or on the relay's own
-    side of an RPC dispatch), so it needs no remote-transparency of its
-    own. Caller is responsible for the surrounding conn.commit().
+    """Append one audit-log row; the caller commits.
 
-    *user* is whatever the outer, already-decorated function was itself
+    *user* is whatever the calling function was itself
     given (see _current_user's own docstring for why this is passed in
     rather than computed here) -- None for the rare internal call that
     doesn't have one to offer, which just stores NULL."""
@@ -278,23 +244,18 @@ def _log_history(
 
 
 # ---------------------------------------------------------------------------
-# Remote (relay) access -- see the module docstring's "Working across
-# machines" section for why this exists and how the pieces fit together.
+# ssh:// paths: a read-only snapshot of a registry on another machine
 # ---------------------------------------------------------------------------
 
 class RemoteSpec:
-    """Parsed ssh://user@host/abs/path/to/db.sqlite. *relay_dir* (where
-    experiment_tracking_server.py lives on the relay) always comes from
-    OCEANICU_RELAY_DIR -- never encoded in the URI itself, since it's a
-    property of the relay's own deployment, not of any one database."""
+    """Parsed ssh://[user@]host/abs/path/to/db.sqlite."""
 
-    def __init__(self, host: str, db_path: str, relay_dir: str):
+    def __init__(self, host: str, db_path: str):
         self.host = host
         self.db_path = db_path
-        self.relay_dir = relay_dir
 
     def __repr__(self) -> str:
-        return f"ssh://{self.host}{self.db_path} (via {self.relay_dir})"
+        return f"ssh://{self.host}{self.db_path}"
 
 
 def _parse_db_spec(spec: Union[str, Path, "RemoteSpec"]) -> Union[Path, "RemoteSpec"]:
@@ -307,14 +268,64 @@ def _parse_db_spec(spec: Union[str, Path, "RemoteSpec"]) -> Union[Path, "RemoteS
     if "/" not in rest:
         raise RuntimeError(f"malformed ssh:// DB path (expected ssh://host/abs/path): {s!r}")
     host, db_path = rest.split("/", 1)
-    db_path = "/" + db_path
-    relay_dir = os.environ.get("OCEANICU_RELAY_DIR")
-    if not relay_dir:
-        raise RuntimeError(
-            f"{s!r} is a remote (ssh://) DB path, but OCEANICU_RELAY_DIR is not set -- "
-            f"it must point at the directory on {host!r} where experiment_tracking_server.py lives."
-        )
-    return RemoteSpec(host, db_path, relay_dir)
+    return RemoteSpec(host, "/" + db_path)
+
+
+# Run with python3 on the remote host (script on stdin): a consistent copy of the
+# registry (backup API, so pending WAL content is included) written to stdout.
+_SNAPSHOT_SCRIPT = """\
+import os, sqlite3, sys, tempfile
+src = {db_path!r}
+if not os.path.exists(src):
+    sys.exit(3)
+fd, tmp = tempfile.mkstemp(suffix=".sqlite"); os.close(fd)
+try:
+    s = sqlite3.connect("file:" + src + "?mode=ro", uri=True); d = sqlite3.connect(tmp)
+    s.backup(d); d.close(); s.close()
+    with open(tmp, "rb") as f:
+        sys.stdout.buffer.write(f.read())
+finally:
+    os.remove(tmp)
+"""
+
+
+def fetch_snapshot(spec: RemoteSpec, dest: Path) -> bool:
+    """Copy the registry at *spec* to the local file *dest*. False if it does not
+    exist there; RuntimeError if the host cannot be reached."""
+    try:
+        result = subprocess.run(["ssh", spec.host, "python3"],
+                                input=_SNAPSHOT_SCRIPT.format(db_path=spec.db_path).encode(),
+                                capture_output=True, timeout=120)
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"fetching {spec!r} timed out") from exc
+    if result.returncode == 3:
+        return False
+    if result.returncode != 0 or not result.stdout:
+        raise RuntimeError(f"fetching {spec!r} failed: "
+                           f"{result.stderr.decode(errors='replace').strip() or 'no output'}")
+    dest.write_bytes(result.stdout)
+    return True
+
+
+_snapshots: dict[str, Path] = {}
+
+
+def _snapshot_path(spec: RemoteSpec) -> Path:
+    """The local snapshot of *spec*, fetched on first use in this process, in a
+    private temporary folder (so the sentinel files next to it -- PAUSE_ALL,
+    DELAY_ALL -- never exist) that is removed at exit."""
+    key = repr(spec)
+    if key not in _snapshots:
+        import atexit
+        import shutil
+        import tempfile
+        folder = Path(tempfile.mkdtemp(prefix="oceanicu_registry_snapshot_"))
+        atexit.register(shutil.rmtree, folder, True)
+        path = folder / "submission_registry.sqlite"
+        if not fetch_snapshot(spec, path):
+            raise RuntimeError(f"no registry at {spec!r}")
+        _snapshots[key] = path
+    return _snapshots[key]
 
 
 def resolve_db_path_arg(
@@ -325,8 +336,8 @@ def resolve_db_path_arg(
     allow_remote: bool = True,
 ) -> Optional[str]:
     """The shared --db/env-var convention of every running/*.py entrypoint:
-    *db_arg* wins over *env_var*. Returns the raw string (ssh:// URL or local
-    path); connect() parses it.
+    *db_arg* wins over *env_var*. Returns the raw string (ssh:// URL of a
+    read-only snapshot, or local path); connect() parses it.
 
     required=True raises RuntimeError with the standard message if neither is
     set; required=False returns None (e.g. the dry-run path). allow_remote=
@@ -346,83 +357,6 @@ def resolve_db_path_arg(
     return resolved
 
 
-class RemoteConn:
-    """Stands in for a real sqlite3.Connection when the registry lives
-    behind a relay. Every @_rpc_or_local-decorated function, called with
-    one of these as *conn*, turns into exactly one `ssh host python
-    experiment_tracking_server.py` round trip carrying its name + arguments as
-    JSON and getting the (JSON-decoded) return value back -- the function
-    body itself never runs locally in this case. Plain functions that
-    aren't decorated (is_paused, next_experiment_to_start) call .call() directly
-    for just the piece of themselves that's DB-shaped, and do their own
-    filesystem checks locally regardless of conn's type -- see the module
-    docstring."""
-
-    def __init__(self, spec: RemoteSpec):
-        self.spec = spec
-
-    def call(self, func_name: str, kwargs: dict) -> Any:
-        payload = json.dumps({"db": self.spec.db_path, "func": func_name, "kwargs": kwargs})
-        remote_cmd = (
-            f"cd {shlex.quote(self.spec.relay_dir)} && "
-            f"python3 experiment_tracking_server.py"
-        )
-        try:
-            result = subprocess.run(
-                ["ssh", self.spec.host, remote_cmd],
-                input=payload, capture_output=True, text=True, timeout=60,
-            )
-        except subprocess.TimeoutExpired as exc:
-            raise RuntimeError(f"relay call to {self.spec.host!r} timed out: {func_name}") from exc
-        if result.returncode != 0 and not result.stdout.strip():
-            raise RuntimeError(
-                f"relay call to {self.spec.host!r} failed (ssh/transport error): "
-                f"{result.stderr.strip() or 'no output'}"
-            )
-        try:
-            response = json.loads(result.stdout.strip().splitlines()[-1])
-        except (ValueError, IndexError) as exc:
-            raise RuntimeError(
-                f"relay call to {self.spec.host!r} returned unparseable output: "
-                f"{result.stdout!r} / stderr: {result.stderr!r}"
-            ) from exc
-        if not response.get("ok"):
-            raise RuntimeError(f"relay call {func_name} failed on {self.spec.host!r}: "
-                                f"{response.get('error', 'unknown error')}")
-        return response.get("result")
-
-
-def _rpc_or_local(func):
-    """Decorator: functions with no filesystem I/O of their own (the
-    large majority) become remote-transparent for free. When *conn* is a
-    RemoteConn, forwards (func's own name, its bound kwargs minus conn)
-    to conn.call() instead of running the function body; when *conn* is a
-    real sqlite3.Connection (including on the relay's OWN side, inside
-    experiment_tracking_server.py's dispatch -- nested calls between decorated
-    functions Just Work, no double-dispatch, since conn there is real),
-    runs the body exactly as before."""
-    sig = inspect.signature(func)
-
-    @functools.wraps(func)
-    def wrapper(conn, *args, **kwargs):
-        if isinstance(conn, RemoteConn):
-            bound = sig.bind_partial(conn, *args, **kwargs)
-            bound.apply_defaults()
-            call_kwargs = {k: v for k, v in bound.arguments.items() if k != "conn"}
-            return conn.call(func.__name__, call_kwargs)
-        return func(conn, *args, **kwargs)
-
-    # Marks this specific function as safe to dispatch by name over RPC --
-    # experiment_tracking_server.py's allow-list checks for this attribute, not a
-    # naming convention, so it stays correct as functions are added/
-    # renamed and isn't fooled by a leading underscore on an internal
-    # helper (_control_or_pause_all, _not_started_candidates) that still
-    # legitimately needs to be dispatchable.
-    wrapper._is_rpc_dispatchable = True  # type: ignore[attr-defined]
-    return wrapper
-
-
-@_rpc_or_local
 def list_history(conn: sqlite3.Connection, experiment_id: str) -> list[sqlite3.Row]:
     """Full audit trail for one experiment, oldest first -- registration, every
     chunk start/finish, the experiment itself reaching a terminal status, and
@@ -436,7 +370,7 @@ def list_history(conn: sqlite3.Connection, experiment_id: str) -> list[sqlite3.R
 @contextmanager
 def connect(
     db_path: Optional[Union[str, Path, "RemoteSpec"]] = None,
-) -> Iterator[Union[sqlite3.Connection, "RemoteConn"]]:
+) -> Iterator[sqlite3.Connection]:
     """Open the registry (WAL mode, for concurrent writers from different
     SLURM jobs), creating the schema on first use.
 
@@ -444,13 +378,15 @@ def connect(
     would silently create an empty registry at a wrong guess. Use e.g.
     OCEANICU_EXPERIMENT_DB=/tmp/test.sqlite for testing.
 
-    An `ssh://host/abs/path` value (or a RemoteSpec) yields a RemoteConn (see
-    the module docstring); @_rpc_or_local functions accept either.
+    An `ssh://host/abs/path` value (or a RemoteSpec) opens a read-only local
+    snapshot of that registry (see the module docstring); writes raise
+    RuntimeError.
     """
     resolved = db_path if db_path is not None else resolve_db_path_arg(None)
     spec = _parse_db_spec(resolved)
     if isinstance(spec, RemoteSpec):
-        yield RemoteConn(spec)
+        with _connect_snapshot(spec) as conn:
+            yield conn
         return
     path = spec
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -469,10 +405,30 @@ def connect(
         conn.close()
 
 
+@contextmanager
+def _connect_snapshot(spec: RemoteSpec) -> Iterator[sqlite3.Connection]:
+    conn = sqlite3.connect(str(_snapshot_path(spec)), timeout=30.0)
+    conn.row_factory = sqlite3.Row
+    try:
+        conn.executescript(_SCHEMA)          # an older registry: bring the copy up to date
+        conn.commit()
+        _migrate_schema(conn)
+        conn.execute("PRAGMA query_only=ON")
+        try:
+            yield conn
+        except sqlite3.OperationalError as exc:
+            if "readonly" in str(exc):
+                raise RuntimeError(f"{spec!r} is a read-only snapshot; change the registry "
+                                   f"through the command queue (--queue)") from exc
+            raise
+    finally:
+        conn.close()
+
+
 def _ensure_group_writable(db_path: Path) -> None:
     """Add group-write to the DB file and its -wal/-shm sidecars: SQLite
     creates them with the creating process's umask (often 022), which would
-    lock the other user of a shared relay out. Only adds bits; group
+    lock the other user of a shared registry out. Only adds bits; group
     ownership comes from the directory's setgid bit (EXPERIMENT_TRACKING.md).
     Best-effort: a PermissionError is ignored (chmod by hand then).
     """
@@ -496,9 +452,7 @@ def _ensure_group_writable(db_path: Path) -> None:
 # OCEANICU_DB_BACKUP_EVERY_N_WRITES), take a WAL-safe snapshot via
 # sqlite3's own backup API (NOT a raw file copy, which can catch the main
 # file mid-checkpoint and miss pending WAL content) and commit it. Hooked
-# into connect()'s local-mode teardown -- the one chokepoint every write
-# passes through either directly or, via experiment_tracking_server.py's own
-# connect() call, on the relay side of an RPC dispatch.
+# into connect()'s teardown -- the one chokepoint every write passes through.
 #
 # Default is 1, not some larger batching value, DELIBERATELY -- this
 # system's whole point is a remote production machine nobody is watching
@@ -601,7 +555,6 @@ def _write_backup_snapshot_and_commit(conn: sqlite3.Connection, db_path: Path, w
 # experiments table
 # ---------------------------------------------------------------------------
 
-@_rpc_or_local
 def add_experiment(
     conn: sqlite3.Connection, *, experiment_id: str, experiment_root: str, script: str, config: str,
     initial_date: str, stop_date: str, data_roots_file: Optional[str] = None,
@@ -631,7 +584,6 @@ def add_experiment(
     conn.commit()
 
 
-@_rpc_or_local
 def remove_experiment(conn: sqlite3.Connection, experiment_id: str, *, force: bool = False, user: Optional[str] = None) -> None:
     row = get_experiment(conn, experiment_id)
     if row is None:
@@ -656,12 +608,10 @@ def remove_experiment(conn: sqlite3.Connection, experiment_id: str, *, force: bo
     conn.commit()
 
 
-@_rpc_or_local
 def get_experiment(conn: sqlite3.Connection, experiment_id: str) -> Optional[sqlite3.Row]:
     return conn.execute("SELECT * FROM experiments WHERE experiment_id = ?", (experiment_id,)).fetchone()
 
 
-@_rpc_or_local
 def list_experiments(
     conn: sqlite3.Connection, *, status: Optional[str] = None, sort: Optional[str] = None,
 ) -> list[sqlite3.Row]:
@@ -693,12 +643,10 @@ def _set_experiment_field(
     conn.commit()
 
 
-@_rpc_or_local
 def set_priority(conn: sqlite3.Connection, experiment_id: str, priority: int, user: Optional[str] = None) -> None:
     _set_experiment_field(conn, experiment_id, 'priority', priority, 'priority_changed', user)
 
 
-@_rpc_or_local
 def set_data_roots_file(
     conn: sqlite3.Connection, experiment_id: str, data_roots_file: Optional[str], user: Optional[str] = None,
 ) -> None:
@@ -713,7 +661,6 @@ def set_data_roots_file(
     _set_experiment_field(conn, experiment_id, 'data_roots_file', data_roots_file, 'data_roots_file_changed', user, repr_values=True)
 
 
-@_rpc_or_local
 def set_np(conn: sqlite3.Connection, experiment_id: str, np: int, user: Optional[str] = None) -> None:
     """Change an experiment's process count, e.g. after finding the original --np
     was wrong for the actual production machine's node layout. Read fresh
@@ -723,7 +670,6 @@ def set_np(conn: sqlite3.Connection, experiment_id: str, np: int, user: Optional
     _set_experiment_field(conn, experiment_id, 'np', np, 'np_changed', user)
 
 
-@_rpc_or_local
 def set_launcher(conn: sqlite3.Connection, experiment_id: str, launcher: str, user: Optional[str] = None) -> None:
     """Change an experiment's launcher (srun/mpiexec), e.g. after registering
     it with the wrong one for the machine it's actually going to run on.
@@ -734,7 +680,6 @@ def set_launcher(conn: sqlite3.Connection, experiment_id: str, launcher: str, us
     _set_experiment_field(conn, experiment_id, 'launcher', launcher, 'launcher_changed', user)
 
 
-@_rpc_or_local
 def set_notes(conn: sqlite3.Connection, experiment_id: str, notes: Optional[str], user: Optional[str] = None) -> None:
     """Change an experiment's free-text notes, e.g. to record why it was
     paused or what a rerun fixed, without needing direct DB access. Same
@@ -744,7 +689,6 @@ def set_notes(conn: sqlite3.Connection, experiment_id: str, notes: Optional[str]
     _set_experiment_field(conn, experiment_id, 'notes', notes, 'notes_changed', user, repr_values=True)
 
 
-@_rpc_or_local
 def rename_experiment(
     conn: sqlite3.Connection, experiment_id: str, *,
     new_experiment_id: Optional[str] = None,
@@ -756,8 +700,7 @@ def rename_experiment(
     its chunk and history records (history rows are rewritten to the new id).
 
     No filesystem access: experiment_root is stored as given. Moving the
-    directory is the caller's job (cmd_rename), done FIRST, since this may
-    run on the relay. PRAGMA defer_foreign_keys makes updating the
+    directory is the caller's job (cmd_rename), done FIRST. PRAGMA defer_foreign_keys makes updating the
     referenced primary key safe within the transaction.
     """
     row = get_experiment(conn, experiment_id)
@@ -797,21 +740,15 @@ def rename_experiment(
     conn.commit()
 
 
-@_rpc_or_local
 def log_cleaned(
     conn: sqlite3.Connection, experiment_id: str, removed_files: list, user: Optional[str] = None,
 ) -> None:
     """Audit-log entry for oceanicu_experiments.py's `clean` command --
-    the actual file deletion is local-filesystem work done by the
-    caller (same "can't live in an @_rpc_or_local body" reasoning as
-    rename_experiment's directory move); this just records that it
-    happened, through the (possibly remote) registry connection like
-    every other history entry."""
+    the file deletion itself is done by the caller; this records it."""
     _log_history(conn, experiment_id, "cleaned", f"removed: {', '.join(removed_files)}", user=user)
     conn.commit()
 
 
-@_rpc_or_local
 def set_chunk_delay(
     conn: sqlite3.Connection, experiment_id: str, chunk_delay_seconds: int, user: Optional[str] = None,
 ) -> None:
@@ -825,7 +762,6 @@ def set_chunk_delay(
     _set_experiment_field(conn, experiment_id, 'chunk_delay_seconds', chunk_delay_seconds, 'chunk_delay_changed', user)
 
 
-@_rpc_or_local
 def set_stop_date(conn: sqlite3.Connection, experiment_id: str, stop_date: str, user: Optional[str] = None) -> None:
     """Change an experiment's target end date, including while it's mid-experiment (e.g.
     currently at 2035, decide to stop at 2050 instead of 2099). Nothing
@@ -839,7 +775,6 @@ def set_stop_date(conn: sqlite3.Connection, experiment_id: str, stop_date: str, 
     recompute_experiment_status(conn, experiment_id)
 
 
-@_rpc_or_local
 def set_start_date(conn: sqlite3.Connection, experiment_id: str, initial_date: str, user: Optional[str] = None) -> None:
     """Change an experiment's own start date (the initial_date column) --
     unlike set_stop_date, this is only meaningful BEFORE the experiment's
@@ -853,7 +788,6 @@ def set_start_date(conn: sqlite3.Connection, experiment_id: str, initial_date: s
     _set_experiment_field(conn, experiment_id, 'initial_date', initial_date, 'initial_date_changed', user)
 
 
-@_rpc_or_local
 def chunk_delay_sentinel_path(conn: sqlite3.Connection) -> Path:
     """Path of the DELAY_ALL sentinel, next to the registry DB (as PAUSE_ALL):
     a timed pause of every hand-off. Content = delay in seconds, counted from
@@ -870,14 +804,8 @@ def chunk_delay_sentinel_path(conn: sqlite3.Connection) -> Path:
 
 def get_chunk_delay_remaining(conn) -> float:
     """Seconds still remaining on the DELAY_ALL sentinel (see its own
-    docstring), 0.0 if absent, unreadable, or already expired. Not
-    @_rpc_or_local: like is_paused/next_experiment_to_start, this needs a LOCAL
-    filesystem check (the sentinel lives next to wherever the DB actually
-    is, which for a RemoteConn is the relay, not necessarily reachable by
-    plain Path() from wherever this is called) -- calls
-    chunk_delay_sentinel_path (relay-transparent on its own) for the path,
-    then always stats it locally on whichever machine is asking, exactly
-    mirroring _control_or_pause_all's own split."""
+    docstring), 0.0 if absent, unreadable, or already expired. (A read-only
+    ssh:// snapshot has no sentinel files: always 0.0 there.)"""
     try:
         path = Path(chunk_delay_sentinel_path(conn))
     except RuntimeError:
@@ -893,19 +821,13 @@ def get_chunk_delay_remaining(conn) -> float:
     return remaining if remaining > 0 else 0.0
 
 
-@_rpc_or_local
 def pause_all_sentinel_path(conn: sqlite3.Connection) -> Path:
     """Path of the PAUSE_ALL sentinel: always right next to whatever
     registry DB file *conn* actually has open (via PRAGMA database_list,
     not a hardcoded location) -- so it's automatically correct on any
     machine/folder layout the DB happens to live on, no matter which one
     that is. `touch <this path>` pauses every experiment; `rm` resumes them.
-
-    Dispatched wholesale like most functions here (PAUSE_ALL always lives
-    with the DB, so relay-side execution is correct no matter which
-    machine is asking) -- unlike is_paused/next_experiment_to_start, which also
-    need a per-experiment filesystem check that is NOT relay-side, and so can't
-    use this same blanket treatment for themselves as a whole."""
+    (A read-only ssh:// snapshot has no sentinel files.)"""
     row = conn.execute("PRAGMA database_list").fetchone()
     db_file = row["file"] if row is not None else None
     if not db_file:
@@ -913,12 +835,10 @@ def pause_all_sentinel_path(conn: sqlite3.Connection) -> Path:
     return Path(db_file).parent / "PAUSE_ALL"
 
 
-@_rpc_or_local
 def _control_or_pause_all(conn: sqlite3.Connection, experiment_id: str) -> bool:
-    """The half of is_paused that lives wherever the DB lives (the DB
-    control column, and the PAUSE_ALL sentinel next to the DB file) --
-    dispatched as ONE round trip when conn is remote. is_paused adds the
-    per-experiment PAUSE-file check on top of this, always locally."""
+    """The half of is_paused that lives with the DB (the control column, and
+    the PAUSE_ALL sentinel next to the DB file); is_paused adds the
+    per-experiment PAUSE file."""
     if Path(pause_all_sentinel_path(conn)).exists():
         return True
     row = get_experiment(conn, experiment_id)
@@ -946,15 +866,10 @@ def resolve_experiment_root(experiment_root: str) -> str:
 
 
 def is_paused(conn, experiment_id: str, experiment_root: Optional[str] = None) -> bool:
-    """True if EITHER the DB control column, the PAUSE_ALL sentinel
-    (both checked wherever the DB actually lives -- see
-    _control_or_pause_all, one RPC round trip if conn is remote), OR the
-    per-experiment `<experiment_root>/PAUSE` file (ALWAYS checked locally on whichever
-    machine is calling this -- experiment_root is a path on whichever machine
-    actually has that experiment's output, which is normally the production
-    machine and is NEVER the relay; resolved against this machine's own
-    OCEANICU_EXPERIMENT_ROOT_BASE first if it's relative, see resolve_experiment_root)
-    says to pause. Checked before every chunk launch and before every
+    """True if EITHER the DB control column, the PAUSE_ALL sentinel (see
+    _control_or_pause_all), OR the per-experiment `<experiment_root>/PAUSE`
+    file (a relative experiment_root is resolved against this machine's
+    OCEANICU_EXPERIMENT_ROOT_BASE, see resolve_experiment_root) says to pause. Checked before every chunk launch and before every
     self-resubmission -- never mid-chunk, so a currently-running chunk
     always finishes cleanly first."""
     if _control_or_pause_all(conn, experiment_id):
@@ -964,13 +879,10 @@ def is_paused(conn, experiment_id: str, experiment_root: Optional[str] = None) -
     return False
 
 
-@_rpc_or_local
 def _not_started_candidates(conn: sqlite3.Connection) -> list:
     """experiment_id + experiment_root for every not_started, control='run' experiment,
-    priority order -- the pure-DB half of next_experiment_to_start, dispatched
-    as one round trip; the per-candidate pause check (which needs a
-    local filesystem look at each candidate's OWN experiment_root) happens
-    afterwards, one candidate at a time, always on the calling machine."""
+    priority order -- the DB half of next_experiment_to_start; the
+    per-candidate PAUSE-file check follows, one candidate at a time."""
     rows = conn.execute(
         "SELECT experiment_id, experiment_root FROM experiments WHERE status = 'not_started' AND control = 'run' "
         "ORDER BY priority DESC, experiment_id"
@@ -994,7 +906,6 @@ def next_experiment_to_start(conn) -> Optional[str]:
     return None
 
 
-@_rpc_or_local
 def set_chunk_settings(
     conn: sqlite3.Connection, experiment_id: str, *, chunk_kind: Optional[str] = None,
     chunk_multiplier: Optional[int] = None, user: Optional[str] = None,
@@ -1025,7 +936,6 @@ def set_chunk_settings(
     conn.commit()
 
 
-@_rpc_or_local
 def set_control(conn: sqlite3.Connection, experiment_id: str, control: str, user: Optional[str] = None) -> None:
     if control not in EXPERIMENT_CONTROLS:
         raise ValueError(f"control must be one of {EXPERIMENT_CONTROLS}, got {control!r}")
@@ -1059,7 +969,6 @@ def set_control(conn: sqlite3.Connection, experiment_id: str, control: str, user
 # chunks table
 # ---------------------------------------------------------------------------
 
-@_rpc_or_local
 def next_chunk_index(conn: sqlite3.Connection, experiment_id: str) -> int:
     row = conn.execute(
         "SELECT COALESCE(MAX(chunk_index), -1) + 1 AS n FROM chunks WHERE experiment_id = ?",
@@ -1068,7 +977,6 @@ def next_chunk_index(conn: sqlite3.Connection, experiment_id: str) -> int:
     return int(row["n"])
 
 
-@_rpc_or_local
 def next_chunk_start(conn: sqlite3.Connection, experiment_id: str, initial_date: str) -> str:
     """Resume point: the stop of the last chunk on record, or the experiment's
     own initial_date if nothing has run yet. This is the ONLY source of
@@ -1082,7 +990,6 @@ def next_chunk_start(conn: sqlite3.Connection, experiment_id: str, initial_date:
     return row["s"] if row and row["s"] else initial_date
 
 
-@_rpc_or_local
 def start_chunk(
     conn: sqlite3.Connection, *, experiment_id: str, chunk_index: int, start: str, stop: str,
     chunk_dir: str, load_restart: Optional[str], save_restart: str,
@@ -1168,7 +1075,6 @@ def start_chunk(
     conn.commit()
 
 
-@_rpc_or_local
 def finish_chunk(
     conn: sqlite3.Connection, *, experiment_id: str, chunk_index: int, exit_code: int,
     nan_detected: bool = False, user: Optional[str] = None,
@@ -1226,12 +1132,7 @@ def is_slurm_job_running(job_id: Optional[str]) -> Optional[bool]:
     """True/False if squeue can tell us the job is still active; None if
     it can't be determined (no job_id recorded, squeue unavailable, or it
     errored) -- callers fall back to a time-based staleness check.
-
-    Deliberately NOT a filesystem/DB operation, so NOT @_rpc_or_local --
-    squeue only exists on the machine that's actually part of the SLURM
-    cluster (the HPC), never on the relay, so this always runs locally on
-    the caller, same category as is_paused's own per-experiment PAUSE-
-    file check. Shared by chunk_runner.py's own start-of-chunk lock/
+    Shared by chunk_runner.py's own start-of-chunk lock/
     orphan check and reap_orphaned_chunks.py's periodic watchdog sweep --
     single source of truth for "is this recorded job actually still
     alive," not duplicated logic that could quietly drift apart."""
@@ -1251,10 +1152,7 @@ def is_slurm_job_running(job_id: Optional[str]) -> Optional[bool]:
 def cancel_slurm_job(job_id: str) -> tuple[bool, str]:
     """Best-effort `scancel <job_id>`. Returns (success, message).
 
-    Deliberately NOT @_rpc_or_local, same reasoning as is_slurm_job_running
-    right above -- scancel only exists on a machine that's actually part
-    of the SLURM cluster, so this always runs locally on the caller (the
-    HPC), never proxied over the relay. A failure here (job already gone,
+    A failure here (job already gone,
     scancel unavailable, timeout) is reported but not fatal to the
     caller -- cmd_kill still marks the chunk failed in the DB regardless,
     since "no longer tracked as running" is the actual intent either way.
@@ -1270,7 +1168,6 @@ def cancel_slurm_job(job_id: str) -> tuple[bool, str]:
     return True, "scancel issued"
 
 
-@_rpc_or_local
 def record_queue_command(conn: sqlite3.Connection, experiment_id: str, detail: str,
                           user: Optional[str] = None) -> None:
     """Log a queued command's result (its id, queued_by, queued_at, queue
@@ -1284,7 +1181,6 @@ def record_queue_command(conn: sqlite3.Connection, experiment_id: str, detail: s
     conn.commit()
 
 
-@_rpc_or_local
 def list_running_chunks(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     """Every chunk currently marked 'running', across ALL experiments --
     the cross-experiment counterpart to get_running_chunk (which is
@@ -1301,7 +1197,6 @@ def list_running_chunks(conn: sqlite3.Connection) -> list[sqlite3.Row]:
     ).fetchall()
 
 
-@_rpc_or_local
 def get_running_chunk(conn: sqlite3.Connection, experiment_id: str) -> Optional[sqlite3.Row]:
     """The chunk currently marked 'running' for this experiment, if any -- used
     as a lock: chunk_runner.py refuses to start a new chunk while one is
@@ -1315,7 +1210,6 @@ def get_running_chunk(conn: sqlite3.Connection, experiment_id: str) -> Optional[
     ).fetchone()
 
 
-@_rpc_or_local
 def get_chunk(conn: sqlite3.Connection, experiment_id: str, chunk_index: int) -> Optional[sqlite3.Row]:
     """One chunk's full row, by index, regardless of status -- unlike
     get_done_chunk_restart (which only ever returns something for a
@@ -1332,14 +1226,9 @@ def get_chunk(conn: sqlite3.Connection, experiment_id: str, chunk_index: int) ->
     ).fetchone()
 
 
-@_rpc_or_local
 def get_done_chunk_restart(conn: sqlite3.Connection, experiment_id: str, chunk_index: int) -> Optional[str]:
     """save_restart path of a specific completed chunk -- what the NEXT
-    chunk's --load-restart should point at. Exists as its own named,
-    dispatchable function (rather than chunk_runner.py running this
-    query directly against conn) specifically so it keeps working when
-    conn is a RemoteConn: raw ad-hoc SQL outside this module has no way
-    to cross the relay, only named functions do."""
+    chunk's --load-restart should point at."""
     row = conn.execute(
         "SELECT save_restart FROM chunks WHERE experiment_id = ? AND chunk_index = ? AND status = 'done'",
         (experiment_id, chunk_index),
@@ -1347,14 +1236,12 @@ def get_done_chunk_restart(conn: sqlite3.Connection, experiment_id: str, chunk_i
     return row["save_restart"] if row else None
 
 
-@_rpc_or_local
 def list_chunks(conn: sqlite3.Connection, experiment_id: str) -> list[sqlite3.Row]:
     return conn.execute(
         "SELECT * FROM chunks WHERE experiment_id = ? ORDER BY chunk_index", (experiment_id,)
     ).fetchall()
 
 
-@_rpc_or_local
 def get_latest_chunk_indices(conn: sqlite3.Connection) -> dict[str, int]:
     """{experiment_id: highest chunk_index reached so far} for every
     experiment that has at least one chunk row -- one grouped query for
@@ -1369,7 +1256,6 @@ def get_latest_chunk_indices(conn: sqlite3.Connection) -> dict[str, int]:
     return {r["experiment_id"]: r["latest"] for r in rows}
 
 
-@_rpc_or_local
 def rerun_from(
     conn: sqlite3.Connection, experiment_id: str, *, chunk_index: Optional[int] = None,
     user: Optional[str] = None, note: Optional[str] = None, force: bool = False,
@@ -1471,7 +1357,6 @@ def rerun_from(
     return n_dropped
 
 
-@_rpc_or_local
 def recompute_experiment_status(conn: sqlite3.Connection, experiment_id: str) -> str:
     """Derive the experiment-level status from its chunk history -- 'complete' is
     reserved for a genuinely clean finish (see module docstring); an experiment

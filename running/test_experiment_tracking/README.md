@@ -137,26 +137,15 @@ oceanicu-experiments show --experiment-id fake/notstarted/spare   # priority is 
 Use the REAL `../run_chunk.slurm` -- no new script needed for this path,
 `run_chunk_local.py` is only a stand-in for machines without SLURM.
 
-**Remember: the DB should live on the relay**, not on whichever machine
-happens to run `setup_fake_experiments.py`, whenever the add-machine and the
-SLURM machine can't reach each other directly (see `../EXPERIMENT_TRACKING.md`'s
-"Working across machines"). Point `--db` at the relay explicitly:
+The test registry lives on the SLURM machine itself (an `ssh://` path is
+only a read-only snapshot, see `../EXPERIMENT_TRACKING.md` "Reading the
+registry from another machine"). On the SLURM machine:
 
 ```bash
 python setup_fake_experiments.py --launcher srun \
-    --db ssh://oceanicu-relay/abs/path/to/test_registry.sqlite \
+    --db /abs/path/to/test_registry.sqlite \
     --fake-driver-path /abs/path/on/the/slurm/machine/fake_driver.py
-```
-
-(`--fake-driver-path` only needs overriding if the SLURM machine isn't
-the same one you ran `setup_fake_experiments.py` from -- copy `fake_driver.py`
-there first, same as any other driver script normally gets deployed
-per-experiment per `EXPERIMENT_TRACKING.md`.)
-
-Then, **on the SLURM machine**:
-
-```bash
-cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='fake/quick/run01',OCEANICU_EXPERIMENT_DB='ssh://oceanicu-relay/abs/path/to/test_registry.sqlite' \
+cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='fake/quick/run01',OCEANICU_EXPERIMENT_DB='/abs/path/to/test_registry.sqlite' \
     run_chunk.slurm
 ```
 
@@ -165,9 +154,7 @@ cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='fake/quick/run01',OCEA
 it" for why.)
 
 Everything else -- `list`/`show`/`pause`/`resume`/`rerun`/etc. -- works
-exactly as in Option A, just with `--db`/`OCEANICU_EXPERIMENT_DB` set to the
-same `ssh://` relay path everywhere, from any machine that can reach the
-relay.
+exactly as in Option A there, with the same `--db`.
 
 One thing to sanity-check first if this is a genuinely different SLURM
 cluster than the one `run_chunk.slurm` was written for: it unconditionally

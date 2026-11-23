@@ -23,17 +23,18 @@ That queue directory is plain data, deliberately NOT part of this git
 repo -- see EXPERIMENT_TRACKING.md "Command queue" for where it actually lives
 and how it reaches the registry from there.
 
-list/show are read-only and safe to point at a read-only mirror (e.g.
-bb-server1) if that's all you can reach -- you just might be looking at
-a slightly stale snapshot, not live state:
+list/show are read-only: point them at the bb-server1 mirror from any
+machine with an ssh:// path (a read-only snapshot, fetched per run; the
+mirror itself may be a little behind the HPC):
+
+    OCEANICU_EXPERIMENT_DB=ssh://oceanicu-relay/data/OceanICU/oceanicu_3d/experiments/submission_registry.sqlite
 
     oceanicu_experiments.py list   [--status in_progress] [--like MPI-ESM1-2-HR] [--sort updated_at]
     oceanicu_experiments.py show   --experiment-id ...              # experiment + full chunk history
 
 Every WRITE command below also works without --queue, but only if you
-have an actual, live path to the AUTHORITATIVE registry -- the
-production machine itself, or the ssh:// relay (see EXPERIMENT_TRACKING.md
-"Working across machines"). A read-only mirror does NOT count for these:
+run them on the machine that has the AUTHORITATIVE registry (an ssh://
+snapshot refuses writes). A local copy of a mirror does NOT count:
 pointing --db at one "succeeds" with no warning, writes into a copy with
 no effect on the real thing, and vanishes next time a real push
 overwrites it. On this project's actual HPC, nobody runs these directly
@@ -168,41 +169,16 @@ def _print_table(rows: list, columns: list[str], labels: dict[str, str] | None =
 def _resolve_real_db_path(args: argparse.Namespace):
     resolved = rt.resolve_db_path_arg(args.db)
     assert resolved is not None  # required=True (default) guarantees this, or raises
-    return rt._parse_db_spec(resolved)  # Path, or RemoteSpec for an ssh:// path
+    return rt._parse_db_spec(resolved)  # Path, or RemoteSpec for an ssh:// snapshot
 
 
 def _pull_snapshot_copy(real_db, scratch_db: Path) -> None:
-    """Copy *real_db* to a fresh LOCAL file at *scratch_db*, for real
-    (not simulated) dry-run execution against it -- read-only as far as
-    the real DB is concerned either way. A local real_db is just
-    shutil.copy2 (skipped if it doesn't exist yet -- dry-run then starts
-    from an empty scratch DB, same as the no-DB-configured case). A
-    remote one is backed up with Python's own sqlite3.Connection.backup()
-    (WAL-consistent, unlike copying a possibly-mid-write file directly,
-    and depends only on the sqlite3 MODULE -- always present, since
-    experiment_tracking_server.py itself needs it -- not the separate `sqlite3`
-    CLI binary, which isn't guaranteed to be installed on an arbitrary
-    relay) then `scp`'d down; nothing is ever written back to the real
-    DB. The script is sent over `python3`'s stdin (same pattern as
-    RemoteConn.call's own JSON payload), not as a `-c` argument -- ssh
-    joins all trailing argv into one string for the REMOTE shell to
-    re-parse, so a multi-line script with quotes and colons gets mangled
-    if sent that way; stdin has no such quoting to survive."""
+    """Copy *real_db* to a fresh local file at *scratch_db* for a dry run
+    (skipped when it does not exist yet: the dry run then starts empty). An
+    ssh:// registry is fetched with rt.fetch_snapshot (consistent under WAL);
+    nothing is ever written back."""
     if isinstance(real_db, rt.RemoteSpec):
-        remote_tmp = f"/tmp/.oceanicu_dryrun_backup_{os.getpid()}.sqlite"
-        backup_script = (
-            "import os, sqlite3\n"
-            f"src, dst = {real_db.db_path!r}, {remote_tmp!r}\n"
-            "if os.path.exists(src):\n"
-            "    s = sqlite3.connect(src)\n"
-            "    d = sqlite3.connect(dst)\n"
-            "    s.backup(d)\n"
-            "    d.close(); s.close()\n"
-        )
-        subprocess.run(["ssh", real_db.host, "python3"], input=backup_script, text=True, check=False)
-        subprocess.run(["scp", "-q", f"{real_db.host}:{remote_tmp}", str(scratch_db)],
-                        check=False, stderr=subprocess.DEVNULL)
-        subprocess.run(["ssh", real_db.host, "rm", "-f", remote_tmp], check=False)
+        rt.fetch_snapshot(real_db, scratch_db)
     elif real_db.exists():
         shutil.copy2(real_db, scratch_db)
 

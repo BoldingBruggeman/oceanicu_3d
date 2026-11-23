@@ -6,10 +6,7 @@
 #
 # Submit from inside running/ (SCRIPT_DIR comes from $SLURM_SUBMIT_DIR):
 #   cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='/abs/path/to/experiment_registry.sqlite' run_chunk.slurm
-# With the registry behind a relay (EXPERIMENT_TRACKING.md "Working across
-# machines"; OCEANICU_RELAY_DIR is where experiment_tracking_server.py lives
-# on the relay):
-#   cd /path/to/running && sbatch --export=ALL,EXPERIMENT_ID='...',OCEANICU_EXPERIMENT_DB='ssh://relay/abs/path/db.sqlite',OCEANICU_RELAY_DIR='/abs/path/on/relay' run_chunk.slurm
+# The registry must be a local file (an ssh:// path is a read-only snapshot).
 #
 # Keep the leading `ALL,`: without it --export replaces the whole job
 # environment (HOME included), and module/conda setup fails.
@@ -163,7 +160,7 @@ with rt.connect() as conn:
     _wait_for_delay_all
     _wait_for_experiment_chunk_delay "$NEXT_EXPERIMENT_ID"
     _push_registry_snapshot_best_effort
-    sbatch --export=ALL,EXPERIMENT_ID="$NEXT_EXPERIMENT_ID",OCEANICU_EXPERIMENT_DB="$OCEANICU_EXPERIMENT_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
+    sbatch --export=ALL,EXPERIMENT_ID="$NEXT_EXPERIMENT_ID",OCEANICU_EXPERIMENT_DB="$OCEANICU_EXPERIMENT_DB" "$SELF"
     exit 0
 fi
 
@@ -182,4 +179,4 @@ _wait_for_delay_all
 _wait_for_experiment_chunk_delay "$EXPERIMENT_ID"
 _push_registry_snapshot_best_effort
 echo "$EXPERIMENT_ID: submitting next chunk"
-sbatch --export=ALL,EXPERIMENT_ID="$EXPERIMENT_ID",OCEANICU_EXPERIMENT_DB="$OCEANICU_EXPERIMENT_DB",OCEANICU_RELAY_DIR="${OCEANICU_RELAY_DIR:-}" "$SELF"
+sbatch --export=ALL,EXPERIMENT_ID="$EXPERIMENT_ID",OCEANICU_EXPERIMENT_DB="$OCEANICU_EXPERIMENT_DB" "$SELF"

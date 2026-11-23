@@ -17,15 +17,9 @@ folder's README.md for the full walkthrough of both:
     same registry, same fake_driver.py as --script, no new script needed
     for that path.
 
-**Remember the DB itself should live on the relay**, not on whichever
-machine happens to run this setup script, if the machine(s) actually
-executing chunks (in particular a separate SLURM cluster) can't reach
-this one directly -- see EXPERIMENT_TRACKING.md's "Working across machines".
-Pass --db explicitly for that, e.g.:
-    --db ssh://oceanicu-relay/abs/path/to/test_registry.sqlite
-    --db ssh://bb-server1/data/OceanICU/oceanicu_3d/experiments/test_experiment_tracking/test_registry.sqlite
-experiment_tracking.connect() already handles ssh:// specs transparently
-(RemoteConn) -- this script needs no special-casing for that itself.
+Run it on the machine that executes the chunks: the test registry must be
+a local file there (an ssh:// --db is only a read-only snapshot, see
+EXPERIMENT_TRACKING.md "Reading the registry from another machine").
 
 Everything this creates ON THIS machine (experiment_root dirs under experiments/, the
 local test_registry.sqlite if --db is left at its default) lives under
