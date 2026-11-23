@@ -1,0 +1,174 @@
+/* docs-theme: the Bolding & Bruggeman presentation style (bb_style.js of the B&B template) on the
+   web -- neutral white/grey, the logo colours as accents, Calibri. Shared by nesting-docs,
+   config-docs, ocean-docs and oceanicu_3d (a submodule in each). Dark mode follows the system
+   setting: the same tokens, redefined below; figures keep their white plate (--plate). */
+:root {
+  --ink: #262626;        /* dk1 */
+  --head: #252E37;       /* dk2: titles */
+  --paper: #FFFFFF;      /* lt1 */
+  --paper-2: #F2F2F2;    /* lt2: section background */
+  --teal: #006976;       /* accent1: wordmark */
+  --blue: #007FB3;       /* accent2: links */
+  --cyan: #19B3D1;       /* accent3 */
+  --navy: #005E85;       /* accent4: visited links */
+  --mist: #9FCFD7;       /* accent5 */
+  --grey: #7F7F7F;       /* accent6 */
+  --rule: #DADADA;
+  --code: #F6F7F8;
+  --quote: #F3FAFC;      /* blockquote background */
+  --font: Calibri, Carlito, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", Consolas, "DejaVu Sans Mono", monospace;
+  --wide: 76rem;
+  /* names used by nesting-docs' own components */
+  --ink-2: #595959;
+  --display: var(--font);
+  --body: var(--font);
+  --magenta: #B0216F;    /* the interfaces in the nesting figures */
+  --ok: #2C7A3F;
+  --plate: #FFFFFF;
+  --measure: 72ch;
+  color-scheme: light;
+}
+/* dark mode: the system setting, unless the reader chose with the top-bar button (mode.js sets
+   data-theme="light" or "dark" on <html>) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #E1E5E8;
+    --head: #F2F4F5;
+    --paper: #14191E;
+    --paper-2: #1D242B;
+    --teal: #4DB6C2;      /* accent1, lightened for a dark background */
+    --blue: #5CB8E6;
+    --cyan: #19B3D1;
+    --navy: #93BEDD;
+    --mist: #3D7480;
+    --grey: #9AA3AA;
+    --rule: #333D46;
+    --code: #10151A;
+    --quote: #17262C;
+    --ink-2: #B4BCC2;
+    --magenta: #E57AB3;
+    --ok: #63BF7B;
+    --plate: #FFFFFF;     /* figures with a white background stay on white */
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ink: #E1E5E8;
+  --head: #F2F4F5;
+  --paper: #14191E;
+  --paper-2: #1D242B;
+  --teal: #4DB6C2;      /* accent1, lightened for a dark background */
+  --blue: #5CB8E6;
+  --cyan: #19B3D1;
+  --navy: #93BEDD;
+  --mist: #3D7480;
+  --grey: #9AA3AA;
+  --rule: #333D46;
+  --code: #10151A;
+  --quote: #17262C;
+  --ink-2: #B4BCC2;
+  --magenta: #E57AB3;
+  --ok: #63BF7B;
+  --plate: #FFFFFF;     /* figures with a white background stay on white */
+  color-scheme: dark;
+}
+/* the logos have teal lettering on a transparent background: on dark, put them on a light plate */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .brand img, :root:not([data-theme="light"]) .footin img { background: #FFFFFF; border-radius: 4px; padding: 3px 6px; box-sizing: content-box; }
+}
+:root[data-theme="dark"] .brand img, :root[data-theme="dark"] .footin img { background: #FFFFFF; border-radius: 4px; padding: 3px 6px; box-sizing: content-box; }
+
+/* the light/dark button (mode.js) at the end of the top bar */
+.bb-mode { font: inherit; font-size: 1.05rem; line-height: 1; color: var(--head); background: transparent;
+  border: 1px solid var(--rule); border-radius: 4px; padding: 0.2rem 0.45rem; cursor: pointer;
+  align-self: center; margin-left: 0.3rem; }
+.bb-mode:hover { border-color: var(--teal); color: var(--teal); }
+* { box-sizing: border-box; }
+html { scroll-padding-top: 5rem; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.075rem/1.6 var(--font); }
+a { color: var(--blue); }
+a:visited { color: var(--navy); }
+a:hover { color: var(--teal); }
+img { max-width: 100%; height: auto; }
+
+/* top bar: the wide logo, as on the content slides */
+.topbar { position: sticky; top: 0; z-index: 5; background: var(--paper); border-bottom: 3px solid var(--teal); }
+.topin { max-width: var(--wide); margin: 0 auto; padding: 0.7rem 1.25rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 0.9rem; text-decoration: none; color: var(--head); }
+.brand img { height: 26px; width: auto; }
+.brand span { font-weight: 700; font-size: 1.05rem; color: var(--teal); border-left: 1px solid var(--rule); padding-left: 0.9rem; }
+.topbar nav { display: flex; flex-wrap: wrap; gap: 0.2rem 1.1rem; margin-left: auto; }
+.topbar nav a { color: var(--head); text-decoration: none; font-weight: 600; font-size: 0.98rem; padding: 0.2rem 0; border-bottom: 2px solid transparent; }
+.topbar nav a:hover { color: var(--teal); }
+.topbar nav a[aria-current="page"] { color: var(--teal); border-bottom-color: var(--teal); }
+
+/* a section band, as on the Section slide */
+.band { background: var(--paper-2); }
+.bandin { max-width: var(--wide); margin: 0 auto; padding: 2.2rem 1.25rem 1.8rem; }
+.band h1 { margin: 0; font-size: 2.3rem; line-height: 1.15; color: var(--head); }
+.band p { margin: 0.5rem 0 0; font-size: 1.25rem; color: var(--teal); max-width: 52rem; }
+.crumbs { font-size: 0.95rem; color: var(--grey); margin-bottom: 0.4rem; }
+.crumbs a { color: var(--grey); }
+
+/* page body: guide list on the left, text on the right */
+.layout { max-width: var(--wide); margin: 0 auto; padding: 1.8rem 1.25rem 3rem; display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 2.5rem; }
+.layout.single { grid-template-columns: minmax(0, 1fr); }
+.side { position: sticky; top: 5.5rem; align-self: start; max-height: calc(100vh - 7rem); overflow: auto; font-size: 0.97rem; }
+.side h2 { font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--grey); margin: 0 0 0.5rem; }
+.side ul { list-style: none; margin: 0 0 1.2rem; padding: 0; }
+.side li a { display: block; padding: 0.22rem 0 0.22rem 0.7rem; border-left: 3px solid var(--rule); color: var(--ink); text-decoration: none; }
+.side li a:hover { border-left-color: var(--mist); color: var(--teal); }
+.side li a[aria-current="page"] { border-left-color: var(--teal); color: var(--teal); font-weight: 700; }
+.doc { min-width: 0; max-width: 54rem; }
+.doc h1 { display: none; }  /* the band carries the title */
+.doc h2 { font-size: 1.6rem; color: var(--head); margin: 2.2rem 0 0.6rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--rule); }
+.doc h3 { font-size: 1.25rem; color: var(--teal); margin: 1.6rem 0 0.4rem; }
+.doc h4 { font-size: 1.08rem; color: var(--head); margin: 1.3rem 0 0.3rem; }
+.doc h2:first-child, .doc h1 + h2 { margin-top: 0; }
+.doc blockquote { margin: 1rem 0; padding: 0.6rem 1rem; border-left: 4px solid var(--cyan); background: var(--quote); }
+.doc blockquote p { margin: 0.3rem 0; }
+.doc hr { border: 0; border-top: 1px solid var(--rule); margin: 2rem 0; }
+.doc table { border-collapse: collapse; margin: 1rem 0; font-size: 0.97rem; display: block; overflow-x: auto; max-width: 100%; }
+.doc th { background: var(--paper-2); color: var(--head); text-align: left; }
+.doc th, .doc td { border: 1px solid var(--rule); padding: 0.35rem 0.6rem; vertical-align: top; }
+.doc code { font: 0.88em var(--mono); background: var(--code); padding: 0.08em 0.3em; border-radius: 3px; }
+.doc pre { background: var(--code); border: 1px solid var(--rule); border-left: 4px solid var(--teal); border-radius: 4px; padding: 0.8rem 1rem; overflow-x: auto; line-height: 1.45; }
+.doc pre code { background: none; padding: 0; font-size: 0.86rem; }
+.doc .codehilite { margin: 1rem 0; }
+.doc .codehilite pre { margin: 0; }
+.doc details { margin: 0.8rem 0; border: 1px solid var(--rule); border-radius: 4px; padding: 0.4rem 0.8rem; }
+.doc details[open] { padding-bottom: 0.8rem; }
+.doc summary { cursor: pointer; font-weight: 600; color: var(--head); }
+.doc details > summary + * { margin-top: 0.6rem; }
+.doc .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
+
+/* overview cards */
+.flow { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 0.6rem; margin: 0.5rem 0 2rem; }
+.flow .step { flex: 1 1 0; min-width: 0; padding: 0.8rem 0.9rem; border: 1px solid var(--rule); border-top: 4px solid var(--teal); border-radius: 4px; background: var(--paper); text-decoration: none; color: var(--ink); }
+.flow .step.ext { border-top-color: var(--mist); background: var(--paper-2); }
+.flow .step strong { display: block; color: var(--head); font-size: 1.08rem; }
+.flow .step span { font-size: 0.92rem; color: var(--grey); }
+.flow .arrow { align-self: center; color: var(--teal); font-size: 1.4rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 1.1rem; margin: 1rem 0 2rem; }
+.card { display: grid; gap: 0.4rem; align-content: start; padding: 1rem 1.1rem; border: 1px solid var(--rule); border-radius: 6px; text-decoration: none; color: var(--ink); background: var(--paper); }
+.card:hover { border-color: var(--teal); }
+.card h3 { margin: 0; color: var(--teal); font-size: 1.2rem; }
+.card p { margin: 0; color: var(--ink); font-size: 0.98rem; }
+.card .n { color: var(--grey); font-size: 0.9rem; }
+
+/* footer: the stacked logo, as on the title slide */
+.foot { background: var(--paper-2); border-top: 1px solid var(--rule); }
+.footin { max-width: var(--wide); margin: 0 auto; padding: 1.4rem 1.25rem; display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; font-size: 0.92rem; color: var(--grey); }
+.footin img { height: 44px; width: auto; }
+.footin p { margin: 0.15rem 0; }
+.footin .bb-related a { margin-right: 0.2rem; }
+.footin .note { max-width: 60rem; }
+
+@media (max-width: 52rem) {
+  .flow { flex-wrap: wrap; }
+  .flow .step { flex-basis: 9rem; }
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .side { position: static; max-height: none; }
+  .band h1 { font-size: 1.8rem; }
+}

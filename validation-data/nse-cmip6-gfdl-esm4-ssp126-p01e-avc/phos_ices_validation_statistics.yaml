@@ -8,7 +8,7 @@ periods:
 - period: 2011-2023
   is_all_period: true
   model: pyGETM
-  analysed: '2026-11-09 13:39:31'
+  analysed: '2026-11-10 21:10:36'
   datasets:
     ICES point observations:
       rmse: 0.841587
@@ -60,3 +60,135 @@ periods:
           bias: -0.02449
           rmse: 0.082333
           correlation: 0.410401
+      water_depth_mode: separate
+      by_water_depth:
+        H<50m:
+          rmse: 1.054303
+          bias: -0.151377
+          mae: 0.236969
+          correlation: 0.160822
+          n_points: 12013
+          mean_model: 0.311799
+          mean_obs: 0.463177
+          std_model: 0.247398
+          std_obs: 1.054237
+          n_profiles: 7248
+          error_distribution:
+            min: -104.897055
+            p05: -0.607185
+            p25: -0.241783
+            median: -0.094805
+            p75: 0.012788
+            p95: 0.278806
+            max: 1.763964
+          by_depth:
+            0-10m:
+              n: 8156
+              bias: -0.144803
+              rmse: 1.256454
+              correlation: 0.147292
+            10-25m:
+              n: 2818
+              bias: -0.146356
+              rmse: 0.336377
+              correlation: 0.416276
+            25-50m:
+              n: 1039
+              bias: -0.216605
+              rmse: 0.390679
+              correlation: 0.100766
+        50<=H<200m:
+          rmse: 0.247963
+          bias: -0.08204
+          mae: 0.171083
+          correlation: 0.502821
+          n_points: 6781
+          mean_model: 0.378197
+          mean_obs: 0.460237
+          std_model: 0.183382
+          std_obs: 0.26436
+          n_profiles: 2787
+          error_distribution:
+            min: -4.272381
+            p05: -0.406125
+            p25: -0.183691
+            median: -0.080371
+            p75: 0.020747
+            p95: 0.292561
+            max: 0.715123
+          by_depth:
+            0-10m:
+              n: 3209
+              bias: -0.124644
+              rmse: 0.233672
+              correlation: 0.608201
+            10-25m:
+              n: 935
+              bias: -0.050187
+              rmse: 0.189033
+              correlation: 0.662748
+            25-50m:
+              n: 1248
+              bias: -0.035414
+              rmse: 0.271288
+              correlation: 0.202441
+            50-100m:
+              n: 1110
+              bias: -0.0487
+              rmse: 0.306639
+              correlation: 0.097329
+            100-200m:
+              n: 279
+              bias: -0.039976
+              rmse: 0.208103
+              correlation: 0.283562
+        H>=200m:
+          rmse: 0.159553
+          bias: -0.013068
+          mae: 0.105841
+          correlation: 0.832423
+          n_points: 672
+          mean_model: 0.509624
+          mean_obs: 0.522692
+          std_model: 0.26024
+          std_obs: 0.283918
+          n_profiles: 72
+          error_distribution:
+            min: -1.433929
+            p05: -0.210576
+            p25: -0.088366
+            median: -0.022271
+            p75: 0.03816
+            p95: 0.286965
+            max: 0.637913
+          by_depth:
+            0-10m:
+              n: 82
+              bias: -0.028021
+              rmse: 0.147785
+              correlation: 0.816287
+            10-25m:
+              n: 145
+              bias: -0.020758
+              rmse: 0.104196
+              correlation: 0.861095
+            25-50m:
+              n: 105
+              bias: 0.009206
+              rmse: 0.222889
+              correlation: -0.035081
+            50-100m:
+              n: 89
+              bias: -0.017439
+              rmse: 0.251796
+              correlation: -0.164587
+            100-200m:
+              n: 153
+              bias: -0.003193
+              rmse: 0.12042
+              correlation: 0.371953
+            200-500m:
+              n: 98
+              bias: -0.02449
+              rmse: 0.082333
+              correlation: 0.410401

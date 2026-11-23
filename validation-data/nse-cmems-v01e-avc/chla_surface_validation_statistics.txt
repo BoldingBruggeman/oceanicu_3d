@@ -13,27 +13,27 @@ CHLA_SURFACE Validation Statistics
 ================================================================================
 Period: 2011  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-19  08:47:50
+Analysed: 2026-11-23  10:01:04
 
 --- CCI-CHL ---
-  RMSE:          1.7325
-  Bias:         -0.7762
-  MAE:           1.1478
-  Correlation:   0.3248
-  N points:      292,489
-  Model mean:   0.7626
-  Obs mean:     1.6478
-  Model std:    0.9542
-  Obs std:      1.5530
+  RMSE:          1.7324
+  Bias:         -0.8129
+  MAE:           1.1226
+  Correlation:   0.3068
+  N points:      295,567
+  Model mean:   0.8274
+  Obs mean:     1.6403
+  Model std:    0.8868
+  Obs std:      1.5479
 
   Error distribution:
-    Min:         -38.2116
-    5th pct:      -3.3225
-    25th pct:     -1.2590
-    Median:       -0.5611
-    75th pct:     -0.0961
-    95th pct:     +1.3365
-    Max:         +5.3274
+    Min:         -38.8367
+    5th pct:      -3.3365
+    25th pct:     -1.2624
+    Median:       -0.5588
+    75th pct:     -0.1255
+    95th pct:     +1.0636
+    Max:         +5.7643
 
 ================================================================================
 Period: 2011-2012  |  Model: pyGETM
@@ -82,27 +82,27 @@ Analysed: 2026-10-18  17:56:43
 ================================================================================
 Period: 2012  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-19  08:47:50
+Analysed: 2026-11-23  10:01:04
 
 --- CCI-CHL ---
-  RMSE:          1.5997
-  Bias:         -0.6666
-  MAE:           1.0531
-  Correlation:   0.2863
-  N points:      279,635
-  Model mean:   0.7265
-  Obs mean:     1.4879
-  Model std:    0.9385
-  Obs std:      1.3936
+  RMSE:          1.5966
+  Bias:         -0.6920
+  MAE:           1.0401
+  Correlation:   0.2618
+  N points:      282,623
+  Model mean:   0.7891
+  Obs mean:     1.4811
+  Model std:    0.8861
+  Obs std:      1.3891
 
   Error distribution:
-    Min:         -40.0241
-    5th pct:      -3.1345
-    25th pct:     -1.0897
-    Median:       -0.4765
-    75th pct:     -0.0555
-    95th pct:     +1.3009
-    Max:         +5.8632
+    Min:         -41.3104
+    5th pct:      -3.1471
+    25th pct:     -1.0946
+    Median:       -0.4852
+    75th pct:     -0.0757
+    95th pct:     +1.1200
+    Max:         +6.2385
 
 ================================================================================
 Period: 2011-2015  |  Model: pyGETM
@@ -151,79 +151,77 @@ Analysed: 2026-10-19  08:47:50
 ================================================================================
 Period: 2013  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-19  08:47:50
+Analysed: 2026-11-23  10:01:04
 
 --- CCI-CHL ---
-  RMSE:          1.6465
-  Bias:         -0.7820
-  MAE:           1.0589
-  Correlation:   0.3228
-  N points:      280,853
-  Model mean:   0.6601
-  Obs mean:     1.5086
-  Model std:    0.8499
-  Obs std:      1.4720
+  RMSE:          1.6376
+  Bias:         -0.7727
+  MAE:           1.0430
+  Correlation:   0.3111
+  N points:      283,854
+  Model mean:   0.7286
+  Obs mean:     1.5014
+  Model std:    0.8309
+  Obs std:      1.4672
 
   Error distribution:
-    Min:         -67.0223
-    5th pct:      -3.1251
-    25th pct:     -1.1739
-    Median:       -0.5308
-    75th pct:     -0.1991
-    95th pct:     +0.9735
-    Max:         +6.2204
-
+    Min:         -67.2042
+    5th pct:      -3.1282
+    25th pct:     -1.1459
+    Median:       -0.5188
+    75th pct:     -0.1832
+    95th pct:     +0.9763
+    Max:         +5.1283
 
 ================================================================================
 Period: 2014  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-19  08:47:50
+Analysed: 2026-11-23  10:01:04
 
 --- CCI-CHL ---
-  RMSE:          1.5320
-  Bias:         -0.8009
-  MAE:           1.0220
-  Correlation:   0.3516
-  N points:      279,096
-  Model mean:   0.6288
-  Obs mean:     1.4961
-  Model std:    0.7961
-  Obs std:      1.3451
+  RMSE:          1.5271
+  Bias:         -0.7897
+  MAE:           1.0143
+  Correlation:   0.3360
+  N points:      282,110
+  Model mean:   0.7001
+  Obs mean:     1.4899
+  Model std:    0.7881
+  Obs std:      1.3406
 
   Error distribution:
-    Min:         -47.1717
-    5th pct:      -2.9681
-    25th pct:     -1.1941
-    Median:       -0.5680
-    75th pct:     -0.2364
-    95th pct:     +0.8285
-    Max:         +3.7760
-
+    Min:         -47.1321
+    5th pct:      -2.9512
+    25th pct:     -1.1807
+    Median:       -0.5657
+    75th pct:     -0.2272
+    95th pct:     +0.8421
+    Max:         +3.8795
 
 ================================================================================
 Period: 2015  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-20  09:50:44
+Analysed: 2026-11-23  10:01:04
 
 --- CCI-CHL ---
-  RMSE:          1.5738
-  Bias:         -0.6993
-  MAE:           1.0404
-  Correlation:   0.2679
-  N points:      280,243
-  Model mean:   0.7064
-  Obs mean:     1.4971
-  Model std:    0.8713
-  Obs std:      1.3513
+  RMSE:          1.5552
+  Bias:         -0.6789
+  MAE:           1.0181
+  Correlation:   0.2630
+  N points:      283,255
+  Model mean:   0.8110
+  Obs mean:     1.4899
+  Model std:    0.8727
+  Obs std:      1.3470
 
   Error distribution:
-    Min:         -59.2618
-    5th pct:      -3.0015
-    25th pct:     -1.1138
-    Median:       -0.5182
-    75th pct:     -0.1076
-    95th pct:     +1.1853
-    Max:         +5.7687
+    Min:         -59.2642
+    5th pct:      -2.9521
+    25th pct:     -1.0829
+    Median:       -0.4976
+    75th pct:     -0.0937
+    95th pct:     +1.1754
+    Max:         +5.3227
 
 ================================================================================
 Period: 2015-2022  |  Model: pyGETM
@@ -272,181 +270,217 @@ Analysed: 2026-10-20  09:50:44
 ================================================================================
 Period: 2016  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-20  09:50:44
+Analysed: 2026-11-23  10:01:04
 
 --- CCI-CHL ---
-  RMSE:          1.5853
-  Bias:         -0.7927
-  MAE:           1.0232
-  Correlation:   0.3204
-  N points:      284,631
-  Model mean:   0.6082
-  Obs mean:     1.4748
-  Model std:    0.7787
-  Obs std:      1.3988
+  RMSE:          1.5727
+  Bias:         -0.7803
+  MAE:           1.0033
+  Correlation:   0.3139
+  N points:      287,683
+  Model mean:   0.6877
+  Obs mean:     1.4680
+  Model std:    0.7729
+  Obs std:      1.3941
 
   Error distribution:
-    Min:         -89.1829
-    5th pct:      -3.0236
-    25th pct:     -1.1770
-    Median:       -0.5529
-    75th pct:     -0.1956
-    95th pct:     +0.8425
-    Max:         +5.1643
-
+    Min:         -89.3339
+    5th pct:      -2.9808
+    25th pct:     -1.1379
+    Median:       -0.5464
+    75th pct:     -0.1796
+    95th pct:     +0.8157
+    Max:         +4.6948
 
 ================================================================================
 Period: 2017  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-20  09:50:44
+Analysed: 2026-11-23  10:01:04
 
 --- CCI-CHL ---
-  RMSE:          1.4687
-  Bias:         -0.7395
-  MAE:           0.9632
-  Correlation:   0.3542
-  N points:      292,063
-  Model mean:   0.5997
-  Obs mean:     1.4067
-  Model std:    0.7401
-  Obs std:      1.3188
+  RMSE:          1.4519
+  Bias:         -0.7220
+  MAE:           0.9430
+  Correlation:   0.3571
+  N points:      295,142
+  Model mean:   0.6782
+  Obs mean:     1.4002
+  Model std:    0.7517
+  Obs std:      1.3143
 
   Error distribution:
-    Min:         -42.2907
-    5th pct:      -2.9796
-    25th pct:     -1.0573
-    Median:       -0.5236
-    75th pct:     -0.1534
-    95th pct:     +0.7863
-    Max:         +4.0354
-
+    Min:         -41.5551
+    5th pct:      -2.8900
+    25th pct:     -1.0357
+    Median:       -0.5125
+    75th pct:     -0.1496
+    95th pct:     +0.7401
+    Max:         +4.3438
 
 ================================================================================
 Period: 2018  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-20  09:50:44
+Analysed: 2026-11-23  10:01:05
 
 --- CCI-CHL ---
-  RMSE:          1.5035
-  Bias:         -0.8026
-  MAE:           1.0063
-  Correlation:   0.3462
-  N points:      290,827
-  Model mean:   0.5579
-  Obs mean:     1.4272
-  Model std:    0.7339
-  Obs std:      1.3144
+  RMSE:          1.4948
+  Bias:         -0.7715
+  MAE:           0.9905
+  Correlation:   0.3289
+  N points:      293,924
+  Model mean:   0.6497
+  Obs mean:     1.4213
+  Model std:    0.7609
+  Obs std:      1.3100
 
   Error distribution:
-    Min:         -71.0593
-    5th pct:      -2.9183
-    25th pct:     -1.1537
-    Median:       -0.5838
-    75th pct:     -0.2426
-    95th pct:     +0.7274
-    Max:         +4.3306
-
+    Min:         -71.4682
+    5th pct:      -2.8872
+    25th pct:     -1.1214
+    Median:       -0.5559
+    75th pct:     -0.2229
+    95th pct:     +0.7702
+    Max:         +4.3756
 
 ================================================================================
 Period: 2019  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-20  09:50:44
+Analysed: 2026-11-23  10:01:05
 
 --- CCI-CHL ---
-  RMSE:          1.5287
-  Bias:         -0.8055
-  MAE:           1.0149
-  Correlation:   0.3232
-  N points:      284,172
-  Model mean:   0.5932
-  Obs mean:     1.4741
-  Model std:    0.7253
-  Obs std:      1.3285
+  RMSE:          1.5220
+  Bias:         -0.7946
+  MAE:           1.0029
+  Correlation:   0.3066
+  N points:      287,177
+  Model mean:   0.6735
+  Obs mean:     1.4681
+  Model std:    0.7164
+  Obs std:      1.3242
 
   Error distribution:
-    Min:         -84.4549
-    5th pct:      -2.9710
-    25th pct:     -1.1587
-    Median:       -0.5809
-    75th pct:     -0.2472
-    95th pct:     +0.7596
-    Max:         +5.6699
-
+    Min:         -85.1915
+    5th pct:      -2.9449
+    25th pct:     -1.1247
+    Median:       -0.5740
+    75th pct:     -0.2415
+    95th pct:     +0.7478
+    Max:         +4.6626
 
 ================================================================================
 Period: 2020  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-20  09:50:44
+Analysed: 2026-11-23  10:01:05
 
 --- CCI-CHL ---
-  RMSE:          1.5195
-  Bias:         -0.8274
-  MAE:           1.0479
-  Correlation:   0.3296
-  N points:      285,216
-  Model mean:   0.6325
-  Obs mean:     1.5497
-  Model std:    0.7857
-  Obs std:      1.2835
+  RMSE:          1.5108
+  Bias:         -0.7864
+  MAE:           1.0351
+  Correlation:   0.3076
+  N points:      288,205
+  Model mean:   0.7572
+  Obs mean:     1.5436
+  Model std:    0.8198
+  Obs std:      1.2796
 
   Error distribution:
-    Min:         -53.2583
-    5th pct:      -3.0029
-    25th pct:     -1.2480
-    Median:       -0.6223
-    75th pct:     -0.2395
-    95th pct:     +0.7504
-    Max:         +4.7235
-
+    Min:         -53.1453
+    5th pct:      -2.9641
+    25th pct:     -1.2082
+    Median:       -0.5943
+    75th pct:     -0.2103
+    95th pct:     +0.8831
+    Max:         +4.5826
 
 ================================================================================
 Period: 2021  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-20  09:50:44
+Analysed: 2026-11-23  10:01:05
 
 --- CCI-CHL ---
-  RMSE:          1.3885
-  Bias:         -0.6800
-  MAE:           0.9558
-  Correlation:   0.3219
-  N points:      286,522
-  Model mean:   0.6071
-  Obs mean:     1.3630
-  Model std:    0.7965
-  Obs std:      1.1853
+  RMSE:          1.3689
+  Bias:         -0.6435
+  MAE:           0.9298
+  Correlation:   0.3161
+  N points:      289,556
+  Model mean:   0.7133
+  Obs mean:     1.3567
+  Model std:    0.8243
+  Obs std:      1.1815
 
   Error distribution:
-    Min:         -60.5275
-    5th pct:      -2.6529
-    25th pct:     -1.0410
-    Median:       -0.5383
-    75th pct:     -0.1825
-    95th pct:     +0.9706
-    Max:         +4.6822
-
+    Min:         -60.5259
+    5th pct:      -2.6215
+    25th pct:     -0.9877
+    Median:       -0.5111
+    75th pct:     -0.1358
+    95th pct:     +1.0281
+    Max:         +4.7146
 
 ================================================================================
 Period: 2022  |  Model: pyGETM
 ================================================================================
-Analysed: 2026-10-20  09:50:44
+Analysed: 2026-11-23  10:01:05
 
 --- CCI-CHL ---
-  RMSE:          1.7158
-  Bias:         -1.0531
-  MAE:           1.2617
-  Correlation:   0.2972
-  N points:      286,583
-  Model mean:   0.6349
-  Obs mean:     1.7735
-  Model std:    0.8036
-  Obs std:      1.3417
+  RMSE:          1.7052
+  Bias:         -1.0133
+  MAE:           1.2399
+  Correlation:   0.2792
+  N points:      289,605
+  Model mean:   0.7542
+  Obs mean:     1.7675
+  Model std:    0.8529
+  Obs std:      1.3382
 
   Error distribution:
-    Min:         -70.0907
-    5th pct:      -3.4802
-    25th pct:     -1.5805
-    Median:       -0.8281
-    75th pct:     -0.3568
-    95th pct:     +0.8022
-    Max:         +5.1158
+    Min:         -70.0495
+    5th pct:      -3.4493
+    25th pct:     -1.5309
+    Median:       -0.7942
+    75th pct:     -0.3228
+    95th pct:     +0.8215
+    Max:         +5.6564
 
+================================================================================
+Period: 2011-2022  |  Model: pyGETM
+================================================================================
+Analysed: 2026-11-23  10:01:04
+
+--- CCI-CHL ---
+  RMSE:          1.5593
+  Bias:         -0.7717
+  MAE:           1.0319
+  Correlation:   0.3064
+  N points:      3,458,701
+  Model mean:   0.7307
+  Obs mean:     1.5024
+  Model std:    0.8171
+  Obs std:      1.3598
+
+  Error distribution:
+    Min:         -89.3339
+    5th pct:      -3.0467
+    25th pct:     -1.1640
+    Median:       -0.5541
+    75th pct:     -0.1821
+    95th pct:     +0.9217
+    Max:         +6.2385
+
+  Monthly breakdown:
+  Month      RMSE      Bias      MAE    Corr
+  --------------------------------------------
+  Jan      2.6416   -2.0487   2.0543  0.2232
+  Feb      2.0191   -1.4838   1.5041  0.3476
+  Mar      1.6089   -1.0925   1.1953  0.5907
+  Apr      1.7196   -0.4383   1.2252  0.3530
+  May      1.6168   +0.0161   1.0318  0.1112
+  Jun      1.1499   -0.3148   0.6564  0.3578
+  Jul      1.0450   -0.5413   0.6396  0.4916
+  Aug      1.1072   -0.6420   0.7185  0.4902
+  Sep      1.1659   -0.6511   0.7518  0.4617
+  Oct      1.3884   -0.8569   0.9000  0.4805
+  Nov      1.9297   -1.3984   1.4126  0.4847
+  Dec      1.8427   -1.2509   1.2513  0.4942
+  --------------------------------------------
+  All      1.5593   -0.7717   1.0319  0.3064
