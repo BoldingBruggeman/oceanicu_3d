@@ -57,10 +57,9 @@ open_boundaries:
   mstart: 120
   mstop: 136
   type_2d: FLATHER_ELEV
-  # Phyto-/zooplankton: ZERO_GRADIENT here, SPONGE (with a constant
+  # Phyto-/zooplankton: ZERO_GRADIENT here, SPONGE `weaker` (with a constant
   # background value, boundaries.fabm tracers) on all other boundaries.
-  # Commented out with the P/Z boundary values (boundaries.fabm tracers):
-  # without them every boundary is pyGETM's default ZERO_GRADIENT anyway.
+  # Restored by scylla, 2026-11-24 (1d149c35).
   variable_types:
     P1_Chl: ZERO_GRADIENT
     P1_c: ZERO_GRADIENT
@@ -201,6 +200,7 @@ open_boundary_sponge:
 # hand-edited generated_nse_cmems.py (bb-server1:/tmp/generated_nse_cmems.py_scylla):
 # weak   -- temp/salt and the nutrient/O2/carbonate tracers (custom_sponge there)
 # strong -- the detritus/DOC pools R4/R6/R8, R6_s, R8_s, L2_c
+# weaker -- phyto-/zooplankton P1-P4, P1_s, Z4-Z6 (scylla, 2026-11-24)
 open_boundary_sponges:
 - name: weaker
   tmrlx_max: 0.01
@@ -677,9 +677,8 @@ boundaries:
         # Low background boundary values for plankton/zooplankton/detritus pools
         # that have no boundary product (SPONGE). Transferred from scylla's
         # hand-edited generated_nse_cmems.py (2026-11-05). Phyto-/zooplankton
-        # are commented out, as in scylla's script (2026-11-10): they then keep
-        # pyGETM's default ZERO_GRADIENT on every boundary. To restore them,
-        # uncomment these and the 'Baltic' variable_types above.
+        # use the `weaker` sponge, and ZERO_GRADIENT at the Baltic (its
+        # variable_types above) -- scylla, 2026-11-24 (1d149c35).
         P1_Chl: {constant: 0.0001, sponge: weaker}
         P1_c: {constant: 0.0001, sponge: weaker}
         P1_n: {constant: 1.26e-06, sponge: weaker}
