@@ -109,6 +109,10 @@ CREATE TABLE IF NOT EXISTS experiments (
     -- One-shot: the snapshot time the next chunk loads from its restart file
     -- (rerun --restart-time); cleared by start_chunk. NULL = last snapshot.
     next_load_restart_time TEXT,
+    -- One-shot: `rerun --from-snapshot` -- the next chunk_runner.py start keeps the
+    -- interrupted last chunk up to its newest complete restart snapshot and continues
+    -- from there (or redoes it whole if it has none); cleared when acted on.
+    resume_from_snapshot INTEGER NOT NULL DEFAULT 0,
     notes            TEXT,
     created_at       TEXT NOT NULL,
     updated_at       TEXT NOT NULL
@@ -198,6 +202,9 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
             conn.commit()
         if "next_load_restart_time" not in run_cols:
             conn.execute("ALTER TABLE experiments ADD COLUMN next_load_restart_time TEXT")
+            conn.commit()
+        if "resume_from_snapshot" not in run_cols:
+            conn.execute("ALTER TABLE experiments ADD COLUMN resume_from_snapshot INTEGER NOT NULL DEFAULT 0")
             conn.commit()
     except sqlite3.OperationalError as exc:
         if "readonly" not in str(exc).lower() and "read-only" not in str(exc).lower():
@@ -1259,7 +1266,7 @@ def get_latest_chunk_indices(conn: sqlite3.Connection) -> dict[str, int]:
 def rerun_from(
     conn: sqlite3.Connection, experiment_id: str, *, chunk_index: Optional[int] = None,
     user: Optional[str] = None, note: Optional[str] = None, force: bool = False,
-    restart_time: Optional[str] = None, cancel_jobs: bool = True,
+    restart_time: Optional[str] = None, cancel_jobs: bool = True, from_snapshot: bool = False,
 ) -> int:
     """Drop the chunk records from *chunk_index* on, so the next submission
     redoes them; earlier chunks (and so the restart to load) are kept:
@@ -1276,6 +1283,16 @@ def rerun_from(
     restart_time: which snapshot of the redone chunk's restart file to load
     (for files holding several), stored as the one-shot
     experiments.next_load_restart_time. Not allowed for chunk 0.
+
+    from_snapshot: for an interrupted LAST chunk (killed, orphaned, HPC
+    maintenance) whose restart file holds intermediate snapshots
+    (save_restart_interval). Its row is kept, marked failed, and
+    experiments.resume_from_snapshot is set; the next chunk_runner.py start
+    (which has netCDF4) then keeps the chunk as done up to its newest
+    complete snapshot -- or *restart_time*, a snapshot in THAT chunk's own
+    restart file -- and continues from it, or redoes the chunk whole if no
+    snapshot is usable (see resume_chunk_at_snapshot / abandon_snapshot_resume).
+    Returns 0 (no chunk row dropped).
     """
     row = get_experiment(conn, experiment_id)
     if row is None:
@@ -1311,6 +1328,41 @@ def rerun_from(
         if row is None or row["n"] is None:
             return 0  # nothing has run yet, nothing to rewind
         chunk_index = int(row["n"])
+    if from_snapshot:
+        last = conn.execute(
+            "SELECT * FROM chunks WHERE experiment_id = ? ORDER BY chunk_index DESC LIMIT 1", (experiment_id,)
+        ).fetchone()
+        if last is None:
+            raise ValueError(f"{experiment_id!r} has no chunks -- nothing to resume")
+        if chunk_index is not None and chunk_index != last["chunk_index"]:
+            raise ValueError(f"--from-snapshot resumes the last chunk ({last['chunk_index']}), not chunk {chunk_index}")
+        if last["status"] == "done":
+            raise ValueError(f"chunk {last['chunk_index']} finished normally -- nothing to resume")
+        now = _now()
+        if last["status"] == "running":
+            exit_code = EXIT_CODE_KILLED if scancel_note else EXIT_CODE_ORPHANED
+            conn.execute(
+                "UPDATE chunks SET status = 'failed', exit_code = ?, end_time = COALESCE(end_time, ?) "
+                "WHERE experiment_id = ? AND chunk_index = ?",
+                (exit_code, now, experiment_id, last["chunk_index"]),
+            )
+        conn.execute(
+            "UPDATE experiments SET control = 'run', resume_from_snapshot = 1, next_load_restart_time = ?, "
+            "updated_at = ? WHERE experiment_id = ?",
+            (restart_time, now, experiment_id),
+        )
+        detail = (f"chunk {last['chunk_index']} ({last['start']} -> {last['stop']}) to be continued from "
+                  f"{'its snapshot ' + restart_time if restart_time else 'its newest complete snapshot'} "
+                  f"at the next chunk start")
+        if scancel_note:
+            detail += f" -- forced while in_progress, {scancel_note}"
+        if note:
+            detail += f" -- {note}"
+        _log_history(conn, experiment_id, "rerun", detail, user=user)
+        conn.commit()
+        recompute_experiment_status(conn, experiment_id)
+        return 0
+
     if restart_time and chunk_index == 0:
         raise ValueError(
             "--restart-time needs a chunk that loads a restart -- chunk 0 starts from "
@@ -1337,8 +1389,8 @@ def rerun_from(
     )
     n_dropped = cur.rowcount
     conn.execute(
-        "UPDATE experiments SET control = 'run', next_load_restart_time = ?, updated_at = ? "
-        "WHERE experiment_id = ?",
+        "UPDATE experiments SET control = 'run', next_load_restart_time = ?, resume_from_snapshot = 0, "
+        "updated_at = ? WHERE experiment_id = ?",
         (restart_time, _now(), experiment_id),
     )
     detail = f"dropped {n_dropped} chunk(s) from index {chunk_index} onward"
@@ -1355,6 +1407,53 @@ def rerun_from(
     conn.commit()
     recompute_experiment_status(conn, experiment_id)
     return n_dropped
+
+
+def resume_chunk_at_snapshot(
+    conn: sqlite3.Connection, experiment_id: str, *, chunk_index: int, snapshot_date: str,
+    snapshot_time: str, detail: str = "", user: Optional[str] = None,
+) -> None:
+    """Act on `rerun --from-snapshot`: keep interrupted chunk *chunk_index* as
+    done up to *snapshot_date* (YYYY-MM-DD; its chunk_dir keeps its original
+    name), and have the next chunk load that snapshot (*snapshot_time*, ISO)
+    from its restart file -- not the file's last record, which may be the one
+    being written when it was killed."""
+    row = get_chunk(conn, experiment_id, chunk_index)
+    if row is None or row["status"] != "failed":
+        raise ValueError(f"chunk {chunk_index} of {experiment_id!r} is not an interrupted (failed) chunk")
+    if not (row["start"] < snapshot_date < row["stop"]):
+        raise ValueError(f"snapshot {snapshot_date} is not inside chunk {chunk_index} ({row['start']} -> {row['stop']})")
+    conn.execute(
+        "UPDATE chunks SET status = 'done', stop = ? WHERE experiment_id = ? AND chunk_index = ?",
+        (snapshot_date, experiment_id, chunk_index),
+    )
+    conn.execute(
+        "UPDATE experiments SET resume_from_snapshot = 0, next_load_restart_time = ?, updated_at = ? "
+        "WHERE experiment_id = ?",
+        (snapshot_time, _now(), experiment_id),
+    )
+    msg = (f"chunk {chunk_index} ({row['start']} -> {row['stop']}, exit_code={describe_exit_code(row['exit_code'])}) "
+           f"kept up to its snapshot {snapshot_time}; the next chunk continues from there")
+    _log_history(conn, experiment_id, "resumed_from_snapshot", msg + (f" -- {detail}" if detail else ""), user=user)
+    conn.commit()
+    recompute_experiment_status(conn, experiment_id)
+
+
+def abandon_snapshot_resume(
+    conn: sqlite3.Connection, experiment_id: str, *, chunk_index: int, reason: str, user: Optional[str] = None,
+) -> None:
+    """`rerun --from-snapshot` found no usable snapshot: drop chunk *chunk_index*
+    so it is redone whole, as a plain `rerun --from-current` would."""
+    conn.execute("DELETE FROM chunks WHERE experiment_id = ? AND chunk_index >= ?", (experiment_id, chunk_index))
+    conn.execute(
+        "UPDATE experiments SET resume_from_snapshot = 0, next_load_restart_time = NULL, updated_at = ? "
+        "WHERE experiment_id = ?",
+        (_now(), experiment_id),
+    )
+    _log_history(conn, experiment_id, "rerun",
+                 f"no usable snapshot in chunk {chunk_index} ({reason}) -- redoing it from its start", user=user)
+    conn.commit()
+    recompute_experiment_status(conn, experiment_id)
 
 
 def recompute_experiment_status(conn: sqlite3.Connection, experiment_id: str) -> str:

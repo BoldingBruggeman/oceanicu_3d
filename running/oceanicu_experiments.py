@@ -74,6 +74,7 @@ alphabetically:
 
     # Recovery -- rewind an experiment's own progress:
     oceanicu_experiments.py rerun  --experiment-id ... [--from-chunk N | --from-current | --from-scratch] [--note ...] [--force]
+    oceanicu_experiments.py rerun  --experiment-id ... --from-snapshot [--restart-time ...] [--force]   # continue an interrupted chunk from its last restart snapshot
     oceanicu_experiments.py reset  --experiment-id ... [--note ...] [--force]   # = rerun --from-scratch, clearer name: back to just-added state
 
     # preview ANY of the above for real, against a scratch copy in /tmp,
@@ -933,10 +934,15 @@ def cmd_rerun(args: argparse.Namespace) -> int:
         try:
             n = rt.rerun_from(conn, args.experiment_id, chunk_index=chunk_index, user=rt._current_user(),
                                note=args.note, force=args.force, restart_time=args.restart_time,
-                               cancel_jobs=not args.dry_run)
+                               cancel_jobs=not args.dry_run, from_snapshot=args.from_snapshot)
         except (KeyError, ValueError) as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
+    if args.from_snapshot:
+        print(f"{args.experiment_id}: the next submission continues the interrupted chunk from "
+              f"{'its snapshot ' + args.restart_time if args.restart_time else 'its newest complete restart snapshot'} "
+              f"(or redoes it whole if none is usable)")
+        return 0
     print(f"{args.experiment_id}: dropped {n} chunk record(s) -- next submission redoes from there")
     if args.restart_time:
         print(f"  will resume from snapshot {args.restart_time!r} instead of the restart "
@@ -1354,6 +1360,16 @@ def main() -> int:
     g3.add_argument("--from-chunk", type=int, default=None, metavar="N")
     g3.add_argument("--from-current", action="store_true")
     g3.add_argument("--from-scratch", action="store_true")
+    g3.add_argument("--from-snapshot", action="store_true",
+                     help="continue an interrupted last chunk (killed, HPC maintenance, node failure) "
+                          "from the newest complete snapshot in its own restart file -- written when "
+                          "the config has save_restart_interval -- instead of redoing it whole. The "
+                          "chunk is kept as done up to that snapshot (its directory keeps its name) "
+                          "and the next chunk starts there; with no usable snapshot the chunk is "
+                          "redone whole. The snapshot is chosen at the next chunk start, where the "
+                          "restart file can be read; that chunk's log lists the snapshots and what "
+                          "the interrupted chunk's output files still hold. With --restart-time: "
+                          "that snapshot of the interrupted chunk's restart file instead.")
     rr.add_argument("--force", action="store_true",
                      help="allow dropping a chunk row that's still marked running -- scancels "
                           "the live job first (same as kill), then proceeds. Without this, "

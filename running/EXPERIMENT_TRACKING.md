@@ -709,6 +709,43 @@ actually one of the snapshots in the restart file, the chunk fails
 immediately with pygetm's own error naming the file's real span, rather
 than silently resuming from the wrong point.
 
+**Continuing an interrupted chunk from its own snapshots.** A chunk that
+is killed partway (HPC maintenance, `kill`, a node failure) normally loses
+everything since its start: `rerun --from-current` redoes it whole. When
+the config writes restart snapshots during the chunk
+(`save_restart_interval`, e.g. every model year), `--from-snapshot` keeps
+the work up to the newest complete one instead:
+
+```bash
+oceanicu-experiments --queue ~/hpc_commands/queue_<you>.yaml rerun --experiment-id ... --from-snapshot [--force]
+```
+
+- `--force` is needed while the experiment still shows `in_progress`, as
+  after a kill that left the chunk marked `running`. It scancels the job
+  first, as `kill` does.
+- The rerun itself only marks the request: the queue runs without netCDF4.
+  The next chunk start (`chunk_runner.py`, in the pygetm environment) reads
+  the interrupted chunk's restart file. It keeps the chunk as done up to
+  the newest complete snapshot, and the new chunk loads exactly that
+  snapshot. The file's last record is not used blindly, since it may be
+  the one being written when the job was killed.
+- A snapshot is complete when every field can be read and has no more
+  missing values (masked or NaN) than the first snapshot. A model that
+  went NaN is therefore not resumed from its NaN state either.
+- With no usable snapshot (no file, unreadable, none complete), the chunk
+  is redone whole, as `--from-current` would.
+- `--restart-time` picks a specific snapshot of the interrupted chunk's
+  file instead of the newest.
+- The chunk log lists the snapshots and, for each output file of the
+  interrupted chunk, whether it is readable and the period it holds. pyGETM
+  syncs every file after each record, so these normally survive the kill.
+- The interrupted chunk's directory keeps its original name
+  (e.g. `001_20200101_20300101`) while its registry `stop` becomes the
+  snapshot date. Its output files may run past that date: the resumed
+  chunk recomputes those records in its own directory
+  (e.g. `002_20260101_20360101`), so drop the overlap when joining the
+  chunks' output.
+
 ## Remove an experiment from the registry
 
 ```bash

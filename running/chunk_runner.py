@@ -260,6 +260,12 @@ def _main_tracked(args: argparse.Namespace) -> int:
                   file=sys.stderr)
             return 2
 
+        if experiment.get("resume_from_snapshot"):
+            done = _resume_from_snapshot(conn, args, experiment, user)
+            if done is not None:
+                return done
+            experiment["next_load_restart_time"] = rt.get_experiment(conn, args.experiment_id)["next_load_restart_time"]
+
         calendar = _experiment_calendar(experiment["config"])
         stop_date = _parse_date(experiment["stop_date"], calendar)
 
@@ -377,6 +383,55 @@ def _main_tracked(args: argparse.Namespace) -> int:
         )
 
     return 0 if exit_code == 0 else 2
+
+
+def _resume_from_snapshot(conn, args: argparse.Namespace, experiment: dict, user: str) -> Optional[int]:
+    """Act on `rerun --from-snapshot`: keep the interrupted last chunk up to its
+    newest complete restart snapshot (or the one asked for), so this run
+    continues from there; with no usable snapshot, redo that chunk whole.
+    Returns an exit code to stop with (dry run), or None to go on normally."""
+    import experiment_tracking as rt
+    import restart_snapshots
+
+    chunks = rt.list_chunks(conn, args.experiment_id)
+    last = chunks[-1] if chunks else None
+    if last is None or last["status"] != "failed":
+        # Nothing interrupted to resume (e.g. edited by hand since): forget the request.
+        if not args.dry_run:
+            rt.abandon_snapshot_resume(conn, args.experiment_id, chunk_index=len(chunks),
+                                       reason="no interrupted last chunk", user=user)
+        return None
+
+    requested = experiment.get("next_load_restart_time")
+    inspection = restart_snapshots.inspect_restart(last["save_restart"])
+    snapshot, reason = restart_snapshots.last_complete_snapshot(inspection, requested)
+    if snapshot is not None and not snapshot.at_midnight:
+        snapshot, reason = None, f"snapshot {snapshot.iso} is not at midnight (chunk dates are whole days)"
+    if snapshot is not None and not (last["start"] < snapshot.date < last["stop"]):
+        snapshot, reason = None, (f"snapshot {snapshot.date} is not after the chunk's start "
+                                  f"({last['start']} -> {last['stop']}), nothing gained")
+
+    print(f"{args.experiment_id}: chunk {last['chunk_index']} ({last['start']} -> {last['stop']}) was interrupted.")
+    print(f"  restart: {inspection.summary()}")
+    outputs = restart_snapshots.output_file_report(last["chunk_dir"], exclude=(Path(last["save_restart"]).name,))
+    for line in outputs:
+        print(f"  output:  {line}")
+    if snapshot is not None:
+        print(f"  continuing from its snapshot {snapshot.iso}")
+    else:
+        print(f"  no usable snapshot ({reason}) -- redoing the chunk from its start")
+
+    if args.dry_run:
+        print("  (dry run: registry unchanged)")
+        return 0
+    if snapshot is None:
+        rt.abandon_snapshot_resume(conn, args.experiment_id, chunk_index=last["chunk_index"], reason=reason, user=user)
+    else:
+        rt.resume_chunk_at_snapshot(
+            conn, args.experiment_id, chunk_index=last["chunk_index"], snapshot_date=snapshot.date,
+            snapshot_time=snapshot.iso, detail="; ".join(outputs), user=user,
+        )
+    return None
 
 
 def _prepare_chunk_dir(chunk_dir: Path, experiment_root: Path) -> None:
